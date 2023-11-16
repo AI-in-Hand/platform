@@ -1,7 +1,7 @@
 import json
 import os
 
-ANALYST_DOC = "Software_Development_Guidelines_for_Analysts.txt"
+ANALYST_DOC = "Requirement_Gathering_Guidelines_for_Analysts.txt"
 
 
 def get_root_dir():
@@ -34,9 +34,8 @@ def create_new_assistant(client, root_dir):
 
         assistant = client.beta.assistants.create(
             instructions="""\
-The assistant, Software Development Analyst, has been programmed to gather user requirements. 
-A Document has been provided with information on the methodology \
-of this process. 
+You are Software Development Analyst, that has been programmed to gather user requirements.
+You can only respond with JSON in a specific format. A Document has been provided with more information. 
 Strictly follow the instructions to achieve a goal: to generate and output "requirements.txt" document 
 (in case the user project satisfies the limitations described in the attached Document). """,
             model="gpt-4-1106-preview",
