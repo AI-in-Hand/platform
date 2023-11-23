@@ -14,7 +14,7 @@ def create_app():
     openai_api_key = os.getenv("OPENAI_API_KEY")
     client = openai.OpenAI(api_key=openai_api_key)
 
-    assistant_id = functions.create_software_assistant(client)
+    assistant_id = functions.load_or_create_assistant(client)
 
     @app.route("/start", methods=["GET"])
     def start_conversation():
@@ -63,3 +63,13 @@ def create_app():
         return jsonify({"response": response})
 
     return app
+
+
+def main():
+    """Main entry point for the application."""
+    app = create_app()
+    app.run(host="0.0.0.0", port=8080)
+
+
+if __name__ == "__main__":
+    main()

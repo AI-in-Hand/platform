@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 from openai import OpenAI
 
@@ -7,30 +8,54 @@ from prompts import assistant_instructions
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+DATA_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / "data"
+ASSISTANT_JSON = DATA_DIR / "assistant.json"
+ANALYST_DOC = DATA_DIR / "Requirement_Gathering_Guidelines_for_Analysts.txt"
 
-TXT_FILE_NAME = "Requirement_Gathering_Guidelines_for_Analysts.txt"
 
-
-def create_assistant(client):
-    assistant_file_path = "assistant.json"
-
-    if os.path.exists(assistant_file_path):
-        with open(assistant_file_path, "r") as file:
+def load_or_create_assistant(client):
+    if os.path.exists(ASSISTANT_JSON):
+        with open(ASSISTANT_JSON, "r") as file:
             assistant_data = json.load(file)
             return assistant_data["assistant_id"]
     else:
-        with open(TXT_FILE_NAME, "rb") as file_to_read:
+        with open(ANALYST_DOC, "rb") as file_to_read:
             file = client.files.create(file=file_to_read, purpose="assistants")
         assistant = client.beta.assistants.create(
             instructions=assistant_instructions,
             model="gpt-4-1106-preview",
             tools=[
                 {"type": "retrieval"},
-                {"type": "function"},
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "save_requirements",
+                        "description": "Save requirements document.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "user_responses": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "question": {"type": "string"},
+                                            "answer": {"type": "string"},
+                                        },
+                                        "required": ["question", "answer"],
+                                    },
+                                },
+                                "thread_id": {"type": "string"},
+                                "run_id": {"type": "string"},
+                            },
+                        },
+                        "required": ["user_responses", "thread_id", "run_id"],
+                    },
+                },
             ],
             file_ids=[file.id],
         )
-        with open(assistant_file_path, "w") as file:
+        with open(ASSISTANT_JSON, "w") as file:
             json.dump({"assistant_id": assistant.id}, file)
         return assistant.id
 
