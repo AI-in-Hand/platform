@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from openai import OpenAI
+from openai.types.beta.threads import RequiredActionFunctionToolCall
 
 from prompts import assistant_instructions
 
@@ -60,7 +61,7 @@ def load_or_create_assistant(client):
         return assistant.id
 
 
-def handle_action(tool_call, thread_id, run_id):
+def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id, run_id):
     if tool_call.function.name == "save_requirements":
         arguments = json.loads(tool_call.function.arguments)
         return save_requirements(arguments["user_responses"], thread_id, run_id)

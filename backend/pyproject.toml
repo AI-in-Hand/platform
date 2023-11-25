@@ -26,6 +26,7 @@ exclude = [".cache"]
 
 [tool.ruff]
 # https://beta.ruff.rs/docs/configuration/
+line-length = 120
 select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
 ignore = ['W291', 'W292', 'W293']
 

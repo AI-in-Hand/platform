@@ -4,6 +4,7 @@ import time
 
 import openai
 from flask import Flask, jsonify, request
+from openai.types.beta.threads.run_submit_tool_outputs_params import ToolOutput
 
 import functions
 
@@ -30,32 +31,24 @@ def create_app():
         if not thread_id:
             return jsonify({"error": "Missing thread_id"}), 400
 
-        client.beta.threads.messages.create(
-            thread_id=thread_id, role="user", content=user_input
-        )
+        client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
 
-        run = client.beta.threads.runs.create(
-            thread_id=thread_id, assistant_id=assistant_id
-        )
+        run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id)
 
         while True:
-            run_status = client.beta.threads.runs.retrieve(
-                thread_id=thread_id, run_id=run.id
-            )
+            run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
             elif run_status.status == "requires_action":
-                for (
-                    tool_call
-                ) in run_status.required_action.submit_tool_outputs.tool_calls:
+                tool_outputs = []
+                for tool_call in run_status.required_action.submit_tool_outputs.tool_calls:
                     output = functions.handle_action(tool_call, thread_id, run.id)
-                    client.beta.threads.runs.submit_tool_outputs(
-                        thread_id=thread_id,
-                        run_id=run.id,
-                        tool_outputs=[
-                            {"tool_call_id": tool_call.id, "output": json.dumps(output)}
-                        ],
-                    )
+                    tool_outputs.append(ToolOutput(tool_call_id=tool_call.id, output=json.dumps(output)))
+                client.beta.threads.runs.submit_tool_outputs(
+                    thread_id=thread_id,
+                    run_id=run.id,
+                    tool_outputs=tool_outputs,
+                )
                 time.sleep(1)
 
         messages = client.beta.threads.messages.list(thread_id=thread_id)
