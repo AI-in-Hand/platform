@@ -44,6 +44,7 @@ def create_app():
                 for tool_call in run_status.required_action.submit_tool_outputs.tool_calls:
                     output = functions.handle_action(tool_call, thread_id, run.id)
                     tool_outputs.append(ToolOutput(tool_call_id=tool_call.id, output=json.dumps(output)))
+
                 client.beta.threads.runs.submit_tool_outputs(
                     thread_id=thread_id,
                     run_id=run.id,

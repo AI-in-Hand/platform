@@ -61,13 +61,6 @@ def load_or_create_assistant(client):
         return assistant.id
 
 
-def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id, run_id):
-    if tool_call.function.name == "save_requirements":
-        arguments = json.loads(tool_call.function.arguments)
-        return save_requirements(arguments["user_responses"], thread_id, run_id)
-    # Additional function calls can be handled here
-
-
 def save_requirements(user_responses, thread_id, run_id):
     file_path = f"requirements/{thread_id}_{run_id}.txt"
     with open(file_path, "w") as file:
@@ -78,3 +71,16 @@ def save_requirements(user_responses, thread_id, run_id):
         "message": "Requirements document saved.",
         "path": file_path,
     }
+
+
+available_functions = {
+    "save_requirements": save_requirements,
+}
+
+
+def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id, run_id):
+    function_name = tool_call.function.name
+    function_to_call = available_functions[function_name]
+    function_args = json.loads(tool_call.function.arguments)
+    function_response = function_to_call(**function_args, thread_id=thread_id, run_id=run_id)
+    return function_response
