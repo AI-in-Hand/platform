@@ -70,7 +70,7 @@ def save_requirements(user_responses: dict, requirements_text: str, thread_id, r
     return {
         "status": "Success",
         "message": "Requirements document saved.",
-        "path": file_path,
+        "path": file_path.as_posix(),
     }
 
 

@@ -31,12 +31,13 @@ def create_app():
         if not thread_id:
             return jsonify({"error": "Missing thread_id"}), 400
 
-        active_runs = client.beta.threads.runs.list(thread_id=thread_id)
-        if not active_runs.data:
+        all_runs = client.beta.threads.runs.list(thread_id=thread_id)
+        active_runs = [run for run in all_runs.data if run.status == "requires_action"]
+        if not active_runs:
             client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
             run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id)
         else:
-            run = active_runs.data[0]
+            run = active_runs[0]
 
         while True:
             run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
