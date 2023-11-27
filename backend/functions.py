@@ -64,7 +64,7 @@ def save_requirements(user_responses: dict, requirements_text: str, thread_id, r
     file_path = DATA_DIR / f"requirements_{thread_id}_{run_id}.txt"
     with open(file_path, "w") as file:
         for response in user_responses:
-            file.write(f"{response['question']}: {response['answer']}\n")
+            file.write(f"{response['question']}: {response['answer']}")
         file.write("\n\n Requirements:\n\n")
         file.write(requirements_text)
     return {
