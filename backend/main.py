@@ -7,15 +7,19 @@ from flask import Flask, jsonify, request
 from openai.types.beta.threads.run_submit_tool_outputs_params import ToolOutput
 
 import functions
+from constants import ANALYST_DOC, ASSISTANT_JSON, DATA_DIR, REQUIREMENTS_DIR
+
+# Ensure directories exist
+DATA_DIR.mkdir(exist_ok=True)
+REQUIREMENTS_DIR.mkdir(exist_ok=True)
 
 
 def create_app():
     app = Flask(__name__)
-
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    client = openai.OpenAI(api_key=openai_api_key)
-
-    assistant_id = functions.load_or_create_assistant(client)
+    client = setup_openai_client()
+    assistant_id = functions.load_or_create_assistant(
+        client, assistant_file_path=ASSISTANT_JSON, analyst_doc_path=ANALYST_DOC
+    )
 
     @app.route("/start", methods=["GET"])
     def start_conversation():
@@ -63,8 +67,14 @@ def create_app():
     return app
 
 
+def setup_openai_client():
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("OpenAI API key is not set")
+    return openai.OpenAI(api_key=openai_api_key)
+
+
 def main():
-    """Main entry point for the application."""
     app = create_app()
     app.run(host="0.0.0.0", port=8080)
 

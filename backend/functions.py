@@ -1,70 +1,68 @@
 import json
-import os
 from pathlib import Path
 
-from openai import OpenAI
 from openai.types.beta.threads import RequiredActionFunctionToolCall
 
+from constants import DATA_DIR
 from prompts import assistant_instructions
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-DATA_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / "data"
-REQUIREMENTS_DIR = DATA_DIR / "requirements"
-ASSISTANT_JSON = DATA_DIR / "assistant.json"
-ANALYST_DOC = DATA_DIR / "Requirement_Gathering_Guidelines_for_Analysts.txt"
-
-DATA_DIR.mkdir(exist_ok=True)
-REQUIREMENTS_DIR.mkdir(exist_ok=True)
-
-
-def load_or_create_assistant(client):
-    if os.path.exists(ASSISTANT_JSON):
-        with open(ASSISTANT_JSON, "r") as file:
-            assistant_data = json.load(file)
-            return assistant_data["assistant_id"]
+def load_or_create_assistant(client, assistant_file_path: Path, analyst_doc_path: Path) -> str:
+    if assistant_file_path.exists():
+        return load_assistant(assistant_file_path)
     else:
-        with open(ANALYST_DOC, "rb") as file_to_read:
-            file = client.files.create(file=file_to_read, purpose="assistants")
-        assistant = client.beta.assistants.create(
-            instructions=assistant_instructions,
-            model="gpt-4-1106-preview",
-            tools=[
-                {"type": "retrieval"},
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "save_requirements",
-                        "description": "Save requirements document.",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "user_responses": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "question": {"type": "string"},
-                                            "answer": {"type": "string"},
-                                        },
-                                        "required": ["question", "answer"],
+        return create_new_assistant(client, assistant_file_path, analyst_doc_path)
+
+
+def load_assistant(file_path: Path) -> str:
+    with open(file_path, "r") as file:
+        assistant_data = json.load(file)
+    return assistant_data["assistant_id"]
+
+
+def create_new_assistant(client, assistant_file_path: Path, analyst_doc_path: Path) -> str:
+    with open(analyst_doc_path, "rb") as file_to_read:
+        file = client.files.create(file=file_to_read, purpose="assistants")
+    assistant = client.beta.assistants.create(
+        instructions=assistant_instructions,
+        model="gpt-4-1106-preview",
+        tools=[
+            {"type": "retrieval"},
+            {
+                "type": "function",
+                "function": {
+                    "name": "save_requirements",
+                    "description": "Save requirements document.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "user_responses": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "question": {"type": "string"},
+                                        "answer": {"type": "string"},
                                     },
+                                    "required": ["question", "answer"],
                                 },
-                                "requirements_text": {"type": "string"},
                             },
+                            "requirements_text": {"type": "string"},
                         },
-                        "required": ["user_responses", "requirements_text"],
                     },
+                    "required": ["user_responses", "requirements_text"],
                 },
-            ],
-            file_ids=[file.id],
-        )
-        with open(ASSISTANT_JSON, "w") as file:
-            json.dump({"assistant_id": assistant.id}, file)
-        return assistant.id
+            },
+        ],
+        file_ids=[file.id],
+    )
+
+    with open(assistant_file_path, "w") as file:
+        json.dump({"assistant_id": assistant.id}, file)
+    return assistant.id
 
 
-def save_requirements(user_responses: dict, requirements_text: str, thread_id, run_id):
+def save_requirements(user_responses: dict, requirements_text: str, thread_id: str, run_id: str) -> dict:
     file_path = DATA_DIR / f"requirements_{thread_id}_{run_id}.txt"
     with open(file_path, "w") as file:
         for response in user_responses:
@@ -83,7 +81,7 @@ available_functions = {
 }
 
 
-def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id, run_id):
+def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id: str, run_id: str) -> dict:
     function_name = tool_call.function.name
     function_to_call = available_functions[function_name]
     try:
