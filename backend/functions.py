@@ -10,8 +10,12 @@ from prompts import assistant_instructions
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 DATA_DIR = Path(os.path.dirname(os.path.abspath(__file__))) / "data"
+REQUIREMENTS_DIR = DATA_DIR / "requirements"
 ASSISTANT_JSON = DATA_DIR / "assistant.json"
 ANALYST_DOC = DATA_DIR / "Requirement_Gathering_Guidelines_for_Analysts.txt"
+
+DATA_DIR.mkdir(exist_ok=True)
+REQUIREMENTS_DIR.mkdir(exist_ok=True)
 
 
 def load_or_create_assistant(client):
@@ -65,7 +69,7 @@ def save_requirements(user_responses: dict, requirements_text: str, thread_id, r
     with open(file_path, "w") as file:
         for response in user_responses:
             file.write(f"{response['question']}: {response['answer']}")
-        file.write("\n\n Requirements:\n\n")
+        file.write("\n\n")
         file.write(requirements_text)
     return {
         "status": "Success",
