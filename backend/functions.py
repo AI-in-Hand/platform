@@ -47,11 +47,9 @@ def load_or_create_assistant(client):
                                     },
                                 },
                                 "requirements_text": {"type": "string"},
-                                "thread_id": {"type": "string"},
-                                "run_id": {"type": "string"},
                             },
                         },
-                        "required": ["user_responses", "requirements_text", "thread_id", "run_id"],
+                        "required": ["user_responses", "requirements_text"],
                     },
                 },
             ],
@@ -62,11 +60,13 @@ def load_or_create_assistant(client):
         return assistant.id
 
 
-def save_requirements(user_responses, thread_id, run_id):
-    file_path = f"requirements/{thread_id}_{run_id}.txt"
+def save_requirements(user_responses: dict, requirements_text: str, thread_id, run_id):
+    file_path = DATA_DIR / f"requirements_{thread_id}_{run_id}.txt"
     with open(file_path, "w") as file:
         for response in user_responses:
             file.write(f"{response['question']}: {response['answer']}\n")
+        file.write("\n\n Requirements:\n\n")
+        file.write(requirements_text)
     return {
         "status": "Success",
         "message": "Requirements document saved.",
@@ -82,6 +82,14 @@ available_functions = {
 def handle_action(tool_call: RequiredActionFunctionToolCall, thread_id, run_id):
     function_name = tool_call.function.name
     function_to_call = available_functions[function_name]
-    function_args = json.loads(tool_call.function.arguments)
-    function_response = function_to_call(**function_args, thread_id=thread_id, run_id=run_id)
+    try:
+        function_args = json.loads(tool_call.function.arguments)
+    except json.decoder.JSONDecodeError as e:
+        return {"status": "Error", "message": f"Invalid arguments: {e}"}
+
+    try:
+        function_response = function_to_call(**function_args, thread_id=thread_id, run_id=run_id)
+    except Exception as e:
+        return {"status": "Error", "message": f"Error while executing function: {e}"}
+
     return function_response
