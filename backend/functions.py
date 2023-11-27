@@ -3,7 +3,7 @@ from pathlib import Path
 
 from openai.types.beta.threads import RequiredActionFunctionToolCall
 
-from constants import DATA_DIR
+from constants import REQUIREMENTS_DIR
 from prompts import assistant_instructions
 
 
@@ -63,7 +63,7 @@ def create_new_assistant(client, assistant_file_path: Path, analyst_doc_path: Pa
 
 
 def save_requirements(user_responses: dict, requirements_text: str, thread_id: str, run_id: str) -> dict:
-    file_path = DATA_DIR / f"requirements_{thread_id}_{run_id}.txt"
+    file_path = REQUIREMENTS_DIR / f"requirements_{thread_id}_{run_id}.txt"
     with open(file_path, "w") as file:
         for response in user_responses:
             file.write(f"{response['question']}: {response['answer']}")
