@@ -3,13 +3,15 @@ from pathlib import Path
 
 from openai.types.beta.threads import RequiredActionFunctionToolCall
 
-from constants import REQUIREMENTS_DIR
+from constants import ASSISTANT_NAME, ASSISTANT_TOOLS, GPT_MODEL, REQUIREMENTS_DIR
 from prompts import assistant_instructions
 
 
-def load_or_create_assistant(client, assistant_file_path: Path, analyst_doc_path: Path) -> str:
+def get_assistant(client, assistant_file_path: Path, analyst_doc_path: Path) -> str:
     if assistant_file_path.exists():
-        return load_assistant(assistant_file_path)
+        assistant_id = load_assistant(assistant_file_path)
+        update_assistant(client, assistant_id, analyst_doc_path)
+        return assistant_id
     else:
         return create_new_assistant(client, assistant_file_path, analyst_doc_path)
 
@@ -24,42 +26,29 @@ def create_new_assistant(client, assistant_file_path: Path, analyst_doc_path: Pa
     with open(analyst_doc_path, "rb") as file_to_read:
         file = client.files.create(file=file_to_read, purpose="assistants")
     assistant = client.beta.assistants.create(
+        name=ASSISTANT_NAME,
         instructions=assistant_instructions,
-        model="gpt-4-1106-preview",
-        tools=[
-            {"type": "retrieval"},
-            {
-                "type": "function",
-                "function": {
-                    "name": "save_requirements",
-                    "description": "Save requirements document.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_responses": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "question": {"type": "string"},
-                                        "answer": {"type": "string"},
-                                    },
-                                    "required": ["question", "answer"],
-                                },
-                            },
-                            "requirements_text": {"type": "string"},
-                        },
-                    },
-                    "required": ["user_responses", "requirements_text"],
-                },
-            },
-        ],
+        model=GPT_MODEL,
+        tools=ASSISTANT_TOOLS,
         file_ids=[file.id],
     )
 
     with open(assistant_file_path, "w") as file:
         json.dump({"assistant_id": assistant.id}, file)
     return assistant.id
+
+
+def update_assistant(client, assistant_id: str, analyst_doc_path: Path):
+    with open(analyst_doc_path, "rb") as file_to_read:
+        file = client.files.create(file=file_to_read, purpose="assistants")
+    client.beta.assistants.update(
+        name=ASSISTANT_NAME,
+        assistant_id=assistant_id,
+        instructions=assistant_instructions,
+        model=GPT_MODEL,
+        tools=ASSISTANT_TOOLS,
+        file_ids=[file.id],
+    )
 
 
 def save_requirements(user_responses: dict, requirements_text: str, thread_id: str, run_id: str) -> dict:

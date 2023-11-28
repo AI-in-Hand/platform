@@ -17,9 +17,7 @@ REQUIREMENTS_DIR.mkdir(exist_ok=True)
 def create_app():
     app = Flask(__name__)
     client = setup_openai_client()
-    assistant_id = functions.load_or_create_assistant(
-        client, assistant_file_path=ASSISTANT_JSON, analyst_doc_path=ANALYST_DOC
-    )
+    assistant_id = functions.get_assistant(client, assistant_file_path=ASSISTANT_JSON, analyst_doc_path=ANALYST_DOC)
 
     @app.route("/start", methods=["GET"])
     def start_conversation():
@@ -29,27 +27,29 @@ def create_app():
     @app.route("/chat", methods=["POST"])
     def chat():
         data = request.json
-        thread_id = data.get("thread_id")
+        thread_id = data["thread_id"]  # validate request after switching to FastAPI
         user_input = data.get("message", "")
 
-        if not thread_id:
-            return jsonify({"error": "Missing thread_id"}), 400
-
-        all_runs = client.beta.threads.runs.list(thread_id=thread_id)
-        active_runs = [run for run in all_runs.data if run.status == "requires_action"]
-        if not active_runs:
+        # A workaround for failures during "requires_action" status function calling (to allow for bug fixing)
+        last_run = client.beta.threads.runs.list(thread_id=thread_id, limit=1, order="desc")
+        if last_run.data and (last_run.data[-1].status == "requires_action"):
+            run = last_run.data[-1]
+        else:
             client.beta.threads.messages.create(thread_id=thread_id, role="user", content=user_input)
             run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id)
-        else:
-            run = active_runs[0]
 
         while True:
-            run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-            if run_status.status == "completed":
-                break
-            elif run_status.status == "requires_action":
+            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+
+            while run.status in ["queued", "in_progress"]:
+                run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+                time.sleep(1)
+
+            if run.status == "requires_action":
+                tool_calls = run.required_action.submit_tool_outputs.tool_calls
                 tool_outputs = []
-                for tool_call in run_status.required_action.submit_tool_outputs.tool_calls:
+                for tool_call in tool_calls:
+                    print(tool_call.function)
                     output = functions.handle_action(tool_call, thread_id, run.id)
                     tool_outputs.append(ToolOutput(tool_call_id=tool_call.id, output=json.dumps(output)))
 
@@ -58,11 +58,14 @@ def create_app():
                     run_id=run.id,
                     tool_outputs=tool_outputs,
                 )
-                time.sleep(1)
 
-        messages = client.beta.threads.messages.list(thread_id=thread_id)
-        response = messages.data[0].content[0].text.value
-        return jsonify({"response": response})
+            elif run.status == "failed":
+                return jsonify({"error": f"Run failed. Error: {run.last_error}"})
+            else:
+                messages = client.beta.threads.messages.list(thread_id=thread_id)
+
+                response = messages.data[0].content[0].text.value
+                return jsonify({"response": response})
 
     return app
 
