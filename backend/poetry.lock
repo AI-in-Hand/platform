@@ -472,13 +472,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.3.5"
+version = "1.3.6"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.3.5-py3-none-any.whl", hash = "sha256:9437458978fb502e61336c3082e02b09c49feebe0e8516a2b8fb4563e6e4af4e"},
-    {file = "openai-1.3.5.tar.gz", hash = "sha256:163e7ece4af76e961f58b75ea20a42b0d0c2a240c2f81b41a3d1c5962463cdf8"},
+    {file = "openai-1.3.6-py3-none-any.whl", hash = "sha256:a88063de50706e7a25d9d3dcc0aa4b7e1f59ad40a3b8901af28fec097abeb230"},
+    {file = "openai-1.3.6.tar.gz", hash = "sha256:5f1f00658474668d8ecb7e87ceed101632c66e1e57d29aa9e0b1cb21f65a72be"},
 ]
 
 [package.dependencies]
@@ -486,6 +486,7 @@ anyio = ">=3.5.0,<4"
 distro = ">=1.7.0,<2"
 httpx = ">=0.23.0,<1"
 pydantic = ">=1.9.0,<3"
+sniffio = "*"
 tqdm = ">4"
 typing-extensions = ">=4.5,<5"
 
@@ -505,13 +506,13 @@ files = [
 
 [[package]]
 name = "pyairtable"
-version = "2.2.0"
+version = "2.2.1"
 description = "Python Client for the Airtable API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyairtable-2.2.0-py2.py3-none-any.whl", hash = "sha256:1a7bf05eda8b72cc6b5c049dd6a56fc708baef0478fc06e16235c02d11797007"},
-    {file = "pyairtable-2.2.0.tar.gz", hash = "sha256:2d31c7538b9873013858aa66916d1dcdd7faa8b600f58cc1851dba9d6f79ed37"},
+    {file = "pyairtable-2.2.1-py2.py3-none-any.whl", hash = "sha256:682f69611c80dcf769ec75c033a75dc5390ad530a4423b145333d8a3bdfca6f1"},
+    {file = "pyairtable-2.2.1.tar.gz", hash = "sha256:1913cfa5a1fc98c4723fafcafde1b4cbc97546b7ea84f37e51f24d43f641f051"},
 ]
 
 [package.dependencies]
@@ -803,4 +804,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11.0a1,<4.0.0"
-content-hash = "fbf6d9c95cecd3273d788908706d2bf4887d2366eb026aa42ca130a8ec499b4e"
+content-hash = "5fafc9dc9a42cebcb3e19f2a69ceedc98ca52106bc8f8f639c382a6e3415f742"
