@@ -39,8 +39,6 @@ def create_app():
             run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id)
 
         while True:
-            run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-
             while run.status in ["queued", "in_progress"]:
                 run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
                 time.sleep(1)
@@ -53,7 +51,7 @@ def create_app():
                     output = functions.handle_action(tool_call, thread_id, run.id)
                     tool_outputs.append(ToolOutput(tool_call_id=tool_call.id, output=json.dumps(output)))
 
-                client.beta.threads.runs.submit_tool_outputs(
+                run = client.beta.threads.runs.submit_tool_outputs(
                     thread_id=thread_id,
                     run_id=run.id,
                     tool_outputs=tool_outputs,
