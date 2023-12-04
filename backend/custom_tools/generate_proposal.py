@@ -9,10 +9,10 @@ class GenerateProposal(BaseTool):
     You must send it back to him after execution."""
 
     project_brief: str = Field(..., description="The project brief to generate a proposal for.")
-    client = get_openai_client()
 
     def run(self):
-        completion = self.client.chat.completions.create(
+        client = get_openai_client()
+        completion = client.chat.completions.create(
             model="gpt-4-1106-preview",
             messages=[
                 {

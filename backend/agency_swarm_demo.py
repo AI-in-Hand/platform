@@ -9,7 +9,6 @@ from custom_tools.search_web import SearchWeb
 from custom_tools.write_and_save_program import WriteAndSaveProgram
 
 set_openai_key(getpass("Please enter your openai key: "))
-
 client = get_openai_client()
 
 
