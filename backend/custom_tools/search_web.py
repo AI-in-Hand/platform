@@ -13,4 +13,4 @@ class SearchWeb(BaseTool):
 
     def run(self):
         with DDGS() as ddgs:
-            return str("\n".join(str(r) for r in ddgs.text(self.phrase, max_results=3)))
+            return str("\n".join(str(r) for r in ddgs.text(self.phrase, max_results=10)))
