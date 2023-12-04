@@ -8,17 +8,19 @@ authors = [
 
 [tool.poetry.dependencies]
 python = ">=3.11.0a1,<4.0.0"
-flask = ">=3.0.0"
 functions = ">=0.7.0"
 openai = ">=1.3.0"
-packaging = ">=23.2"
-requests = ">=2.31.0"
-pyairtable = ">=2.2.0"
 instructor = "^0.4.0"
+fastapi = "^0.104.1"
+uvicorn = "^0.24.0.post1"
+# a dependency from a GitHub repository
+# agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.7.1"
 ruff = "^0.1.6"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
