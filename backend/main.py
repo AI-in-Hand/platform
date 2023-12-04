@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from base_agency.agency_manager import create_agency, get_agency
+from base_agency.agency_manager import AgencyManager
 from constants import DATA_DIR
 
 # Ensure directories exist
@@ -13,11 +13,13 @@ DATA_DIR.mkdir(exist_ok=True)
 app = FastAPI()
 logger = logging.getLogger(__name__)
 
+agency_manager = AgencyManager()
+
 
 @app.get("/start")
 async def start():
     session_id = uuid.uuid4().hex
-    create_agency(session_id)
+    agency_manager.create_agency(session_id)
     return {"session_id": session_id}
 
 
@@ -61,7 +63,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if session_id not in manager.active_connections:
                     await manager.connect(websocket, session_id)
 
-                agency = get_agency(session_id)
+                agency = agency_manager.get_agency(session_id)
 
                 gen = agency.get_completion(message=user_message)
                 for response in gen:

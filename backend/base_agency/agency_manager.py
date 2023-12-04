@@ -11,59 +11,60 @@ from custom_tools.write_and_save_program import WriteAndSaveProgram
 
 client = get_openai_client()
 
-# TODO: make this a database
-agencies = {}
 
+class AgencyManager:
+    def __init__(self):
+        self.active_agencies = {}  # session_id: agency
 
-def get_agency(session_id: str) -> Agency:
-    """Get the agency for the given session ID"""
-    if session_id in agencies:
-        return agencies[session_id]
-    agency = create_agency(session_id)
-    agencies[session_id] = agency
-    return agency
+    def get_agency(self, session_id: str) -> Agency:
+        """Get the agency for the given session ID"""
+        if session_id in self.active_agencies:
+            return self.active_agencies[session_id]
+        new_agency = self.create_agency(session_id)
+        self.active_agencies[session_id] = new_agency
+        return new_agency
 
+    def create_agency(self, session_id: str) -> Agency:
+        """Create the agency for the given session ID"""
 
-def create_agency(session_id: str) -> Agency:
-    """Create the agency for the given session ID"""
+        start = time.time()
 
-    start = time.time()
+        ceo = Agent(
+            name=f"CEO_{session_id}",
+            description="Responsible for client communication, task planning and management.",
+            instructions=ceo_instructions,
+            files_folder=None,  # can be a file like ./instructions.md
+            tools=[],
+        )
 
-    ceo = Agent(
-        name=f"CEO_{session_id}",
-        description="Responsible for client communication, task planning and management.",
-        instructions=ceo_instructions,
-        files_folder=None,  # can be a file like ./instructions.md
-        tools=[],
-    )
+        va = Agent(
+            name=f"Virtual Assistant_{session_id}",
+            description="Responsible for drafting emails, doing research and writing proposals."
+            "Can also search the web for information.",
+            instructions=va_instructions,
+            files_folder=None,
+            tools=[SearchWeb, GenerateProposal],
+        )
 
-    va = Agent(
-        name=f"Virtual Assistant_{session_id}",
-        description="Responsible for drafting emails, doing research and writing proposals."
-        "Can also search the web for information.",
-        instructions=va_instructions,
-        files_folder=None,
-        tools=[SearchWeb, GenerateProposal],
-    )
+        dev = Agent(
+            name=f"Developer_{session_id}",
+            description="Responsible for running and executing Python Programs. Can also save programs to files.",
+            instructions=dev_instructions,
+            files_folder=None,
+            tools=[ExecuteCommand, WriteAndSaveProgram],
+        )
 
-    dev = Agent(
-        name=f"Developer_{session_id}",
-        description="Responsible for running and executing Python Programs. Can also save programs to files.",
-        instructions=dev_instructions,
-        files_folder=None,
-        tools=[ExecuteCommand, WriteAndSaveProgram],
-    )
+        agency = Agency([ceo, [ceo, dev], [ceo, va], [dev, va]], shared_instructions=agency_manifesto)
 
-    agency = Agency([ceo, [ceo, dev], [ceo, va], [dev, va]], shared_instructions=agency_manifesto)
+        # measure the time it takes to create the agency
+        end = time.time()
+        print(f"Agency creation took {end - start} seconds")
 
-    # measure the time it takes to create the agency
-    end = time.time()
-    print(f"Agency creation took {end - start} seconds")
-
-    agencies[session_id] = agency
-    return agency
+        self.active_agencies[session_id] = agency
+        return agency
 
 
 if __name__ == "__main__":
-    agency = get_agency("test")
+    agency_manager = AgencyManager()
+    agency = agency_manager.get_agency("test")
     agency.run_demo()
