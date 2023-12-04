@@ -1,7 +1,10 @@
+import inspect
 import os
 
 from agency_swarm import BaseTool
 from pydantic import Field
+
+from constants import DATA_DIR
 
 
 class File(BaseTool):
@@ -19,7 +22,7 @@ class File(BaseTool):
 
     def run(self):
         # Extract the directory path from the file name
-        directory = os.path.dirname(self.file_name)
+        directory = DATA_DIR / self._session_id / os.path.dirname(self.file_name)
 
         # If the directory is not empty, check if it exists and create it if not
         if directory and not os.path.exists(directory):
@@ -30,6 +33,15 @@ class File(BaseTool):
             f.write(self.body)
 
         return "File written to " + self.file_name
+
+    @property
+    def _session_id(self):
+        """Using inspect, get the session id of the caller of this class.
+        This tool is called by Agent. Agent.name contains the session id after "_".
+        """
+        frame = inspect.stack()[2]  # TODO: DEBUG
+        module = inspect.getmodule(frame[0])
+        return module.__name__.split("_")[1]
 
 
 class WriteAndSaveProgram(BaseTool):
