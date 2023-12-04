@@ -56,7 +56,8 @@ If the task is outside of your capabilities, please report back to the user.
 
 va = Agent(
     name="Virtual Assistant",
-    description="Responsible for drafting emails, doing research and writing proposals.",
+    description="Responsible for drafting emails, doing research and writing proposals."
+    "Can also search the web for information.",
     instructions=va_instructions,
     files_folder=None,
     tools=[SearchWeb, GenerateProposal],
@@ -76,7 +77,7 @@ dev_instructions = """# Instructions for AI Developer Agent
 
 dev = Agent(
     name="Developer",
-    description="Responsible for running and executing Python Programs.",
+    description="Responsible for running and executing Python Programs. Can also save programs to files.",
     instructions=dev_instructions,
     files_folder=None,
     tools=[ExecuteCommand, WriteAndSaveProgram],
