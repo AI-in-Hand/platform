@@ -46,8 +46,7 @@ class ConnectionManager:
 
     async def send_message(self, message: str, session_id: str):
         websocket = self.active_connections.get(session_id)
-        if websocket:
-            await websocket.send_text(message)
+        await websocket.send_text(message)
 
 
 ws_manager = ConnectionManager()
@@ -57,7 +56,15 @@ ws_manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
     logger.info(f"WebSocket connected for session_id: {session_id}")
     await ws_manager.connect(websocket, session_id)
+
+    # TODO: validate session_id
+
     agency = agency_manager.get_agency(session_id)
+    if not agency:
+        await ws_manager.send_message("Agency not found", session_id)
+        ws_manager.disconnect(session_id)
+        await websocket.close(code=1003)
+        return
 
     try:
         while True:

@@ -1,3 +1,15 @@
+import json
+
+# TODO: Finish this
+with open("path_to_configuration_file.json", "r") as file:
+    config = json.load(file)
+
+agency_manifesto = config["agency_manifesto"]
+ceo_instructions = config["ceo_instructions"]
+va_instructions = config["va_instructions"]
+dev_instructions = config["dev_instructions"]
+
+
 agency_manifesto = """# "BONKIT AI" Agency Manifesto
 You are a part of a virtual AI development agency called "BONKIT AI"
 Your mission is to empower businesses to navigate the AI revolution successfully."""

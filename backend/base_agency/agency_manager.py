@@ -24,15 +24,12 @@ class AgencyManager:
         if session_id in self.active_agencies:
             return self.active_agencies[session_id]
 
-        new_agency = self.create_agency(session_id)  # TODO: remove this for SRP?
-        self.active_agencies[session_id] = new_agency
-        return new_agency
-
     def create_agency(self, session_id: str) -> Agency:
         """Create the agency for the given session ID"""
 
         start = time.time()
 
+        # TODO: dynamically create agents based on current settings (session_id)
         ceo = Agent(
             name=f"CEO_{session_id}",
             description="Responsible for client communication, task planning and management.",
@@ -59,7 +56,8 @@ class AgencyManager:
             tools=[ExecuteCommand, WriteAndSaveProgram, SearchWeb],
         )
 
-        agency = Agency([ceo, [ceo, dev], [ceo, va], [dev, va]], shared_instructions=agency_manifesto)
+        agency_chart = [ceo, [ceo, dev], [ceo, va], [dev, va]]
+        agency = Agency(agency_chart, shared_instructions=agency_manifesto)
 
         # measure the time it takes to create the agency
         end = time.time()
