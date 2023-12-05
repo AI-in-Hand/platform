@@ -25,7 +25,7 @@ async def start():
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections = {}  # session_id: websocket
+        self.active_connections: dict[str, WebSocket] = {}  # session_id: websocket
 
     async def connect(self, websocket: WebSocket, session_id: str):
         await websocket.accept()
@@ -41,41 +41,39 @@ class ConnectionManager:
             await websocket.send_text(message)
 
 
-manager = ConnectionManager()
+ws_manager = ConnectionManager()
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    session_id = ""  # Initialize session_id
+@app.websocket("/ws/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    logger.info(f"WebSocket connected for session_id: {session_id}")
+    await ws_manager.connect(websocket, session_id)
 
     try:
         while True:
-            data = await websocket.receive_text()
+            user_message = await websocket.receive_text()
             try:
-                message_data = json.loads(data)
-                session_id = message_data.get("session_id")
-                user_message = message_data.get("message")
-
-                if not session_id or not user_message:
+                if not user_message:
+                    await ws_manager.send_message("message not provided", session_id)
+                    ws_manager.disconnect(session_id)
                     await websocket.close(code=1003)
                     return
-
-                if session_id not in manager.active_connections:
-                    await manager.connect(websocket, session_id)
 
                 agency = agency_manager.get_agency(session_id)
 
                 gen = agency.get_completion(message=user_message)
                 for response in gen:
-                    await manager.send_message(response, session_id)
+                    response_text = response.get_formatted_content()
+                    await ws_manager.send_message(response_text, session_id)
 
             except json.JSONDecodeError:
                 logger.error("Invalid JSON received")
+                ws_manager.disconnect(session_id)
                 await websocket.close(code=1003)
 
     except WebSocketDisconnect:
-        manager.disconnect(session_id)
-        logger.info("WebSocket disconnected")
+        ws_manager.disconnect(session_id)
+        logger.info(f"WebSocket disconnected for session_id: {session_id}")
 
 
 if __name__ == "__main__":

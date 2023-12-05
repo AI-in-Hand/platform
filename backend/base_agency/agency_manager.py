@@ -1,3 +1,4 @@
+import logging
 import time
 
 from agency_swarm import Agency, Agent
@@ -11,6 +12,8 @@ from custom_tools.write_and_save_program import WriteAndSaveProgram
 
 client = get_openai_client()
 
+logger = logging.getLogger(__name__)
+
 
 class AgencyManager:
     def __init__(self):
@@ -20,7 +23,8 @@ class AgencyManager:
         """Get the agency for the given session ID"""
         if session_id in self.active_agencies:
             return self.active_agencies[session_id]
-        new_agency = self.create_agency(session_id)
+
+        new_agency = self.create_agency(session_id)  # TODO: remove this for SRP?
         self.active_agencies[session_id] = new_agency
         return new_agency
 
@@ -58,7 +62,7 @@ class AgencyManager:
 
         # measure the time it takes to create the agency
         end = time.time()
-        print(f"Agency creation took {end - start} seconds")
+        logger.debug(f"Agency creation took {end - start} seconds. Session ID: {session_id}")
 
         self.active_agencies[session_id] = agency
         return agency
@@ -66,5 +70,8 @@ class AgencyManager:
 
 if __name__ == "__main__":
     agency_manager = AgencyManager()
-    agency = agency_manager.get_agency("test")
-    agency.run_demo()
+    agency_1 = agency_manager.create_agency("test")
+    agency_2 = agency_manager.get_agency("test")
+    assert agency_1 == agency_2
+
+    agency_1.run_demo()
