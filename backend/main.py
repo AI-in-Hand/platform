@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 agency_manager = AgencyManager()
 
 
-@app.get("/start")
+@app.post("/start")
 async def start():
     session_id = uuid.uuid4().hex
     agency_manager.create_agency(session_id)
