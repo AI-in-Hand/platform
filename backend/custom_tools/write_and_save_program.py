@@ -34,7 +34,7 @@ class File(BaseTool):
         with open(full_path, "w") as f:
             f.write(self.body)
 
-        return "File written to " + full_path
+        return "File written to " + full_path.as_posix()
 
     @property
     def _session_id(self):
