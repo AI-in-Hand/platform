@@ -52,10 +52,11 @@ class AgencyManager:
 
         dev = Agent(
             name=f"Developer_{session_id}",
-            description="Responsible for running and executing Python Programs. Can also save programs to files.",
+            description="Responsible for running and executing Python Programs. Can also save programs to files, "
+            "and search the web for information.",
             instructions=dev_instructions,
             files_folder=None,
-            tools=[ExecuteCommand, WriteAndSaveProgram],
+            tools=[ExecuteCommand, WriteAndSaveProgram, SearchWeb],
         )
 
         agency = Agency([ceo, [ceo, dev], [ceo, va], [dev, va]], shared_instructions=agency_manifesto)
