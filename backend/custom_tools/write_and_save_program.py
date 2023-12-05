@@ -38,8 +38,8 @@ class File(BaseTool):
 
     @property
     def _session_id(self):
-        """Using inspect, get the session_id from the WebSocket connection."""
-
+        """[Workaround]
+        Using inspect, get the session_id from the WebSocket connection."""
         # Searching for the first WebSocket instance in the call stack
         for frame_record in inspect.stack():
             websocket_instance = next(
@@ -48,7 +48,7 @@ class File(BaseTool):
             if websocket_instance:
                 # Extracting session ID from path_params
                 return websocket_instance.path_params.get("session_id")
-        return None
+        raise ValueError("No WebSocket instance found in the call stack.")
 
 
 class WriteAndSaveProgram(BaseTool):
