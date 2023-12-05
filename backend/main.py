@@ -57,6 +57,7 @@ ws_manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
     logger.info(f"WebSocket connected for session_id: {session_id}")
     await ws_manager.connect(websocket, session_id)
+    agency = agency_manager.get_agency(session_id)
 
     try:
         while True:
@@ -67,8 +68,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                     ws_manager.disconnect(session_id)
                     await websocket.close(code=1003)
                     return
-
-                agency = agency_manager.get_agency(session_id)
 
                 gen = agency.get_completion(message=user_message)
                 for response in gen:
