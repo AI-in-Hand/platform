@@ -11,6 +11,15 @@ from constants import DATA_DIR
 DATA_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        # logging.FileHandler(DATA_DIR / "logs.log"),
+        logging.StreamHandler(),
+    ],
+)
 logger = logging.getLogger(__name__)
 
 agency_manager = AgencyManager()

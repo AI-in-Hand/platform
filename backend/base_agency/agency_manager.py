@@ -62,7 +62,7 @@ class AgencyManager:
 
         # measure the time it takes to create the agency
         end = time.time()
-        logger.debug(f"Agency creation took {end - start} seconds. Session ID: {session_id}")
+        logger.info(f"Agency creation took {end - start} seconds. Session ID: {session_id}")
 
         self.active_agencies[session_id] = agency
         return agency
