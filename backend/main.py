@@ -63,7 +63,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         while True:
             user_message = await websocket.receive_text()
             try:
-                if not user_message:
+                if not user_message.strip():
                     await ws_manager.send_message("message not provided", session_id)
                     ws_manager.disconnect(session_id)
                     await websocket.close(code=1003)
