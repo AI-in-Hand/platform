@@ -2,6 +2,7 @@ import inspect
 import os
 
 from agency_swarm import BaseTool
+from fastapi import WebSocket
 from pydantic import Field
 
 from constants import DATA_DIR
@@ -23,25 +24,31 @@ class File(BaseTool):
     def run(self):
         # Extract the directory path from the file name
         directory = DATA_DIR / self._session_id / os.path.dirname(self.file_name)
+        full_path = directory / self.file_name
 
         # If the directory is not empty, check if it exists and create it if not
         if directory and not os.path.exists(directory):
             os.makedirs(directory)
 
         # Write the file
-        with open(self.file_name, "w") as f:
+        with open(full_path, "w") as f:
             f.write(self.body)
 
-        return "File written to " + self.file_name
+        return "File written to " + full_path
 
     @property
     def _session_id(self):
-        """Using inspect, get the session id of the caller of this class.
-        This tool is called by Agent. Agent.name contains the session id after "_".
-        """
-        frame = inspect.stack()[2]  # TODO: DEBUG
-        module = inspect.getmodule(frame[0])
-        return module.__name__.split("_")[1]
+        """Using inspect, get the session_id from the WebSocket connection."""
+
+        # Searching for the first WebSocket instance in the call stack
+        for frame_record in inspect.stack():
+            websocket_instance = next(
+                (v for v in frame_record.frame.f_locals.values() if isinstance(v, WebSocket)), None
+            )
+            if websocket_instance:
+                # Extracting session ID from path_params
+                return websocket_instance.path_params.get("session_id")
+        return None
 
 
 class WriteAndSaveProgram(BaseTool):
