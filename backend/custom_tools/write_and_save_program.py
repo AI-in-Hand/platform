@@ -26,7 +26,7 @@ class File(BaseTool):
         if ".." in self.file_name or self.file_name.startswith("/"):
             return "Invalid file path. Directory traversal is not allowed."
         # Extract the directory path from the file name
-        directory = DATA_DIR / self._session_id / os.path.dirname(self.file_name)
+        directory = DATA_DIR / self._agency_id / os.path.dirname(self.file_name)
         full_path = directory / self.file_name
 
         # If the directory is not empty, check if it exists and create it if not
@@ -40,9 +40,9 @@ class File(BaseTool):
         return "File written to " + full_path.as_posix()
 
     @property
-    def _session_id(self):
+    def _agency_id(self):
         """[Workaround]
-        Using inspect, get the session_id from the WebSocket connection."""
+        Using inspect, get the agency_id from the WebSocket connection."""
         # Searching for the first WebSocket instance in the call stack
         for frame_record in inspect.stack():
             websocket_instance = next(
@@ -50,7 +50,7 @@ class File(BaseTool):
             )
             if websocket_instance:
                 # Extracting session ID from path_params
-                return websocket_instance.path_params.get("session_id")
+                return websocket_instance.path_params.get("agency_id")
         raise ValueError("No WebSocket instance found in the call stack.")
 
 
