@@ -1,11 +1,10 @@
-import os
 from pathlib import Path
 
 # File and Directory Constants
 DATA_DIR = Path(__file__).resolve().parent / "data"
-
-# Assistant Configuration
-GPT_MODEL = os.getenv("GPT_MODEL", "gpt-4-1106-preview")
+DEFAULT_CONFIG_FILE = DATA_DIR / "default_config.json"
+CONFIG_FILE = DATA_DIR / "config.json"
+LATEST_GPT_MODEL = "gpt-4-1106-preview"
 
 # Assistant Tools Configuration
 ASSISTANT_TOOLS = [

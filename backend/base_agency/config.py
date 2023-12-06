@@ -2,18 +2,16 @@ from agency_swarm import Agency, Agent
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from constants import DATA_DIR
+from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE, LATEST_GPT_MODEL
 from custom_tools.execute_command import ExecuteCommand
 from custom_tools.generate_proposal import GenerateProposal
 from custom_tools.search_web import SearchWeb
 from custom_tools.write_and_save_program import WriteAndSaveProgram
 
-DEFAULT_CONFIG_FILE = DATA_DIR / "default_config.json"
-CONFIG_FILE = DATA_DIR / "config.json"
-
 
 class Settings(BaseSettings):
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY")
+    gpt_model: str = Field(default=LATEST_GPT_MODEL, validation_alias="GPT_MODEL")
 
     model_config = SettingsConfigDict()
 
