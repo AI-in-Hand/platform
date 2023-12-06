@@ -53,15 +53,15 @@ class ConnectionManager:
 ws_manager = ConnectionManager()
 
 
-@app.websocket("/ws/{session_id}")
-async def websocket_endpoint(websocket: WebSocket, session_id: str):
-    logger.info(f"WebSocket connected for session_id: {session_id}")
-    await ws_manager.connect(websocket, session_id)
+@app.websocket("/ws/{agency_id}")
+async def websocket_endpoint(websocket: WebSocket, agency_id: str):
+    logger.info(f"WebSocket connected for agency_id: {agency_id}")
+    await ws_manager.connect(websocket, agency_id)
 
-    agency = agency_manager.get_agency(agency_id=session_id)
+    agency = agency_manager.get_agency(agency_id=agency_id)
     if not agency:
-        await ws_manager.send_message("Agency not found", session_id)
-        ws_manager.disconnect(session_id)
+        await ws_manager.send_message("Agency not found", agency_id)
+        ws_manager.disconnect(agency_id)
         await websocket.close(code=1003)
         return
 
@@ -70,24 +70,24 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             user_message = await websocket.receive_text()
             try:
                 if not user_message.strip():
-                    await ws_manager.send_message("message not provided", session_id)
-                    ws_manager.disconnect(session_id)
+                    await ws_manager.send_message("message not provided", agency_id)
+                    ws_manager.disconnect(agency_id)
                     await websocket.close(code=1003)
                     return
 
                 gen = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
                 for response in gen:
                     response_text = response.get_formatted_content()
-                    await ws_manager.send_message(response_text, session_id)
+                    await ws_manager.send_message(response_text, agency_id)
 
             except json.JSONDecodeError:
                 logger.error("Invalid JSON received")
-                ws_manager.disconnect(session_id)
+                ws_manager.disconnect(agency_id)
                 await websocket.close(code=1003)
 
     except WebSocketDisconnect:
-        ws_manager.disconnect(session_id)
-        logger.info(f"WebSocket disconnected for session_id: {session_id}")
+        ws_manager.disconnect(agency_id)
+        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
 
 if __name__ == "__main__":
