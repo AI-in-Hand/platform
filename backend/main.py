@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import uuid
@@ -28,7 +29,7 @@ agency_manager = AgencyManager()
 @app.post("/start")
 async def start():
     session_id = uuid.uuid4().hex
-    agency_manager.create_agency(session_id)
+    await asyncio.to_thread(agency_manager.create_agency, session_id)
     return {"session_id": session_id}
 
 
@@ -57,8 +58,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
     logger.info(f"WebSocket connected for session_id: {session_id}")
     await ws_manager.connect(websocket, session_id)
 
-    # TODO: validate session_id
-
     agency = agency_manager.get_agency(session_id)
     if not agency:
         await ws_manager.send_message("Agency not found", session_id)
@@ -76,7 +75,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                     await websocket.close(code=1003)
                     return
 
-                gen = agency.get_completion(message=user_message)
+                gen = asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
                 for response in gen:
                     response_text = response.get_formatted_content()
                     await ws_manager.send_message(response_text, session_id)
