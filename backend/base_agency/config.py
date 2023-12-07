@@ -3,10 +3,7 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE, LATEST_GPT_MODEL
-from custom_tools.execute_command import ExecuteCommand
-from custom_tools.generate_proposal import GenerateProposal
-from custom_tools.search_web import SearchWeb
-from custom_tools.write_and_save_program import WriteAndSaveProgram
+from custom_tools import TOOL_MAPPING
 
 
 class Settings(BaseSettings):
@@ -48,22 +45,14 @@ def load_agency_from_config(agency_id: str) -> Agency:
         with open(DEFAULT_CONFIG_FILE) as f:
             config = AppConfig.model_validate_json(f.read())
 
-    # Mapping tool names to actual tool classes
-    tool_mapping = {
-        "SearchWeb": SearchWeb,
-        "GenerateProposal": GenerateProposal,
-        "ExecuteCommand": ExecuteCommand,
-        "WriteAndSaveProgram": WriteAndSaveProgram,
-    }
-
     agents = {
         agent_conf.role: Agent(
-            id=None,
+            id=agent_conf.id,
             name=f"{agent_conf.role}_{agency_id}",
             description=agent_conf.description,
             instructions=agent_conf.instructions,
-            files_folder=None,
-            tools=[tool_mapping.get(tool_name) for tool_name in agent_conf.tools if tool_name in tool_mapping],
+            files_folder=agent_conf.files_folder,
+            tools=[TOOL_MAPPING[tool] for tool in agent_conf.tools if tool in TOOL_MAPPING],
         )
         for agent_conf in config.agents
     }
@@ -88,5 +77,6 @@ def update_agent_ids_in_config(agency_id: str, agents: list[Agent], config: AppC
                 agent_conf.id = agent.id
                 break
 
+    # Save the config file
     with open(CONFIG_FILE, "w") as f:
         f.write(config.model_dump_json(indent=2))
