@@ -18,15 +18,15 @@ class GenerateProposal(BaseTool):
 
     project_brief: str = Field(..., description="The project brief to generate a proposal for.")
 
-    def run(self):
+    def run(self) -> str:
         user_prompt = self.get_user_prompt()
-        completion = get_chat_completion(
+        message = get_chat_completion(
             user_prompt=user_prompt,
             system_message=SYSTEM_MESSAGE,
             temperature=0.6,
         )
 
-        return str(completion.choices[0].message.content)
+        return message
 
     def get_user_prompt(self):
         return f"{USER_PROMPT_PREFIX}\n{self.project_brief}"

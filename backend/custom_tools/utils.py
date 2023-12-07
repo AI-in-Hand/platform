@@ -1,7 +1,7 @@
 from agency_swarm.util import get_openai_client
 
 
-def get_chat_completion(user_prompt, system_message, **kwargs):
+def get_chat_completion(user_prompt, system_message, **kwargs) -> str:
     """Generate a chat completion based on a prompt and a system message.
     This function is a wrapper around the OpenAI API.
     """
@@ -23,4 +23,4 @@ def get_chat_completion(user_prompt, system_message, **kwargs):
         **kwargs,
     )
 
-    return completion
+    return str(completion.choices[0].message.content)
