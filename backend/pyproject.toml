@@ -5,6 +5,7 @@ description = ""
 authors = [
     "Nikita Bobrovskiy <39348559+bonk1t@users.noreply.github.com>",
 ]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11.0a1,<4.0.0"
@@ -18,8 +19,6 @@ uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 # agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.7.1"
-ruff = "^0.1.6"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 
@@ -33,6 +32,9 @@ exclude = [".cache"]
 line-length = 120
 select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
 ignore = ['W291', 'W292', 'W293']
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
