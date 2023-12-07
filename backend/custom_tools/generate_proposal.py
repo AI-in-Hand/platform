@@ -2,8 +2,6 @@ from agency_swarm import BaseTool
 from agency_swarm.util import get_openai_client
 from pydantic import Field
 
-from base_agency.config import settings
-
 
 class GenerateProposal(BaseTool):
     """Generate a proposal for a project based on a project brief.
@@ -13,6 +11,8 @@ class GenerateProposal(BaseTool):
     project_brief: str = Field(..., description="The project brief to generate a proposal for.")
 
     def run(self):
+        from base_agency.config import settings
+
         client = get_openai_client()
         completion = client.chat.completions.create(
             model=settings.gpt_model,
