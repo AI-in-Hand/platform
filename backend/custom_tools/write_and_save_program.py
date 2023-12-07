@@ -22,9 +22,9 @@ class File(BaseTool):
     body: str = Field(..., description="Correct contents of a file")
 
     def run(self):
-        # Ensure directory traversal is not possible
         if ".." in self.file_name or self.file_name.startswith("/"):
             return "Invalid file path. Directory traversal is not allowed."
+
         # Extract the directory path from the file name
         directory = DATA_DIR / self._agency_id / os.path.dirname(self.file_name)
         full_path = directory / self.file_name

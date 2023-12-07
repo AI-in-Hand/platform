@@ -2,8 +2,10 @@ from agency_swarm import Agency, Agent
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE, LATEST_GPT_MODEL
+from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 from custom_tools import TOOL_MAPPING
+
+LATEST_GPT_MODEL = "gpt-4-1106-preview"
 
 
 class Settings(BaseSettings):

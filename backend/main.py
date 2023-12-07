@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import uuid
 
@@ -46,7 +45,7 @@ class ConnectionManager:
             del self.active_connections[session_id]
 
     async def send_message(self, message: str, session_id: str):
-        websocket = self.active_connections.get(session_id)
+        websocket = self.active_connections[session_id]
         await websocket.send_text(message)
 
 
@@ -80,8 +79,8 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
                     response_text = response.get_formatted_content()
                     await ws_manager.send_message(response_text, agency_id)
 
-            except json.JSONDecodeError:
-                logger.error("Invalid JSON received")
+            except Exception:
+                logger.exception(f"Error in websocket_endpoint for agency_id: {agency_id}")
                 ws_manager.disconnect(agency_id)
                 await websocket.close(code=1003)
 

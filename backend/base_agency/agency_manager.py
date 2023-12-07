@@ -34,6 +34,7 @@ class AgencyManager:
 
 
 if __name__ == "__main__":
+    # Test the agency manager
     agency_manager = AgencyManager()
     agency_1 = asyncio.run(agency_manager.create_agency("test"))
     agency_2 = agency_manager.get_agency("test")
