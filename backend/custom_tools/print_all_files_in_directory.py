@@ -17,6 +17,9 @@ class PrintAllFilesInDirectory(BaseTool):
     )
 
     def run(self) -> str:
+        """Run the tool."""
+        self._validate_start_directory()
+
         output = []
         for root, _, files in os.walk(self.directory):
             for file in files:
@@ -32,3 +35,8 @@ class PrintAllFilesInDirectory(BaseTool):
                 return file.read()
         except IOError as e:
             return f"Error reading file {file_path}: {e}"
+
+    def _validate_start_directory(self):
+        """Do not allow directory traversal."""
+        if ".." in self.start_directory or self.start_directory.startswith("/"):
+            raise ValueError("Directory traversal is not allowed.")

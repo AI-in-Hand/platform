@@ -17,10 +17,14 @@ class BuildDirectoryTree(BaseTool):
     )
 
     def run(self) -> str:
+        """Run the tool."""
+        self._validate_start_directory()
         tree_str = self.print_tree(self.start_directory, "")
         return tree_str
 
     def print_tree(self, directory, indent):
+        """Recursively print the tree of directories and files."""
+
         # Print the name of the directory
         tree_str = f"{indent}{os.path.basename(directory)}\n"
         indent += "    "
@@ -37,3 +41,8 @@ class BuildDirectoryTree(BaseTool):
                     tree_str += f"{indent}{os.path.basename(path)}\n"
 
         return tree_str
+
+    def _validate_start_directory(self):
+        """Do not allow directory traversal."""
+        if ".." in self.start_directory or self.start_directory.startswith("/"):
+            raise ValueError("Directory traversal is not allowed.")
