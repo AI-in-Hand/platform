@@ -19,26 +19,22 @@ class BuildDirectoryTree(BaseTool):
     def run(self) -> str:
         """Run the tool."""
         self._validate_start_directory()
-        tree_str = self.print_tree(self.start_directory, "")
+        tree_str = self.print_tree()
         return tree_str
 
-    def print_tree(self, directory, indent):
-        """Recursively print the tree of directories and files."""
+    def print_tree(self):
+        """Recursively print the tree of directories and files using os.walk."""
+        tree_str = ""
 
-        # Print the name of the directory
-        tree_str = f"{indent}{os.path.basename(directory)}\n"
-        indent += "    "
+        for root, _, files in os.walk(self.start_directory, topdown=True):
+            level = root.replace(self.start_directory, "").count(os.sep)
+            indent = " " * 4 * level
+            tree_str += f"{indent}{os.path.basename(root)}\n"
+            sub_indent = " " * 4 * (level + 1)
 
-        # Loop through the contents of the directory
-        for item in os.listdir(directory):
-            path = os.path.join(directory, item)
-            # Check if the item is a directory
-            if os.path.isdir(path):
-                tree_str += self.print_tree(path, indent)
-            else:
-                # If it's a file, just print its name
-                if self.file_extensions is None or path.endswith(tuple(self.file_extensions)):
-                    tree_str += f"{indent}{os.path.basename(path)}\n"
+            for f in files:
+                if self.file_extensions is None or f.endswith(tuple(self.file_extensions)):
+                    tree_str += f"{sub_indent}{f}\n"
 
         return tree_str
 

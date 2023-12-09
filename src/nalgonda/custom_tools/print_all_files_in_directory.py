@@ -21,7 +21,7 @@ class PrintAllFilesInDirectory(BaseTool):
         self._validate_start_directory()
 
         output = []
-        for root, _, files in os.walk(self.start_directory):
+        for root, _, files in os.walk(self.start_directory, topdown=True):
             for file in files:
                 if self.file_extensions is None or file.endswith(tuple(self.file_extensions)):
                     file_path = os.path.join(root, file)
