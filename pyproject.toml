@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "nalgonda"
+version = "1.0.0"
+description = "Nalgonda is a FastAPI app to manage swarm agencies"
+authors = [
+    "Nikita Bobrovskiy <39348559+bonk1t@users.noreply.github.com>",
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11.0a1,<4.0.0"
+duckduckgo-search = "^3.9.11"
+fastapi = "^0.104.1"
+functions = ">=0.7.0"
+instructor = "^0.3.4"
+openai = "^1.3.0"
+pydantic = "^2.5.2"
+pydantic-settings = "^2.1.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+# a dependency from a GitHub repository
+agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+useLibraryCodeForTypes = true
+exclude = [".cache"]
+
+[tool.ruff]
+# https://beta.ruff.rs/docs/configuration/
+line-length = 120
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
+ignore = ['W291', 'W292', 'W293']
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
