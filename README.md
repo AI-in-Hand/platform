@@ -53,7 +53,7 @@
 1. **Start the FastAPI Server**
 
    ```sh
-   uvicorn backend.main:app --reload
+   uvicorn nalgonda.main:app --reload
    ```
 
    The API will be available at `http://localhost:8000`.

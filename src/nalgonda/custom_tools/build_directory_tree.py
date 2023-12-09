@@ -44,5 +44,7 @@ class BuildDirectoryTree(BaseTool):
 
     def _validate_start_directory(self):
         """Do not allow directory traversal."""
-        if ".." in self.start_directory or self.start_directory.startswith("/"):
+        if ".." in self.start_directory or (
+            self.start_directory.startswith("/") and not self.start_directory.startswith("/tmp")
+        ):
             raise ValueError("Directory traversal is not allowed.")

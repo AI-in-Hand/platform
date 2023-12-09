@@ -4,9 +4,8 @@ import time
 
 from agency_swarm import Agency, Agent
 from agency_swarm.util.oai import get_openai_client
-
-from config import AgencyConfig
-from custom_tools import TOOL_MAPPING
+from nalgonda.config import AgencyConfig
+from nalgonda.custom_tools import TOOL_MAPPING
 
 client = get_openai_client()
 

@@ -1,6 +1,6 @@
 import os
 
-from custom_tools import BuildDirectoryTree
+from nalgonda.custom_tools import BuildDirectoryTree
 
 
 def test_build_directory_tree_with_py_extension(temp_dir):

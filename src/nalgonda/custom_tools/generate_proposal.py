@@ -1,7 +1,6 @@
 from agency_swarm import BaseTool
+from nalgonda.custom_tools.utils import get_chat_completion
 from pydantic import Field
-
-from custom_tools.utils import get_chat_completion
 
 USER_PROMPT_PREFIX = "Please draft a proposal for the following project brief: "
 SYSTEM_MESSAGE = """\

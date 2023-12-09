@@ -1,10 +1,9 @@
 from pathlib import Path
 
 from agency_swarm import Agent
+from nalgonda.constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 
 LATEST_GPT_MODEL = "gpt-4-1106-preview"
 
