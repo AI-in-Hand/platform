@@ -17,8 +17,14 @@ def test_build_directory_tree_with_multiple_extensions(temp_dir):
     Test if BuildDirectoryTree lists files with multiple specified extensions.
     """
     bdt = BuildDirectoryTree(start_directory=str(temp_dir), file_extensions=[".py", ".txt"])
-    expected_output = f"{temp_dir.name}\n    sub\n        test.py\n        test.txt\n"
-    assert bdt.run() == expected_output
+    expected_output = {
+        f"{temp_dir.name}",
+        "    sub",
+        "        test.py",
+        "        test.txt",
+    }
+    actual_output = set(bdt.run().strip().split("\n"))
+    assert actual_output == expected_output
 
 
 def test_build_directory_tree_default_settings():

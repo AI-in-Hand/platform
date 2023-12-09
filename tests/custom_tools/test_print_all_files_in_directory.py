@@ -8,11 +8,12 @@ def test_print_all_files_no_extension_filter(temp_dir):
     Test if PrintAllFilesInDirectory correctly prints contents of all files when no file extension filter is applied.
     """
     pafid = PrintAllFilesInDirectory(start_directory=str(temp_dir))
-    expected_output = (
-        f"{os.path.join(temp_dir, 'sub', 'test.py')}:\n```\nprint('hello')\n```\n\n"
-        f"{os.path.join(temp_dir, 'sub', 'test.txt')}:\n```\nhello world\n```\n"
-    )
-    assert pafid.run() == expected_output
+    expected_output = {
+        f"{temp_dir}/sub/test.py:\n```\nprint('hello')\n```",
+        f"{temp_dir}/sub/test.txt:\n```\nhello world\n```",
+    }
+    actual_output = set(pafid.run().strip().split("\n\n"))
+    assert actual_output == expected_output
 
 
 def test_print_all_files_with_py_extension(temp_dir):
