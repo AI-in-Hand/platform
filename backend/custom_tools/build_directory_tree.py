@@ -11,9 +11,9 @@ class BuildDirectoryTree(BaseTool):
         default_factory=lambda: os.getcwd(),
         description="The starting directory for the tree, defaults to the current working directory.",
     )
-    file_extensions: list[str] = Field(
-        default_factory=lambda: [".py"],
-        description="List of file extensions to include in the tree, defaults to ['.py'].",
+    file_extensions: list[str] | None = Field(
+        default_factory=lambda: None,
+        description="List of file extensions to include in the tree. If None, all files will be included.",
     )
 
     def run(self) -> str:
@@ -33,7 +33,7 @@ class BuildDirectoryTree(BaseTool):
                 tree_str += self.print_tree(path, indent)
             else:
                 # If it's a file, just print its name
-                if path.endswith(tuple(self.file_extensions)):
+                if self.file_extensions is None or path.endswith(tuple(self.file_extensions)):
                     tree_str += f"{indent}{os.path.basename(path)}\n"
 
         return tree_str
