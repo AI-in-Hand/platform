@@ -1,21 +1,21 @@
-import os
-import tempfile
 from pathlib import Path
 
 import pytest
 
 
 @pytest.fixture
-def temp_dir():
-    with tempfile.TemporaryDirectory() as temp_dir_path:
-        # Create a subdirectory inside the temporary directory
-        sub_dir = os.path.join(temp_dir_path, "sub")
-        os.mkdir(sub_dir)
+def temp_dir(tmp_path: Path):
+    """Create a temporary directory with some files inside it.
+    The structure looks like this:
+    temp_dir_path
+    ├── sub
+    │   ├── test.py (contains "print('hello')")
+    │   └── test.txt (contains "hello world")
 
-        # Create test files in the subdirectory
-        with open(os.path.join(sub_dir, "test.py"), "w") as f:
-            f.write("print('hello')")
-        with open(os.path.join(sub_dir, "test.txt"), "w") as f:
-            f.write("hello world")
-
-        yield Path(temp_dir_path)
+    Yield the path to the temporary directory.
+    """
+    temp_dir_path = tmp_path / "sub"
+    temp_dir_path.mkdir(parents=True)
+    (temp_dir_path / "test.py").write_text("print('hello')")
+    (temp_dir_path / "test.txt").write_text("hello world")
+    yield tmp_path
