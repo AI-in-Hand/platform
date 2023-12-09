@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from agency_config_lock_manager import AgencyConfigLockManager
 from agency_swarm import Agent
 from nalgonda.constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 from pydantic import BaseModel, Field
@@ -50,12 +51,14 @@ class AgencyConfig(BaseModel):
         config_file_name = cls.get_config_name(agency_id)
         config_file_name = config_file_name if config_file_name.exists() else DEFAULT_CONFIG_FILE
 
-        with open(config_file_name) as f:
+        lock = AgencyConfigLockManager.get_lock(agency_id)
+        with lock as _, open(config_file_name) as f:
             return cls.model_validate_json(f.read())
 
     def save(self, agency_id: str) -> None:
         """Save the config to a file"""
-        with open(self.get_config_name(agency_id), "w") as f:
+        lock = AgencyConfigLockManager.get_lock(agency_id)
+        with lock as _, open(self.get_config_name(agency_id), "w") as f:
             f.write(self.model_dump_json(indent=2))
 
     @staticmethod

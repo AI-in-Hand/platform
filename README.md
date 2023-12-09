@@ -2,7 +2,9 @@
 
 ## Overview
 
-... Project description ...
+Project Nalgonda is a tool for managing and executing AI agents.
+It is built on top of the [OpenAI Assitants API](https://platform.openai.com/docs/assistants/overview)
+and provides a simple interface for configuring agents and executing them.
 
 ## Features
 

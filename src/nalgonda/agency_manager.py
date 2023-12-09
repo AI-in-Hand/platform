@@ -3,11 +3,8 @@ import logging
 import time
 
 from agency_swarm import Agency, Agent
-from agency_swarm.util.oai import get_openai_client
 from nalgonda.config import AgencyConfig
 from nalgonda.custom_tools import TOOL_MAPPING
-
-client = get_openai_client()
 
 logger = logging.getLogger(__name__)
 
@@ -15,20 +12,26 @@ logger = logging.getLogger(__name__)
 class AgencyManager:
     def __init__(self):
         self.cache = {}  # agency_id: agency
+        self.lock = asyncio.Lock()
 
     async def get_or_create_agency(self, agency_id: str) -> Agency:
         """Get or create the agency for the given session ID"""
-        if agency_id in self.cache:
-            return self.cache[agency_id]
+        async with self.lock:
+            if agency_id in self.cache:
+                return self.cache[agency_id]
 
-        # Async-to-Sync Bridge
-        agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
-        self.cache[agency_id] = agency
-        return agency
+            # Note: Async-to-Sync Bridge
+            agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
+            self.cache[agency_id] = agency
+            return agency
 
     @staticmethod
     def load_agency_from_config(agency_id: str) -> Agency:
-        """Load the agency from the config file"""
+        """Load the agency from the config file. The agency is created using the agency-swarm library.
+
+        This code is synchronous and should be run in a single thread.
+        The code is currently not thread safe (due to agency-swarm limitations).
+        """
 
         start = time.time()
         config = AgencyConfig.load(agency_id)
@@ -51,6 +54,8 @@ class AgencyManager:
             for chart in config.agency_chart
         ]
 
+        # Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
+        # It saves all the settings in the settings.json file (in the root folder, not thread safe)
         agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
 
         config.update_agent_ids_in_config(agency_id, agents=agency.agents)

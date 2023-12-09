@@ -37,14 +37,17 @@ async def create_agency():
 class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
+        self.connections_lock = asyncio.Lock()
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        async with self.connections_lock:
+            self.active_connections.append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+    async def disconnect(self, websocket: WebSocket):
+        async with self.connections_lock:
+            if websocket in self.active_connections:
+                self.active_connections.remove(websocket)
 
     async def send_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -70,7 +73,7 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
 
             if not user_message.strip():
                 await ws_manager.send_message("message not provided", websocket)
-                ws_manager.disconnect(websocket)
+                await ws_manager.disconnect(websocket)
                 await websocket.close(code=1003)
                 return
 
@@ -80,7 +83,7 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
                 await ws_manager.send_message(response_text, websocket)
 
     except WebSocketDisconnect:
-        ws_manager.disconnect(websocket)
+        await ws_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
 
