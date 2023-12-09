@@ -27,25 +27,26 @@ agency_manager = AgencyManager()
 
 @app.post("/create_agency")
 async def create_agency():
+    """Create a new agency and return its id."""
+
+    # TODO: Add authentication: check if user is logged in and has permission to create an agency
     agency_id = uuid.uuid4().hex
-    await agency_manager.create_agency(agency_id)
+    await agency_manager.get_or_create_agency(agency_id)
     return {"agency_id": agency_id}
 
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[str, WebSocket] = {}  # session_id: websocket
+        self.active_connections: list[WebSocket] = []
 
-    async def connect(self, websocket: WebSocket, session_id: str):
+    async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections[session_id] = websocket
+        self.active_connections.append(websocket)
 
-    def disconnect(self, session_id: str):
-        if session_id in self.active_connections:
-            del self.active_connections[session_id]
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
 
-    async def send_message(self, message: str, session_id: str):
-        websocket = self.active_connections[session_id]
+    async def send_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
 
@@ -56,38 +57,36 @@ ws_manager = ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket, agency_id: str):
     """Send messages to and from CEO of the given agency."""
 
-    logger.info(f"WebSocket connected for agency_id: {agency_id}")
-    await ws_manager.connect(websocket, agency_id)
+    # TODO: Add authentication: check if agency_id is valid for the given user
 
-    agency = agency_manager.get_agency(agency_id=agency_id)
-    if not agency:
-        await ws_manager.send_message("Agency not found", agency_id)
-        ws_manager.disconnect(agency_id)
-        await websocket.close(code=1003)
-        return
+    await ws_manager.connect(websocket)
+    logger.info(f"WebSocket connected for agency_id: {agency_id}")
+
+    agency = await agency_manager.get_or_create_agency(agency_id=agency_id)
 
     try:
         while True:
             user_message = await websocket.receive_text()
             try:
                 if not user_message.strip():
-                    await ws_manager.send_message("message not provided", agency_id)
-                    ws_manager.disconnect(agency_id)
+                    await ws_manager.send_message("message not provided", websocket)
+                    ws_manager.disconnect(websocket)
                     await websocket.close(code=1003)
                     return
 
                 gen = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
                 for response in gen:
                     response_text = response.get_formatted_content()
-                    await ws_manager.send_message(response_text, agency_id)
+                    await ws_manager.send_message(response_text, websocket)
 
             except Exception:
                 logger.exception(f"Error in websocket_endpoint for agency_id: {agency_id}")
-                ws_manager.disconnect(agency_id)
+                await ws_manager.send_message("An error occurred", websocket)
+                ws_manager.disconnect(websocket)
                 await websocket.close(code=1003)
 
     except WebSocketDisconnect:
-        ws_manager.disconnect(agency_id)
+        ws_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
 

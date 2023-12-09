@@ -1,9 +1,10 @@
-from agency_swarm import Agency, Agent
+from pathlib import Path
+
+from agency_swarm import Agent
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
-from custom_tools import TOOL_MAPPING
 
 LATEST_GPT_MODEL = "gpt-4-1106-preview"
 
@@ -29,56 +30,36 @@ class AgentConfig(BaseModel):
     tools: list[str] = Field(default_factory=list)
 
 
-class AppConfig(BaseModel):
+class AgencyConfig(BaseModel):
     """Config for the agency"""
 
     agency_manifesto: str = Field(default="Agency Manifesto")
     agents: list[AgentConfig]
     agency_chart: list[str | list[str]]  # contains agent roles
 
+    def update_agent_ids_in_config(self, agency_id: str, agents: list[Agent]) -> None:
+        """Update the agent IDs in the config file"""
+        for agent in agents:
+            for agent_conf in self.agents:
+                if agent.name == f"{agent_conf.role}_{agency_id}":
+                    agent_conf.id = agent.id
+                    break
 
-def load_agency_from_config(agency_id: str) -> Agency:
-    """Load the agency from the config file"""
+    @classmethod
+    def load(cls, agency_id: str) -> "AgencyConfig":
+        """Load the config from a file"""
+        config_file_name = cls.get_config_name(agency_id)
+        config_file_name = config_file_name if config_file_name.exists() else DEFAULT_CONFIG_FILE
 
-    if CONFIG_FILE.exists():
-        with open(CONFIG_FILE) as f:
-            config = AppConfig.model_validate_json(f.read())
-    else:
-        with open(DEFAULT_CONFIG_FILE) as f:
-            config = AppConfig.model_validate_json(f.read())
+        with open(config_file_name) as f:
+            return cls.model_validate_json(f.read())
 
-    agents = {
-        agent_conf.role: Agent(
-            id=agent_conf.id,
-            name=f"{agent_conf.role}_{agency_id}",
-            description=agent_conf.description,
-            instructions=agent_conf.instructions,
-            files_folder=agent_conf.files_folder,
-            tools=[TOOL_MAPPING[tool] for tool in agent_conf.tools if tool in TOOL_MAPPING],
-        )
-        for agent_conf in config.agents
-    }
+    def save(self, agency_id: str) -> None:
+        """Save the config to a file"""
+        with open(self.get_config_name(agency_id), "w") as f:
+            f.write(self.model_dump_json(indent=2))
 
-    # Create agency chart based on the config
-    agency_chart = [
-        [agents[role] for role in chart] if isinstance(chart, list) else agents[chart] for chart in config.agency_chart
-    ]
-
-    agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
-
-    update_agent_ids_in_config(agency_id, agency.agents, config)
-
-    return agency
-
-
-def update_agent_ids_in_config(agency_id: str, agents: list[Agent], config: AppConfig):
-    """Update the agent IDs in the config file"""
-    for agent in agents:
-        for agent_conf in config.agents:
-            if agent.name == f"{agent_conf.role}_{agency_id}":
-                agent_conf.id = agent.id
-                break
-
-    # Save the config file
-    with open(CONFIG_FILE, "w") as f:
-        f.write(config.model_dump_json(indent=2))
+    @staticmethod
+    def get_config_name(agency_id: str) -> Path:
+        """Get the name of the config file"""
+        return Path(f"{CONFIG_FILE}_{agency_id}.json")
