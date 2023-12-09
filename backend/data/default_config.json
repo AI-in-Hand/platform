@@ -27,7 +27,8 @@
       "instructions": "# Instructions for AI Developer Agent\n\n- Write clean and efficient Python code.\n- Structure your code logically, with `main.py` as the entry point.\n- Ensure correct imports according to program structure.\n- Execute your code to test for functionality and errors, before reporting back to the user.\n- Anticipate and handle potential runtime errors.\n- Provide clear error messages for easier troubleshooting.\n- Debug any issues before reporting the results back to the user.\n- Always update all local files after each change, don't bother the CEO with details or code diff.",
       "files_folder": null,
       "tools": [
-        "ExecuteCommand",
+        "BuildDirectoryTree",
+        "PrintAllFilesInDirectory",
         "WriteAndSaveProgram",
         "SearchWeb"
       ]

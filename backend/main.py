@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from base_agency.agency_manager import AgencyManager
+from agency_manager import AgencyManager
 from constants import DATA_DIR
 
 # Ensure directories exist
@@ -54,6 +54,8 @@ ws_manager = ConnectionManager()
 
 @app.websocket("/ws/{agency_id}")
 async def websocket_endpoint(websocket: WebSocket, agency_id: str):
+    """Send messages to and from CEO of the given agency."""
+
     logger.info(f"WebSocket connected for agency_id: {agency_id}")
     await ws_manager.connect(websocket, agency_id)
 
