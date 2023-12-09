@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - run: poetry install
+      - run: poetry run pytest
