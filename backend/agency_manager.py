@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 
 from agency_swarm import Agency, Agent
 from agency_swarm.util.oai import get_openai_client
@@ -21,18 +22,16 @@ class AgencyManager:
         if agency_id in self.cache:
             return self.cache[agency_id]
 
-        start = asyncio.get_event_loop().time()
+        # Async-to-Sync Bridge
         agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
-        end = asyncio.get_event_loop().time()
-        logger.info(f"Agency creation took {end - start} seconds. Session ID: {agency_id}")
-
         self.cache[agency_id] = agency
         return agency
 
-    @classmethod
-    def load_agency_from_config(cls, agency_id: str) -> Agency:
+    @staticmethod
+    def load_agency_from_config(agency_id: str) -> Agency:
         """Load the agency from the config file"""
 
+        start = time.time()
         config = AgencyConfig.load(agency_id)
 
         agents = {
@@ -56,9 +55,9 @@ class AgencyManager:
         agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
 
         config.update_agent_ids_in_config(agency_id, agents=agency.agents)
-
         config.save(agency_id)
 
+        logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
         return agency
 
 
