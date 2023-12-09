@@ -4,7 +4,7 @@ import logging
 from agency_swarm import Agency
 from agency_swarm.util.oai import get_openai_client
 
-from base_agency.config import load_agency_from_config
+from config import load_agency_from_config
 
 client = get_openai_client()
 
