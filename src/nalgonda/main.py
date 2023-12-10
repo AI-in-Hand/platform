@@ -69,18 +69,21 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
 
     try:
         while True:
-            user_message = await websocket.receive_text()
+            try:
+                user_message = await websocket.receive_text()
 
-            if not user_message.strip():
-                await ws_manager.send_message("message not provided", websocket)
-                await ws_manager.disconnect(websocket)
-                await websocket.close(code=1003)
-                return
+                if not user_message.strip():
+                    await ws_manager.send_message("message not provided", websocket)
+                    continue
 
-            gen = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
-            for response in gen:
-                response_text = response.get_formatted_content()
-                await ws_manager.send_message(response_text, websocket)
+                gen = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
+                for response in gen:
+                    response_text = response.get_formatted_content()
+                    await ws_manager.send_message(response_text, websocket)
+            except Exception as e:
+                logger.exception(e)
+                await ws_manager.send_message(f"Error: {e}\nPlease try again.", websocket)
+                continue
 
     except WebSocketDisconnect:
         await ws_manager.disconnect(websocket)
