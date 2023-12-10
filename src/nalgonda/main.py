@@ -3,6 +3,7 @@ import logging
 import uuid
 
 from agency_manager import AgencyManager
+from agency_swarm import Agency
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from nalgonda.constants import DATA_DIR
 
@@ -76,10 +77,8 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
                     await ws_manager.send_message("message not provided", websocket)
                     continue
 
-                gen = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=True)
-                for response in gen:
-                    response_text = response.get_formatted_content()
-                    await ws_manager.send_message(response_text, websocket)
+                await process_message(user_message, agency, websocket)
+
             except Exception as e:
                 logger.exception(e)
                 await ws_manager.send_message(f"Error: {e}\nPlease try again.", websocket)
@@ -88,6 +87,22 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
     except WebSocketDisconnect:
         await ws_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
+
+
+async def process_message(user_message: str, agency: Agency, websocket: WebSocket):
+    """Process the user message and send the response to the websocket."""
+    gen = agency.get_completion(message=user_message, yield_messages=True)
+
+    async for response in async_gen(gen):
+        response_text = response.get_formatted_content()
+        await ws_manager.send_message(response_text, websocket)
+
+
+async def async_gen(gen):
+    """Asynchronous wrapper for a synchronous generator."""
+    for value in gen:
+        # Offload the blocking operation to a separate thread
+        yield await asyncio.to_thread(lambda v=value: v)
 
 
 if __name__ == "__main__":
