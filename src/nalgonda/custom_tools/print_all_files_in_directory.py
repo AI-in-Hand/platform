@@ -23,7 +23,7 @@ class PrintAllFilesInDirectory(BaseTool):
         output = []
         for root, _, files in os.walk(self.start_directory, topdown=True):
             for file in files:
-                if self.file_extensions is None or file.endswith(tuple(self.file_extensions)):
+                if not self.file_extensions or file.endswith(tuple(self.file_extensions)):
                     file_path = os.path.join(root, file)
                     output.append(f"{file_path}:\n```\n{self.read_file(file_path)}\n```\n")
         return "\n".join(output)

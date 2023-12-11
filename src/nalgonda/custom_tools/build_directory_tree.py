@@ -33,7 +33,7 @@ class BuildDirectoryTree(BaseTool):
             sub_indent = " " * 4 * (level + 1)
 
             for f in files:
-                if self.file_extensions is None or f.endswith(tuple(self.file_extensions)):
+                if not self.file_extensions or f.endswith(tuple(self.file_extensions)):
                     tree_str += f"{sub_indent}{f}\n"
 
         return tree_str

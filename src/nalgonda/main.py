@@ -4,8 +4,10 @@ import uuid
 
 from agency_manager import AgencyManager
 from agency_swarm import Agency
+from agency_swarm.messages import MessageOutput
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from nalgonda.constants import DATA_DIR
+from websockets import ConnectionClosedOK
 
 # Ensure directories exist
 DATA_DIR.mkdir(exist_ok=True)
@@ -79,6 +81,8 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
 
                 await process_message(user_message, agency, websocket)
 
+            except (WebSocketDisconnect, ConnectionClosedOK) as e:
+                raise e
             except Exception as e:
                 logger.exception(e)
                 await ws_manager.send_message(f"Error: {e}\nPlease try again.", websocket)
@@ -87,22 +91,29 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str):
     except WebSocketDisconnect:
         await ws_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
+    except ConnectionClosedOK:
+        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
 
 async def process_message(user_message: str, agency: Agency, websocket: WebSocket):
     """Process the user message and send the response to the websocket."""
+    loop = asyncio.get_running_loop()
+
     gen = agency.get_completion(message=user_message, yield_messages=True)
 
-    async for response in async_gen(gen):
+    def get_next() -> MessageOutput | None:
+        try:
+            return next(gen)
+        except StopIteration:
+            return None
+
+    while True:
+        response = await loop.run_in_executor(None, get_next)
+        if response is None:
+            break
+
         response_text = response.get_formatted_content()
         await ws_manager.send_message(response_text, websocket)
-
-
-async def async_gen(gen):
-    """Asynchronous wrapper for a synchronous generator."""
-    for value in gen:
-        # Offload the blocking operation to a separate thread
-        yield await asyncio.to_thread(lambda v=value: v)
 
 
 if __name__ == "__main__":
