@@ -1,6 +1,7 @@
 import threading
 from collections import defaultdict
 
+
 class AgencyConfigLockManager:
     """Lock manager for agency config files"""
 
