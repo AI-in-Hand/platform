@@ -5,7 +5,9 @@ from pydantic import Field
 
 
 class PrintAllFilesInDirectory(BaseTool):
-    """Print the contents of all files in a start_directory recursively."""
+    """Print the contents of all files in a start_directory recursively.
+    Directory traversal is not allowed (you cannot read /* or ../*).
+    """
 
     start_directory: str = Field(
         default_factory=lambda: os.getcwd(),

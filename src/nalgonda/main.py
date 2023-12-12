@@ -2,10 +2,11 @@ import asyncio
 import logging
 import uuid
 
-from agency_manager import AgencyManager
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from nalgonda.agency_manager import AgencyManager
+from nalgonda.connection_manager import ConnectionManager
 from nalgonda.constants import DATA_DIR
 from websockets import ConnectionClosedOK
 
@@ -25,6 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 agency_manager = AgencyManager()
+ws_manager = ConnectionManager()
 
 
 @app.post("/create_agency")
@@ -35,28 +37,6 @@ async def create_agency():
     agency_id = uuid.uuid4().hex
     await agency_manager.get_or_create_agency(agency_id)
     return {"agency_id": agency_id}
-
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
-        self.connections_lock = asyncio.Lock()
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        async with self.connections_lock:
-            self.active_connections.append(websocket)
-
-    async def disconnect(self, websocket: WebSocket):
-        async with self.connections_lock:
-            if websocket in self.active_connections:
-                self.active_connections.remove(websocket)
-
-    async def send_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-
-ws_manager = ConnectionManager()
 
 
 @app.websocket("/ws/{agency_id}")

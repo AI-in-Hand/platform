@@ -5,7 +5,9 @@ from pydantic import Field
 
 
 class BuildDirectoryTree(BaseTool):
-    """Print the structure of directories and files."""
+    """Print the structure of directories and files.
+    Directory traversal is not allowed (you cannot read /* or ../*).
+    """
 
     start_directory: str = Field(
         default_factory=lambda: os.getcwd(),
