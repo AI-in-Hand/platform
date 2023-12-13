@@ -5,10 +5,11 @@ import uuid
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from websockets import ConnectionClosedOK
+
 from nalgonda.agency_manager import AgencyManager
 from nalgonda.connection_manager import ConnectionManager
 from nalgonda.constants import DATA_DIR
-from websockets import ConnectionClosedOK
 
 # Ensure directories exist
 DATA_DIR.mkdir(exist_ok=True)

@@ -2,9 +2,10 @@ from pathlib import Path
 
 from agency_config_lock_manager import AgencyConfigLockManager
 from agency_swarm import Agent
-from nalgonda.constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from nalgonda.constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
 
 LATEST_GPT_MODEL = "gpt-4-1106-preview"
 

@@ -32,8 +32,10 @@ exclude = [".cache"]
 [tool.ruff]
 # https://beta.ruff.rs/docs/configuration/
 line-length = 120
-select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM', 'UP']
 ignore = ['W291', 'W292', 'W293']
+src = ["src", "tests"]
+target-version = "py311"
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

@@ -40,5 +40,5 @@ class PrintAllFilesInDirectory(BaseTool):
         """Read and return the contents of a file."""
         try:
             return file_path.read_text()
-        except IOError as e:
+        except OSError as e:
             return f"Error reading file {file_path}: {e}"

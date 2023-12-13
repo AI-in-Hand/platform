@@ -34,5 +34,3 @@ def test_build_directory_tree_default_settings():
     bdt = BuildDirectoryTree()
     assert bdt.start_directory == Path.cwd()
     assert bdt.file_extensions == set()
-
-
