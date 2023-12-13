@@ -67,7 +67,7 @@ and provides a simple interface for configuring agents and executing them.
 ## Usage
 
 ### API Endpoints
-Send a POST request to the /create_agency endpoint to create an agency. The request body should contain the following fields:
+Send a POST request to the /create_agency endpoint to create an agency. The response will contain the following:
 - agency_id: The ID of the agency
 
 ### WebSocket Endpoints
