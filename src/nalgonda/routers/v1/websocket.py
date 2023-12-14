@@ -8,6 +8,7 @@ from websockets import ConnectionClosedOK
 
 from nalgonda.agency_manager import AgencyManager
 from nalgonda.connection_manager import ConnectionManager
+from nalgonda.utils.exceptions import AgencyNotFound
 
 logger = logging.getLogger(__name__)
 ws_manager = ConnectionManager()
@@ -18,16 +19,21 @@ ws_router = APIRouter(
 )
 
 
-@ws_router.websocket("/{agency_id}")
-async def websocket_endpoint(websocket: WebSocket, agency_id: str):
+@ws_router.websocket("/{agency_id}/{thread_id}")
+async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str):
     """Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
 
     await ws_manager.connect(websocket)
-    logger.info(f"WebSocket connected for agency_id: {agency_id}")
+    logger.info(f"WebSocket connected for agency_id: {agency_id}, thread_id: {thread_id}")
 
-    agency = await agency_manager.get_or_create_agency(agency_id=agency_id)
+    try:
+        agency = await agency_manager.get_agency(agency_id, thread_id)
+    except AgencyNotFound:
+        await ws_manager.send_message("Agency not found", websocket)
+        await ws_manager.disconnect(websocket)
+        return
 
     try:
         while True:

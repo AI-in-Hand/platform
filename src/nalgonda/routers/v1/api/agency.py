@@ -1,10 +1,12 @@
 import logging
 import uuid
 
-from agency_manager import AgencyManager
 from agency_swarm import Agency
 from fastapi import APIRouter
-from models.request_models import AgencyMessagePostRequest
+
+from nalgonda.agency_manager import AgencyManager
+from nalgonda.models.request_models import AgencyMessagePostRequest
+from nalgonda.utils.exceptions import AgencyNotFound
 
 logger = logging.getLogger(__name__)
 agency_manager = AgencyManager()
@@ -20,7 +22,7 @@ async def create_agency():
     # TODO: Add authentication: check if user is logged in and has permission to create an agency
 
     agency_id = uuid.uuid4().hex
-    await agency_manager.get_or_create_agency(agency_id)
+    await agency_manager.create_agency(agency_id)
     return {"agency_id": agency_id}
 
 
@@ -29,11 +31,25 @@ async def send_message(payload: AgencyMessagePostRequest) -> dict:
     """Send a message to the CEO of the given agency."""
     # TODO: Add authentication: check if agency_id is valid for the given user
 
-    logger.info(f"Received message: {payload.message} for agency: {payload.agency_id}")
-    agency = await agency_manager.get_or_create_agency(agency_id=payload.agency_id)
+    user_message = payload.message
+    agency_id = payload.agency_id
+    thread_id = payload.thread_id
+
+    logger.info(f"Received message: {user_message}, agency_id: {agency_id}, thread_id: {thread_id}")
 
     try:
-        response = await process_message(payload.message, agency)
+        agency = await agency_manager.get_agency(agency_id, thread_id)
+    except AgencyNotFound:
+        agency = await agency_manager.create_agency(agency_id)
+
+    try:
+        response = await process_message(user_message, agency)
+        if not thread_id:
+            new_thread_id = agency.main_thread.id
+            await agency_manager.cache_agency(agency, agency_id, new_thread_id)
+            await agency_manager.delete_agency_from_cache(agency_id, thread_id)
+            return {"response": response, "thread_id": new_thread_id}
+
         return {"response": response}
     except Exception as e:
         logger.exception(e)

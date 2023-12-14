@@ -6,25 +6,48 @@ from agency_swarm import Agency, Agent
 
 from nalgonda.config import AgencyConfig
 from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.utils.exceptions import AgencyNotFound
 
 logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
     def __init__(self):
-        self.cache = {}  # agency_id: agency
+        self.cache = {}  # agency_id+thread_id: agency
         self.lock = asyncio.Lock()
 
-    async def get_or_create_agency(self, agency_id: str) -> Agency:
-        """Get or create the agency for the given session ID"""
+    async def create_agency(self, agency_id: str) -> Agency:
+        """Create the agency for the given agency ID."""
         async with self.lock:
-            if agency_id in self.cache:
-                return self.cache[agency_id]
-
             # Note: Async-to-Sync Bridge
             agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
             self.cache[agency_id] = agency
             return agency
+
+    async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency:
+        """Get the agency for the given agency ID and thread ID."""
+        async with self.lock:
+            if (cache_key := self.get_cache_key(agency_id, thread_id)) in self.cache:
+                return self.cache[cache_key]
+            else:
+                raise AgencyNotFound(f"Agency not found for agency_id/thread_id: {cache_key}")
+
+    async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None):
+        """Cache the agency for the given agency ID and thread ID."""
+        async with self.lock:
+            cache_key = self.get_cache_key(agency_id, thread_id)
+            self.cache[cache_key] = agency
+
+    async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None):
+        async with self.lock:
+            cache_key = self.get_cache_key(agency_id, thread_id)
+            if cache_key in self.cache:
+                del self.cache[cache_key]
+
+    @staticmethod
+    def get_cache_key(agency_id: str, thread_id: str | None) -> str:
+        """Get the cache key for the given agency ID and thread ID."""
+        return f"{agency_id}/{thread_id}" if thread_id else agency_id
 
     @staticmethod
     def load_agency_from_config(agency_id: str) -> Agency:
@@ -64,10 +87,3 @@ class AgencyManager:
 
         logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
         return agency
-
-
-if __name__ == "__main__":
-    # Test the agency manager
-    agency_manager = AgencyManager()
-    agency_1 = asyncio.run(agency_manager.get_or_create_agency("test"))
-    agency_1.run_demo()
