@@ -6,7 +6,6 @@ from fastapi import APIRouter
 
 from nalgonda.agency_manager import AgencyManager
 from nalgonda.models.request_models import AgencyMessagePostRequest
-from nalgonda.utils.exceptions import AgencyNotFound
 
 logger = logging.getLogger(__name__)
 agency_manager = AgencyManager()
@@ -37,15 +36,14 @@ async def send_message(payload: AgencyMessagePostRequest) -> dict:
 
     logger.info(f"Received message: {user_message}, agency_id: {agency_id}, thread_id: {thread_id}")
 
-    try:
-        agency = await agency_manager.get_agency(agency_id, thread_id)
-    except AgencyNotFound:
+    agency = await agency_manager.get_agency(agency_id, thread_id)
+    if not agency:
         agency = await agency_manager.create_agency(agency_id)
 
     try:
         response = await process_message(user_message, agency)
-        if not thread_id:
-            new_thread_id = agency.main_thread.id
+        new_thread_id = agency.main_thread.id
+        if thread_id != new_thread_id:
             await agency_manager.cache_agency(agency, agency_id, new_thread_id)
             await agency_manager.delete_agency_from_cache(agency_id, thread_id)
             return {"response": response, "thread_id": new_thread_id}

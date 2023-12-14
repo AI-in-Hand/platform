@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 
 from agency_swarm import Agency
@@ -8,7 +9,6 @@ from websockets import ConnectionClosedOK
 
 from nalgonda.agency_manager import AgencyManager
 from nalgonda.connection_manager import ConnectionManager
-from nalgonda.utils.exceptions import AgencyNotFound
 
 logger = logging.getLogger(__name__)
 ws_manager = ConnectionManager()
@@ -20,7 +20,7 @@ ws_router = APIRouter(
 
 
 @ws_router.websocket("/{agency_id}/{thread_id}")
-async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str):
+async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str = ""):
     """Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
@@ -28,12 +28,9 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
     await ws_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, thread_id: {thread_id}")
 
-    try:
-        agency = await agency_manager.get_agency(agency_id, thread_id)
-    except AgencyNotFound:
-        await ws_manager.send_message("Agency not found", websocket)
-        await ws_manager.disconnect(websocket)
-        return
+    agency = await agency_manager.get_agency(agency_id, thread_id)
+    if not agency:
+        agency = await agency_manager.create_agency(agency_id)
 
     try:
         while True:
@@ -45,6 +42,11 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
                     continue
 
                 await process_ws_message(user_message, agency, websocket)
+                new_thread_id = agency.main_thread.id
+                if thread_id != new_thread_id:
+                    await ws_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
+                    await agency_manager.cache_agency(agency, agency_id, new_thread_id)
+                    await agency_manager.delete_agency_from_cache(agency_id, thread_id)
 
             except (WebSocketDisconnect, ConnectionClosedOK) as e:
                 raise e
