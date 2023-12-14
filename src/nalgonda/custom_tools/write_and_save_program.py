@@ -1,8 +1,6 @@
-import inspect
 import os
 
 from agency_swarm import BaseTool
-from fastapi import WebSocket
 from pydantic import Field
 
 from nalgonda.constants import DATA_DIR
@@ -26,7 +24,7 @@ class File(BaseTool):
             return "Invalid file path. Directory traversal is not allowed."
 
         # Extract the directory path from the file name
-        directory = DATA_DIR / self._agency_id / os.path.dirname(self.file_name)
+        directory = DATA_DIR / self._agency_id / os.path.dirname(self.file_name)  # TODO: pass agency_id to all tools
         full_path = directory / self.file_name
 
         # If the directory is not empty, check if it exists and create it if not
@@ -39,23 +37,9 @@ class File(BaseTool):
 
         return "File written to " + full_path.as_posix()
 
-    @property
-    def _agency_id(self):
-        """[Workaround]
-        Using inspect, get the agency_id from the WebSocket connection."""
-        # Searching for the first WebSocket instance in the call stack
-        for frame_record in inspect.stack():
-            websocket_instance = next(
-                (v for v in frame_record.frame.f_locals.values() if isinstance(v, WebSocket)), None
-            )
-            if websocket_instance:
-                # Extracting session ID from path_params
-                return websocket_instance.path_params.get("agency_id")
-        raise ValueError("No WebSocket instance found in the call stack.")
-
 
 class WriteAndSaveProgram(BaseTool):
-    """Set of files that represent a complete and correct program.
+    """Set of files that represent a complete and correct program/application.
     This environment has access to all standard Python packages and the internet."""
 
     chain_of_thought: str = Field(

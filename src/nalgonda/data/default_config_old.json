@@ -30,7 +30,6 @@
         "CodeInterpreter",
         "BuildDirectoryTree",
         "PrintAllFilesInDirectory",
-        "WriteAndSaveProgram",
         "SearchWeb"
       ]
     }

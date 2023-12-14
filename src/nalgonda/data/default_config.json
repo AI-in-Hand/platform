@@ -10,8 +10,7 @@
       "tools": [
         "CodeInterpreter",
         "BuildDirectoryTree",
-        "PrintAllFilesInDirectory",
-        "WriteAndSaveProgram"
+        "PrintAllFilesInDirectory"
       ]
     }
   ],
