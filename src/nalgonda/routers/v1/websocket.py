@@ -20,7 +20,7 @@ ws_router = APIRouter(
 
 
 @ws_router.websocket("/{agency_id}/{thread_id}")
-async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str = ""):
+async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str = "main"):
     """Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
