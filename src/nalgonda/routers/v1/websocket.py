@@ -20,9 +20,21 @@ ws_router = APIRouter(
 )
 
 
+@ws_router.websocket("/{agency_id}")
+async def websocket_initial_endpoint(websocket: WebSocket, agency_id: str):
+    """WebSocket endpoint for initial connection."""
+    await base_websocket_endpoint(websocket, agency_id)
+
+
 @ws_router.websocket("/{agency_id}/{thread_id}")
-async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str = "main"):
-    """Send messages to and from CEO of the given agency."""
+async def websocket_thread_endpoint(websocket: WebSocket, agency_id: str, thread_id: str):
+    """WebSocket endpoint for maintaining conversation with a specific thread."""
+    await base_websocket_endpoint(websocket, agency_id, thread_id)
+
+
+async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str | None = None):
+    """Common logic for WebSocket endpoint handling.
+    Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
 
@@ -31,9 +43,13 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        await ws_manager.send_message("Agency not found", websocket)
-        await ws_manager.disconnect(websocket)
-        return
+        # TODO: remove this once Redis is used for storing agencies:
+        # the problem now is that cache is empty in the websocket thread
+        agency, _ = await agency_manager.create_agency(agency_id)
+        # await ws_manager.send_message("Agency not found", websocket)
+        # await ws_manager.disconnect(websocket)
+        # await websocket.close()
+        # return
 
     try:
         while True:
@@ -49,6 +65,7 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
                 new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
                 if new_thread_id is not None:
                     await ws_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
+                    thread_id = new_thread_id
 
             except (WebSocketDisconnect, ConnectionClosedOK) as e:
                 raise e

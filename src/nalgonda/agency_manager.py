@@ -16,15 +16,15 @@ class AgencyManager:
         self.cache = {}  # agency_id+thread_id: agency
         self.lock = asyncio.Lock()
 
-    async def create_agency(self) -> str:
+    async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
         """Create the agency for the given agency ID."""
-        agency_id = uuid.uuid4().hex
+        agency_id = agency_id or uuid.uuid4().hex
 
         async with self.lock:
             # Note: Async-to-Sync Bridge
             agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
             self.cache[agency_id] = agency
-            return agency_id
+            return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
         """Get the agency for the given agency ID and thread ID."""

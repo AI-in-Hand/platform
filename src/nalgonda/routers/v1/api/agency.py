@@ -20,7 +20,7 @@ async def create_agency():
     """Create a new agency and return its id."""
     # TODO: Add authentication: check if user is logged in and has permission to create an agency
 
-    agency_id = await agency_manager.create_agency()
+    _, agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
 
 
