@@ -26,8 +26,7 @@ class AgencyManager:
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
         """Get the agency for the given agency ID and thread ID."""
         async with self.lock:
-            if (cache_key := self.get_cache_key(agency_id, thread_id)) in self.cache:
-                return self.cache[cache_key]
+            return self.cache.get(self.get_cache_key(agency_id, thread_id), None)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None):
         """Cache the agency for the given agency ID and thread ID."""
