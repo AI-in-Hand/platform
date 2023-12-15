@@ -1,8 +1,7 @@
 import logging
 
 from fastapi import FastAPI
-from routers.v1.api.agency import agency_api_router
-from routers.v1.websocket import ws_router
+from routers.v1 import v1_router
 
 from nalgonda.constants import DATA_DIR
 
@@ -21,8 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app.include_router(agency_api_router, prefix="/api/v1/agency")
-app.include_router(ws_router, prefix="/ws/v1")
+app.include_router(v1_router)
 
 
 if __name__ == "__main__":

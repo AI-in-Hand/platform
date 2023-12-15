@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 ws_manager = ConnectionManager()
 agency_manager = AgencyManager()
 ws_router = APIRouter(
+    prefix="/ws",
     tags=["websocket"],
     responses={404: {"description": "Not found"}},
 )
@@ -30,7 +31,7 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        ws_manager.send_message("Agency not found", websocket)
+        await ws_manager.send_message("Agency not found", websocket)
         await ws_manager.disconnect(websocket)
         return
 

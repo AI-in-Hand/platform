@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 agency_manager = AgencyManager()
 
 agency_api_router = APIRouter(
+    prefix="/agency",
     responses={404: {"description": "Not found"}},
 )
 
