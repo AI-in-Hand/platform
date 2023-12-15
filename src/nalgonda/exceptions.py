@@ -1,0 +1,2 @@
+class AgencyNotFound(Exception):
+    pass

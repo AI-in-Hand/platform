@@ -7,7 +7,9 @@ from nalgonda.custom_tools.utils import check_directory_traversal
 
 
 class PrintAllFilesInDirectory(BaseTool):
-    """Print the contents of all files in a start_directory recursively."""
+    """Print the contents of all files in a start_directory recursively.
+    Directory traversal is not allowed (you cannot read /* or ../*).
+    """
 
     start_directory: Path = Field(
         default_factory=Path.cwd,

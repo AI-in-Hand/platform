@@ -7,7 +7,9 @@ from nalgonda.custom_tools.utils import check_directory_traversal
 
 
 class BuildDirectoryTree(BaseTool):
-    """Print the structure of directories and files."""
+    """Print the structure of directories and files.
+    Directory traversal is not allowed (you cannot read /* or ../*).
+    """
 
     start_directory: Path = Field(
         default_factory=Path.cwd,
