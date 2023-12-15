@@ -36,9 +36,7 @@ class AgencyManager:
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None):
         async with self.lock:
-            cache_key = self.get_cache_key(agency_id, thread_id)
-            if cache_key in self.cache:
-                del self.cache[cache_key]
+            self.cache.pop(self.get_cache_key(agency_id, thread_id), None)
 
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None) -> str:
