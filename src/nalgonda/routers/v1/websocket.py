@@ -30,7 +30,9 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        agency = await agency_manager.create_agency(agency_id)
+        ws_manager.send_message("Agency not found", websocket)
+        await ws_manager.disconnect(websocket)
+        return
 
     try:
         while True:
@@ -42,11 +44,10 @@ async def websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: st
                     continue
 
                 await process_ws_message(user_message, agency, websocket)
-                new_thread_id = agency.main_thread.id
-                if thread_id != new_thread_id:
+
+                new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
+                if new_thread_id is not None:
                     await ws_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
-                    await agency_manager.cache_agency(agency, agency_id, new_thread_id)
-                    await agency_manager.delete_agency_from_cache(agency_id, thread_id)
 
             except (WebSocketDisconnect, ConnectionClosedOK) as e:
                 raise e

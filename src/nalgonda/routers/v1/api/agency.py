@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 from agency_swarm import Agency
 from fastapi import APIRouter
@@ -20,8 +19,7 @@ async def create_agency():
     """Create a new agency and return its id."""
     # TODO: Add authentication: check if user is logged in and has permission to create an agency
 
-    agency_id = uuid.uuid4().hex
-    await agency_manager.create_agency(agency_id)
+    agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
 
 
@@ -38,14 +36,13 @@ async def send_message(payload: AgencyMessagePostRequest) -> dict:
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        agency = await agency_manager.create_agency(agency_id)
+        return {"error": "Agency not found"}
 
     try:
         response = await process_message(user_message, agency)
-        new_thread_id = agency.main_thread.id
-        if thread_id != new_thread_id:
-            await agency_manager.cache_agency(agency, agency_id, new_thread_id)
-            await agency_manager.delete_agency_from_cache(agency_id, thread_id)
+
+        new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
+        if new_thread_id is not None:
             return {"response": response, "thread_id": new_thread_id}
 
         return {"response": response}
