@@ -17,6 +17,9 @@ class File(BaseTool):
         description="The name of the file including the extension and the file path from your current directory "
         "if needed.",
     )
+    chain_of_thought: str = Field(
+        ..., description="Think step by step to determine the correct plan that is needed to write the file."
+    )
     body: str = Field(..., description="Correct contents of a file")
 
     def run(self):
