@@ -9,7 +9,7 @@ def get_chat_completion(user_prompt, system_message, **kwargs) -> str:
     Generate a chat completion based on a prompt and a system message.
     This function is a wrapper around the OpenAI API.
     """
-    from config import settings
+    from settings import settings
 
     client = get_openai_client()
     completion = client.chat.completions.create(

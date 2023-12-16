@@ -5,8 +5,8 @@ import uuid
 
 from agency_swarm import Agency, Agent
 
-from nalgonda.config import AgencyConfig
 from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.models.agency_config import AgencyConfig
 
 logger = logging.getLogger(__name__)
 

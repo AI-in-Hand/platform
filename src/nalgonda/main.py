@@ -1,14 +1,12 @@
 import logging
 
 from fastapi import FastAPI
-from routers.v1 import v1_router
 
 from nalgonda.constants import DATA_DIR
+from nalgonda.routers.v1 import v1_router
 
 # Ensure directories exist
 DATA_DIR.mkdir(exist_ok=True)
-
-app = FastAPI()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +18,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# App initialization
+app = FastAPI()
 app.include_router(v1_router)
 
 

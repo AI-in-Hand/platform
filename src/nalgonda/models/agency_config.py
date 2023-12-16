@@ -1,34 +1,11 @@
 from pathlib import Path
 
-from agency_config_lock_manager import AgencyConfigLockManager
 from agency_swarm import Agent
 from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from nalgonda.constants import CONFIG_FILE, DEFAULT_CONFIG_FILE
-
-LATEST_GPT_MODEL = "gpt-4-1106-preview"
-
-
-class Settings(BaseSettings):
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY")
-    gpt_model: str = Field(default=LATEST_GPT_MODEL, validation_alias="GPT_MODEL")
-
-    model_config = SettingsConfigDict()
-
-
-settings = Settings()
-
-
-class AgentConfig(BaseModel):
-    """Config for an agent"""
-
-    id: str | None = None
-    role: str
-    description: str
-    instructions: str
-    files_folder: str | None = None
-    tools: list[str] = Field(default_factory=list)
+from nalgonda.agency_config_lock_manager import AgencyConfigLockManager
+from nalgonda.constants import CONFIG_FILE_BASE, DEFAULT_CONFIG_FILE
+from nalgonda.models.agent_config import AgentConfig
 
 
 class AgencyConfig(BaseModel):
@@ -65,4 +42,4 @@ class AgencyConfig(BaseModel):
     @staticmethod
     def get_config_name(agency_id: str) -> Path:
         """Get the name of the config file"""
-        return Path(f"{CONFIG_FILE}_{agency_id}.json")
+        return Path(f"{CONFIG_FILE_BASE}_{agency_id}.json")

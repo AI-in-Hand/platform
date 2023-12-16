@@ -1,6 +1,11 @@
 from pathlib import Path
 
-# File and Directory Constants
-DATA_DIR = Path(__file__).resolve().parent / "data"
+# Base directory for the project
+BASE_DIR = Path(__file__).parent.resolve()
+
+# Directory constants
+DATA_DIR = BASE_DIR / "data"
+
+# File constants
 DEFAULT_CONFIG_FILE = DATA_DIR / "default_config.json"
-CONFIG_FILE = DATA_DIR / "config"
+CONFIG_FILE_BASE = DATA_DIR / "config"
