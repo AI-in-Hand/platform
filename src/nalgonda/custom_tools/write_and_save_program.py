@@ -23,9 +23,10 @@ class File(BaseTool):
         if ".." in self.file_name or self.file_name.startswith("/"):
             return "Invalid file path. Directory traversal is not allowed."
 
-        # Extract the directory path from the file name without the actual file name
+        # Extract the directory path from the file name
         directory_path = os.path.dirname(self.file_name)
-        directory = DATA_DIR / "test_agency" / directory_path
+        agency_id = "test_agency_id"  # agency_id = self.context["agency_id"]  # TODO: pass agency_id to all tools
+        directory = DATA_DIR / agency_id / directory_path
 
         # Ensure the directory exists
         directory.mkdir(parents=True, exist_ok=True)
