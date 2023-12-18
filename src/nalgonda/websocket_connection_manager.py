@@ -3,14 +3,14 @@ import asyncio
 from starlette.websockets import WebSocket
 
 
-class ConnectionManager:
+class WebSocketConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
         self._connections_lock = asyncio.Lock()
 
     async def connect(self, websocket: WebSocket):
-        await websocket.accept()
         async with self._connections_lock:
+            await websocket.accept()
             self.active_connections.append(websocket)
 
     async def disconnect(self, websocket: WebSocket):

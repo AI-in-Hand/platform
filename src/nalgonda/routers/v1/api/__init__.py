@@ -2,11 +2,11 @@
 
 from fastapi import APIRouter
 
-from .agency import agency_api_router
+from .agency import agency_router
 
 api_router = APIRouter(
     prefix="/api",
     responses={404: {"description": "Not found"}},
 )
 
-api_router.include_router(agency_api_router)
+api_router.include_router(agency_router)

@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self):
-        self.cache = {}  # agency_id+thread_id: agency
+    def __init__(self) -> None:
+        self.cache: dict[str, Agency] = {}  # Mapping from agency_id+thread_id to Agency class instance
         self.lock = asyncio.Lock()
 
     async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
-        """Create the agency for the given agency ID."""
+        """Create an agency and return the agency and the agency_id."""
         agency_id = agency_id or uuid.uuid4().hex
 
         async with self.lock:
@@ -27,9 +27,9 @@ class AgencyManager:
             return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
-        """Get the agency for the given agency ID and thread ID."""
+        """Get the agency from the cache."""
         async with self.lock:
-            return self.cache.get(self.get_cache_key(agency_id, thread_id), None)
+            return self.cache.get(self.get_cache_key(agency_id, thread_id))
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency for the given agency ID and thread ID."""
@@ -39,9 +39,10 @@ class AgencyManager:
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
         async with self.lock:
-            self.cache.pop(self.get_cache_key(agency_id, thread_id), None)
+            cache_key = self.get_cache_key(agency_id, thread_id)
+            self.cache.pop(cache_key, None)
 
-    async def refresh_thread_id(self, agency, agency_id, thread_id) -> str | None:
+    async def refresh_thread_id(self, agency: Agency, agency_id: str, thread_id: str | None) -> str | None:
         new_thread_id = agency.main_thread.id
         if thread_id != new_thread_id:
             await self.cache_agency(agency, agency_id, new_thread_id)
@@ -87,8 +88,8 @@ class AgencyManager:
         # It saves all the settings in the settings.json file (in the root folder, not thread safe)
         agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
 
-        config.update_agent_ids_in_config(agency_id, agents=agency.agents)
-        config.save(agency_id)
+        config.update_agent_ids_in_config(agency.agents)
+        config.save()
 
         logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
         return agency
