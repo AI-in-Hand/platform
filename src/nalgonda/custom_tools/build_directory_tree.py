@@ -21,7 +21,7 @@ class BuildDirectoryTree(BaseTool):
         "Examples are {'.py', '.txt', '.md'}.",
     )
 
-    _validate_start_directory = field_validator("start_directory", mode="before")(check_directory_traversal)
+    _validate_start_directory = field_validator("start_directory", mode="after")(check_directory_traversal)
 
     def run(self) -> str:
         """Recursively print the tree of directories and files using pathlib."""
