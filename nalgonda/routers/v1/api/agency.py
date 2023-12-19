@@ -42,6 +42,7 @@ async def post_agency_message(request: AgencyMessagePostRequest) -> dict:
 
         new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
         if new_thread_id is not None:
+            logger.info(f"Thread ID changed from {thread_id} to {new_thread_id}")
             return {"response": response, "thread_id": new_thread_id}
 
         return {"response": response}

@@ -73,6 +73,7 @@ async def websocket_receive_and_process_messages(
 
             new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
             if new_thread_id is not None:
+                logger.info(f"Thread ID changed from {thread_id} to {new_thread_id}")
                 await connection_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
                 thread_id = new_thread_id
 
