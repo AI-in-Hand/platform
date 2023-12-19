@@ -10,7 +10,8 @@ class SearchWeb(BaseTool):
         ...,
         description="The search phrase you want to use. " "Optimize the search phrase for an internet search engine.",
     )
+    max_results: int = Field(default=10, description="The maximum number of search results to return, default is 10.")
 
-    def run(self):
+    def run(self) -> str:
         with DDGS() as ddgs:
-            return str("\n".join(str(r) for r in ddgs.text(self.phrase, max_results=10)))
+            return "\n".join(str(result) for result in ddgs.text(self.phrase, max_results=self.max_results))

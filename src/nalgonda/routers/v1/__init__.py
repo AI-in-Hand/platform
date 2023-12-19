@@ -1,5 +1,3 @@
-# nalgonda/routers/v1/__init__.py
-
 from fastapi import APIRouter
 
 from .api import api_router

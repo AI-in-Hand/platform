@@ -5,31 +5,30 @@ import logging
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from websockets import ConnectionClosedOK
+from websockets.exceptions import ConnectionClosedOK
 
 from nalgonda.agency_manager import AgencyManager
-from nalgonda.connection_manager import ConnectionManager
+from nalgonda.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
-ws_manager = ConnectionManager()
+connection_manager = WebSocketConnectionManager()
 agency_manager = AgencyManager()
 ws_router = APIRouter(
-    prefix="/ws",
     tags=["websocket"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@ws_router.websocket("/{agency_id}")
+@ws_router.websocket("/ws/{agency_id}")
 async def websocket_initial_endpoint(websocket: WebSocket, agency_id: str):
     """WebSocket endpoint for initial connection."""
     await base_websocket_endpoint(websocket, agency_id)
 
 
-@ws_router.websocket("/{agency_id}/{thread_id}")
+@ws_router.websocket("/ws/{agency_id}/{thread_id}")
 async def websocket_thread_endpoint(websocket: WebSocket, agency_id: str, thread_id: str):
     """WebSocket endpoint for maintaining conversation with a specific thread."""
-    await base_websocket_endpoint(websocket, agency_id, thread_id)
+    await base_websocket_endpoint(websocket, agency_id, thread_id=thread_id)
 
 
 async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str | None = None):
@@ -38,7 +37,7 @@ async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_i
 
     # TODO: Add authentication: check if agency_id is valid for the given user
 
-    await ws_manager.connect(websocket)
+    await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, thread_id: {thread_id}")
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
@@ -46,39 +45,43 @@ async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_i
         # TODO: remove this once Redis is used for storing agencies:
         # the problem now is that cache is empty in the websocket thread
         agency, _ = await agency_manager.create_agency(agency_id)
-        # await ws_manager.send_message("Agency not found", websocket)
-        # await ws_manager.disconnect(websocket)
+        # await connection_manager.send_message("Agency not found", websocket)
+        # await connection_manager.disconnect(websocket)
         # await websocket.close()
         # return
 
     try:
-        while True:
-            try:
-                user_message = await websocket.receive_text()
+        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id)
+    except (WebSocketDisconnect, ConnectionClosedOK):
+        await connection_manager.disconnect(websocket)
+        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
-                if not user_message.strip():
-                    await ws_manager.send_message("message not provided", websocket)
-                    continue
 
-                await process_ws_message(user_message, agency, websocket)
+async def websocket_receive_and_process_messages(
+    websocket: WebSocket, agency_id: str, agency: Agency, thread_id: str | None
+) -> None:
+    """Receive messages from the websocket and process them."""
+    while True:
+        try:
+            user_message = await websocket.receive_text()
 
-                new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
-                if new_thread_id is not None:
-                    await ws_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
-                    thread_id = new_thread_id
-
-            except (WebSocketDisconnect, ConnectionClosedOK) as e:
-                raise e
-            except Exception as e:
-                logger.exception(e)
-                await ws_manager.send_message(f"Error: {e}\nPlease try again.", websocket)
+            if not user_message.strip():
+                await connection_manager.send_message("message not provided", websocket)
                 continue
 
-    except WebSocketDisconnect:
-        await ws_manager.disconnect(websocket)
-        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
-    except ConnectionClosedOK:
-        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
+            await process_ws_message(user_message, agency, websocket)
+
+            new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
+            if new_thread_id is not None:
+                await connection_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
+                thread_id = new_thread_id
+
+        except (WebSocketDisconnect, ConnectionClosedOK) as e:
+            raise e
+        except Exception:
+            logger.exception(f"Exception while processing message: agency_id: {agency_id}, thread_id: {thread_id}")
+            await connection_manager.send_message("Something went wrong. Please try again.", websocket)
+            continue
 
 
 async def process_ws_message(user_message: str, agency: Agency, websocket: WebSocket):
@@ -99,4 +102,4 @@ async def process_ws_message(user_message: str, agency: Agency, websocket: WebSo
             break
 
         response_text = response.get_formatted_content()
-        await ws_manager.send_message(response_text, websocket)
+        await connection_manager.send_message(response_text, websocket)

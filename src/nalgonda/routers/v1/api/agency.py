@@ -7,16 +7,14 @@ from nalgonda.agency_manager import AgencyManager
 from nalgonda.models.request_models import AgencyMessagePostRequest
 
 logger = logging.getLogger(__name__)
-agency_manager = AgencyManager()
-
-agency_api_router = APIRouter(
-    prefix="/agency",
+agency_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
+agency_manager = AgencyManager()
 
 
-@agency_api_router.post("/")
-async def create_agency():
+@agency_router.post("/agency")
+async def create_agency() -> dict:
     """Create a new agency and return its id."""
     # TODO: Add authentication: check if user is logged in and has permission to create an agency
 
@@ -24,14 +22,14 @@ async def create_agency():
     return {"agency_id": agency_id}
 
 
-@agency_api_router.post("/message")
-async def send_message(payload: AgencyMessagePostRequest) -> dict:
+@agency_router.post("/agency/message")
+async def post_agency_message(request: AgencyMessagePostRequest) -> dict:
     """Send a message to the CEO of the given agency."""
     # TODO: Add authentication: check if agency_id is valid for the given user
 
-    user_message = payload.message
-    agency_id = payload.agency_id
-    thread_id = payload.thread_id
+    user_message = request.message
+    agency_id = request.agency_id
+    thread_id = request.thread_id
 
     logger.info(f"Received message: {user_message}, agency_id: {agency_id}, thread_id: {thread_id}")
 

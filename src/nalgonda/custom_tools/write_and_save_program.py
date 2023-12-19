@@ -17,6 +17,9 @@ class File(BaseTool):
         description="The name of the file including the extension and the file path from your current directory "
         "if needed.",
     )
+    chain_of_thought: str = Field(
+        ..., description="Think step by step to determine the correct plan that is needed to write the file."
+    )
     body: str = Field(..., description="Correct contents of a file")
 
     def run(self):
@@ -24,12 +27,15 @@ class File(BaseTool):
             return "Invalid file path. Directory traversal is not allowed."
 
         # Extract the directory path from the file name
-        directory = DATA_DIR / self._agency_id / os.path.dirname(self.file_name)  # TODO: pass agency_id to all tools
-        full_path = directory / self.file_name
+        directory_path = Path(self.file_name).parent
+        agency_id = "test_agency_id"  # agency_id = self.context["agency_id"]  # TODO: pass agency_id to all tools
+        directory = DATA_DIR / agency_id / directory_path
 
-        # If the directory is not empty, check if it exists and create it if not
-        if directory and not os.path.exists(directory):
-            os.makedirs(directory)
+        # Ensure the directory exists
+        directory.mkdir(parents=True, exist_ok=True)
+
+        # Construct the full path using the directory and file name
+        full_path = directory / Path(self.file_name).name
 
         # Write the file
         with open(full_path, "w") as f:
