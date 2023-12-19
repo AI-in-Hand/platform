@@ -1,12 +1,8 @@
-import json
-from pathlib import Path
-
 from agency_swarm import Agent
 from pydantic import BaseModel, Field
 
-from nalgonda.agency_config_lock_manager import AgencyConfigLockManager
-from nalgonda.constants import CONFIG_FILE_BASE, DEFAULT_CONFIG_FILE
 from nalgonda.models.agent_config import AgentConfig
+from nalgonda.persistence.agency_config_file_storage import AgencyConfigFileStorage
 
 
 class AgencyConfig(BaseModel):
@@ -26,20 +22,14 @@ class AgencyConfig(BaseModel):
 
     @classmethod
     def load(cls, agency_id: str) -> "AgencyConfig":
-        """Load agency config from file"""
-        config_file_path = cls.get_config_path(agency_id)
-        if not config_file_path.is_file():
-            config_file_path = DEFAULT_CONFIG_FILE
+        """Load agency config from the storage"""
+        with AgencyConfigFileStorage(agency_id) as config_file:
+            config = config_file.load()
 
-        with AgencyConfigLockManager.get_lock(agency_id), config_file_path.open() as file:
-            config = json.load(file)
-            config["agency_id"] = agency_id
-            return cls.model_validate(config)
+        config["agency_id"] = agency_id
+        return cls.model_validate(config)
 
     def save(self) -> None:
-        with AgencyConfigLockManager.get_lock(self.agency_id), self.get_config_path(self.agency_id).open("w") as file:
-            file.write(self.model_dump_json(indent=2))
-
-    @staticmethod
-    def get_config_path(agency_id: str) -> Path:
-        return CONFIG_FILE_BASE.with_name(f"config_{agency_id}.json")
+        """Save agency config to the storage"""
+        with AgencyConfigFileStorage(self.agency_id) as config_file:
+            config_file.save(self.model_dump())
