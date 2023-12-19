@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from nalgonda.agency_config_lock_manager import AgencyConfigLockManager
 from nalgonda.constants import CONFIG_FILE_BASE, DEFAULT_CONFIG_FILE
+from nalgonda.persistence.agency_config_lock_manager import AgencyConfigLockManager
 from nalgonda.persistence.agency_config_storage_interface import AgencyConfigStorageInterface
 
 
