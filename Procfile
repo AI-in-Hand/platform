@@ -1,0 +1,3 @@
+web: gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.nalgonda.main:app
+
+#release: ./manage.py migrate --no-input
