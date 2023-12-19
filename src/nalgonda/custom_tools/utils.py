@@ -26,7 +26,7 @@ def check_directory_traversal(directory: Path) -> Path:
     if ".." in directory.parts:
         raise ValueError("Directory traversal is not allowed.")
 
-    base_directory = Path(os.getcwd())
+    base_directory = Path.cwd()
 
     # Resolve the directory path against the base directory
     resolved_directory = (base_directory / directory).resolve()

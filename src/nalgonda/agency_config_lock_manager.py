@@ -10,7 +10,7 @@ class AgencyConfigLockManager:
     """
 
     # Mapping from agency ID to its corresponding Lock.
-    _locks: "defaultdict[str, threading.Lock]" = defaultdict(threading.Lock)
+    _locks: dict[str, threading.Lock] = defaultdict(threading.Lock)
 
     @classmethod
     def get_lock(cls, agency_id: str) -> threading.Lock:

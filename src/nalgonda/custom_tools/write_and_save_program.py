@@ -27,7 +27,7 @@ class File(BaseTool):
             return "Invalid file path. Directory traversal is not allowed."
 
         # Extract the directory path from the file name
-        directory_path = os.path.dirname(self.file_name)
+        directory_path = Path(self.file_name).parent
         agency_id = "test_agency_id"  # agency_id = self.context["agency_id"]  # TODO: pass agency_id to all tools
         directory = DATA_DIR / agency_id / directory_path
 
@@ -35,7 +35,7 @@ class File(BaseTool):
         directory.mkdir(parents=True, exist_ok=True)
 
         # Construct the full path using the directory and file name
-        full_path = directory / os.path.basename(self.file_name)
+        full_path = directory / Path(self.file_name).name
 
         # Write the file
         with open(full_path, "w") as f:
