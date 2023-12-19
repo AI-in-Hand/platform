@@ -1,0 +1,20 @@
+{
+  "name": "Nalgonda",
+  "description": "A FastAPI application to manage swarm agencies",
+  "image": "ainhand/nalgonda",
+  "repository": "https://github.com/ainhand/nalgonda",
+  "keywords": ["python", "fastapi"],
+  "env": {
+    "EXAMPLE_SECRET_KEY": {
+      "description": "The secret key used by the application",
+      "generator": "secret"
+    }
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "pytest"
+      }
+    }
+  }
+}
