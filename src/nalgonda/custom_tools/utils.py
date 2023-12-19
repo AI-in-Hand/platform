@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from agency_swarm.util import get_openai_client
