@@ -5,15 +5,15 @@
   "repository": "https://github.com/ainhand/nalgonda",
   "keywords": ["python", "fastapi"],
   "env": {
-    "DJANGO_SECRET_KEY": {
-      "description": "The secret key for the Django application.",
+    "EXAMPLE_SECRET_KEY": {
+      "description": "The secret key used by the application",
       "generator": "secret"
     }
   },
   "environments": {
     "test": {
       "scripts": {
-        "test": "./manage.py test --debug-mode"
+        "test": "pytest"
       }
     }
   }
