@@ -33,6 +33,16 @@ Ensure you have Python 3.11 or higher and follow these steps to get started:
 
 Note: Refer to individual class and method docstrings for detailed instructions and usage.
 
+## Deployment to Heroku
+
+Follow these steps to deploy the app to Heroku:
+1. `poetry export -o requirements.txt --without dev --without-hashes` - update `requirements.txt`
+2. `heroku login`- log in to Heroku
+3. `heroku git:remote -a ainhand` - set up Heroku remote
+4. `git push heroku main` - deploy to Heroku
+5. `heroku ps:scale web=1` - scale up the app
+6. `heroku logs --tail` - view logs
+
 ## Usage
 
 ### API Endpoints
