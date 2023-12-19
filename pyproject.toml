@@ -4,6 +4,7 @@ version = "1.0.0"
 description = "Nalgonda is a FastAPI app to manage swarm agencies"
 authors = [
     "Nikita Bobrovskiy <39348559+bonk1t@users.noreply.github.com>",
+    "Guilherme Parpinelli <g.parpinelli@logifuture.com>",
 ]
 readme = "README.md"
 
