@@ -8,9 +8,10 @@ from nalgonda.persistence.agency_config_storage_interface import AgencyConfigSto
 from nalgonda.settings import settings
 
 # Initialize FireStore
-cred_json = json.loads(settings.google_credentials)
-cred = credentials.Certificate(cred_json)
-firebase_admin.initialize_app(cred)
+if settings.google_credentials:
+    cred_json = json.loads(settings.google_credentials)
+    cred = credentials.Certificate(cred_json)
+    firebase_admin.initialize_app(cred)
 
 
 class AgencyConfigFirestoreStorage(AgencyConfigStorageInterface):
