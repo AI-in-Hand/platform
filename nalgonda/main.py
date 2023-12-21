@@ -1,9 +1,13 @@
 import logging
 
+import openai
 from fastapi import FastAPI
 
 from nalgonda.constants import DATA_DIR
 from nalgonda.routers.v1 import v1_router
+from nalgonda.settings import settings
+
+openai.api_key = settings.openai_api_key
 
 # Ensure data directory exists
 DATA_DIR.mkdir(parents=True, exist_ok=True)

@@ -1,7 +1,8 @@
 import logging
+from http import HTTPStatus
 
 from agency_swarm import Agency
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from nalgonda.agency_manager import AgencyManager
 from nalgonda.models.request_models import AgencyMessagePostRequest
@@ -35,7 +36,7 @@ async def post_agency_message(request: AgencyMessagePostRequest) -> dict:
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        return {"error": "Agency not found"}
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     try:
         response = await process_message(user_message, agency)

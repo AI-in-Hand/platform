@@ -2,8 +2,7 @@ from agency_swarm import Agent
 from pydantic import BaseModel, Field
 
 from nalgonda.models.agent_config import AgentConfig
-from nalgonda.persistence.agency_config_file_storage import AgencyConfigFileStorage
-
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 class AgencyConfig(BaseModel):
     """Agency configuration model"""
@@ -22,14 +21,12 @@ class AgencyConfig(BaseModel):
 
     @classmethod
     def load(cls, agency_id: str) -> "AgencyConfig":
-        """Load agency config from the storage"""
-        with AgencyConfigFileStorage(agency_id) as config_file:
-            config = config_file.load()
+        with AgencyConfigFirestoreStorage(agency_id) as config_document:
+            config = config_document.load()
 
         config["agency_id"] = agency_id
         return cls.model_validate(config)
 
     def save(self) -> None:
-        """Save agency config to the storage"""
-        with AgencyConfigFileStorage(self.agency_id) as config_file:
-            config_file.save(self.model_dump())
+        with AgencyConfigFirestoreStorage(self.agency_id) as config_document:
+            config_document.save(self.model_dump())

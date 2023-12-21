@@ -5,10 +5,11 @@ LATEST_GPT_MODEL = "gpt-4-1106-preview"
 
 
 class Settings(BaseSettings):
-    # openai_api_key: str = Field(validation_alias="OPENAI_API_KEY")
+    openai_api_key: str | None = Field(default=None, validation_alias="OPENAI_API_KEY")
     gpt_model: str = Field(default=LATEST_GPT_MODEL, validation_alias="GPT_MODEL")
+    google_credentials: str | None = Field(default=None, validation_alias="GOOGLE_CREDENTIALS")
 
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="AINHAND_", case_sensitive=True)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
 settings = Settings()
