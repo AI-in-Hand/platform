@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -12,7 +13,7 @@ cred = credentials.Certificate(cred_json)
 firebase_admin.initialize_app(cred)
 
 
-class AgencyConfigFireStoreStorage(AgencyConfigStorageInterface):
+class AgencyConfigFirestoreStorage(AgencyConfigStorageInterface):
     def __init__(self, agency_id: str):
         self.db = firestore.client()
         self.agency_id = agency_id
@@ -29,5 +30,5 @@ class AgencyConfigFireStoreStorage(AgencyConfigStorageInterface):
     def load(self):
         return self.document.get().to_dict()
 
-    def save(self, data):
+    def save(self, data: dict[str, Any]):
         self.document.set(data)
