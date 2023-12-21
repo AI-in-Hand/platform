@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
-
 class AgencyConfig(BaseModel):
     """Agency configuration model"""
 
