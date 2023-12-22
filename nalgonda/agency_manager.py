@@ -15,17 +15,15 @@ logger = logging.getLogger(__name__)
 class AgencyManager:
     def __init__(self) -> None:
         self.cache_manager = RedisCacheManager()
-        self.lock = asyncio.Lock()
 
     async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
         """Create an agency and return the agency and the agency_id."""
         agency_id = agency_id or uuid.uuid4().hex
 
-        async with self.lock:
-            # Note: Async-to-Sync Bridge
-            agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
-            await self.cache_agency(agency, agency_id, None)
-            return agency, agency_id
+        # Note: Async-to-Sync Bridge
+        agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
+        await self.cache_agency(agency, agency_id, None)
+        return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
         """Get the agency from the cache."""
