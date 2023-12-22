@@ -15,7 +15,7 @@ class RedisCacheManager(CacheManager):
 
     def __init__(self):
         """Initializes the Redis cache manager"""
-        self.redis = aioredis.from_url(str(settings.redis_dsn), decode_responses=True)
+        self.redis = aioredis.from_url(str(settings.redis_tls_url or settings.redis_url), decode_responses=True)
 
     def __del__(self):
         """Wait for the Redis connection to close"""
