@@ -6,24 +6,6 @@ info:
 servers:
   - url: https://admin.marketrightside.com/api
 paths:
-  /oauth/token:
-    post:
-      operationId: getAuthToken
-      summary: Obtain an authorization token
-      responses:
-        "200":
-          description: Returns an authorization token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token_type:
-                    type: string
-                  expires_in:
-                    type: integer
-                  access_token:
-                    type: string
   /public/market-list:
     get:
       operationId: getMarketList

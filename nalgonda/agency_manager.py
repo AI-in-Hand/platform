@@ -5,6 +5,7 @@ import uuid
 
 from agency_swarm import Agency, Agent
 
+from nalgonda.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agency_config import AgencyConfig
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AgencyManager:
     def __init__(self) -> None:
-        self.cache: dict[str, Agency] = {}  # Mapping from agency_id+thread_id to Agency class instance
+        self.cache_manager = RedisCacheManager()
         self.lock = asyncio.Lock()
 
     async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
@@ -23,26 +24,30 @@ class AgencyManager:
         async with self.lock:
             # Note: Async-to-Sync Bridge
             agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
-            self.cache[agency_id] = agency
+            await self.cache_agency(agency, agency_id, None)
             return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
         """Get the agency from the cache."""
-        async with self.lock:
-            return self.cache.get(self.get_cache_key(agency_id, thread_id))
+        cache_key = self.get_cache_key(agency_id, thread_id)
+        agency = await self.cache_manager.get(cache_key)
+        return agency
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
-        """Cache the agency for the given agency ID and thread ID."""
-        async with self.lock:
-            cache_key = self.get_cache_key(agency_id, thread_id)
-            self.cache[cache_key] = agency
+        """Cache the agency."""
+        cache_key = self.get_cache_key(agency_id, thread_id)
+        await self.cache_manager.set(cache_key, agency)
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
-        async with self.lock:
-            cache_key = self.get_cache_key(agency_id, thread_id)
-            self.cache.pop(cache_key, None)
+        """Delete the agency from the cache."""
+        cache_key = self.get_cache_key(agency_id, thread_id)
+        await self.cache_manager.delete(cache_key)
 
     async def refresh_thread_id(self, agency: Agency, agency_id: str, thread_id: str | None) -> str | None:
+        """Refresh the thread ID for the given agency.
+        If the thread ID has changed, update the cache and return the new thread ID.
+        Otherwise, return None.
+        """
         new_thread_id = agency.main_thread.id
         if thread_id != new_thread_id:
             await self.cache_agency(agency, agency_id, new_thread_id)
