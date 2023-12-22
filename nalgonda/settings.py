@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     google_credentials: str | None = Field(default=None)
     redis_dsn: RedisDsn = Field(
         "redis://localhost:6379/1",
-        validation_alias=AliasChoices("service_redis_dsn", "redis_url"),
+        validation_alias=AliasChoices("redis_tls_url", "redis_url"),
     )
 
     model_config = SettingsConfigDict(env_file=".env")
