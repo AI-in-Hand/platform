@@ -35,7 +35,8 @@ class BuildDirectoryTree(BaseTool):
             sub_indent = " " * 4 * (level + 1)
 
             for path in sorted(directory.iterdir()):
-                if path.is_dir():
+                # ignore hidden files and directories
+                if path.is_dir() and not path.name.startswith("."):
                     recurse(path, level + 1)
                 elif path.is_file() and (not self.file_extensions or path.suffix in self.file_extensions):
                     tree_str += f"{sub_indent}{path.name}\n"
