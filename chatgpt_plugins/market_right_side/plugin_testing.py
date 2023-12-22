@@ -20,7 +20,7 @@ def serve_manifest():
     return send_from_directory(os.path.dirname(__file__), "ai-plugin.json")
 
 
-@app.route("/openapi.yaml")
+@app.route("/.well-known/openapi.yaml")
 def serve_openapi_yaml():
     with open(os.path.join(os.path.dirname(__file__), "openapi.yaml")) as f:
         yaml_data = f.read()
