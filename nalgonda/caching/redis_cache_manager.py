@@ -9,7 +9,7 @@ from nalgonda.settings import settings
 
 class RedisCacheManager(CacheManager):
     def __init__(self):
-        self.redis = aioredis.from_url(settings.redis_dsn, decode_responses=True)
+        self.redis = aioredis.from_url(str(settings.redis_dsn), decode_responses=True)
 
     async def get(self, key: str) -> Agency | None:
         serialized_data = await self.redis.get(key)
