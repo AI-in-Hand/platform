@@ -1,5 +1,6 @@
 import asyncio
 import pickle
+from ssl import CERT_NONE
 
 from agency_swarm import Agency
 from agency_swarm.util import get_openai_client
@@ -16,7 +17,8 @@ class RedisCacheManager(CacheManager):
 
     def __init__(self):
         """Initializes the Redis cache manager"""
-        self.redis = aioredis.from_url(str(settings.redis_tls_url or settings.redis_url), decode_responses=True)
+        redis_url = str(settings.redis_tls_url or settings.redis_url)
+        self.redis = from_url(redis_url, decode_responses=True, ssl=True, ssl_cert_reqs=CERT_NONE)
 
     def __del__(self):
         """Wait for the Redis connection to close"""
