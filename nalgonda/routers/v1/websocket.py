@@ -4,15 +4,14 @@ import logging
 
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 
-from nalgonda.agency_manager import AgencyManager
+from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
 connection_manager = WebSocketConnectionManager()
-agency_manager = AgencyManager()
 ws_router = APIRouter(
     tags=["websocket"],
     responses={404: {"description": "Not found"}},
@@ -31,7 +30,12 @@ async def websocket_thread_endpoint(websocket: WebSocket, agency_id: str, thread
     await base_websocket_endpoint(websocket, agency_id, thread_id=thread_id)
 
 
-async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_id: str | None = None):
+async def base_websocket_endpoint(
+    websocket: WebSocket,
+    agency_id: str,
+    thread_id: str | None = None,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+) -> None:
     """Common logic for WebSocket endpoint handling.
     Send messages to and from CEO of the given agency."""
 
@@ -58,7 +62,11 @@ async def base_websocket_endpoint(websocket: WebSocket, agency_id: str, thread_i
 
 
 async def websocket_receive_and_process_messages(
-    websocket: WebSocket, agency_id: str, agency: Agency, thread_id: str | None
+    websocket: WebSocket,
+    agency_id: str,
+    agency: Agency,
+    thread_id: str | None,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
 ) -> None:
     """Receive messages from the websocket and process them."""
     while True:

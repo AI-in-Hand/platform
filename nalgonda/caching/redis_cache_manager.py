@@ -6,7 +6,6 @@ from agency_swarm.util import get_openai_client
 from redis import asyncio as aioredis
 
 from nalgonda.caching.cache_manager import CacheManager
-from nalgonda.settings import settings
 
 
 class RedisCacheManager(CacheManager):
@@ -14,10 +13,9 @@ class RedisCacheManager(CacheManager):
     This class implements the CacheManager interface using Redis as the cache backend.
     """
 
-    def __init__(self):
+    def __init__(self, redis: aioredis.Redis) -> None:
         """Initializes the Redis cache manager"""
-        redis_url = str(settings.redis_tls_url or settings.redis_url)
-        self.redis = aioredis.from_url(redis_url, decode_responses=False, ssl_cert_reqs="none")
+        self.redis = redis
 
     def __del__(self):
         """Wait for the Redis connection to close"""

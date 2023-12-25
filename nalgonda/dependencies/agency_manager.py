@@ -4,17 +4,20 @@ import time
 import uuid
 
 from agency_swarm import Agency, Agent
+from fastapi import Depends
+from redis import asyncio as aioredis
 
 from nalgonda.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
 
 logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self) -> None:
-        self.cache_manager = RedisCacheManager()
+    def __init__(self, redis: aioredis.Redis) -> None:
+        self.cache_manager = RedisCacheManager(redis)
 
     async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
         """Create an agency and return the agency and the agency_id."""
@@ -96,3 +99,8 @@ class AgencyManager:
 
         logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
         return agency
+
+
+def get_agency_manager(redis: aioredis.Redis = Depends(get_redis)) -> AgencyManager:
+    """Get the agency manager."""
+    return AgencyManager(redis)

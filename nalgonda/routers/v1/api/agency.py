@@ -2,20 +2,19 @@ import logging
 from http import HTTPStatus
 
 from agency_swarm import Agency
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
-from nalgonda.agency_manager import AgencyManager
+from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.models.request_models import AgencyMessagePostRequest
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
-agency_manager = AgencyManager()
 
 
 @agency_router.post("/agency")
-async def create_agency() -> dict:
+async def create_agency(agency_manager: AgencyManager = Depends(get_agency_manager)) -> dict:
     """Create a new agency and return its id."""
     # TODO: Add authentication: check if user is logged in and has permission to create an agency
 
@@ -24,7 +23,9 @@ async def create_agency() -> dict:
 
 
 @agency_router.post("/agency/message")
-async def post_agency_message(request: AgencyMessagePostRequest) -> dict:
+async def post_agency_message(
+    request: AgencyMessagePostRequest, agency_manager: AgencyManager = Depends(get_agency_manager)
+) -> dict:
     """Send a message to the CEO of the given agency."""
     # TODO: Add authentication: check if agency_id is valid for the given user
 

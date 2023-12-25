@@ -45,6 +45,9 @@ target-version = "py311"
 [tool.ruff.lint.isort]
 combine-as-imports = true
 
+[tool.ruff.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
