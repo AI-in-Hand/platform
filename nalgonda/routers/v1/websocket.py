@@ -64,7 +64,7 @@ async def base_websocket_endpoint(
         # return
 
     try:
-        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id)
+        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id, agency_manager)
     except (WebSocketDisconnect, ConnectionClosedOK):
         await connection_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
@@ -75,7 +75,7 @@ async def websocket_receive_and_process_messages(
     agency_id: str,
     agency: Agency,
     thread_id: str | None,
-    agency_manager: AgencyManager = Depends(get_agency_manager),
+    agency_manager: AgencyManager,
 ) -> None:
     """Receive messages from the websocket and process them."""
     while True:
