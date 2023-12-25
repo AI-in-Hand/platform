@@ -19,22 +19,31 @@ ws_router = APIRouter(
 
 
 @ws_router.websocket("/ws/{agency_id}")
-async def websocket_initial_endpoint(websocket: WebSocket, agency_id: str):
+async def websocket_initial_endpoint(
+    websocket: WebSocket,
+    agency_id: str,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+):
     """WebSocket endpoint for initial connection."""
-    await base_websocket_endpoint(websocket, agency_id)
+    await base_websocket_endpoint(websocket, agency_id, agency_manager=agency_manager)
 
 
 @ws_router.websocket("/ws/{agency_id}/{thread_id}")
-async def websocket_thread_endpoint(websocket: WebSocket, agency_id: str, thread_id: str):
+async def websocket_thread_endpoint(
+    websocket: WebSocket,
+    agency_id: str,
+    thread_id: str,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+):
     """WebSocket endpoint for maintaining conversation with a specific thread."""
-    await base_websocket_endpoint(websocket, agency_id, thread_id=thread_id)
+    await base_websocket_endpoint(websocket, agency_id, thread_id=thread_id, agency_manager=agency_manager)
 
 
 async def base_websocket_endpoint(
     websocket: WebSocket,
     agency_id: str,
+    agency_manager: AgencyManager,
     thread_id: str | None = None,
-    agency_manager: AgencyManager = Depends(get_agency_manager),
 ) -> None:
     """Common logic for WebSocket endpoint handling.
     Send messages to and from CEO of the given agency."""
