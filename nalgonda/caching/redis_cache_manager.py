@@ -18,8 +18,9 @@ class RedisCacheManager(CacheManager):
         self.redis = redis
 
     def __del__(self):
-        """Wait for the Redis connection to close"""
-        asyncio.run(self.close())
+        """Closes the Redis connection when the object is deleted"""
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.close())
 
     async def get(self, key: str) -> Agency | None:
         """Gets the value for the given key from the cache"""
