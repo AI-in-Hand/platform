@@ -17,10 +17,13 @@ class RedisCacheManager(CacheManager):
         """Initializes the Redis cache manager"""
         self.redis = redis
 
-    def __del__(self):
-        """Closes the Redis connection when the object is deleted"""
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.close())
+    def __enter__(self):
+        """Returns the cache manager"""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Closes the Redis connection"""
+        asyncio.create_task(self.close())
 
     async def get(self, key: str) -> Agency | None:
         """Gets the value for the given key from the cache"""
@@ -46,8 +49,7 @@ class RedisCacheManager(CacheManager):
         """Closes the Redis connection"""
         await self.redis.close()
 
-    @staticmethod
-    def remove_client_objects(agency: Agency) -> Agency:
+    def remove_client_objects(self, agency: Agency) -> Agency:
         """Remove all client objects from the agency object"""
         for agent in agency.agents:
             agent.client = None
@@ -56,8 +58,7 @@ class RedisCacheManager(CacheManager):
 
         return agency
 
-    @staticmethod
-    def restore_client_objects(agency: Agency) -> Agency:
+    def restore_client_objects(self, agency: Agency) -> Agency:
         """Restore all client objects from the agency object"""
         for agent in agency.agents:
             agent.client = get_openai_client()
