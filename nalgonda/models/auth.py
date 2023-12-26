@@ -12,7 +12,7 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     username: str
-    disabled: bool | None = None
+    disabled: bool = False
 
 
 class UserInDB(User):

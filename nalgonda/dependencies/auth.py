@@ -5,27 +5,19 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from nalgonda.models.auth import TokenData, User, UserInDB
+from nalgonda.persistence.user_repository import UserRepository
 from nalgonda.settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/api/token")
 
-# TODO: Move this to a database
-users_db = {
-    "voiceflow_ainhand": {
-        "username": "voiceflow_ainhand",
-        "hashed_password": "$2b$12$o8As6pJtE5tvk/pFdTplSeCkIv9ScbliW7sy4yWXS4bjre77ZDKUG",
-        "disabled": False,
-    }
-}
+
+def get_user(username: str) -> UserInDB | None:
+    user = UserRepository().get_user_by_username(username)
+    if user:
+        return UserInDB(**user, username=username)
 
 
-def get_user(db, username: str) -> UserInDB | None:
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -39,7 +31,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception from None
-    user = get_user(users_db, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
