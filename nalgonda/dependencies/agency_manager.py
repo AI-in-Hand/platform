@@ -44,18 +44,6 @@ class AgencyManager:
         cache_key = self.get_cache_key(agency_id, thread_id)
         await self.cache_manager.delete(cache_key)
 
-    async def refresh_thread_id(self, agency: Agency, agency_id: str, thread_id: str | None) -> str | None:
-        """Refresh the thread ID for the given agency.
-        If the thread ID has changed, update the cache and return the new thread ID.
-        Otherwise, return None.
-        """
-        new_thread_id = agency.main_thread.id
-        if thread_id != new_thread_id:
-            await self.cache_agency(agency, agency_id, new_thread_id)
-            await self.delete_agency_from_cache(agency_id, thread_id)
-            return new_thread_id
-        return None
-
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None) -> str:
         """Get the cache key for the given agency ID and thread ID."""

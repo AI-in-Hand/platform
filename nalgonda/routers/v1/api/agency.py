@@ -5,7 +5,8 @@ from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
-from nalgonda.models.request_models import AgencyMessagePostRequest
+from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
+from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
@@ -20,6 +21,25 @@ async def create_agency(agency_manager: AgencyManager = Depends(get_agency_manag
 
     _, agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
+
+
+@agency_router.post("/agency/thread")
+async def create_agency_thread(
+    request: AgencyThreadPostRequest,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+    thread_manager: ThreadManager = Depends(get_thread_manager),
+) -> dict:
+    """Create a new thread for the given agency and return its id."""
+    agency_id = request.agency_id
+
+    agency = await agency_manager.get_agency(agency_id, None)
+    if not agency:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found, create an agency first")
+
+    thread_id = thread_manager.create_threads(agency)
+
+    await agency_manager.cache_agency(agency, agency_id, thread_id)
+    return {"thread_id": thread_id}
 
 
 @agency_router.post("/agency/message")
@@ -37,16 +57,10 @@ async def post_agency_message(
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found, create an agency first")
 
     try:
         response = await process_message(user_message, agency)
-
-        new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
-        if new_thread_id is not None:
-            logger.info(f"Thread ID changed from {thread_id} to {new_thread_id}")
-            return {"response": response, "thread_id": new_thread_id}
-
         return {"response": response}
     except Exception as e:
         logger.exception(e)

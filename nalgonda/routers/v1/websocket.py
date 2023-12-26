@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 
 from agency_swarm import Agency
@@ -18,16 +17,6 @@ ws_router = APIRouter(
 )
 
 
-@ws_router.websocket("/ws/{agency_id}")
-async def websocket_initial_endpoint(
-    websocket: WebSocket,
-    agency_id: str,
-    agency_manager: AgencyManager = Depends(get_agency_manager),
-):
-    """WebSocket endpoint for initial connection."""
-    await base_websocket_endpoint(websocket, agency_id, agency_manager=agency_manager)
-
-
 @ws_router.websocket("/ws/{agency_id}/{thread_id}")
 async def websocket_thread_endpoint(
     websocket: WebSocket,
@@ -35,17 +24,7 @@ async def websocket_thread_endpoint(
     thread_id: str,
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ):
-    """WebSocket endpoint for maintaining conversation with a specific thread."""
-    await base_websocket_endpoint(websocket, agency_id, thread_id=thread_id, agency_manager=agency_manager)
-
-
-async def base_websocket_endpoint(
-    websocket: WebSocket,
-    agency_id: str,
-    agency_manager: AgencyManager,
-    thread_id: str | None = None,
-) -> None:
-    """Common logic for WebSocket endpoint handling.
+    """WebSocket endpoint for maintaining conversation with a specific thread.
     Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
@@ -55,16 +34,13 @@ async def base_websocket_endpoint(
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        # TODO: remove this once Redis is used for storing agencies:
-        # the problem now is that cache is empty in the websocket thread
-        agency, _ = await agency_manager.create_agency(agency_id)
-        # await connection_manager.send_message("Agency not found", websocket)
-        # await connection_manager.disconnect(websocket)
-        # await websocket.close()
-        # return
+        await connection_manager.send_message("Agency not found, create an agency first", websocket)
+        await connection_manager.disconnect(websocket)
+        await websocket.close()
+        return
 
     try:
-        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id, agency_manager)
+        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id)
     except (WebSocketDisconnect, ConnectionClosedOK):
         await connection_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
@@ -74,8 +50,7 @@ async def websocket_receive_and_process_messages(
     websocket: WebSocket,
     agency_id: str,
     agency: Agency,
-    thread_id: str | None,
-    agency_manager: AgencyManager,
+    thread_id: str,
 ) -> None:
     """Receive messages from the websocket and process them."""
     while True:
@@ -87,12 +62,6 @@ async def websocket_receive_and_process_messages(
                 continue
 
             await process_ws_message(user_message, agency, websocket)
-
-            new_thread_id = await agency_manager.refresh_thread_id(agency, agency_id, thread_id)
-            if new_thread_id is not None:
-                logger.info(f"Thread ID changed from {thread_id} to {new_thread_id}")
-                await connection_manager.send_message(json.dumps({"thread_id": new_thread_id}), websocket)
-                thread_id = new_thread_id
 
         except (WebSocketDisconnect, ConnectionClosedOK) as e:
             raise e
