@@ -1,11 +1,14 @@
 import logging
 from http import HTTPStatus
+from typing import Annotated
 
 from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
+from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
+from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 
 logger = logging.getLogger(__name__)
@@ -15,9 +18,13 @@ agency_router = APIRouter(
 
 
 @agency_router.post("/agency")
-async def create_agency(agency_manager: AgencyManager = Depends(get_agency_manager)) -> dict:
+async def create_agency(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+) -> dict:
     """Create a new agency and return its id."""
-    # TODO: Add authentication: check if user is logged in and has permission to create an agency
+    # TODO: check if the current_user has permission to create an agency
+    logger.info(f"Creating agency for user: {current_user.username}")
 
     _, agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
