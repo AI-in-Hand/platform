@@ -24,6 +24,8 @@ redis = "^5.0.1"
 uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 # a dependency from a GitHub repository
 agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.group.dev.dependencies]
 poetry-plugin-export = "^1.6.0"
