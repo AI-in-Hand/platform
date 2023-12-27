@@ -1,18 +1,10 @@
 import json
 from typing import Any
 
-import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
 from nalgonda.constants import DEFAULT_CONFIG_FILE
 from nalgonda.persistence.agency_config_storage_interface import AgencyConfigStorageInterface
-from nalgonda.settings import settings
-
-# Initialize FireStore
-if settings.google_credentials:
-    cred_json = json.loads(settings.google_credentials)
-    cred = credentials.Certificate(cred_json)
-    firebase_admin.initialize_app(cred)
 
 
 class AgencyConfigFirestoreStorage(AgencyConfigStorageInterface):

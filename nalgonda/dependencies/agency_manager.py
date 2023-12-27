@@ -31,30 +31,24 @@ class AgencyManager:
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
         """Get the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
-        agency = await self.cache_manager.get(cache_key)
+
+        with self.cache_manager as cache:
+            agency = await cache.get(cache_key)
         return agency
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""
         cache_key = self.get_cache_key(agency_id, thread_id)
-        await self.cache_manager.set(cache_key, agency)
+
+        with self.cache_manager as cache:
+            await cache.set(cache_key, agency)
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
         """Delete the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
-        await self.cache_manager.delete(cache_key)
 
-    async def refresh_thread_id(self, agency: Agency, agency_id: str, thread_id: str | None) -> str | None:
-        """Refresh the thread ID for the given agency.
-        If the thread ID has changed, update the cache and return the new thread ID.
-        Otherwise, return None.
-        """
-        new_thread_id = agency.main_thread.id
-        if thread_id != new_thread_id:
-            await self.cache_agency(agency, agency_id, new_thread_id)
-            await self.delete_agency_from_cache(agency_id, thread_id)
-            return new_thread_id
-        return None
+        with self.cache_manager as cache:
+            await cache.delete(cache_key)
 
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None) -> str:
