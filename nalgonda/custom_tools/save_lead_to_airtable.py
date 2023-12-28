@@ -16,17 +16,22 @@ class SaveLeadToAirtable(BaseTool):
         """Save a new lead to Airtable."""
         self.logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.phone}, {self.lead_details}")
 
-        api = Api(settings.airtable_token)
-        table = api.table(settings.airtable_base_id, settings.airtable_table_id)
+        try:
+            api = Api(settings.airtable_token)
+            table = api.table(settings.airtable_base_id, settings.airtable_table_id)
 
-        data = {
-            "Name": self.name,
-            "Email": self.email,
-            "Lead Details": self.lead_details,
-        }
+            data = {
+                "Name": self.name,
+                "Email": self.email,
+                "Lead Details": self.lead_details,
+            }
 
-        response = table.create(data)
-        airtable_message = f"Response from Airtable: id: {response['id']}, createdTime: {response['createdTime']}"
+            response = table.create(data)
+            airtable_message = f"Response from Airtable: id: {response['id']}, createdTime: {response['createdTime']}"
+        except Exception as e:
+            airtable_message = f"Error while saving lead to Airtable: {e}"
+            self.logger.exception(airtable_message)
+
         self.logger.info(airtable_message)
 
         return airtable_message
