@@ -32,23 +32,20 @@ class AgencyManager:
         """Get the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
 
-        with self.cache_manager as cache:
-            agency = await cache.get(cache_key)
+        agency = await self.cache_manager.get(cache_key)
         return agency
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""
         cache_key = self.get_cache_key(agency_id, thread_id)
 
-        with self.cache_manager as cache:
-            await cache.set(cache_key, agency)
+        await self.cache_manager.set(cache_key, agency)
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
         """Delete the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
 
-        with self.cache_manager as cache:
-            await cache.delete(cache_key)
+        await self.cache_manager.delete(cache_key)
 
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None) -> str:

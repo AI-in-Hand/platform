@@ -17,11 +17,7 @@ class RedisCacheManager(CacheManager):
         """Initializes the Redis cache manager"""
         self.redis = redis
 
-    def __enter__(self):
-        """Returns the cache manager"""
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __del__(self):
         """Closes the Redis connection"""
         asyncio.create_task(self.close())
 
