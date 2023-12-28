@@ -1,4 +1,3 @@
-import asyncio
 import pickle
 
 from agency_swarm import Agency
@@ -17,9 +16,9 @@ class RedisCacheManager(CacheManager):
         """Initializes the Redis cache manager"""
         self.redis = redis
 
-    def __del__(self):
-        """Closes the Redis connection"""
-        asyncio.create_task(self.close())
+    # def __del__(self):
+    #     """Closes the Redis connection"""
+    #     asyncio.create_task(self.close())
 
     async def get(self, key: str) -> Agency | None:
         """Gets the value for the given key from the cache"""
