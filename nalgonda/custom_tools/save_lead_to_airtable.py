@@ -1,8 +1,12 @@
+import logging
+
 from agency_swarm import BaseTool
 from pyairtable import Api
 from pydantic import Field
 
 from nalgonda.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SaveLeadToAirtable(BaseTool):
@@ -14,7 +18,7 @@ class SaveLeadToAirtable(BaseTool):
 
     def run(self) -> str:
         """Save a new lead to Airtable."""
-        self.logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.phone}, {self.lead_details}")
+        logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.lead_details}")
 
         try:
             api = Api(settings.airtable_token)
@@ -30,8 +34,8 @@ class SaveLeadToAirtable(BaseTool):
             airtable_message = f"Response from Airtable: id: {response['id']}, createdTime: {response['createdTime']}"
         except Exception as e:
             airtable_message = f"Error while saving lead to Airtable: {e}"
-            self.logger.exception(airtable_message)
+            logger.exception(airtable_message)
 
-        self.logger.info(airtable_message)
+        logger.info(airtable_message)
 
         return airtable_message
