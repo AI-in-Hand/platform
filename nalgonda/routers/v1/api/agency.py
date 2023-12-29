@@ -39,6 +39,8 @@ async def create_agency_thread(
     """Create a new thread for the given agency and return its id."""
     agency_id = request.agency_id
 
+    logger.info(f"Creating a new thread for the agency: {agency_id}")
+
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found, create an agency first")
