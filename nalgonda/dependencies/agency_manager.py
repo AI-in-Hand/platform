@@ -25,7 +25,6 @@ class AgencyManager:
 
         # Note: Async-to-Sync Bridge
         agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
-        await self.cache_agency(agency, agency_id, None)
         return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:

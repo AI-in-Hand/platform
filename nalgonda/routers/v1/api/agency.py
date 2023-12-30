@@ -28,7 +28,9 @@ async def create_agency(
     # TODO: check if the current_user has permission to create an agency
     logger.info(f"Creating agency for user: {current_user.username}")
 
-    _, agency_id = await agency_manager.create_agency()
+    agency, agency_id = await agency_manager.create_agency()
+
+    await agency_manager.cache_agency(agency, agency_id, None)
     return {"agency_id": agency_id}
 
 
@@ -55,7 +57,7 @@ async def create_agency_thread(
 
 
 @agency_router.get("/agency/config")
-def get_agency_config(agency_id: str):
+async def get_agency_config(agency_id: str):
     agency_config = AgencyConfig.load(agency_id)
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
@@ -63,12 +65,22 @@ def get_agency_config(agency_id: str):
 
 
 @agency_router.post("/agency/config", status_code=HTTP_201_CREATED)
-def update_agency_config(agency_id: str, updated_data: dict):
+async def update_agency_config(
+    agency_id: str,
+    updated_data: dict,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+):
     agency_config = AgencyConfig.load(agency_id)
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
     agency_config.update(updated_data)
     agency_config.save()
+
+    agency = await agency_manager.get_agency(agency_id, None)
+    if not agency:
+        agency, _ = await agency_manager.create_agency(agency_id)
+
+    await agency_manager.cache_agency(agency, agency_id, None)
     return {"message": "Agency configuration updated successfully"}
 
 
