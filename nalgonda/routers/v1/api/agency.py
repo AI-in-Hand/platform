@@ -33,13 +33,14 @@ async def create_agency(
 @agency_router.post("/agency/thread")
 async def create_agency_thread(
     request: AgencyThreadPostRequest,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     thread_manager: ThreadManager = Depends(get_thread_manager),
 ) -> dict:
     """Create a new thread for the given agency and return its id."""
     agency_id = request.agency_id
 
-    logger.info(f"Creating a new thread for the agency: {agency_id}")
+    logger.info(f"Creating a new thread for the agency: {agency_id}, and user: {current_user.username}")
 
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
