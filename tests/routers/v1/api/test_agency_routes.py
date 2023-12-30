@@ -4,28 +4,44 @@ from fastapi.testclient import TestClient
 
 from nalgonda.main import app
 from nalgonda.models.agency_config import AgencyConfig
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 
-def get_mocked_agency_config(agency_id: str):
-    # This is a stub for generating a mocked AgencyConfig instance
-    return AgencyConfig(agency_id=agency_id, agency_manifesto="Mocked Agency Manifesto")
+def mocked_load(self, agency_id: str):  # noqa: ARG001
+    if agency_id == "test_agency":
+        return AgencyConfig(agency_id="test_agency", agency_manifesto="Test Manifesto", agents=[], agency_chart=[])
+    return None
 
 
-@patch("persistence.agency_config_firestore_storage.AgencyConfigFirestoreStorage.load")
-@patch("persistence.agency_config_firestore_storage.AgencyConfigFirestoreStorage.save")
-def test_get_agency_config(mock_load, mock_save):
-    # Configure the mock to return a mocked AgencyConfig upon load
-    mock_load.return_value = {"agency_id": "test_agency", "agency_manifesto": "Mocked Agency Manifesto"}
+def mocked_save(self, data: dict):  # noqa: ARG001
+    assert data == {"agency_manifesto": "Updated Manifesto"}
+
+
+class TestAgencyRoutes:
     client = TestClient(app)
 
-    # Send a GET request to the /agency/config endpoint
-    response = client.get("/agency/config?agency_id=test_agency")
-    assert response.status_code == 200
-    assert response.json() == {"agency_id": "test_agency", "agency_manifesto": "Mocked Agency Manifesto"}
+    @patch.object(AgencyConfigFirestoreStorage, "load", mocked_load)
+    @patch.object(AgencyConfigFirestoreStorage, "save", mocked_save)
+    def test_get_agency_config(self):
+        response = self.client.get("/agency/config?agency_id=test_agency")
+        assert response.status_code == 200
+        assert response.json() == {
+            "agency_id": "test_agency",
+            "agency_manifesto": "Test Manifesto",
+            "agents": [],
+            "agency_chart": [],
+        }
 
-    # Test updating agency_config through a POST request and ensure correct saving
-    new_data = {"agency_manifesto": "Updated Manifesto"}
-    response = client.post("/agency/config?agency_id=test_agency", json=new_data)
-    assert response.status_code == 201
-    assert response.json() == {"message": "Config updated successfully"}
-    mock_save.assert_called_with(new_data)
+    @patch.object(AgencyConfigFirestoreStorage, "load", mocked_load)
+    @patch.object(AgencyConfigFirestoreStorage, "save", mocked_save)
+    def test_update_agency_config(self):
+        new_data = {"agency_manifesto": "Updated Manifesto"}
+        response = self.client.post("/agency/config?agency_id=test_agency", json=new_data)
+        assert response.status_code == 201
+        assert response.json() == {"message": "Agency configuration updated successfully"}
+
+    @patch.object(AgencyConfigFirestoreStorage, "load", lambda _: None)
+    def test_agency_config_not_found(self):
+        response = self.client.get("/agency/config?agency_id=non_existent_agency")
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Agency configuration not found"}
