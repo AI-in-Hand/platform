@@ -61,7 +61,7 @@ class AgencyManager:
         """
 
         start = time.time()
-        config = AgencyConfig.load(agency_id)
+        config = AgencyConfig.load_or_create(agency_id)
 
         agents = {
             agent_conf.role: Agent(
