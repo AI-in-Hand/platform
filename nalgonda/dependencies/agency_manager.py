@@ -49,7 +49,7 @@ class AgencyManager:
         """Update the agency"""
         agency_id = agency_config.agency_id
 
-        updated_data.pop("agency_id")
+        updated_data.pop("agency_id", None)
         agency_config.update(updated_data)
         agency_config.save()
 
