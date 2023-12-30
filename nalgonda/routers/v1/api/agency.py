@@ -4,7 +4,7 @@ from typing import Annotated
 
 from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
@@ -28,9 +28,7 @@ async def create_agency(
     # TODO: check if the current_user has permission to create an agency
     logger.info(f"Creating agency for user: {current_user.username}")
 
-    agency, agency_id = await agency_manager.create_agency()
-
-    await agency_manager.cache_agency(agency, agency_id, None)
+    _, agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
 
 
@@ -64,7 +62,7 @@ async def get_agency_config(agency_id: str):
     return agency_config
 
 
-@agency_router.post("/agency/config", status_code=HTTP_201_CREATED)
+@agency_router.put("/agency/config", status_code=HTTP_200_OK)
 async def update_agency_config(
     agency_id: str,
     updated_data: dict,
@@ -73,14 +71,9 @@ async def update_agency_config(
     agency_config = AgencyConfig.load(agency_id)
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
-    agency_config.update(updated_data)
-    agency_config.save()
 
-    agency = await agency_manager.get_agency(agency_id, None)
-    if not agency:
-        agency, _ = await agency_manager.create_agency(agency_id)
+    await agency_manager.update_agency(agency_config, updated_data)
 
-    await agency_manager.cache_agency(agency, agency_id, None)
     return {"message": "Agency configuration updated successfully"}
 
 
