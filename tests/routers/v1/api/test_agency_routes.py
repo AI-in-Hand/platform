@@ -1,11 +1,9 @@
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from nalgonda.main import app
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 
 def mocked_load(self):  # noqa: ARG001
@@ -23,12 +21,27 @@ def mocked_save(self, data: dict):  # noqa: ARG001
     }
 
 
+class MockedAgencyConfigFirestoreStorage:
+    def __init__(self, agency_id):
+        self.agency_id = agency_id
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def load(self):
+        return mocked_load(self)
+
+    def save(self, data):
+        mocked_save(self, data)
+
+
 class TestAgencyRoutes:
     client = TestClient(app)
 
-    @pytest.mark.skip("Fix the mocks")
-    @patch.object(AgencyConfigFirestoreStorage, "load", mocked_load)
-    @patch.object(AgencyConfigFirestoreStorage, "save", mocked_save)
+    @patch("nalgonda.models.agency_config.AgencyConfigFirestoreStorage", new=MockedAgencyConfigFirestoreStorage)
     def test_get_agency_config(self):
         response = self.client.get("/v1/api/agency/config?agency_id=test_agency")
         assert response.status_code == 200
@@ -39,18 +52,20 @@ class TestAgencyRoutes:
             "agency_chart": [],
         }
 
-    @pytest.mark.skip("Fix the mocks")
-    @patch.object(AgencyConfigFirestoreStorage, "load", mocked_load)
-    @patch.object(AgencyConfigFirestoreStorage, "save", mocked_save)
-    def test_update_agency_config(self):
+    @patch("nalgonda.models.agency_config.AgencyConfigFirestoreStorage", new=MockedAgencyConfigFirestoreStorage)
+    @patch("nalgonda.caching.redis_cache_manager.RedisCacheManager.get", new_callable=AsyncMock)
+    @patch("nalgonda.caching.redis_cache_manager.RedisCacheManager.set", new_callable=AsyncMock)
+    def test_update_agency_config_success(self, mock_redis_set, mock_redis_get):
         new_data = {"agency_manifesto": "Updated Manifesto"}
         response = self.client.put("/v1/api/agency/config?agency_id=test_agency", json=new_data)
-        assert response.status_code == 201
+        assert response.status_code == 200
         assert response.json() == {"message": "Agency configuration updated successfully"}
+        mock_redis_get.assert_called_once()
+        mock_redis_set.assert_called_once()
 
-    @pytest.mark.skip("Fix the mocks")
-    @patch.object(AgencyConfigFirestoreStorage, "load", lambda _: None)
-    def test_agency_config_not_found(self):
+    @patch("nalgonda.models.agency_config.AgencyConfigFirestoreStorage", new=MockedAgencyConfigFirestoreStorage)
+    @patch.object(MockedAgencyConfigFirestoreStorage, "load", lambda _: None)
+    def test_get_agency_config_not_found(self):
         response = self.client.get("/v1/api/agency/config?agency_id=non_existent_agency")
-        assert response.status_code == 404
         assert response.json() == {"detail": "Agency configuration not found"}
+        assert response.status_code == 404
