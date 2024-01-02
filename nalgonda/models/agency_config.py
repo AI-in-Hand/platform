@@ -25,17 +25,15 @@ class AgencyConfig(BaseModel):
 
     @classmethod
     def load_or_create(cls, agency_id: str) -> "AgencyConfig":
-        with AgencyConfigFirestoreStorage(agency_id) as config_document:
-            config_data = config_document.load()
+        model = cls.load(agency_id)
 
-        if not config_data:
+        if model is None:
             config_data = cls._create_default_config()
-
-        config_data["agency_id"] = agency_id
-        model = cls.model_validate(config_data)
+            config_data["agency_id"] = agency_id
+            model = cls.model_validate(config_data)
 
         with AgencyConfigFirestoreStorage(agency_id) as config_document:
-            config_document.save(config_data)
+            config_document.save(model.model_dump())
 
         return model
 
