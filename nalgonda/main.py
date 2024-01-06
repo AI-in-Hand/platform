@@ -21,7 +21,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()],
 )
+# Silence passlib warning messages
+logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
+
 
 # FastAPI app initialization
 app = FastAPI()

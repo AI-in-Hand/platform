@@ -50,7 +50,7 @@ target-version = "py311"
 combine-as-imports = true
 
 [tool.ruff.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends"]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends", "fastapi.Body", "fastapi.params.Body"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

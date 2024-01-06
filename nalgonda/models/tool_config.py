@@ -1,0 +1,16 @@
+from pydantic import BaseModel, Field
+
+
+class ToolConfig(BaseModel):
+    """Tool configuration model"""
+
+    tool_id: str = Field(..., description="Unique identifier for the tool configuration")
+    owner_id: str = Field(..., description="The user ID owning this tool configuration")
+    name: str = Field(..., description="Name of the tool")
+    version: int = Field(default=1, description="Version of the tool configuration")
+    code: str = Field(..., description="The actual code of the tool")
+    approved: bool = Field(default=False, description="Approval status of the tool configuration")
+
+    def increment_version(self):
+        """Increment the tool's version."""
+        self.version += 1
