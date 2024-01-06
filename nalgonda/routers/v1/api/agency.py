@@ -4,10 +4,12 @@ from typing import Annotated
 
 from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
+from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
+from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 
@@ -50,6 +52,29 @@ async def create_agency_thread(
 
     await agency_manager.cache_agency(agency, agency_id, thread_id)
     return {"thread_id": thread_id}
+
+
+@agency_router.get("/agency/config")
+async def get_agency_config(agency_id: str):
+    agency_config = AgencyConfig.load(agency_id)
+    if not agency_config:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+    return agency_config
+
+
+@agency_router.put("/agency/config", status_code=HTTP_200_OK)
+async def update_agency_config(
+    agency_id: str,
+    updated_data: dict,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+):
+    agency_config = AgencyConfig.load(agency_id)
+    if not agency_config:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+
+    await agency_manager.update_agency(agency_config, updated_data)
+
+    return {"message": "Agency configuration updated successfully"}
 
 
 @agency_router.post("/agency/message")

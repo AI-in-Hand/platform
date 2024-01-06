@@ -1,9 +1,7 @@
-import json
 from typing import Any
 
 from firebase_admin import firestore
 
-from nalgonda.constants import DEFAULT_CONFIG_FILE
 from nalgonda.persistence.agency_config_storage_interface import AgencyConfigStorageInterface
 
 
@@ -21,18 +19,9 @@ class AgencyConfigFirestoreStorage(AgencyConfigStorageInterface):
         # No special action needed on exiting the context.
         pass
 
-    def load(self):
+    def load(self) -> dict[str, Any] | None:
         db_config = self.document.get().to_dict()
-        if not db_config:
-            db_config = self._create_default_config()
         return db_config
 
     def save(self, data: dict[str, Any]):
         self.document.set(data)
-
-    def _create_default_config(self) -> dict[str, Any]:
-        """Creates a default config for the agency and saves it to the database."""
-        with DEFAULT_CONFIG_FILE.open() as file:
-            config = json.load(file)
-        self.save(config)
-        return config

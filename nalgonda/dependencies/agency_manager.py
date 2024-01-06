@@ -24,16 +24,40 @@ class AgencyManager:
         agency_id = agency_id or uuid.uuid4().hex
 
         # Note: Async-to-Sync Bridge
-        agency = await asyncio.to_thread(self.load_agency_from_config, agency_id)
+        agency = await asyncio.to_thread(self.load_agency_from_config, agency_id, config=None)
         await self.cache_agency(agency, agency_id, None)
         return agency, agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
-        """Get the agency from the cache."""
+        """Get the agency from the cache. If not found, retrieve from Firestore and repopulate cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
 
         agency = await self.cache_manager.get(cache_key)
+
+        if agency is None:
+            agency_config = AgencyConfig.load(agency_id)
+            if agency_config:
+                agency = await asyncio.to_thread(self.load_agency_from_config, agency_id, config=agency_config)
+                await self.cache_manager.set(cache_key, agency)
+            else:
+                logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
+                return None
+
         return agency
+
+    async def update_agency(self, agency_config: AgencyConfig, updated_data: dict) -> None:
+        """Update the agency"""
+        agency_id = agency_config.agency_id
+
+        updated_data.pop("agency_id", None)
+        agency_config.update(updated_data)
+        agency_config.save()
+
+        agency = await self.get_agency(agency_id, None)
+        if not agency:
+            agency, _ = await self.create_agency(agency_id)
+
+        await self.cache_agency(agency, agency_id, None)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""
@@ -53,7 +77,7 @@ class AgencyManager:
         return f"{agency_id}/{thread_id}" if thread_id else agency_id
 
     @staticmethod
-    def load_agency_from_config(agency_id: str) -> Agency:
+    def load_agency_from_config(agency_id: str, config: AgencyConfig | None = None) -> Agency:
         """Load the agency from the config file. The agency is created using the agency-swarm library.
 
         This code is synchronous and should be run in a single thread.
@@ -61,7 +85,7 @@ class AgencyManager:
         """
 
         start = time.time()
-        config = AgencyConfig.load(agency_id)
+        config = config or AgencyConfig.load_or_create(agency_id)
 
         agents = {
             agent_conf.role: Agent(
