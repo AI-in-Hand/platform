@@ -8,7 +8,7 @@ from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFiresto
 router = APIRouter()
 
 
-@router.put("/tools/{tool_name}/config", tags=["tools"])
+@router.put("/tool/config", tags=["tool"])
 def update_tool_config(
     tool_config: ToolConfig = Body(...),
     current_user: UserInDB = Depends(get_current_active_user),
@@ -19,8 +19,8 @@ def update_tool_config(
     return {"message": "Tool configuration saved successfully", "version": tool_config.version}
 
 
-@router.get("/tools/config", tags=["tools"])
-def get_tools_configs(user_id: str = Query(..., description="The unique identifier of the user")):
+@router.get("/tool/config", tags=["tool"])
+def get_tool_configs(user_id: str = Query(..., description="The unique identifier of the user")):
     storage = ToolConfigFirestoreStorage()
     tools = storage.load_by_user_id(user_id)
     if not tools:
@@ -28,7 +28,7 @@ def get_tools_configs(user_id: str = Query(..., description="The unique identifi
     return tools
 
 
-@router.put("/tools/{tool_id}/approve", tags=["tools"])
+@router.put("/tool/approve", tags=["tool"])
 def approve_tool_config(tool_id: str = Path(..., description="The unique identifier of the tool configuration")):
     storage = ToolConfigFirestoreStorage()
     tool_config = storage.load_by_tool_id(tool_id)

@@ -6,20 +6,17 @@ from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFires
 router = APIRouter()
 
 
-@router.put("/agent/{agent_id}/config", tags=["agents"])
-def update_agent_config(
-    agent_id: str = Path(..., description="The unique identifier of the agent configuration"),
-    agent_config: AgentConfig = Body(...),
-):
-    storage = AgentConfigFirestoreStorage(agent_id)
+@router.put("/agent/config", tags=["agents"])
+def update_agent_config(agent_config: AgentConfig = Body(...)):
+    storage = AgentConfigFirestoreStorage()
     storage.save(agent_config)
     return {"message": "Agent configuration saved successfully"}
 
 
-@router.get("/agent/{agent_id}/config", tags=["agents"])
+@router.get("/agent/config", tags=["agents"])
 def get_agent_config(agent_id: str = Path(..., description="The unique identifier of the agent configuration")):
-    storage = AgentConfigFirestoreStorage(agent_id)
-    config = storage.load()
+    storage = AgentConfigFirestoreStorage()
+    config = storage.load(agent_id)
     if not config:
         raise HTTPException(status_code=404, detail="Agent configuration not found")
     return config
