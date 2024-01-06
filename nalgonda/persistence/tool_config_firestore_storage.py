@@ -26,4 +26,6 @@ class ToolConfigFirestoreStorage:
         if tool_config.tool_id:
             self.collection.document(tool_config.tool_id).set(document_data)
         else:
-            self.collection.add(document_data)
+            # Create a new document and set the tool_id
+            document_reference = self.collection.add(document_data)
+            tool_config.tool_id = document_reference.id
