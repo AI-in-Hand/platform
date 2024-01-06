@@ -9,9 +9,9 @@ from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
-from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
@@ -56,7 +56,8 @@ async def create_agency_thread(
 
 @agency_router.get("/agency/config")
 async def get_agency_config(agency_id: str):
-    agency_config = AgencyConfig.load(agency_id)
+    storage = AgencyConfigFirestoreStorage(agency_id)
+    agency_config = storage.load()
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
     return agency_config
@@ -68,7 +69,8 @@ async def update_agency_config(
     updated_data: dict,
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ):
-    agency_config = AgencyConfig.load(agency_id)
+    storage = AgencyConfigFirestoreStorage(agency_id)
+    agency_config = storage.load()
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
 

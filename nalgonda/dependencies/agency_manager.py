@@ -11,6 +11,8 @@ from nalgonda.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,8 @@ class AgencyManager:
         agency = await self.cache_manager.get(cache_key)
 
         if agency is None:
-            agency_config = AgencyConfig.load(agency_id)
+            storage = AgencyConfigFirestoreStorage(agency_id)
+            agency_config = storage.load()
             if agency_config:
                 agency = await asyncio.to_thread(self.load_agency_from_config, agency_id, config=agency_config)
                 await self.cache_manager.set(cache_key, agency)
@@ -85,7 +88,12 @@ class AgencyManager:
         """
 
         start = time.time()
+
+        # Load agency configuration and related agents
         config = config or AgencyConfig.load_or_create(agency_id)
+
+        _agent_configs = [AgentConfigFirestoreStorage(agent_id).load() for agent_id in config.agents]
+        agent_configs = [agent_config for agent_config in _agent_configs if agent_config is not None]
 
         agents = {
             agent_conf.role: Agent(
@@ -96,7 +104,7 @@ class AgencyManager:
                 files_folder=agent_conf.files_folder,
                 tools=[TOOL_MAPPING[tool] for tool in agent_conf.tools if tool in TOOL_MAPPING],
             )
-            for agent_conf in config.agents
+            for agent_conf in agent_configs
         }
 
         # Create agency chart based on the config
@@ -109,11 +117,24 @@ class AgencyManager:
         # It saves all the settings in the settings.json file (in the root folder, not thread safe)
         agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
 
-        config.update_agent_ids_in_config(agency.agents)
+        # Update agent IDs in the configuration
+        for agent_config in agent_configs:
+            agent_config.id = agents[agent_config.role].id
+            agent_config.save()
         config.save()
 
         logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
         return agency
+
+
+def update_agent_ids_in_config(agents: list[Agent]) -> None:
+    """This function will update the 'id' field for all agents in the agency."""
+    for agent in agents:
+        storage = AgentConfigFirestoreStorage(agent.id)
+        agent_config = storage.load()
+        if agent_config:
+            agent_config.id = agent.id
+            storage.save(agent_config)
 
 
 def get_agency_manager(redis: aioredis.Redis = Depends(get_redis)) -> AgencyManager:
