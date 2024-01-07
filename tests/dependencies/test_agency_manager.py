@@ -280,3 +280,36 @@ async def test_load_and_construct_agents_agent_not_found():
 
         assert agents == {}
         mock_logger_error.assert_called_with("Agent with id agent1 not found.")
+
+
+@pytest.mark.asyncio
+async def test_construct_agency_single_layer_chart():
+    # Mock AgencyConfig
+    agency_config = AgencyConfig(
+        agency_id="test_agency",
+        agency_chart=["agent1"],
+        agency_manifesto="manifesto",
+        agents=["agent1"],
+        owner_id="test_owner",
+    )
+
+    # Mock agents
+    mock_agent = MagicMock(spec=Agent)
+    mock_agent.id = "agent1"
+    mock_agent.role = "role1"
+    mock_agent.name = "agent1_name"
+
+    # AgencyManager instance
+    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
+
+    # Mocking static method
+    AgencyManager.load_and_construct_agents = MagicMock(return_value={"agent1": mock_agent})
+
+    # Construct the agency
+    agency = agency_manager.construct_agency(agency_config, {"agent1": mock_agent})
+
+    # Assertions
+    assert isinstance(agency, Agency)
+    assert len(agency.agents) == 1
+    assert agency.agents[0] == mock_agent
+    assert agency.shared_instructions == "manifesto"
