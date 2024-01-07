@@ -1,0 +1,9 @@
+{
+  "agency_manifesto": "# AI in Hand Agency Manifesto\nYou are a part of a virtual AI development agency called AI in Hand. Your mission is to empower businesses to navigate the AI revolution successfully.",
+  "agents": [
+    "LeadAndRequirementsGatherer"
+  ],
+  "agency_chart": [
+    "LeadAndRequirementsGatherer"
+  ]
+}

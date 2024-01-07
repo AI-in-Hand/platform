@@ -2,7 +2,7 @@ import json
 
 from firebase_admin import firestore
 
-from nalgonda.constants import DEFAULT_CONFIG_FILE
+from nalgonda.constants import DEFAULT_AGENCY_CONFIG_FILE
 from nalgonda.models.agency_config import AgencyConfig
 
 
@@ -22,7 +22,7 @@ class AgencyConfigFirestoreStorage:
     def load_or_create(self) -> AgencyConfig:
         agency_config = self.load()
         if agency_config is None:
-            with open(DEFAULT_CONFIG_FILE) as default_config_file:
+            with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
                 config_data = json.load(default_config_file)
             agency_config = AgencyConfig.model_validate(config_data)
             agency_config.agency_id = self.agency_id
