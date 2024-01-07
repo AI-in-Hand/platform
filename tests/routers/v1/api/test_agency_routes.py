@@ -15,7 +15,7 @@ from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFir
         agency_chart=[],
     ),
 )
-def test_get_agency_config(mock_load, client):  # noqa: ARG001
+def test_get_agency_config(mock_load, client):
     response = client.get("/v1/api/agency/config?agency_id=test_agency")
     assert response.status_code == 200
     assert response.json() == {
@@ -25,6 +25,7 @@ def test_get_agency_config(mock_load, client):  # noqa: ARG001
         "agents": [],
         "agency_chart": [],
     }
+    mock_load.assert_called_once()
 
 
 test_agency_config = AgencyConfig(
@@ -42,11 +43,13 @@ test_agency_config = AgencyConfig(
     "load",
     return_value=test_agency_config,
 )
-def test_update_agency_config_success(mock_load, mock_save, client):  # noqa: ARG001
+def test_update_agency_config_success(mock_load, mock_save, client):
     new_data = {"agency_manifesto": "Updated Manifesto"}
     response = client.put("/v1/api/agency/config?agency_id=test_agency", json=new_data)
     assert response.status_code == 200
     assert response.json() == {"message": "Agency configuration updated successfully"}
+    assert mock_load.call_count == 2
+    mock_save.assert_called_once_with(test_agency_config)
 
 
 @patch.object(AgencyConfigFirestoreStorage, "load", return_value=None)
