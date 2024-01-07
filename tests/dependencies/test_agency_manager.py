@@ -65,7 +65,7 @@ class MockRedisCacheManager:
 @pytest.fixture
 def agency_manager():
     with patch("nalgonda.dependencies.agency_manager.AgencyConfigFirestoreStorage") as mock_storage_class, patch(
-        "nalgonda.dependencies.agency_manager.AgentConfigFirestoreStorage"
+        "nalgonda.dependencies.agent_manager.AgentConfigFirestoreStorage"
     ) as mock_agent_storage_class, patch(
         "nalgonda.dependencies.agency_manager.RedisCacheManager", MockRedisCacheManager()
     ):
@@ -75,12 +75,12 @@ def agency_manager():
         mock_agent_storage_instance = MockAgentConfigFirestoreStorage()
         mock_agent_storage_class.return_value = mock_agent_storage_instance
 
-        yield AgencyManager(redis=MagicMock())
+        yield AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
 
 
 @pytest.fixture(autouse=True)
 def mock_tool_mapping():
-    with patch("nalgonda.dependencies.agency_manager.TOOL_MAPPING", {"tool1": MagicMock()}):
+    with patch("nalgonda.dependencies.agent_manager.TOOL_MAPPING", {"tool1": MagicMock()}):
         yield
 
 
@@ -246,15 +246,18 @@ async def test_load_and_construct_agents_success():
     agent_config_mock = MagicMock(
         agent_id="agent1", role="test_role", description="Test Agent", instructions="Test Instructions", tools=["tool1"]
     )
+    agent_mock = MagicMock(spec=Agent)
+    agent_mock.id = "agent1"
 
-    with patch("nalgonda.dependencies.agency_manager.AgentConfigFirestoreStorage") as mock_agent_storage_class:
-        mock_agent_storage_class.return_value.load = MagicMock(return_value=agent_config_mock)
-        agency_manager = AgencyManager(redis=MagicMock())
-        agents = await agency_manager.load_and_construct_agents(agency_config)
+    agent_manager_mock = AsyncMock()
+    agent_manager_mock.get_agent.return_value = (agent_mock, agent_config_mock)
 
-        assert "test_role" in agents
-        assert isinstance(agents["test_role"], Agent)
-        assert agents["test_role"].id == "agent1"
+    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
+    agents = await agency_manager.load_and_construct_agents(agency_config)
+
+    assert "test_role" in agents
+    assert isinstance(agents["test_role"], Agent)
+    assert agents["test_role"].id == "agent1"
 
 
 # Test agent not found
@@ -268,11 +271,11 @@ async def test_load_and_construct_agents_agent_not_found():
         agency_manifesto="Test manifesto",
     )
 
-    with patch("nalgonda.dependencies.agency_manager.AgentConfigFirestoreStorage") as mock_agent_storage_class, patch(
-        "logging.Logger.error"
-    ) as mock_logger_error:
-        mock_agent_storage_class.return_value.load = MagicMock(return_value=None)
-        agency_manager = AgencyManager(redis=MagicMock())
+    agent_manager_mock = AsyncMock()
+    agent_manager_mock.get_agent.return_value = None
+
+    with patch("logging.Logger.error") as mock_logger_error:
+        agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
         agents = await agency_manager.load_and_construct_agents(agency_config)
 
         assert agents == {}

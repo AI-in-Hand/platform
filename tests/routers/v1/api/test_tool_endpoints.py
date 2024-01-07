@@ -30,4 +30,4 @@ def test_approve_tool_config(client):
         assert response.status_code == 200
         tool_config_instance.approved = True
         mock_save.assert_called_once_with(tool_config_instance)
-        assert response.json() == {"message": "Tool configuration approved successfully"}
+        assert response.json() == {"message": "Tool configuration approved"}
