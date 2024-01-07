@@ -91,6 +91,8 @@ class AgencyManager:
                 agents[agent_config.role] = agent
                 agent_config.agent_id = agent.id
                 await asyncio.to_thread(agent_config_storage.save, agent_config)
+            else:
+                logger.error(f"Agent with id {agent_id} not found.")
         return agents
 
     @staticmethod
