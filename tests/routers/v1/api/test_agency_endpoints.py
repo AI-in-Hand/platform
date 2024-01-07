@@ -48,10 +48,8 @@ def test_update_agency_config_success(mock_save, client, mock_firestore_client):
     mock_save.assert_called_once_with(updated_config)
 
 
-def test_get_agency_config_not_found(client, mock_firestore_client):
-    # Ensure no data is set in the mock Firestore client for the non-existent agency
-    mock_firestore_client.setup_mock_data("agency_configs", "non_existent_agency", {})
-
+def test_get_agency_config_not_found(client, mock_firestore_client):  # noqa: ARG001
+    # Simulate non-existent agency by not setting up any data for it
     response = client.get("/v1/api/agency/config?agency_id=non_existent_agency")
     assert response.status_code == 404
     assert response.json() == {"detail": "Agency configuration not found"}
