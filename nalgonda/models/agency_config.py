@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class AgencyConfig(BaseModel):
     """Agency configuration model"""
 
-    agency_id: str | None = Field(None, description="The agency ID")
+    agency_id: str = Field(..., description="The agency ID")
     owner_id: str | None = Field(None, description="The user ID owning this agency configuration")
     agency_manifesto: str = Field("Agency Manifesto")
     agents: list[str] = Field(..., description="List of agent IDs used in the agency chart")

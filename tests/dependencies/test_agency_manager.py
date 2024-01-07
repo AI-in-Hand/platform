@@ -97,9 +97,8 @@ async def test_create_agency_with_new_id(agency_manager):
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        agency, new_agency_id = await agency_manager.create_agency()
+        new_agency_id = await agency_manager.create_agency()
 
-        assert agency is not None
         assert isinstance(new_agency_id, str)
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
@@ -119,9 +118,8 @@ async def test_create_agency_with_provided_id(agency_manager):
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        agency, returned_agency_id = await agency_manager.create_agency(agency_id=provided_id)
+        returned_agency_id = await agency_manager.create_agency(agency_id=provided_id)
 
-        assert agency is not None
         assert returned_agency_id == provided_id
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
@@ -140,9 +138,8 @@ async def test_create_agency(agency_manager):
         mock_load_agents.return_value = {"agent1": MagicMock(spec=Agent)}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        agency, agency_id = await agency_manager.create_agency()
+        agency_id = await agency_manager.create_agency()
 
-        assert agency is not None
         assert isinstance(agency_id, str)
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()

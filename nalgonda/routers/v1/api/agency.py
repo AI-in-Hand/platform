@@ -28,7 +28,7 @@ async def create_agency(
     # TODO: check if the current_user has permission to create an agency
     logger.info(f"Creating agency for user: {current_user.username}")
 
-    _, agency_id = await agency_manager.create_agency()
+    agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
 
 

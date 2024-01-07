@@ -18,7 +18,7 @@ class ToolConfigFirestoreStorage:
             return None
         return ToolConfig.model_validate(document_snapshot.to_dict())
 
-    def save(self, tool_config: ToolConfig) -> None:
+    def save(self, tool_config: ToolConfig) -> tuple[str, int]:
         # Increment version and set as not approved for each new save
         tool_config.version += 1
         tool_config.approved = False
@@ -29,3 +29,5 @@ class ToolConfigFirestoreStorage:
             document_reference = self.collection.add(document_data)
             tool_config.tool_id = document_reference.id
         self.collection.document(tool_config.tool_id).set(document_data)
+
+        return tool_config.tool_id, tool_config.version

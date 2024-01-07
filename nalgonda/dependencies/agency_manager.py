@@ -7,20 +7,20 @@ from fastapi import Depends
 from redis import asyncio as aioredis
 
 from nalgonda.caching.redis_cache_manager import RedisCacheManager
-from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
 from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 
 logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self, redis: aioredis.Redis) -> None:
+    def __init__(self, redis: aioredis.Redis, agent_manager: AgentManager) -> None:
         self.cache_manager = RedisCacheManager(redis)
+        self.agent_manager = agent_manager
 
-    async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
+    async def create_agency(self, agency_id: str | None = None) -> str:
         """Create the agency. If agency_id is not provided, it will be generated.
         If agency_id is provided, it will be used to load the agency from the firestore.
         If agency is not found in the firestore, it will be created.
@@ -34,7 +34,7 @@ class AgencyManager:
         agency = self.construct_agency(agency_config, agents)
 
         await self.cache_agency(agency, agency_id, None)
-        return agency, agency_id
+        return agency_id
 
     async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, thread_id)
@@ -73,24 +73,13 @@ class AgencyManager:
         await self.cache_manager.set(cache_key, agency)
         return agency
 
-    @staticmethod
-    async def load_and_construct_agents(agency_config: AgencyConfig) -> dict[str, Agent]:
+    async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
         agents = {}
         for agent_id in agency_config.agents:
-            agent_config_storage = AgentConfigFirestoreStorage()
-            agent_config = await asyncio.to_thread(agent_config_storage.load, agent_id)
-            if agent_config:
-                agent = Agent(
-                    id=agent_config.agent_id,
-                    name=f"{agent_config.role}_{agency_config.agency_id}",
-                    description=agent_config.description,
-                    instructions=agent_config.instructions,
-                    files_folder=agent_config.files_folder,
-                    tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
-                )
+            get_result = await self.agent_manager.get_agent(agent_id)
+            if get_result:
+                agent, agent_config = get_result
                 agents[agent_config.role] = agent
-                agent_config.agent_id = agent.id
-                await asyncio.to_thread(agent_config_storage.save, agent_config)
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
         return agents
@@ -123,5 +112,7 @@ class AgencyManager:
         return f"{agency_id}/{thread_id}" if thread_id else agency_id
 
 
-def get_agency_manager(redis: aioredis.Redis = Depends(get_redis)) -> AgencyManager:
-    return AgencyManager(redis)
+def get_agency_manager(
+    redis: aioredis.Redis = Depends(get_redis), agent_manager: AgentManager = Depends(get_agent_manager)
+) -> AgencyManager:
+    return AgencyManager(redis, agent_manager)

@@ -15,8 +15,8 @@ def update_tool_config(
 ):
     tool_config.owner_id = current_user.username  # Ensure the tool is associated with the user
     storage = ToolConfigFirestoreStorage()
-    storage.save(tool_config)
-    return {"message": "Tool configuration saved successfully", "version": tool_config.version}
+    tool_id, tool_version = storage.save(tool_config)
+    return {"tool_id": tool_id, "tool_version": tool_version}
 
 
 @tool_router.get("/tool/config", tags=["tool"])
@@ -36,4 +36,4 @@ def approve_tool_config(tool_id: str = Query(..., description="The unique identi
         raise HTTPException(status_code=404, detail="Tool configuration not found")
     tool_config.approved = True
     storage.save(tool_config)
-    return {"message": "Tool configuration approved successfully"}
+    return {"message": "Tool configuration approved"}
