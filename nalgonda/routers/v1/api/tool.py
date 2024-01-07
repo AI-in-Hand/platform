@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.models.auth import UserInDB
@@ -29,7 +29,7 @@ def get_tool_configs(user_id: str = Query(..., description="The unique identifie
 
 
 @tool_router.put("/tool/approve", tags=["tool"])
-def approve_tool_config(tool_id: str = Path(..., description="The unique identifier of the tool configuration")):
+def approve_tool_config(tool_id: str = Query(..., description="The unique identifier of the tool")):
     storage = ToolConfigFirestoreStorage()
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body, HTTPException, Path
+from fastapi import APIRouter, Body, HTTPException
+from fastapi.params import Query
 
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
@@ -14,7 +15,7 @@ def update_agent_config(agent_config: AgentConfig = Body(...)):
 
 
 @agent_router.get("/agent/config", tags=["agents"])
-def get_agent_config(agent_id: str = Path(..., description="The unique identifier of the agent configuration")):
+def get_agent_config(agent_id: str = Query(..., description="Agent ID")):
     storage = AgentConfigFirestoreStorage()
     config = storage.load(agent_id)
     if not config:
