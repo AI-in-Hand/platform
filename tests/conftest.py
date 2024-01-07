@@ -1,7 +1,10 @@
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+
+from tests.test_utils.mock_firestore_client import MockFirestoreClient
 
 
 # each test runs on cwd to its temp dir
@@ -32,3 +35,10 @@ def temp_dir(tmp_path: Path):
     (temp_dir_path / "test.py").write_text("print('hello')")
     (temp_dir_path / "test.txt").write_text("hello world")
     yield tmp_path
+
+
+@pytest.fixture
+def mock_firestore_client():
+    firestore_client = MockFirestoreClient()
+    with patch("firebase_admin.firestore.client", return_value=firestore_client):
+        yield firestore_client

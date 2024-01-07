@@ -15,7 +15,7 @@ from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFir
         agency_chart=[],
     ),
 )
-def test_get_agency_config(mock_load, client):
+def test_get_agency_config(mock_load, client, mock_firestore_client):  # noqa: ARG001
     response = client.get("/v1/api/agency/config?agency_id=test_agency")
     assert response.status_code == 200
     assert response.json() == {
