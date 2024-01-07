@@ -24,8 +24,8 @@ class AgencyConfigFirestoreStorage:
         if agency_config is None:
             with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
                 config_data = json.load(default_config_file)
+            config_data["agency_id"] = self.agency_id
             agency_config = AgencyConfig.model_validate(config_data)
-            agency_config.agency_id = self.agency_id
             self.save(agency_config)
         return agency_config
 
