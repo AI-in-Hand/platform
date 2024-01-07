@@ -34,6 +34,6 @@ def approve_tool_config(tool_id: str = Query(..., description="The unique identi
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:
         raise HTTPException(status_code=404, detail="Tool configuration not found")
-    tool_config.approved = True
-    storage.save(tool_config)
+
+    storage.save(tool_config, approved=True)
     return {"message": "Tool configuration approved"}
