@@ -5,10 +5,10 @@ from nalgonda.models.auth import UserInDB
 from nalgonda.models.tool_config import ToolConfig
 from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
 
-tool_router = APIRouter()
+tool_router = APIRouter(tags=["tool"])
 
 
-@tool_router.put("/tool/config", tags=["tool"])
+@tool_router.put("/tool/config")
 def update_tool_config(
     tool_config: ToolConfig = Body(...),
     current_user: UserInDB = Depends(get_current_active_user),
@@ -19,7 +19,7 @@ def update_tool_config(
     return {"tool_id": tool_id, "tool_version": tool_version}
 
 
-@tool_router.get("/tool/config", tags=["tool"])
+@tool_router.get("/tool/config")
 def get_tool_configs(user_id: str = Query(..., description="The unique identifier of the user")):
     storage = ToolConfigFirestoreStorage()
     tools = storage.load_by_user_id(user_id)
@@ -28,7 +28,7 @@ def get_tool_configs(user_id: str = Query(..., description="The unique identifie
     return tools
 
 
-@tool_router.put("/tool/approve", tags=["tool"])
+@tool_router.put("/tool/approve")
 def approve_tool_config(tool_id: str = Query(..., description="The unique identifier of the tool")):
     storage = ToolConfigFirestoreStorage()
     tool_config = storage.load_by_tool_id(tool_id)

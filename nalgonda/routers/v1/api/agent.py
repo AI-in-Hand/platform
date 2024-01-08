@@ -7,10 +7,10 @@ from nalgonda.models.agent_config import AgentConfig
 from nalgonda.models.auth import UserInDB
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 
-agent_router = APIRouter()
+agent_router = APIRouter(tags=["agent"])
 
 
-@agent_router.put("/agent/config", tags=["agents"])
+@agent_router.put("/agent/config")
 async def update_agent_config(
     agent_config: AgentConfig = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
@@ -21,7 +21,7 @@ async def update_agent_config(
     return {"agent_id": agent_id}
 
 
-@agent_router.get("/agent/config", tags=["agents"])
+@agent_router.get("/agent/config")
 async def get_agent_config(
     agent_id: str = Query(..., description="Agent ID"),
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
