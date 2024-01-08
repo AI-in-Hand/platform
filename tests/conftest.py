@@ -37,7 +37,7 @@ def temp_dir(tmp_path: Path):
     yield tmp_path
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_firestore_client():
     firestore_client = MockFirestoreClient()
     with patch("firebase_admin.firestore.client", return_value=firestore_client):

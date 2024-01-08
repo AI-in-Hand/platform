@@ -41,7 +41,7 @@ def test_update_agency_config_success(client, mock_firestore_client):
     assert response.json() == {"message": "Agency configuration updated successfully"}
 
 
-def test_get_agency_config_not_found(client, mock_firestore_client):  # noqa: ARG001
+def test_get_agency_config_not_found(client):
     # Simulate non-existent agency by not setting up any data for it
     response = client.get("/v1/api/agency/config?agency_id=non_existent_agency")
     assert response.status_code == 404

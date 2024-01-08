@@ -20,7 +20,7 @@ def test_get_agent_config(client, mock_firestore_client):
     assert response.json() == MOCK_DATA
 
 
-def test_update_agent_config(client, mock_firestore_client):  # noqa: ARG001
+def test_update_agent_config(client):
     agent_config_data = MOCK_DATA.copy()
 
     with patch("nalgonda.dependencies.agent_manager.AgentManager") as mock_agent_manager:
