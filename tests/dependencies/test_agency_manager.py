@@ -12,7 +12,7 @@ class MockAgencyConfigFirestoreStorage:
     def load_or_create(self):
         return AgencyConfig(
             agency_id="test_agency",
-            owner_id="test_owner_id",
+            owner_id="test_user",
             agents=["agent1"],
             agency_chart=["agent1"],
             agency_manifesto="manifesto",
@@ -21,7 +21,7 @@ class MockAgencyConfigFirestoreStorage:
     def load(self):
         return AgencyConfig(
             agency_id="test_agency",
-            owner_id="test_owner_id",
+            owner_id="test_user",
             agents=["agent1"],
             agency_chart=["agent1"],
             agency_manifesto="manifesto",
@@ -173,7 +173,7 @@ async def test_get_agency_repopulate_cache(agency_manager):
 async def test_update_agency(agency_manager):
     agency_config = AgencyConfig(
         agency_id="test_agency",
-        owner_id="test_owner_id",
+        owner_id="test_user",
         agents=["agent1"],
         agency_chart=["agent1"],
         agency_manifesto="manifesto",
@@ -205,7 +205,7 @@ async def test_repopulate_cache_no_config(agency_manager):
 async def test_repopulate_cache_success(agency_manager):
     agency_config = AgencyConfig(
         agency_id="test_agency",
-        owner_id="test_owner_id",
+        owner_id="test_user",
         agents=["agent1"],
         agency_chart=["agent1"],
         agency_manifesto="manifesto",
@@ -238,7 +238,7 @@ async def test_repopulate_cache_success(agency_manager):
 async def test_load_and_construct_agents_success():
     agency_config = AgencyConfig(
         agency_id="test_agency",
-        owner_id="test_owner",
+        owner_id="test_user",
         agents=["agent1"],
         agency_chart=["agent1"],
         agency_manifesto="Test manifesto",
@@ -265,7 +265,7 @@ async def test_load_and_construct_agents_success():
 async def test_load_and_construct_agents_agent_not_found():
     agency_config = AgencyConfig(
         agency_id="test_agency",
-        owner_id="test_owner",
+        owner_id="test_user",
         agents=["agent1"],
         agency_chart=["agent1"],
         agency_manifesto="Test manifesto",
@@ -290,7 +290,7 @@ async def test_construct_agency_single_layer_chart():
         agency_chart=["agent1"],
         agency_manifesto="manifesto",
         agents=["agent1"],
-        owner_id="test_owner",
+        owner_id="test_user",
     )
 
     # Mock agents

@@ -6,7 +6,7 @@ from nalgonda.models.agency_config import AgencyConfig
 def test_get_agency_config(client, mock_firestore_client):
     mock_data = {
         "agency_id": "test_agency",
-        "owner_id": "test_owner",
+        "owner_id": "test_user",
         "agency_manifesto": "Test Manifesto",
         "agents": [],
         "agency_chart": [],
@@ -22,7 +22,7 @@ def test_update_agency_config_success(client, mock_firestore_client):
     # Setup initial data in mock Firestore client
     initial_data = {
         "agency_id": "test_agency",
-        "owner_id": "test_owner",
+        "owner_id": "test_user",
         "agency_manifesto": "Original Manifesto",
         "agents": [],
         "agency_chart": [],
@@ -35,6 +35,7 @@ def test_update_agency_config_success(client, mock_firestore_client):
     ) as mock_update_agency:
         response = client.put("/v1/api/agency/config?agency_id=test_agency", json=new_data)
 
+    new_data["owner_id"] = initial_data["owner_id"]
     mock_update_agency.assert_called_once_with(AgencyConfig.model_validate(initial_data), new_data)
 
     assert response.status_code == 200

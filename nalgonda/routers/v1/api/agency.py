@@ -67,6 +67,7 @@ async def get_agency_config(agency_id: str):
 async def update_agency_config(
     agency_id: str,
     updated_data: dict,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ):
     storage = AgencyConfigFirestoreStorage(agency_id)
@@ -74,6 +75,7 @@ async def update_agency_config(
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
 
+    updated_data["owner_id"] = current_user.username
     await agency_manager.update_agency(agency_config, updated_data)
 
     return {"message": "Agency configuration updated successfully"}
