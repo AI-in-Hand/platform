@@ -7,44 +7,6 @@ from nalgonda.dependencies.agency_manager import AgencyManager
 from nalgonda.models.agency_config import AgencyConfig
 
 
-# Mock classes
-class MockAgencyConfigFirestoreStorage:
-    def load_or_create(self):
-        return AgencyConfig(
-            agency_id="test_agency",
-            owner_id="test_user",
-            agents=["agent1"],
-            agency_chart=["agent1"],
-            agency_manifesto="manifesto",
-        )
-
-    def load(self):
-        return AgencyConfig(
-            agency_id="test_agency",
-            owner_id="test_user",
-            agents=["agent1"],
-            agency_chart=["agent1"],
-            agency_manifesto="manifesto",
-        )
-
-    def save(self, agency_config):
-        pass
-
-
-class MockAgentConfigFirestoreStorage:
-    def load(self, agent_id):
-        return MagicMock(
-            agent_id=agent_id,
-            role="role1",
-            description="desc",
-            instructions="instr",
-            tools=["tool1"],
-        )
-
-    def save(self, agent_config):
-        pass
-
-
 class MockRedisCacheManager:
     def __init__(self, *args, **kwargs):
         pass
@@ -63,18 +25,8 @@ class MockRedisCacheManager:
 
 
 @pytest.fixture
-def agency_manager():
-    with patch("nalgonda.dependencies.agency_manager.AgencyConfigFirestoreStorage") as mock_storage_class, patch(
-        "nalgonda.dependencies.agent_manager.AgentConfigFirestoreStorage"
-    ) as mock_agent_storage_class, patch(
-        "nalgonda.dependencies.agency_manager.RedisCacheManager", MockRedisCacheManager()
-    ):
-        mock_storage_instance = MockAgencyConfigFirestoreStorage()
-        mock_storage_class.return_value = mock_storage_instance
-
-        mock_agent_storage_instance = MockAgentConfigFirestoreStorage()
-        mock_agent_storage_class.return_value = mock_agent_storage_instance
-
+def agency_manager(mock_firestore_client):  # noqa: ARG001
+    with patch("nalgonda.dependencies.agency_manager.RedisCacheManager", MockRedisCacheManager()):
         yield AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
 
 
