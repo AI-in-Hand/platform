@@ -1,8 +1,18 @@
+class MockDocumentSnapshot:
+    def __init__(self, id, data):
+        self.id = id
+        self._data = data
+
+    def to_dict(self):
+        return self._data
+
+
 class MockFirestoreClient:
     def __init__(self):
         self._collections = {}
         self.current_collection = None
         self.current_document = None
+        self.current_document_id = None
 
     def collection(self, collection_name):
         self.current_collection = collection_name
@@ -27,14 +37,14 @@ class MockFirestoreClient:
         collection = self._collections.get(self.current_collection, {})
         return collection.get(self.current_document, {})
 
-    def setup_mock_data(self, collection_name, document_name, data):
+    def setup_mock_data(self, collection_name, document_name, data, doc_id=None):
         self.current_collection = collection_name
         self.current_document = document_name
+        self.current_document_id = doc_id
         self.set(data)
 
     def where(self, field, op, value):
         # This is a simplified implementation.
-        # Adjust the logic to suit your specific query requirements.
         self._where_field = field
         self._where_op = op
         self._where_value = value
@@ -49,11 +59,8 @@ class MockFirestoreClient:
                 matching_docs.append(MockDocumentSnapshot(doc_id, doc))
         return matching_docs
 
-
-class MockDocumentSnapshot:
-    def __init__(self, id, data):
-        self.id = id
-        self._data = data
-
-    def to_dict(self):
-        return self._data
+    def add(self, data) -> list[MockDocumentSnapshot]:
+        # This method should add a new document to the collection
+        # and return a list with the new document.
+        self.set(data)
+        return [MockDocumentSnapshot(self.current_document_id, data)]
