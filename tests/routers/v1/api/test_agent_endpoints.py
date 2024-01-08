@@ -23,8 +23,15 @@ def test_get_agent_config(client, mock_firestore_client):
 def test_update_agent_config(client):
     agent_config_data = MOCK_DATA.copy()
 
-    with patch("nalgonda.dependencies.agent_manager.AgentManager") as mock_agent_manager:
-        mock_agent_manager.return_value.create_or_update_agent = AsyncMock(return_value=AGENT_ID)
+    with patch(
+        "nalgonda.dependencies.agent_manager.AgentConfigFirestoreStorage"
+    ) as mock_agent_config_firestore_storage, patch(
+        "nalgonda.dependencies.agent_manager.AgentManager"
+    ) as mock_agent_manager:
+        mock_agent_manager.return_value = AsyncMock()
+        mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
+        mock_agent_config_firestore_storage.return_value = AsyncMock()
+
         response = client.put("/v1/api/agent/config", json=agent_config_data)
 
     assert response.status_code == 200
