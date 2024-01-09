@@ -9,13 +9,14 @@ from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
-from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
     responses={404: {"description": "Not found"}},
+    tags=["agency"],
 )
 
 
@@ -28,7 +29,7 @@ async def create_agency(
     # TODO: check if the current_user has permission to create an agency
     logger.info(f"Creating agency for user: {current_user.username}")
 
-    _, agency_id = await agency_manager.create_agency()
+    agency_id = await agency_manager.create_agency()
     return {"agency_id": agency_id}
 
 
@@ -56,7 +57,8 @@ async def create_agency_thread(
 
 @agency_router.get("/agency/config")
 async def get_agency_config(agency_id: str):
-    agency_config = AgencyConfig.load(agency_id)
+    storage = AgencyConfigFirestoreStorage(agency_id)
+    agency_config = storage.load()
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
     return agency_config
@@ -66,12 +68,15 @@ async def get_agency_config(agency_id: str):
 async def update_agency_config(
     agency_id: str,
     updated_data: dict,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ):
-    agency_config = AgencyConfig.load(agency_id)
+    storage = AgencyConfigFirestoreStorage(agency_id)
+    agency_config = storage.load()
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
 
+    updated_data["owner_id"] = current_user.username
     await agency_manager.update_agency(agency_config, updated_data)
 
     return {"message": "Agency configuration updated successfully"}

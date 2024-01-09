@@ -1,63 +1,99 @@
 import asyncio
 import logging
-import time
-import uuid
+from uuid import uuid4
 
 from agency_swarm import Agency, Agent
 from fastapi import Depends
 from redis import asyncio as aioredis
 
 from nalgonda.caching.redis_cache_manager import RedisCacheManager
-from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
 from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
 logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self, redis: aioredis.Redis) -> None:
+    def __init__(self, redis: aioredis.Redis, agent_manager: AgentManager) -> None:
         self.cache_manager = RedisCacheManager(redis)
+        self.agent_manager = agent_manager
 
-    async def create_agency(self, agency_id: str | None = None) -> tuple[Agency, str]:
-        """Create an agency and return the agency and the agency_id."""
-        agency_id = agency_id or uuid.uuid4().hex
+    async def create_agency(self, agency_id: str | None = None) -> str:
+        """Create the agency. If agency_id is not provided, it will be generated.
+        If agency_id is provided, it will be used to load the agency from the firestore.
+        If agency is not found in the firestore, it will be created.
+        """
+        agency_id = agency_id or str(uuid4())
 
-        # Note: Async-to-Sync Bridge
-        agency = await asyncio.to_thread(self.load_agency_from_config, agency_id, config=None)
+        agency_config_storage = AgencyConfigFirestoreStorage(agency_id)
+        agency_config = await asyncio.to_thread(agency_config_storage.load_or_create)
+
+        agents = await self.load_and_construct_agents(agency_config)
+        agency = self.construct_agency(agency_config, agents)
+
         await self.cache_agency(agency, agency_id, None)
-        return agency, agency_id
+        return agency_id
 
-    async def get_agency(self, agency_id: str, thread_id: str | None) -> Agency | None:
-        """Get the agency from the cache. If not found, retrieve from Firestore and repopulate cache."""
+    async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, thread_id)
-
         agency = await self.cache_manager.get(cache_key)
-
-        if agency is None:
-            agency_config = AgencyConfig.load(agency_id)
-            if agency_config:
-                agency = await asyncio.to_thread(self.load_agency_from_config, agency_id, config=agency_config)
-                await self.cache_manager.set(cache_key, agency)
-            else:
+        if not agency:
+            # If agency is not found in the cache, re-populate the cache
+            agency = await self.repopulate_cache(agency_id)
+            if not agency:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
 
         return agency
 
     async def update_agency(self, agency_config: AgencyConfig, updated_data: dict) -> None:
-        """Update the agency"""
+        """Update the agency. It will update the agency in the firestore and also in the cache."""
         agency_id = agency_config.agency_id
 
-        updated_data.pop("agency_id", None)
+        updated_data.pop("agency_id", None)  # ensure agency_id is not modified
         agency_config.update(updated_data)
-        agency_config.save()
+        agency_config_storage = AgencyConfigFirestoreStorage(agency_id)
+        await asyncio.to_thread(agency_config_storage.save, agency_config)
 
-        agency = await self.get_agency(agency_id, None)
-        if not agency:
-            agency, _ = await self.create_agency(agency_id)
+        # Update the agency in the cache
+        await self.repopulate_cache(agency_id)
 
-        await self.cache_agency(agency, agency_id, None)
+    async def repopulate_cache(self, agency_id: str) -> Agency | None:
+        cache_key = self.get_cache_key(agency_id)
+        agency_config_storage = AgencyConfigFirestoreStorage(agency_id)
+        agency_config = await asyncio.to_thread(agency_config_storage.load)
+        if not agency_config:
+            logger.error(f"Agency with id {agency_id} not found.")
+            return None
+
+        agents = await self.load_and_construct_agents(agency_config)
+        agency = self.construct_agency(agency_config, agents)
+        await self.cache_manager.set(cache_key, agency)
+        return agency
+
+    async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
+        agents = {}
+        for agent_id in agency_config.agents:
+            get_result = await self.agent_manager.get_agent(agent_id)
+            if get_result:
+                agent, agent_config = get_result
+                agents[agent_config.role] = agent
+            else:
+                logger.error(f"Agent with id {agent_id} not found.")
+        return agents
+
+    @staticmethod
+    def construct_agency(agency_config: AgencyConfig, agents: dict[str, Agent]) -> Agency:
+        """Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
+        It saves all the settings in the settings.json file (in the root folder, not thread safe)
+        """
+        agency_chart = [
+            [agents[role] for role in layer] if isinstance(layer, list) else agents[layer]
+            for layer in agency_config.agency_chart
+        ]
+        return Agency(agency_chart, shared_instructions=agency_config.agency_manifesto)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""
@@ -72,50 +108,11 @@ class AgencyManager:
         await self.cache_manager.delete(cache_key)
 
     @staticmethod
-    def get_cache_key(agency_id: str, thread_id: str | None) -> str:
-        """Get the cache key for the given agency ID and thread ID."""
+    def get_cache_key(agency_id: str, thread_id: str | None = None) -> str:
         return f"{agency_id}/{thread_id}" if thread_id else agency_id
 
-    @staticmethod
-    def load_agency_from_config(agency_id: str, config: AgencyConfig | None = None) -> Agency:
-        """Load the agency from the config file. The agency is created using the agency-swarm library.
 
-        This code is synchronous and should be run in a single thread.
-        The code is currently not thread safe (due to agency-swarm limitations).
-        """
-
-        start = time.time()
-        config = config or AgencyConfig.load_or_create(agency_id)
-
-        agents = {
-            agent_conf.role: Agent(
-                id=agent_conf.id,
-                name=f"{agent_conf.role}_{agency_id}",
-                description=agent_conf.description,
-                instructions=agent_conf.instructions,
-                files_folder=agent_conf.files_folder,
-                tools=[TOOL_MAPPING[tool] for tool in agent_conf.tools if tool in TOOL_MAPPING],
-            )
-            for agent_conf in config.agents
-        }
-
-        # Create agency chart based on the config
-        agency_chart = [
-            [agents[role] for role in chart] if isinstance(chart, list) else agents[chart]
-            for chart in config.agency_chart
-        ]
-
-        # Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
-        # It saves all the settings in the settings.json file (in the root folder, not thread safe)
-        agency = Agency(agency_chart, shared_instructions=config.agency_manifesto)
-
-        config.update_agent_ids_in_config(agency.agents)
-        config.save()
-
-        logger.info(f"Agency creation took {time.time() - start} seconds. Session ID: {agency_id}")
-        return agency
-
-
-def get_agency_manager(redis: aioredis.Redis = Depends(get_redis)) -> AgencyManager:
-    """Get the agency manager."""
-    return AgencyManager(redis)
+def get_agency_manager(
+    redis: aioredis.Redis = Depends(get_redis), agent_manager: AgentManager = Depends(get_agent_manager)
+) -> AgencyManager:
+    return AgencyManager(redis, agent_manager)

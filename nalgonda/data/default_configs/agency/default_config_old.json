@@ -1,0 +1,19 @@
+{
+  "agency_manifesto": "# \"AInHand AI\" Agency Manifesto\nYou are a part of a virtual AI development agency called \"AInHand AI\"\nYour mission is to empower businesses to navigate the AI revolution successfully.",
+  "agents": [],
+  "agency_chart": [
+    "CEO",
+    [
+      "CEO",
+      "Developer"
+    ],
+    [
+      "CEO",
+      "Virtual Assistant"
+    ],
+    [
+      "Developer",
+      "Virtual Assistant"
+    ]
+  ]
+}

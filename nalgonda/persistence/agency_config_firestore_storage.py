@@ -1,27 +1,34 @@
-from typing import Any
+import json
 
 from firebase_admin import firestore
 
-from nalgonda.persistence.agency_config_storage_interface import AgencyConfigStorageInterface
+from nalgonda.constants import DEFAULT_AGENCY_CONFIG_FILE
+from nalgonda.models.agency_config import AgencyConfig
 
 
-class AgencyConfigFirestoreStorage(AgencyConfigStorageInterface):
+class AgencyConfigFirestoreStorage:
     def __init__(self, agency_id: str):
         self.db = firestore.client()
         self.agency_id = agency_id
         self.collection_name = "agency_configs"
-        self.document = self.db.collection(self.collection_name).document(agency_id)
+        self.document_ref = self.db.collection(self.collection_name).document(agency_id)
 
-    def __enter__(self):
-        return self
+    def load(self) -> AgencyConfig | None:
+        agency_config_snapshot = self.document_ref.get()
+        if agency_config_snapshot.exists:
+            return AgencyConfig.model_validate(agency_config_snapshot.to_dict())
+        return None
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # No special action needed on exiting the context.
-        pass
+    def load_or_create(self) -> AgencyConfig:
+        agency_config = self.load()
+        if agency_config is None:
+            with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
+                config_data = json.load(default_config_file)
+            config_data["agency_id"] = self.agency_id
+            agency_config = AgencyConfig.model_validate(config_data)
+            self.save(agency_config)
+        return agency_config
 
-    def load(self) -> dict[str, Any] | None:
-        db_config = self.document.get().to_dict()
-        return db_config
-
-    def save(self, data: dict[str, Any]):
-        self.document.set(data)
+    def save(self, agency_config: AgencyConfig) -> None:
+        document_data = agency_config.model_dump()
+        self.document_ref.set(document_data)

@@ -162,4 +162,5 @@ cython_debug/
 .idea/
 
 settings.json
-config.json
+
+.env

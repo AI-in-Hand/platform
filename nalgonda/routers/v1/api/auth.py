@@ -14,6 +14,7 @@ from nalgonda.settings import settings
 logger = logging.getLogger(__name__)
 auth_router = APIRouter(
     responses={404: {"description": "Not found"}},
+    tags=["auth"],
 )
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
