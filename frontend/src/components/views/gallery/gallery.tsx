@@ -170,7 +170,7 @@ const GalleryView = ({ location }: any) => {
       {!currentGallery && (
         <>
           <div>
-            View a collection of AutoGen agent specifications and sessions{" "}
+            View a collection of agent specifications and sessions{" "}
           </div>
           <div className="mt-4 grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {galleryRows}
