@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     redis_url: RedisDsn = Field(default="redis://localhost:6379/1")
     secret_key: str | None = Field(default=None)
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env.testing")
 
 
 settings = Settings()

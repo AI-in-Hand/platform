@@ -4,6 +4,7 @@ from agency_swarm import Agency
 from agency_swarm.util import get_openai_client
 from redis import asyncio as aioredis
 
+from nalgonda.constants import DEFAULT_CACHE_EXPIRATION
 from nalgonda.dependencies.caching.cache_manager import CacheManager
 
 
@@ -16,10 +17,6 @@ class RedisCacheManager(CacheManager):
         """Initializes the Redis cache manager"""
         self.redis = redis
 
-    # def __del__(self):
-    #     """Closes the Redis connection"""
-    #     asyncio.create_task(self.close())
-
     async def get(self, key: str) -> Agency | None:
         """Gets the value for the given key from the cache"""
         serialized_data = await self.redis.get(key)
@@ -30,11 +27,11 @@ class RedisCacheManager(CacheManager):
         loaded = self.restore_client_objects(loaded)
         return loaded
 
-    async def set(self, key: str, value: Agency) -> None:
+    async def set(self, key: str, value: Agency, expire: int = DEFAULT_CACHE_EXPIRATION) -> None:
         """Sets the value for the given key in the cache"""
         value_copy = self.remove_client_objects(value)
         serialized_data = pickle.dumps(value_copy)
-        await self.redis.set(key, serialized_data)
+        await self.redis.set(key, serialized_data, ex=expire)
 
     async def delete(self, key: str) -> None:
         """Deletes the value for the given key from the cache"""
@@ -44,20 +41,18 @@ class RedisCacheManager(CacheManager):
         """Closes the Redis connection"""
         await self.redis.close()
 
-    def remove_client_objects(self, agency: Agency) -> Agency:
+    @staticmethod
+    def remove_client_objects(agency: Agency) -> Agency:
         """Remove all client objects from the agency object"""
         for agent in agency.agents:
             agent.client = None
-
         agency.main_thread.client = None
-
         return agency
 
-    def restore_client_objects(self, agency: Agency) -> Agency:
+    @staticmethod
+    def restore_client_objects(agency: Agency) -> Agency:
         """Restore all client objects from the agency object"""
         for agent in agency.agents:
             agent.client = get_openai_client()
-
         agency.main_thread.client = get_openai_client()
-
         return agency

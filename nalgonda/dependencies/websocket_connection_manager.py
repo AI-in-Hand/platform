@@ -4,7 +4,7 @@ from starlette.websockets import WebSocket
 
 
 class WebSocketConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_connections: list[WebSocket] = []
         self._connections_lock = asyncio.Lock()
 

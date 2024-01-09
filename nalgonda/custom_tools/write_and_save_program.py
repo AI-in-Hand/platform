@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field
 
-from nalgonda.constants import DATA_DIR
+from nalgonda.constants import AGENCY_DATA_DIR
 
 
 class File(BaseTool):
@@ -29,7 +29,7 @@ class File(BaseTool):
         # Extract the directory path from the file name
         directory_path = Path(self.file_name).parent
         agency_id = "test_agency_id"  # agency_id = self.context["agency_id"]  # TODO: pass agency_id to all tools
-        directory = DATA_DIR / agency_id / directory_path
+        directory = AGENCY_DATA_DIR / agency_id / directory_path
 
         # Ensure the directory exists
         directory.mkdir(parents=True, exist_ok=True)
