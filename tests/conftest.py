@@ -42,3 +42,9 @@ def mock_firestore_client():
     firestore_client = MockFirestoreClient()
     with patch("firebase_admin.firestore.client", return_value=firestore_client):
         yield firestore_client
+
+
+@pytest.fixture(autouse=True)
+def mock_get_openai_client():
+    with patch("agency_swarm.threads.thread.get_openai_client"):
+        yield

@@ -28,7 +28,8 @@ Ensure you have Python 3.11 or higher and follow these steps to get started:
 
 1. Ensure you have Python 3.11+ and Node.js (version above 14.15.0) installed.
 2. Install the required dependencies (from `requirements.txt` or using Poetry).
-3. Set up the necessary environment variables, see ".env" file for reference.
+3. Set up the necessary environment variables in the ".env" file, see ".env.testing" file for reference.
+   - To get Google Credentials as a string, use `cat ~/ai-in-hand-firebase-adminsdk-....json | jq -c . | sed 's/"/\\"/g' | tr -d '\n'`
 4. Use the provided JSON configuration files as templates to configure your own agents and agencies.
 5. Navigate to the `frontend` directory, install dependencies, and build the UI:
     ```
