@@ -7,8 +7,8 @@ from agency_swarm import Agency, Agent
 from fastapi import Depends
 from redis import asyncio as aioredis
 
-from nalgonda.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.custom_tools import TOOL_MAPPING
+from nalgonda.dependencies.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
 

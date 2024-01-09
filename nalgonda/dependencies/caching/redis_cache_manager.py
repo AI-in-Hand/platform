@@ -4,7 +4,7 @@ from agency_swarm import Agency
 from agency_swarm.util import get_openai_client
 from redis import asyncio as aioredis
 
-from nalgonda.caching.cache_manager import CacheManager
+from nalgonda.dependencies.caching.cache_manager import CacheManager
 
 
 class RedisCacheManager(CacheManager):
