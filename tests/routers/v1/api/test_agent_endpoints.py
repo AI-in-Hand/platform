@@ -4,7 +4,7 @@ AGENT_ID = "agent1"
 MOCK_DATA = {
     "agent_id": AGENT_ID,
     "owner_id": "user123",
-    "role": "ExampleRole",
+    "name": "ExampleRole",
     "description": "An example agent.",
     "instructions": "Do something important.",
     "files_folder": "agent_files/",

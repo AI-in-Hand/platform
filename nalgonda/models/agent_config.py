@@ -6,7 +6,7 @@ class AgentConfig(BaseModel):
 
     agent_id: str | None = Field(None, description="Unique identifier for the agent configuration")
     owner_id: str | None = Field(None, description="The user ID owning this agent configuration")
-    role: str = Field(..., description="Role of the agent within an agency")
+    name: str = Field(..., description="Name of the agent (must be unique within an agency). Can use versioning")
     description: str = Field(..., description="Description of the agent")
     instructions: str = Field(..., description="Instructions for the agent")
     files_folder: str | None = Field(None, description="Folder containing agent-related files")

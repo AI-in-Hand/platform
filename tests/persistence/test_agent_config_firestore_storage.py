@@ -8,7 +8,7 @@ from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFires
 def agent_data():
     return {
         "agent_id": "agent1",
-        "role": "example_role",
+        "name": "example_name",
         "owner_id": "owner123",
         "description": "An example agent",
         "instructions": "Do something important",

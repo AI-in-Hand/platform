@@ -79,7 +79,7 @@ class AgencyManager:
             get_result = await self.agent_manager.get_agent(agent_id)
             if get_result:
                 agent, agent_config = get_result
-                agents[agent_config.role] = agent
+                agents[agent_config.name] = agent
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
         return agents
@@ -90,7 +90,7 @@ class AgencyManager:
         It saves all the settings in the settings.json file (in the root folder, not thread safe)
         """
         agency_chart = [
-            [agents[role] for role in layer] if isinstance(layer, list) else agents[layer]
+            [agents[name] for name in layer] if isinstance(layer, list) else agents[layer]
             for layer in agency_config.agency_chart
         ]
         return Agency(agency_chart, shared_instructions=agency_config.agency_manifesto)

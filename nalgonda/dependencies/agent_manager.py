@@ -45,7 +45,7 @@ class AgentManager:
     def _construct_agent(agent_config: AgentConfig) -> Agent:
         agent = Agent(
             id=agent_config.agent_id,
-            name=agent_config.role,
+            name=agent_config.name,
             description=agent_config.description,
             instructions=agent_config.instructions,
             files_folder=agent_config.files_folder,
