@@ -939,7 +939,7 @@ export const AgentFlowSpecView = ({
           }
         />
 
-        <ControlRowView
+        {/* <ControlRowView
           title="Max Consecutive Auto Reply"
           className="mt-4"
           description="Max consecutive auto reply messages before termination."
@@ -1041,7 +1041,8 @@ export const AgentFlowSpecView = ({
               />
             }
           />
-        }
+        } */}
+
       </GroupView>
     </>
   );
