@@ -51,6 +51,7 @@ class PrintAllFilesInDirectory(BaseTool):
 if __name__ == "__main__":
     print(
         PrintAllFilesInDirectory(
-            start_directory=".", file_extensions={".py", ".json", ".yaml", ".yml", ".md", ".txt"}
+            start_directory=".",
+            file_extensions={".py", ".json", ".yaml", ".yml", ".md", ".txt", ".tsx", ".ts", ".js", ".jsx", ".html"},
         ).run()
     )
