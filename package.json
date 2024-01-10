@@ -7,6 +7,6 @@
     "heroku-postbuild": "cd frontend && npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build"
   },
   "engines": {
-    "node": "14.19.0",
+    "node": "14.19.0"
   }
 }
