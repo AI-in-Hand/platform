@@ -12,6 +12,7 @@
     "dev": "npm run develop",
     "start": "gatsby clean && gatsby develop",
     "build": "gatsby clean && rm -rf ../nalgonda/ui  && PREFIX_PATH_VALUE='' gatsby build --prefix-paths && cp -r  public/ ../nalgonda/ui",
+    "heroku-postbuild": "cd frontend && npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "typecheck": "tsc --noEmit"
