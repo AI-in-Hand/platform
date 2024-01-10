@@ -173,7 +173,6 @@ const Icon = ({ icon = "app", size = 4, className = "" }: Props) => {
         src="../images/icon.png"
         fill="currentColor"
         viewBox="0 0 93 90"
-        style={{ width: "36px", height: "36px" }}
         className={` ${sizeClass} inline-block  `}
       />
     );
