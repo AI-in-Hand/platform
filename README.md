@@ -30,7 +30,7 @@ and agent management.
 
 ## Installation
 
-1. Ensure Python 3.11+ and Node.js (version above 14.15.0) are installed.
+1. Ensure Python 3.11+ and Node.js (version above 16.14.0) are installed.
 2. Install Python dependencies (from `requirements.txt` or using Poetry).
 3. Set up environment variables in ".env", reference in ".env.testing".
    - Use `cat ~/ai-in-hand-firebase-adminsdk-....json | jq -c .` for Google Credentials.
