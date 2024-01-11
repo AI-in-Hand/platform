@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from tests.test_utils.mock_firestore_client import MockFirestoreClient
+from tests.unit.test_utils.mock_firestore_client import MockFirestoreClient
 
 
 # each test runs on cwd to its temp dir

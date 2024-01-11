@@ -8,6 +8,7 @@ def test_get_agency_config(client, mock_firestore_client):
         "agency_id": "test_agency",
         "owner_id": "test_user",
         "agency_manifesto": "Test Manifesto",
+        "main_agent": None,
         "agents": [],
         "agency_chart": [],
     }

@@ -82,6 +82,7 @@ class AgencyManager:
                 agents[agent_config.name] = agent
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
+                # TODO: Handle this error (raise exception?)
         return agents
 
     @staticmethod
@@ -89,10 +90,11 @@ class AgencyManager:
         """Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
         It saves all the settings in the settings.json file (in the root folder, not thread safe)
         """
-        agency_chart = [
-            [agents[name] for name in layer] if isinstance(layer, list) else agents[layer]
-            for layer in agency_config.agency_chart
-        ]
+        if agents and agency_config.main_agent and agency_config.agency_chart:
+            main_agent = agents[agency_config.main_agent]
+            agency_chart = [main_agent] + [[agents[name] for name in layer] for layer in agency_config.agency_chart]
+        else:
+            agency_chart = []
         return Agency(agency_chart, shared_instructions=agency_config.agency_manifesto)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:

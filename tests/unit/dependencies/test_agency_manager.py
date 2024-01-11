@@ -128,7 +128,6 @@ async def test_update_agency(agency_manager):
         owner_id="test_user",
         agency_manifesto="manifesto",
         agents=["agent1_id"],
-        agency_chart=["agent1_name"],
     )
     updated_data = {"agency_manifesto": "new_manifesto"}
 
@@ -160,7 +159,6 @@ async def test_repopulate_cache_success(agency_manager):
         owner_id="test_user",
         agency_manifesto="manifesto",
         agents=["agent1_id"],
-        agency_chart=["agent1_name"],
     )
     agent = MagicMock(spec=Agent)
 
@@ -193,7 +191,6 @@ async def test_load_and_construct_agents_success():
         owner_id="test_user",
         agency_manifesto="Test manifesto",
         agents=["agent1_id"],
-        agency_chart=["agent1_name"],
     )
     agent_config_mock = Mock()
     agent_config_mock.name = "agent1_name"
@@ -219,7 +216,6 @@ async def test_load_and_construct_agents_agent_not_found():
         owner_id="test_user",
         agency_manifesto="Test manifesto",
         agents=["agent1_id"],
-        agency_chart=["agent1_name"],
     )
 
     agent_manager_mock = AsyncMock()
@@ -240,23 +236,29 @@ async def test_construct_agency_single_layer_chart():
         agency_id="test_agency",
         owner_id="test_user",
         agency_manifesto="manifesto",
-        agents=["agent1_id"],
-        agency_chart=["agent1_name"],
+        agents=["agent1_id", "agent2_id"],
+        main_agent="agent1_name",
+        agency_chart=[["agent1_name", "agent2_name"]],
     )
 
     # Mock agents
-    mock_agent = MagicMock(spec=Agent)
-    mock_agent.id = "agent1_id"
-    mock_agent.name = "agent1_name"
+    mock_agent_1 = MagicMock(spec=Agent)
+    mock_agent_1.id = "agent1_id"
+    mock_agent_1.name = "agent1_name"
+    mock_agent_1.description = "agent1_description"
+    mock_agent_2 = MagicMock(spec=Agent)
+    mock_agent_2.id = "agent2_id"
+    mock_agent_2.name = "agent2_name"
+    mock_agent_2.description = "agent2_description"
 
     # AgencyManager instance
     agency_manager = AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
 
     # Construct the agency
-    agency = agency_manager.construct_agency(agency_config, {"agent1_name": mock_agent})
+    agency = agency_manager.construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})
 
     # Assertions
     assert isinstance(agency, Agency)
-    assert len(agency.agents) == 1
-    assert agency.agents[0] == mock_agent
+    assert len(agency.agents) == 2
+    assert agency.agents == [mock_agent_1, mock_agent_2]
     assert agency.shared_instructions == "manifesto"
