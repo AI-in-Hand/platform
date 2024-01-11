@@ -1423,15 +1423,15 @@ export const FlowConfigViewer = ({
         control={
           <Input
             className="mt-2 w-full"
-            value={localFlowConfig.agencyChart}
-            {/* onChange={(e) => {
+            value={JSON.stringify(localFlowConfig.agencyChart)}
+            onChange={(e) => {
               const updatedConfig = {
                 ...localFlowConfig,
                 agencyChart: JSON.parse(e.target.value),
               };
               setLocalFlowConfig(updatedConfig);
               setFlowConfig(updatedConfig);
-            }} */}
+            }}
           />
         }
       />
