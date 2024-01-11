@@ -272,6 +272,8 @@ export const sampleWorkflowConfig = () => {
     sender: userProxyFlowSpec,
     receiver: assistantFlowSpec,
     type: "default",
+    mainAgent: "CEO",
+    agencyChart: [["CEO", "Developer"], ["CEO", "Virtual Assistant"], ["Virtual Assistant", "Developer"]]
   };
 
   return workFlowConfig;

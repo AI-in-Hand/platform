@@ -17,6 +17,7 @@ import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { fetchJSON, getServerUrl, truncateText } from "./utils";
 import {
+  IAgencyChartSpec,
   IAgentFlowSpec,
   IFlowConfig,
   IModelConfig,
@@ -1018,7 +1019,7 @@ export const AgentFlowSpecView = ({
               />
             }
           />
-        )}
+        )} */}
 
         {
           <ControlRowView
@@ -1041,7 +1042,7 @@ export const AgentFlowSpecView = ({
               />
             }
           />
-        } */}
+        }
 
       </GroupView>
     </>
@@ -1270,6 +1271,20 @@ export const FlowConfigViewer = ({
   flowConfig: IFlowConfig;
   setFlowConfig: (newFlowConfig: IFlowConfig) => void;
 }) => {
+  // Local state for the AgencyChart
+  const [agencyChart, setAgencyChart] = React.useState<IAgencyChartSpec>(
+    flowConfig.agencyChart
+  );
+
+  // Update IAgentFlowSpec.mainAgent
+  const updateMainAgent = (newMainAgent: string) => {
+    const updatedFlowConfig = {
+      ...flowConfig,
+      mainAgent: newMainAgent,
+    };
+    setFlowConfig(updatedFlowConfig);
+  };
+
   // Local state for sender and receiver FlowSpecs
   const [senderFlowSpec, setSenderFlowSpec] = React.useState<IAgentFlowSpec>(
     flowConfig.sender
@@ -1340,7 +1355,7 @@ export const FlowConfigViewer = ({
         }
       />
 
-      <ControlRowView
+      {/* <ControlRowView
         title="Summary Method"
         description="Defines the method to summarize the conversation"
         value={localFlowConfig.summary_method || "last"}
@@ -1366,6 +1381,7 @@ export const FlowConfigViewer = ({
           />
         }
       />
+
       <div className="flex gap-3 ">
         <div className="w-1/2">
           <div className="">
@@ -1383,7 +1399,43 @@ export const FlowConfigViewer = ({
             setFlowSpec={updateReceiverFlowSpec}
           />
         </div>
-      </div>
+      </div> */}
+
+      <ControlRowView
+        title="Main Agent"
+        className="mt-4 mb-2"
+        description="Name of the main agent"
+        value={localFlowConfig.mainAgent}
+        control={
+          <Input
+            className="mt-2 w-full"
+            value={localFlowConfig.mainAgent}
+            onChange={(e) => updateMainAgent(e.target.value)}
+          />
+        }
+      />
+
+      <ControlRowView
+        title="Agency Chart"
+        className="mt-4 mb-2"
+        description="Defines the agency chart as a list of agent pairs. Example: [['CEO', 'Developer'], ['CEO', 'VA']"
+        value={localFlowConfig.agencyChart}
+        control={
+          <Input
+            className="mt-2 w-full"
+            value={localFlowConfig.agencyChart}
+            onChange={(e) => {
+              const updatedConfig = {
+                ...localFlowConfig,
+                agencyChart: JSON.parse(e.target.value),
+              };
+              setLocalFlowConfig(updatedConfig);
+              setFlowConfig(updatedConfig);
+            }}
+          />
+        }
+      />
+
     </>
   );
 };

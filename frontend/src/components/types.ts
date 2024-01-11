@@ -60,6 +60,14 @@ export interface IFlowConfig {
   type: "default" | "groupchat";
   timestamp?: string;
   summary_method?: "none" | "last" | "llm";
+  mainAgent?: string;
+  agencyChart?: IAgencyChartSpec;
+}
+
+export type AgencyChartElement = [string, string];
+
+export interface IAgencyChartSpec {
+  edges: Array<AgencyChartElement>;
 }
 
 export interface IModelConfig {
