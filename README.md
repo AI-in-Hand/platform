@@ -30,18 +30,14 @@ and agent management.
 
 ## Installation
 
-1. Ensure Python 3.11+ and Node.js (version above 16.14.0) are installed.
+1. Ensure Python 3.11+ and Node.js 20.11+ are installed.
 2. Install Python dependencies (from `requirements.txt` or using Poetry).
 3. Set up environment variables in ".env", reference in ".env.testing".
    - Use `cat ~/ai-in-hand-firebase-adminsdk-....json | jq -c .` for Google Credentials.
 4. In `frontend` directory, run:
-   ```
-   npm install -g gatsby-cli
-   npm install --global yarn
-   cd frontend
-   yarn install
-   yarn build
-   ```
+   - for local development: `npm install && npm run start`
+   - for production (builds to nalgonda/ui/ directory and is served by FastAPI):
+   `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build`
 
 ### Running the Application
 Start the FastAPI server: `uvicorn nalgonda.main:app --reload`
