@@ -1418,20 +1418,20 @@ export const FlowConfigViewer = ({
       <ControlRowView
         title="Agency Chart"
         className="mt-4 mb-2"
-        description="Defines the agency chart as a list of agent pairs. Example: [['CEO', 'Developer'], ['CEO', 'VA']"
-        value={localFlowConfig.agencyChart}
+        description='Defines the agency chart as a list of agent pairs. Example: [["CEO", "Developer"], ["CEO", "VA"]]'
+        value={JSON.stringify(localFlowConfig.agencyChart)}
         control={
           <Input
             className="mt-2 w-full"
             value={localFlowConfig.agencyChart}
-            onChange={(e) => {
+            {/* onChange={(e) => {
               const updatedConfig = {
                 ...localFlowConfig,
                 agencyChart: JSON.parse(e.target.value),
               };
               setLocalFlowConfig(updatedConfig);
               setFlowConfig(updatedConfig);
-            }}
+            }} */}
           />
         }
       />

@@ -64,11 +64,7 @@ export interface IFlowConfig {
   agencyChart?: IAgencyChartSpec;
 }
 
-export type AgencyChartElement = [string, string];
-
-export interface IAgencyChartSpec {
-  edges: Array<AgencyChartElement>;
-}
+export type IAgencyChartSpec = Array<[string, string]>;
 
 export interface IModelConfig {
   model: string;
