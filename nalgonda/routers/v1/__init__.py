@@ -4,7 +4,6 @@ from .api import api_router
 from .websocket import ws_router
 
 v1_router = APIRouter(
-    prefix="/v1",
     responses={404: {"description": "Not found"}},
 )
 

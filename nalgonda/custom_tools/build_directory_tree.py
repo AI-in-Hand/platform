@@ -43,3 +43,7 @@ class BuildDirectoryTree(BaseTool):
 
         recurse(start_path)
         return tree_str
+
+
+if __name__ == "__main__":
+    print(BuildDirectoryTree().run())

@@ -46,3 +46,12 @@ class PrintAllFilesInDirectory(BaseTool):
             return file_path.read_text()
         except OSError as e:
             return f"Error reading file {file_path}: {e}"
+
+
+if __name__ == "__main__":
+    print(
+        PrintAllFilesInDirectory(
+            start_directory=".",
+            file_extensions={".py", ".json", ".yaml", ".yml", ".md", ".txt", ".tsx", ".ts", ".js", ".jsx", ".html"},
+        ).run()
+    )

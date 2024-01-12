@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
-from nalgonda.websocket_connection_manager import WebSocketConnectionManager
+from nalgonda.dependencies.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
 connection_manager = WebSocketConnectionManager()

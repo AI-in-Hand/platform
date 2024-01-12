@@ -6,8 +6,8 @@ from agency_swarm import Agency, Agent
 from fastapi import Depends
 from redis import asyncio as aioredis
 
-from nalgonda.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
+from nalgonda.dependencies.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.dependencies.redis import get_redis
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
@@ -79,9 +79,10 @@ class AgencyManager:
             get_result = await self.agent_manager.get_agent(agent_id)
             if get_result:
                 agent, agent_config = get_result
-                agents[agent_config.role] = agent
+                agents[agent_config.name] = agent
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
+                # TODO: Handle this error (raise exception?)
         return agents
 
     @staticmethod
@@ -89,10 +90,14 @@ class AgencyManager:
         """Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
         It saves all the settings in the settings.json file (in the root folder, not thread safe)
         """
-        agency_chart = [
-            [agents[role] for role in layer] if isinstance(layer, list) else agents[layer]
-            for layer in agency_config.agency_chart
-        ]
+        agency_chart = []
+        if agents and agency_config.main_agent:
+            main_agent = agents[agency_config.main_agent]
+            agency_chart = [main_agent]
+            if agency_config.agency_chart:
+                new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart]
+                agency_chart.extend(new_agency_chart)
+
         return Agency(agency_chart, shared_instructions=agency_config.agency_manifesto)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:

@@ -3,54 +3,71 @@
 ## Overview
 
 Project Nalgonda is an innovative platform for managing and executing AI-driven swarm agencies.
-It is built upon the foundational [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview)
-and extends its functionality through a suite of specialized tools and a sophisticated management system for AI agencies.
+Built upon the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview),
+it extends functionality through specialized tools and a sophisticated management system for AI agencies.
+It combines robust FastAPI architecture, Firebase Firestore, and OpenAI's GPT models for dynamic agency
+and agent management.
 
 ## Key Components
 
-- **Agency Configuration Manager**: Manages configurations for AI agencies, ensuring they're loaded and saved properly.
-- **WebSocket Connection Manager**: Handles real-time WebSocket connections for interactive agency-client communication.
-- **Custom Tools**: A collection of tools including `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, and more,
-providing specialized functionalities tailored to the needs of different agency roles.
-- **Data Persistence**: Utilizes JSON-based configurations to maintain agency states and preferences across sessions.
+- **Agency Configuration Manager**: Manages configurations for AI agencies.
+- **WebSocket Connection Manager**: Handles WebSocket connections for interactive agency-client communication.
+- **Custom Tools**: Includes tools like `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, and more.
+- **Data Persistence**: Uses Firestore for storing tool, agent, and agency configurations.
+- **FastAPI Web Server**: For API routing, CORS middleware, Firebase initialization, and WebSocket communication.
+- **Data Models**: Pydantic models for agencies, agents, and tool configurations.
+- **Caching**: Redis for efficient caching of agency states.
 
 ## Features
 
-- **Agency Configuration**: Configure agencies with agents
-- **Tool Configuration**: Configure tools with custom parameters
-- **Tool Execution**: Execute tools and return results
-- **Agent Configuration**: Configure agents with their knowledge and tools
-- **User Management**: Manage users and their access to different agencies [TODO]
+- **Tool Configuration**: Configure tools with code and parameters.
+- **Agent Configuration**: Configure agents with knowledge and tools.
+- **Agency Configuration**: Set up agencies with agents.
+- **Tool Execution**: Execute tools for various tasks.
+- **User Management**: Manage user access to different agencies [TODO].
+- **API and WebSocket Routers**: Define API endpoints and WebSocket routes.
+- **Security**: Basic implementations of JWT authentication and authorization [TBD].
 
 ## Installation
 
-Ensure you have Python 3.11 or higher and follow these steps to get started:
+1. Ensure Python 3.11+ and Node.js 20.11+ are installed.
+2. Install Python dependencies (from `requirements.txt` or using Poetry).
+3. Set up environment variables in ".env", reference in ".env.testing".
+   - Use `cat ~/ai-in-hand-firebase-adminsdk-....json | jq -c .` for Google Credentials.
+4. In `frontend` directory, run:
+   - for local development: `npm install && npm run start`
+   - for production (builds to nalgonda/ui/ directory and is served by FastAPI):
+   `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build`
 
-1. Install the required dependencies (from `requirements.txt` or using Poetry).
-2. Set up the necessary environment variables, including `OPENAI_API_KEY`.
-3. Use the provided JSON configuration files as templates to configure your own AI agencies.
-4. Start the FastAPI server (`uvicorn nalgonda.main:app --reload`) to interact with the system.
-
-Note: Refer to individual class and method docstrings for detailed instructions and usage.
+### Running the Application
+Start the FastAPI server: `uvicorn nalgonda.main:app --reload`
 
 ## Deployment to Heroku
 
-Follow these steps to deploy the app to Heroku:
-1. `poetry export -o requirements.txt --without dev --without-hashes` - update `requirements.txt`
-2. `heroku login`- log in to Heroku
-3. `heroku git:remote -a ainhand` - set up Heroku remote
-4. `git push heroku main` - deploy to Heroku
-5. `heroku ps:scale web=1` - scale up the app
-6. `heroku logs --tail` - view logs
+1. Update `requirements.txt` with `poetry export --without dev --without-hashes > requirements.txt`.
+2. Log in to Heroku with `heroku login`.
+3. Set up Heroku remote: `heroku git:remote -a ainhand`.
+4. Deploy: `git push heroku main`.
+5. Scale up: `heroku ps:scale web=1`.
+6. View logs: `heroku logs --tail`.
 
 ## Usage
 
 ### API Endpoints
-
-Send POST requests to endpoints such as `POST /v1/api/agency` and `POST /v1/api/agency/message` to perform operations
-like creating new agencies and sending messages to them.
+To interact with the platform, use the Postman collection, which includes all necessary routes and variables for testing.
 
 ### WebSocket Communication
+Connect to WebSocket endpoints (`/v1/ws/{agency_id}`, `/v1/ws/{agency_id}/{thread_id}`)
+for real-time communication with AI agencies.
 
-Connect to WebSocket endpoints (e.g., `/v1/ws/{agency_id}`, `/v1/ws/{agency_id}/{thread_id}`)
-to engage in real-time communication with configured AI agencies.
+## Key Components
+- Agency Configuration Manager: Manages configurations for AI agencies.
+- WebSocket Connection Manager: Handles WebSocket connections for interactive agency-client communication.
+- Custom Tools: Includes tools like SearchWeb, GenerateProposal, BuildDirectoryTree, and more.
+- Data Persistence: Uses JSON-based configurations and Firestore for maintaining agency states.
+- FastAPI Web Server: For API routing, CORS middleware, Firebase initialization, and WebSocket communication.
+- Data Models: Pydantic models for agencies, agents, and tool configurations.
+- Caching: Redis for efficient configuration management.
+
+## Areas for Improvement
+- Enhanced exception handling, security, documentation, testing, caching logic, and database interactions.
