@@ -1,8 +1,10 @@
 import asyncio
 import logging
+from copy import deepcopy
 from uuid import uuid4
 
 from agency_swarm import Agency, Agent
+from agency_swarm.util import get_openai_client
 from fastapi import Depends
 from redis import asyncio as aioredis
 
@@ -31,7 +33,7 @@ class AgencyManager:
         agency_config = await asyncio.to_thread(agency_config_storage.load_or_create)
 
         agents = await self.load_and_construct_agents(agency_config)
-        agency = self.construct_agency(agency_config, agents)
+        agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
 
         await self.cache_agency(agency, agency_id, None)
         return agency_id
@@ -39,6 +41,7 @@ class AgencyManager:
     async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, thread_id)
         agency = await self.cache_manager.get(cache_key)
+
         if not agency:
             # If agency is not found in the cache, re-populate the cache
             agency = await self.repopulate_cache(agency_id)
@@ -46,6 +49,7 @@ class AgencyManager:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
 
+        agency = self._restore_client_objects(agency)
         return agency
 
     async def update_agency(self, agency_config: AgencyConfig, updated_data: dict) -> None:
@@ -61,7 +65,6 @@ class AgencyManager:
         await self.repopulate_cache(agency_id)
 
     async def repopulate_cache(self, agency_id: str) -> Agency | None:
-        cache_key = self.get_cache_key(agency_id)
         agency_config_storage = AgencyConfigFirestoreStorage(agency_id)
         agency_config = await asyncio.to_thread(agency_config_storage.load)
         if not agency_config:
@@ -69,8 +72,9 @@ class AgencyManager:
             return None
 
         agents = await self.load_and_construct_agents(agency_config)
-        agency = self.construct_agency(agency_config, agents)
-        await self.cache_manager.set(cache_key, agency)
+        agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
+
+        await self.cache_agency(agency, agency_id, None)
         return agency
 
     async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
@@ -103,8 +107,8 @@ class AgencyManager:
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""
         cache_key = self.get_cache_key(agency_id, thread_id)
-
-        await self.cache_manager.set(cache_key, agency)
+        agency_clean = self._remove_client_objects(agency)
+        await self.cache_manager.set(cache_key, agency_clean)
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
         """Delete the agency from the cache."""
@@ -115,6 +119,23 @@ class AgencyManager:
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None = None) -> str:
         return f"{agency_id}/{thread_id}" if thread_id else agency_id
+
+    @staticmethod
+    def _remove_client_objects(agency: Agency) -> Agency:
+        """Remove all client objects from the agency object"""
+        agency = deepcopy(agency)
+        for agent in agency.agents:
+            agent.client = None
+        agency.main_thread.client = None
+        return agency
+
+    @staticmethod
+    def _restore_client_objects(agency: Agency) -> Agency:
+        """Restore all client objects from the agency object"""
+        for agent in agency.agents:
+            agent.client = get_openai_client()
+        agency.main_thread.client = get_openai_client()
+        return agency
 
 
 def get_agency_manager(
