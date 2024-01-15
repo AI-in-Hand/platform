@@ -46,5 +46,5 @@ def mock_firestore_client():
 
 @pytest.fixture(autouse=True)
 def mock_get_openai_client():
-    with patch("agency_swarm.threads.thread.get_openai_client"):
+    with patch("agency_swarm.util.oai.get_openai_client"):
         yield
