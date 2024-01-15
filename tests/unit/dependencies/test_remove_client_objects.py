@@ -17,12 +17,14 @@ def agency():
     agent2 = MagicMock(spec=Agent)
     agent2.name = "Agent2"
     agent2.client = "Client2"
-    main_thread = MagicMock(spec=Thread)
+    main_thread = MagicMock(spec=Thread, recipient_agent=agent2)
     main_thread.client = "Client3"
+
     agents = [agent1, agent2]
     agency = MagicMock(spec=Agency)
     agency.name = "test_agency"
     agency.agents = agents
+    agency.ceo = agent1
     agency.main_thread = main_thread
     return agency
 
