@@ -191,7 +191,7 @@ const SkillsView = ({}: any) => {
   });
 
   return (
-    <div className="  ">
+    <div className=" text-primary ">
       <Modal
         title={selectedSkill?.name}
         width={800}
@@ -281,7 +281,7 @@ const SkillsView = ({}: any) => {
             </div>
           )}
 
-          {skills && skills.length === 0 && (
+          {skills && skills.length === 0 && !loading && (
             <div className="text-sm border mt-4 rounded text-secondary p-2">
               <InformationCircleIcon className="h-4 w-4 inline mr-1" />
               No skills found. Please create a new skill.
