@@ -6,9 +6,11 @@ import openai
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials
+from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
 from nalgonda.constants import BASE_DIR
+from nalgonda.exception_handlers import bad_request_exception_handler
 from nalgonda.routers.v1 import v1_router
 from nalgonda.settings import settings
 from nalgonda.utils import init_webserver_folders
@@ -48,6 +50,7 @@ folders = init_webserver_folders(root_file_path=BASE_DIR)
 
 v1_api_app = FastAPI(root_path="/v1")
 v1_api_app.include_router(v1_router)
+v1_api_app.add_exception_handler(ValidationError, bad_request_exception_handler)
 
 # mount an api route such that the main route serves the ui and the /api
 app.mount("/v1", v1_api_app)
