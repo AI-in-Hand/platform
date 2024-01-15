@@ -134,6 +134,10 @@ class AgencyManager:
 
         agency_copy.main_thread = copy(agency_copy.main_thread)
         agency_copy.main_thread.client = None
+        agency_copy.main_thread.recipient_agent.client = None
+
+        agency_copy.ceo = copy(agency_copy.ceo)
+        agency_copy.ceo.client = None
 
         return agency_copy
 
