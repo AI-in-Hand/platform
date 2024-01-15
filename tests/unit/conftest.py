@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from agency_swarm.util.oai import get_openai_client  # noqa: F401
 
 from tests.unit.test_utils.mock_firestore_client import MockFirestoreClient
 
