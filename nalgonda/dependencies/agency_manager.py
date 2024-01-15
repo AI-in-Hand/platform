@@ -58,6 +58,9 @@ class AgencyManager:
 
         updated_data.pop("agency_id", None)  # ensure agency_id is not modified
         agency_config.update(updated_data)
+
+        AgencyConfig.model_validate(agency_config.model_dump())
+
         agency_config_storage = AgencyConfigFirestoreStorage(agency_id)
         await asyncio.to_thread(agency_config_storage.save, agency_config)
 

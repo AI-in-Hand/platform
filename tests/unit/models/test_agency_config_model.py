@@ -28,9 +28,9 @@ def test_invalid_list_size_in_agency_chart():
             agency_id="123",
             agents=["Agent1", "Agent2", "Agent3"],
             main_agent="CEO",
-            agency_chart=[["CEO", "Agent1", "ExtraAgent"]],
+            agency_chart=[["CEO"]],
         )
-    assert "List should have at most 2 items after validation" in str(excinfo.value)
+    assert "List should have at least 2 items after validation" in str(excinfo.value)
 
 
 def test_main_agent_not_in_agency_chart():
