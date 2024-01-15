@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from copy import deepcopy
+from copy import copy
 from uuid import uuid4
 
 from agency_swarm import Agency, Agent
@@ -123,11 +123,16 @@ class AgencyManager:
     @staticmethod
     def _remove_client_objects(agency: Agency) -> Agency:
         """Remove all client objects from the agency object"""
-        agency = deepcopy(agency)
-        for agent in agency.agents:
+        agency_copy = copy(agency)
+        agency_copy.agents = [copy(agent) for agent in agency_copy.agents]
+
+        for agent in agency_copy.agents:
             agent.client = None
-        agency.main_thread.client = None
-        return agency
+
+        agency_copy.main_thread = copy(agency_copy.main_thread)
+        agency_copy.main_thread.client = None
+
+        return agency_copy
 
     @staticmethod
     def _restore_client_objects(agency: Agency) -> Agency:
