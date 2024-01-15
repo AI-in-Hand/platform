@@ -1,10 +1,12 @@
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from tests.unit.test_utils.mock_firestore_client import MockFirestoreClient
+
+sys.modules["agency_swarm.util.oai"] = Mock()
 
 
 # each test runs on cwd to its temp dir
@@ -42,9 +44,3 @@ def mock_firestore_client():
     firestore_client = MockFirestoreClient()
     with patch("firebase_admin.firestore.client", return_value=firestore_client):
         yield firestore_client
-
-
-@pytest.fixture(autouse=True)
-def mock_get_openai_client():
-    with patch("agency_swarm.threads.thread.get_openai_client"):
-        yield

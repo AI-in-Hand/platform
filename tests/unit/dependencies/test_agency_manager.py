@@ -45,7 +45,7 @@ async def test_create_agency_with_new_id(agency_manager):
         "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
         "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-    ):
+    ) as mock_cache_agency:
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
@@ -54,6 +54,7 @@ async def test_create_agency_with_new_id(agency_manager):
         assert isinstance(new_agency_id, str)
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
+        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, new_agency_id, None)
 
 
 @pytest.mark.asyncio
@@ -66,7 +67,7 @@ async def test_create_agency_with_provided_id(agency_manager):
         "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
         "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-    ):
+    ) as mock_cache_agency:
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
@@ -75,6 +76,7 @@ async def test_create_agency_with_provided_id(agency_manager):
         assert returned_agency_id == provided_id
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
+        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, provided_id, None)
 
 
 @pytest.mark.asyncio
@@ -85,7 +87,7 @@ async def test_create_agency(agency_manager):
         "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
         "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-    ):
+    ) as mock_cache_agency:
         # Mock return value with necessary agents
         mock_load_agents.return_value = {"agent1": MagicMock(spec=Agent)}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
@@ -95,6 +97,7 @@ async def test_create_agency(agency_manager):
         assert isinstance(agency_id, str)
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
+        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, agency_id, None)
 
 
 @pytest.mark.asyncio
@@ -140,20 +143,19 @@ async def test_update_agency(agency_manager):
 
 @pytest.mark.asyncio
 async def test_repopulate_cache_no_config(agency_manager):
-    with patch("nalgonda.dependencies.agency_manager.AgencyConfigFirestoreStorage") as mock_storage_class, patch(
-        "nalgonda.dependencies.agency_manager.logger"
-    ) as mock_logger, patch("asyncio.to_thread", new_callable=AsyncMock) as mock_async_to_thread:
+    with patch("nalgonda.dependencies.agency_manager.logger") as mock_logger, patch(
+        "asyncio.to_thread", new_callable=AsyncMock
+    ) as mock_async_to_thread:
         mock_async_to_thread.return_value = None
 
         result = await agency_manager.repopulate_cache("nonexistent_agency_id")
         assert result is None
         mock_async_to_thread.assert_called_once()
         mock_logger.error.assert_called_once_with("Agency with id nonexistent_agency_id not found.")
-        mock_storage_class.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_repopulate_cache_success(agency_manager):
+async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id="test_agency",
         owner_id="test_user",
@@ -162,25 +164,22 @@ async def test_repopulate_cache_success(agency_manager):
     )
     agent = MagicMock(spec=Agent)
 
-    with patch("nalgonda.dependencies.agency_manager.AgencyConfigFirestoreStorage") as mock_storage_class, patch(
+    with patch(
         "nalgonda.dependencies.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
     ) as mock_load_agents, patch(
         "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
-        "nalgonda.dependencies.agency_manager.RedisCacheManager.set", new_callable=AsyncMock
-    ) as mock_cache_set, patch("asyncio.to_thread", new_callable=AsyncMock) as mock_async_to_thread:
-        mock_async_to_thread.return_value = agency_config
+        "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+    ) as mock_cache_agency:
+        mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = Agency([], "manifesto")
 
         result = await agency_manager.repopulate_cache("test_agency")
         assert result is not None
-        mock_async_to_thread.assert_called_once()
         mock_load_agents.assert_called_once_with(agency_config)
         mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})
-        mock_cache_set.assert_called_once_with("test_agency", result)
-
-        mock_storage_class.assert_called_once()
+        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, "test_agency", None)
 
 
 # Test successful agent construction
