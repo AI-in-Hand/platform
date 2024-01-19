@@ -4,11 +4,13 @@ from typing import Annotated
 
 from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Query
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
+from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
@@ -18,6 +20,28 @@ agency_router = APIRouter(
     responses={404: {"description": "Not found"}},
     tags=["agency"],
 )
+
+
+@agency_router.get("/agency")
+async def get_agency_list(
+    user_id: str = Query(..., description="The unique identifier of the user"),
+    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+) -> list[AgencyConfig]:
+    agencies = storage.load_by_user_id(user_id)
+    if not agencies:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+    return agencies
+
+
+@agency_router.get("/agency/config")
+async def get_agency_config(
+    agency_id: str = Query(..., description="The unique identifier of the agency"),
+    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+) -> AgencyConfig:
+    agency_config = storage.load_by_agency_id(agency_id)
+    if not agency_config:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+    return agency_config
 
 
 @agency_router.post("/agency")
@@ -55,24 +79,15 @@ async def create_agency_thread(
     return {"thread_id": thread_id}
 
 
-@agency_router.get("/agency/config")
-async def get_agency_config(agency_id: str):
-    storage = AgencyConfigFirestoreStorage(agency_id)
-    agency_config = storage.load()
-    if not agency_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
-    return agency_config
-
-
 @agency_router.put("/agency/config", status_code=HTTP_200_OK)
 async def update_agency_config(
     agency_id: str,
     updated_data: dict,
     current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ):
-    storage = AgencyConfigFirestoreStorage(agency_id)
-    agency_config = storage.load()
+    agency_config = storage.load_by_agency_id(agency_id)
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
 
@@ -84,7 +99,8 @@ async def update_agency_config(
 
 @agency_router.post("/agency/message")
 async def post_agency_message(
-    request: AgencyMessagePostRequest, agency_manager: AgencyManager = Depends(get_agency_manager)
+    request: AgencyMessagePostRequest,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
 ) -> dict:
     """Send a message to the CEO of the given agency."""
     # TODO: Add authentication: check if agency_id is valid for the given user

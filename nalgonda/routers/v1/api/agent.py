@@ -17,7 +17,7 @@ async def get_agent_list(
 ) -> list[AgentConfig]:
     agents = storage.load_by_user_id(user_id)
     if not agents:
-        raise HTTPException(status_code=404, detail="No agent configurations found")
+        raise HTTPException(status_code=404, detail="No agency configuration found")
     return agents
 
 

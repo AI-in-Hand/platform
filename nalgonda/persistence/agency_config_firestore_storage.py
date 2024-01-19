@@ -7,28 +7,32 @@ from nalgonda.models.agency_config import AgencyConfig
 
 
 class AgencyConfigFirestoreStorage:
-    def __init__(self, agency_id: str):
+    def __init__(self):
         self.db = firestore.client()
-        self.agency_id = agency_id
-        self.collection_name = "agency_configs"
-        self.document_ref = self.db.collection(self.collection_name).document(agency_id)
+        self.collection = self.db.collection("agency_configs")
 
-    def load(self) -> AgencyConfig | None:
-        agency_config_snapshot = self.document_ref.get()
+    def load_by_user_id(self, user_id: str) -> list[AgencyConfig]:
+        query = self.collection.where("owner_id", "==", user_id)
+        return [AgencyConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
+
+    def load_by_agency_id(self, agency_id: str) -> AgencyConfig | None:
+        document_ref = self.collection.document(agency_id)
+        agency_config_snapshot = document_ref.get()
         if agency_config_snapshot.exists:
             return AgencyConfig.model_validate(agency_config_snapshot.to_dict())
         return None
 
-    def load_or_create(self) -> AgencyConfig:
-        agency_config = self.load()
+    def load_or_create(self, agency_id: str) -> AgencyConfig:
+        agency_config = self.load_by_agency_id(agency_id)
         if agency_config is None:
             with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
                 config_data = json.load(default_config_file)
-            config_data["agency_id"] = self.agency_id
+            config_data["agency_id"] = agency_id
             agency_config = AgencyConfig.model_validate(config_data)
-            self.save(agency_config)
+            self.save(agency_id, agency_config)
         return agency_config
 
-    def save(self, agency_config: AgencyConfig) -> None:
+    def save(self, agency_id: str, agency_config: AgencyConfig) -> None:
         document_data = agency_config.model_dump()
-        self.document_ref.set(document_data)
+        document_ref = self.collection.document(agency_id)
+        document_ref.set(document_data)

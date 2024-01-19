@@ -15,7 +15,7 @@ async def get_tool_list(
 ) -> list[ToolConfig]:
     tools = storage.load_by_user_id(user_id)
     if not tools:
-        raise HTTPException(status_code=404, detail="No tool configurations found")
+        raise HTTPException(status_code=404, detail="No tool configuration found")
     return tools
 
 
