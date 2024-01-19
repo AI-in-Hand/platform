@@ -22,7 +22,7 @@ const SessionsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listSessionUrl = `${serverUrl}/sessions?user_id=${user?.email}`;
+  const listSessionUrl = `${serverUrl}/sessions?user_id=${user?.id}`;
   const createSessionUrl = `${serverUrl}/sessions`;
   const publishSessionUrl = `${serverUrl}/sessions/publish`;
   const deleteSessionUrl = `${serverUrl}/sessions/delete`;
@@ -45,7 +45,7 @@ const SessionsView = ({}: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         session: session,
       }),
     };
@@ -111,7 +111,7 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
+      user_id: user?.id,
       session: session,
       tags: ["published"],
     };
@@ -156,9 +156,9 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
+      user_id: user?.id,
       session: {
-        user_id: user?.email,
+        user_id: user?.id,
         flow_config: workflowConfig,
         session_id: null,
       },

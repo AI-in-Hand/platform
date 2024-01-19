@@ -24,9 +24,9 @@ const AgentsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listAgentsUrl = `${serverUrl}/agents?user_id=${user?.email}`;
-  const saveAgentsUrl = `${serverUrl}/agents`;
-  const deleteAgentUrl = `${serverUrl}/agents/delete`;
+  const listAgentsUrl = `${serverUrl}/agent?user_id=${user?.id}`;
+  const saveAgentsUrl = `${serverUrl}/agent/config`;
+  const deleteAgentUrl = `${serverUrl}/agent/delete`;
 
   const [agents, setAgents] = React.useState<IAgentFlowSpec[] | null>([]);
   const [selectedAgent, setSelectedAgent] =
@@ -39,7 +39,7 @@ const AgentsView = ({}: any) => {
   const sampleAgent: IAgentFlowSpec = {
     type: "assistant",
     description: "Sample assistant",
-    user_id: user?.email,
+    user_id: user?.id,
     config: {
       name: "sample_assistant",
       llm_config: {
@@ -55,6 +55,7 @@ const AgentsView = ({}: any) => {
       human_input_mode: "NEVER",
       max_consecutive_auto_reply: 8,
       system_message: " ..",
+      instructions: "",
     },
   };
   const [newAgent, setNewAgent] = React.useState<IAgentFlowSpec | null>(
@@ -71,7 +72,7 @@ const AgentsView = ({}: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         agent: agent,
       }),
     };
@@ -129,13 +130,13 @@ const AgentsView = ({}: any) => {
     // const fetch;
 
     const payLoad = {
-      method: "POST",
+      method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         agent: agent,
       }),
     };

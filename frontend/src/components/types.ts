@@ -38,6 +38,7 @@ export interface IAgentConfig {
   human_input_mode: string;
   max_consecutive_auto_reply: number;
   system_message: string | "";
+  instructions: string | "";
   is_termination_msg?: boolean | string;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
 }

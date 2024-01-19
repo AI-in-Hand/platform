@@ -8,11 +8,15 @@ class AgentConfigFirestoreStorage:
         self.db = firestore.client()
         self.collection = self.db.collection("agent_configs")
 
-    def load(self, agent_id: str) -> AgentConfig | None:
+    def load_by_user_id(self, user_id: str) -> list[AgentConfig]:
+        query = self.collection.where("owner_id", "==", user_id)
+        return [AgentConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
+
+    def load_by_agent_id(self, agent_id: str) -> AgentConfig | None:
         document_snapshot = self.collection.document(agent_id).get()
-        if document_snapshot.exists:
-            return AgentConfig.model_validate(document_snapshot.to_dict())
-        return None
+        if not document_snapshot.exists:
+            return None
+        return AgentConfig.model_validate(document_snapshot.to_dict())
 
     def save(self, agent_config: AgentConfig) -> str:
         """Save the agent configuration to the firestore.

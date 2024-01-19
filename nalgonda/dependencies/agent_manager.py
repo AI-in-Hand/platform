@@ -30,7 +30,7 @@ class AgentManager:
         return agent.id
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentConfig] | None:
-        agent_config = await asyncio.to_thread(self.storage.load, agent_id)
+        agent_config = await asyncio.to_thread(self.storage.load_by_agent_id, agent_id)
         if not agent_config:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None

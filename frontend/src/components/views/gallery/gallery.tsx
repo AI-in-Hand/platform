@@ -18,7 +18,7 @@ const GalleryView = ({ location }: any) => {
   const [gallery, setGallery] = React.useState<null | IGalleryItem[]>(null);
   const [currentGallery, setCurrentGallery] =
     React.useState<null | IGalleryItem>(null);
-  const listGalleryUrl = `${serverUrl}/gallery?user_id=${user?.email}`;
+  const listGalleryUrl = `${serverUrl}/gallery?user_id=${user?.id}`;
   const [error, setError] = React.useState<IStatus | null>({
     status: true,
     message: "All good",

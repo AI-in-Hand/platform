@@ -89,7 +89,7 @@ const ChatBox = ({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         msg_id: messageId,
         session_id: session?.id,
       }),
@@ -320,12 +320,12 @@ const ChatBox = ({
       role: "user",
       content: query,
       msg_id: userMessage.msg_id,
-      user_id: user?.email || "",
+      user_id: user?.id || "",
       root_msg_id: "0",
       session_id: session?.id || "",
     };
 
-    const textUrl = `${serverUrl}/messages`;
+    const textUrl = `${serverUrl}/agency/message`;
     const postData = {
       method: "POST",
       headers: {

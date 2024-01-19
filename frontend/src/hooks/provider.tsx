@@ -48,6 +48,7 @@ const Provider = ({ children }: any) => {
 
   // Modify logic here to add your own authentication
   const initUser = {
+    id: "test_user_id",
     name: "Guest User",
     email: "guestuser@gmail.com",
     username: "guestuser",

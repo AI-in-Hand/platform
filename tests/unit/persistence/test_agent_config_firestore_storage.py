@@ -23,7 +23,7 @@ def test_load_agent_config(mock_firestore_client, agent_data):
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
     storage = AgentConfigFirestoreStorage()
-    loaded_agent_config = storage.load(agent_data["agent_id"])
+    loaded_agent_config = storage.load_by_agent_id(agent_data["agent_id"])
 
     expected_agent_config = AgentConfig.model_validate(agent_data)
     assert loaded_agent_config == expected_agent_config

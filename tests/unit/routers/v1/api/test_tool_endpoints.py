@@ -1,4 +1,4 @@
-def test_get_tool_configs(client, mock_firestore_client):
+def test_get_tool_list(client, mock_firestore_client):
     user_id = "user1"
     tool_config_data = {
         "tool_id": "tool1",
@@ -10,7 +10,7 @@ def test_get_tool_configs(client, mock_firestore_client):
     }
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
-    response = client.get(f"/v1/api/tool/config?user_id={user_id}")
+    response = client.get(f"/v1/api/tool?user_id={user_id}")
     assert response.status_code == 200
     assert response.json() == [tool_config_data]
 

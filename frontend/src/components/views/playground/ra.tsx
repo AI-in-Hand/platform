@@ -35,7 +35,7 @@ const RAView = () => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/messages?user_id=${user?.email}&session_id=${session?.id}`;
+  const fetchMessagesUrl = `${serverUrl}/messages?user_id=${user?.id}&session_id=${session?.id}`;
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
 
   const fetchMessages = () => {

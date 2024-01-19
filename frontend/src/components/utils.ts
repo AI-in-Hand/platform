@@ -8,7 +8,7 @@ import {
 } from "./types";
 
 export const getServerUrl = () => {
-  return process.env.GATSBY_API_URL || "/api";
+  return process.env.GATSBY_API_URL || "/v1/api";
 };
 
 export function setCookie(name: string, value: any, days: number) {
@@ -241,6 +241,7 @@ export const sampleWorkflowConfig = () => {
     human_input_mode: "NEVER",
     max_consecutive_auto_reply: 5,
     system_message: "",
+    instructions: "",
     llm_config: false,
     code_execution_config: {
       work_dir: null,
@@ -259,6 +260,8 @@ export const sampleWorkflowConfig = () => {
     max_consecutive_auto_reply: 8,
     system_message:
       "You are a helpful assistant that can use available functions when needed to solve problems. At each point, do your best to determine if the user's request has been addressed. IF THE REQUEST HAS NOT BEEN ADDRESSED, RESPOND WITH CODE TO ADDRESS IT. IF A FAILURE OCCURRED (e.g., due to a missing library) AND SOME ADDITIONAL CODE WAS WRITTEN (e.g. code to install the library), ENSURE THAT THE ORIGINAL CODE TO ADDRESS THE TASK STILL GETS EXECUTED. If the request HAS been addressed, respond with a summary of the result. The summary must be written as a coherent helpful response to the user request e.g. 'Sure, here is result to your request ' or 'The tallest mountain in Africa is ..' etc.  The summary MUST end with the word TERMINATE. If the user request is  pleasantry or greeting, you should respond with a pleasantry or greeting and TERMINATE.",
+    instructions:
+      "You are a helpful assistant that can use available functions when needed to solve problems. At each point, do your best to determine if the user's request has been addressed. IF THE REQUEST HAS NOT BEEN ADDRESSED, ADDRESS IT. IF A FAILURE OCCURRED AND SOME ADDITIONAL CODE WAS WRITTEN (e.g. code to install the library), ENSURE THAT THE ORIGINAL CODE TO ADDRESS THE TASK STILL GETS EXECUTED. If the request HAS been addressed, respond with a summary of the result. The summary must be written as a coherent helpful response to the user request e.g. 'Sure, here is result to your request ' or 'The tallest mountain in Africa is ..' etc.",
   };
 
   const assistantFlowSpec: IAgentFlowSpec = {

@@ -1032,6 +1032,26 @@ export const AgentFlowSpecView = ({
           />
         )} */}
 
+        {llm_config && (
+          <ControlRowView
+            title="Instructions"
+            className="mt-4"
+            description="Instructions to define agent behavior"
+            value={flowSpec.config.instructions}
+            control={
+              <TextArea
+                className="mt-2 w-full"
+                value={flowSpec.config.instructions}
+                rows={3}
+                onChange={(e) => {
+                  // onDebouncedControlChange(e.target.value, "instructions");
+                  onControlChange(e.target.value, "instructions");
+                }}
+              />
+            }
+          />
+        )}
+
         {
           <ControlRowView
             title="Skills"
@@ -1197,7 +1217,7 @@ export const SkillLoader = ({
   });
   const serverUrl = getServerUrl();
   const { user } = React.useContext(appContext);
-  const listSkillsUrl = `${serverUrl}/skills?user_id=${user?.email}`;
+  const listSkillsUrl = `${serverUrl}/tool?user_id=${user?.id}`;
 
   const fetchSkills = () => {
     setError(null);
@@ -1372,7 +1392,7 @@ const AgentModal = ({
 
   const serverUrl = getServerUrl();
   const { user } = React.useContext(appContext);
-  const listAgentsUrl = `${serverUrl}/agents?user_id=${user?.email}`;
+  const listAgentsUrl = `${serverUrl}/agent?user_id=${user?.id}`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);
   useEffect(() => {

@@ -29,9 +29,9 @@ const WorkflowView = ({}: any) => {
   });
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listWorkflowsUrl = `${serverUrl}/workflows?user_id=${user?.email}`;
-  const saveWorkflowsUrl = `${serverUrl}/workflows`;
-  const deleteWorkflowsUrl = `${serverUrl}/workflows/delete`;
+  const listWorkflowsUrl = `${serverUrl}/agency?user_id=${user?.id}`;
+  const saveWorkflowsUrl = `${serverUrl}/agency/config`;
+  const deleteWorkflowsUrl = `${serverUrl}/agency/delete`;
 
   const [workflows, setWorkflows] = React.useState<IFlowConfig[] | null>([]);
   const [selectedWorkflow, setSelectedWorkflow] =
@@ -84,7 +84,7 @@ const WorkflowView = ({}: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         workflow: workflow,
       }),
     };
@@ -111,13 +111,13 @@ const WorkflowView = ({}: any) => {
     setLoading(true);
     // const fetch;
     const payLoad = {
-      method: "POST",
+      method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         workflow: workflow,
       }),
     };
