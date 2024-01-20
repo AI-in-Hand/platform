@@ -12,7 +12,7 @@ def agent_data():
         "owner_id": "owner123",
         "description": "An example agent",
         "instructions": "Do something important",
-        "files_folder": "example_folder",
+        "files_folder": None,
         "tools": ["tool1", "tool2"],
     }
 

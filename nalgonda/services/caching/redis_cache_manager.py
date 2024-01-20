@@ -1,12 +1,10 @@
 import pickle
 
 from agency_swarm import Agency
-from fastapi import Depends
 from redis import asyncio as aioredis
 
 from nalgonda.constants import DEFAULT_CACHE_EXPIRATION
-from nalgonda.dependencies.caching.cache_manager import CacheManager
-from nalgonda.dependencies.redis import get_redis
+from nalgonda.services.caching.cache_manager import CacheManager
 
 
 class RedisCacheManager(CacheManager):
@@ -39,7 +37,3 @@ class RedisCacheManager(CacheManager):
     async def close(self) -> None:
         """Closes the Redis connection"""
         await self.redis.close()
-
-
-def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> RedisCacheManager:
-    return RedisCacheManager(redis)

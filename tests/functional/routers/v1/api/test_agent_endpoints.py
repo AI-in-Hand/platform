@@ -7,7 +7,7 @@ MOCK_DATA = {
     "name": "ExampleRole",
     "description": "An example agent.",
     "instructions": "Do something important.",
-    "files_folder": "agent_files/",
+    "files_folder": None,
     "tools": ["tool1", "tool2"],
 }
 
@@ -23,7 +23,7 @@ def test_get_agent_config(client, mock_firestore_client):
 def test_update_agent_config(client):
     agent_config_data = MOCK_DATA.copy()
 
-    with patch("nalgonda.dependencies.agent_manager.AgentManager") as mock_agent_manager:
+    with patch("nalgonda.services.agent_manager.AgentManager") as mock_agent_manager:
         mock_agent_manager.return_value = AsyncMock()
         mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
 

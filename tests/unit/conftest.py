@@ -1,10 +1,7 @@
 import sys
 from pathlib import Path
-from unittest.mock import Mock
 
 import pytest
-
-sys.modules["agency_swarm.util.oai"] = Mock()
 
 
 # each test runs on cwd to its temp dir

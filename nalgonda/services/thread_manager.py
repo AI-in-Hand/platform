@@ -1,6 +1,5 @@
-from agency_swarm import Agency, Agent
+from agency_swarm import Agency, Agent, get_openai_client
 from agency_swarm.threads import Thread
-from agency_swarm.util import get_openai_client
 
 
 class ThreadManager:
@@ -41,8 +40,3 @@ class ThreadManager:
         thread.thread = new_thread
         thread.id = new_thread.id
         return thread
-
-
-def get_thread_manager() -> ThreadManager:
-    """Returns a ThreadManager object"""
-    return ThreadManager()

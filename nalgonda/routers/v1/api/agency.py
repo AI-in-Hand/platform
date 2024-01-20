@@ -7,13 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
-from nalgonda.dependencies.agency_manager import AgencyManager, get_agency_manager
 from nalgonda.dependencies.auth import get_current_active_user
-from nalgonda.dependencies.thread_manager import ThreadManager, get_thread_manager
+from nalgonda.dependencies.dependencies import get_agency_manager, get_thread_manager
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.services.agency_manager import AgencyManager
+from nalgonda.services.thread_manager import ThreadManager
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(

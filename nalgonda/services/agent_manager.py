@@ -2,7 +2,6 @@ import asyncio
 import logging
 
 from agency_swarm import Agent
-from fastapi import Depends
 
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
@@ -52,7 +51,3 @@ class AgentManager:
             tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
         )
         return agent
-
-
-def get_agent_manager(storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage)) -> AgentManager:
-    return AgentManager(storage)

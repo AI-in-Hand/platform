@@ -3,14 +3,12 @@ import logging
 from copy import copy
 from uuid import uuid4
 
-from agency_swarm import Agency, Agent
-from agency_swarm.util import get_openai_client
-from fastapi import Depends
+from agency_swarm import Agency, Agent, get_openai_client
 
-from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
-from nalgonda.dependencies.caching.redis_cache_manager import RedisCacheManager, get_redis_cache_manager
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.services.agent_manager import AgentManager
+from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
 
 logger = logging.getLogger(__name__)
 
@@ -150,10 +148,3 @@ class AgencyManager:
             agent.client = get_openai_client()
         agency.main_thread.client = get_openai_client()
         return agency
-
-
-def get_agency_manager(
-    cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
-    agent_manager: AgentManager = Depends(get_agent_manager),
-) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager)

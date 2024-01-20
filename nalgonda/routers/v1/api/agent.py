@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
-from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
 from nalgonda.dependencies.auth import get_current_active_user
+from nalgonda.dependencies.dependencies import get_agent_manager
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.models.auth import UserInDB
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.services.agent_manager import AgentManager
 
 agent_router = APIRouter(tags=["agent"])
 
