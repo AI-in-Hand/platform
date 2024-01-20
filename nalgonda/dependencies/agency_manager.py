@@ -6,11 +6,9 @@ from uuid import uuid4
 from agency_swarm import Agency, Agent
 from agency_swarm.util import get_openai_client
 from fastapi import Depends
-from redis import asyncio as aioredis
 
 from nalgonda.dependencies.agent_manager import AgentManager, get_agent_manager
-from nalgonda.dependencies.caching.redis_cache_manager import RedisCacheManager
-from nalgonda.dependencies.redis import get_redis
+from nalgonda.dependencies.caching.redis_cache_manager import RedisCacheManager, get_redis_cache_manager
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 
@@ -18,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self, redis: aioredis.Redis, agent_manager: AgentManager) -> None:
-        self.cache_manager = RedisCacheManager(redis)
+    def __init__(self, cache_manager: RedisCacheManager, agent_manager: AgentManager) -> None:
+        self.cache_manager = cache_manager
         self.agent_manager = agent_manager
 
     async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
@@ -155,6 +153,7 @@ class AgencyManager:
 
 
 def get_agency_manager(
-    redis: aioredis.Redis = Depends(get_redis), agent_manager: AgentManager = Depends(get_agent_manager)
+    cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
+    agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgencyManager:
-    return AgencyManager(redis, agent_manager)
+    return AgencyManager(cache_manager, agent_manager)
