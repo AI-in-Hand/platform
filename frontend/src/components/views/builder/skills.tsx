@@ -27,9 +27,9 @@ const SkillsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listSkillsUrl = `${serverUrl}/skills?user_id=${user?.email}`;
-  const saveSkillsUrl = `${serverUrl}/skills`;
-  const deleteSkillsUrl = `${serverUrl}/skills/delete`;
+  const listSkillsUrl = `${serverUrl}/tool?user_id=${user?.id}`;
+  const saveSkillsUrl = `${serverUrl}/tool/config`;
+  const deleteSkillsUrl = `${serverUrl}/tool/delete`;
 
   const [skills, setSkills] = React.useState<ISkill[] | null>([]);
   const [selectedSkill, setSelectedSkill] = React.useState<any>(null);
@@ -52,7 +52,7 @@ const SkillsView = ({}: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         skill: skill,
       }),
     };
@@ -115,7 +115,7 @@ const SkillsView = ({}: any) => {
       title: newSkillTitle,
       file_name: "skill.py",
       content: skillCode,
-      user_id: user?.email,
+      user_id: user?.id,
     };
 
     setError(null);
@@ -128,7 +128,7 @@ const SkillsView = ({}: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: user?.email,
+        user_id: user?.id,
         skill: skill,
       }),
     };

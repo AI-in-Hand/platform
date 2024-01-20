@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from agency_swarm import Agency, Agent
 
-from nalgonda.dependencies.agency_manager import AgencyManager
 from nalgonda.models.agency_config import AgencyConfig
+from nalgonda.services.agency_manager import AgencyManager
 
 
 class MockRedisCacheManager:
@@ -26,25 +26,18 @@ class MockRedisCacheManager:
 
 @pytest.fixture
 def agency_manager(mock_firestore_client):  # noqa: ARG001
-    with patch("nalgonda.dependencies.agency_manager.RedisCacheManager", MockRedisCacheManager()):
-        yield AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
-
-
-@pytest.fixture(autouse=True)
-def mock_tool_mapping():
-    with patch("nalgonda.dependencies.agent_manager.TOOL_MAPPING", {"tool1": MagicMock()}):
-        yield
+    yield AgencyManager(cache_manager=MagicMock(), agent_manager=MagicMock())
 
 
 @pytest.mark.asyncio
 async def test_create_agency_with_new_id(agency_manager):
     # Test creating an agency with a newly generated ID
     with patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
     ) as mock_load_agents, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
+        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
     ) as mock_cache_agency:
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
@@ -62,11 +55,11 @@ async def test_create_agency_with_provided_id(agency_manager):
     # Test creating an agency with a provided ID
     provided_id = "test_id"
     with patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
     ) as mock_load_agents, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
+        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
     ) as mock_cache_agency:
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
@@ -82,11 +75,11 @@ async def test_create_agency_with_provided_id(agency_manager):
 @pytest.mark.asyncio
 async def test_create_agency(agency_manager):
     with patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
     ) as mock_load_agents, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
+        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
     ) as mock_cache_agency:
         # Mock return value with necessary agents
         mock_load_agents.return_value = {"agent1": MagicMock(spec=Agent)}
@@ -143,7 +136,7 @@ async def test_update_agency(agency_manager):
 
 @pytest.mark.asyncio
 async def test_repopulate_cache_no_config(agency_manager):
-    with patch("nalgonda.dependencies.agency_manager.logger") as mock_logger, patch(
+    with patch("nalgonda.services.agency_manager.logger") as mock_logger, patch(
         "asyncio.to_thread", new_callable=AsyncMock
     ) as mock_async_to_thread:
         mock_async_to_thread.return_value = None
@@ -165,11 +158,11 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agent = MagicMock(spec=Agent)
 
     with patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
     ) as mock_load_agents, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.construct_agency"
+        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
     ) as mock_construct_agency, patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
     ) as mock_cache_agency:
         mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
@@ -199,7 +192,7 @@ async def test_load_and_construct_agents_success():
     agent_manager_mock = AsyncMock()
     agent_manager_mock.get_agent.return_value = (agent_mock, agent_config_mock)
 
-    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
+    agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=agent_manager_mock)
     agents = await agency_manager.load_and_construct_agents(agency_config)
 
     assert "agent1_name" in agents
@@ -221,7 +214,7 @@ async def test_load_and_construct_agents_agent_not_found():
     agent_manager_mock.get_agent.return_value = None
 
     with patch("logging.Logger.error") as mock_logger_error:
-        agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
+        agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=agent_manager_mock)
         agents = await agency_manager.load_and_construct_agents(agency_config)
 
         assert agents == {}
@@ -251,7 +244,7 @@ async def test_construct_agency_single_layer_chart():
     mock_agent_2.description = "agent2_description"
 
     # AgencyManager instance
-    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
+    agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=MagicMock())
 
     # Construct the agency
     agency = agency_manager.construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})

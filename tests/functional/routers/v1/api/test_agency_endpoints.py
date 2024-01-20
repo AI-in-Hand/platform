@@ -32,7 +32,7 @@ def test_update_agency_config_success(client, mock_firestore_client):
     new_data = {"agency_manifesto": "Updated Manifesto"}
 
     with patch(
-        "nalgonda.dependencies.agency_manager.AgencyManager.update_agency", new_callable=AsyncMock
+        "nalgonda.services.agency_manager.AgencyManager.update_agency", new_callable=AsyncMock
     ) as mock_update_agency:
         response = client.put("/v1/api/agency/config?agency_id=test_agency", json=new_data)
 

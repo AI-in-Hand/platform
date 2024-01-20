@@ -4,7 +4,7 @@ from agency_swarm import Agency
 from redis import asyncio as aioredis
 
 from nalgonda.constants import DEFAULT_CACHE_EXPIRATION
-from nalgonda.dependencies.caching.cache_manager import CacheManager
+from nalgonda.services.caching.cache_manager import CacheManager
 
 
 class RedisCacheManager(CacheManager):

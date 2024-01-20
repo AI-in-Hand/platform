@@ -2,7 +2,6 @@ import asyncio
 import logging
 
 from agency_swarm import Agent
-from fastapi import Depends
 
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
@@ -30,7 +29,7 @@ class AgentManager:
         return agent.id
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentConfig] | None:
-        agent_config = await asyncio.to_thread(self.storage.load, agent_id)
+        agent_config = await asyncio.to_thread(self.storage.load_by_agent_id, agent_id)
         if not agent_config:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None
@@ -52,7 +51,3 @@ class AgentManager:
             tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
         )
         return agent
-
-
-def get_agent_manager(storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage)) -> AgentManager:
-    return AgentManager(storage)

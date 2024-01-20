@@ -20,7 +20,7 @@ const AgentsWorkflowView = () => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listWorkflowsUrl = `${serverUrl}/workflows?user_id=${user?.email}`;
+  const listWorkflowsUrl = `${serverUrl}/agency?user_id=${user?.id}`;
 
   const [workflowConfigs, setWorkflowConfigs] = React.useState<IFlowConfig[]>(
     []
