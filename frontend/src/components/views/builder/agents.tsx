@@ -10,8 +10,10 @@ import { appContext } from "../../../hooks/provider";
 import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
 import {
   AgentFlowSpecView,
+  BounceLoader,
   Card,
   LaunchButton,
+  LoadBox,
   LoadingOverlay,
 } from "../../atoms";
 
@@ -108,7 +110,7 @@ const AgentsView = ({}: any) => {
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
-        message.success(data.message);
+        // message.success(data.message);
         console.log("agents", data.data);
         setAgents(data.data);
       } else {
@@ -182,16 +184,18 @@ const AgentsView = ({}: any) => {
   const agentRows = (agents || []).map((agent: IAgentFlowSpec, i: number) => {
     return (
       <div key={"agentrow" + i} className=" " style={{ width: "200px" }}>
-        <div className="h-full">
+        <div className="">
           <Card
             className="h-full p-2 cursor-pointer"
-            title={agent.config.name}
+            title={
+              <div className="  ">{truncateText(agent.config.name, 25)}</div>
+            }
             onClick={() => {
               setSelectedAgent(agent);
               setShowAgentModal(true);
             }}
           >
-            <div className="my-2">
+            <div style={{ minHeight: "65px" }} className="my-2   break-words">
               {" "}
               {truncateText(agent.description || "", 70)}
             </div>
@@ -328,6 +332,14 @@ const AgentsView = ({}: any) => {
             <div className="text-sm border mt-4 rounded text-secondary p-2">
               <InformationCircleIcon className="h-4 w-4 inline mr-1" />
               No agents found. Please create a new agent.
+            </div>
+          )}
+
+          {loading && (
+            <div className="  w-full text-center">
+              {" "}
+              <BounceLoader />{" "}
+              <span className="inline-block"> loading .. </span>
             </div>
           )}
         </div>
