@@ -26,8 +26,7 @@ class MockRedisCacheManager:
 
 @pytest.fixture
 def agency_manager(mock_firestore_client):  # noqa: ARG001
-    with patch("nalgonda.dependencies.agency_manager.RedisCacheManager", MockRedisCacheManager()):
-        yield AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
+    yield AgencyManager(cache_manager=MagicMock(), agent_manager=MagicMock())
 
 
 @pytest.fixture(autouse=True)
@@ -199,7 +198,7 @@ async def test_load_and_construct_agents_success():
     agent_manager_mock = AsyncMock()
     agent_manager_mock.get_agent.return_value = (agent_mock, agent_config_mock)
 
-    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
+    agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=agent_manager_mock)
     agents = await agency_manager.load_and_construct_agents(agency_config)
 
     assert "agent1_name" in agents
@@ -221,7 +220,7 @@ async def test_load_and_construct_agents_agent_not_found():
     agent_manager_mock.get_agent.return_value = None
 
     with patch("logging.Logger.error") as mock_logger_error:
-        agency_manager = AgencyManager(redis=MagicMock(), agent_manager=agent_manager_mock)
+        agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=agent_manager_mock)
         agents = await agency_manager.load_and_construct_agents(agency_config)
 
         assert agents == {}
@@ -251,7 +250,7 @@ async def test_construct_agency_single_layer_chart():
     mock_agent_2.description = "agent2_description"
 
     # AgencyManager instance
-    agency_manager = AgencyManager(redis=MagicMock(), agent_manager=MagicMock())
+    agency_manager = AgencyManager(cache_manager=MagicMock(), agent_manager=MagicMock())
 
     # Construct the agency
     agency = agency_manager.construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})

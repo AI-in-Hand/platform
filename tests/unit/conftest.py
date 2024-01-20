@@ -1,10 +1,8 @@
 import sys
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
-
-from tests.unit.test_utils.mock_firestore_client import MockFirestoreClient
 
 sys.modules["agency_swarm.util.oai"] = Mock()
 
@@ -37,10 +35,3 @@ def temp_dir(tmp_path: Path):
     (temp_dir_path / "test.py").write_text("print('hello')")
     (temp_dir_path / "test.txt").write_text("hello world")
     yield tmp_path
-
-
-@pytest.fixture(autouse=True)
-def mock_firestore_client():
-    firestore_client = MockFirestoreClient()
-    with patch("firebase_admin.firestore.client", return_value=firestore_client):
-        yield firestore_client

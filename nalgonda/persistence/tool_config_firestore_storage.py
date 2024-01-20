@@ -1,4 +1,5 @@
 from firebase_admin import firestore
+from google.cloud.firestore_v1 import FieldFilter
 
 from nalgonda.models.tool_config import ToolConfig
 
@@ -9,7 +10,7 @@ class ToolConfigFirestoreStorage:
         self.collection = self.db.collection("tool_configs")
 
     def load_by_user_id(self, user_id: str) -> list[ToolConfig]:
-        query = self.collection.where("owner_id", "==", user_id)
+        query = self.collection.where(filter=FieldFilter("owner_id", "==", user_id))
         return [ToolConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
     def load_by_tool_id(self, tool_id: str) -> ToolConfig | None:

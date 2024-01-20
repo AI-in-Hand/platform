@@ -1,4 +1,5 @@
 from firebase_admin import firestore
+from google.cloud.firestore_v1 import FieldFilter
 
 from nalgonda.models.agent_config import AgentConfig
 
@@ -9,7 +10,7 @@ class AgentConfigFirestoreStorage:
         self.collection = self.db.collection("agent_configs")
 
     def load_by_user_id(self, user_id: str) -> list[AgentConfig]:
-        query = self.collection.where("owner_id", "==", user_id)
+        query = self.collection.where(filter=FieldFilter("owner_id", "==", user_id))
         return [AgentConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
     def load_by_agent_id(self, agent_id: str) -> AgentConfig | None:

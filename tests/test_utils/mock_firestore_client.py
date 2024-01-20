@@ -1,3 +1,6 @@
+from google.cloud.firestore_v1 import FieldFilter
+
+
 class MockDocumentSnapshot:
     def __init__(self, id, data):
         self.id = id
@@ -43,11 +46,11 @@ class MockFirestoreClient:
         self.current_document_id = doc_id
         self.set(data)
 
-    def where(self, field, op, value):
-        # This is a simplified implementation.
-        self._where_field = field
-        self._where_op = op
-        self._where_value = value
+    def where(self, filter: FieldFilter):
+        # Extract field, op, and value from the FieldFilter object
+        self._where_field = filter.field_path
+        self._where_op = filter.op_string
+        self._where_value = filter.value
         return self
 
     def stream(self):
