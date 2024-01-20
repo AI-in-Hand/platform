@@ -16,8 +16,6 @@ async def get_agent_list(
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> list[AgentConfig]:
     agents = storage.load_by_user_id(user_id)
-    if not agents:
-        raise HTTPException(status_code=404, detail="No agency configuration found")
     return agents
 
 
