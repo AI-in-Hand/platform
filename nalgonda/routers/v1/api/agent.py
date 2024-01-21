@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
@@ -13,10 +15,10 @@ agent_router = APIRouter(tags=["agent"])
 
 @agent_router.get("/agent")
 async def get_agent_list(
-    user_id: str = Query(..., description="The unique identifier of the user"),
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> list[AgentConfig]:
-    agents = storage.load_by_user_id(user_id)
+    agents = storage.load_by_user_id(current_user.id)
     return agents
 
 
@@ -33,10 +35,10 @@ async def get_agent_config(
 
 @agent_router.put("/agent/config")
 async def update_agent_config(
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agent_config: AgentConfig = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
-    current_user: UserInDB = Depends(get_current_active_user),
 ) -> dict[str, str]:
-    agent_config.owner_id = current_user.username  # Ensure the agent is associated with the user
+    agent_config.owner_id = current_user.id  # Ensure the agent is associated with the user
     agent_id = await agent_manager.create_or_update_agent(agent_config)
     return {"agent_id": agent_id}

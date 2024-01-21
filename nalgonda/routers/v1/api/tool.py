@@ -1,6 +1,8 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
-from nalgonda.dependencies.auth import get_current_active_user
+from nalgonda.dependencies.auth import get_current_active_user, get_current_superuser
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.tool_config import ToolConfig
 from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
@@ -10,10 +12,10 @@ tool_router = APIRouter(tags=["tool"])
 
 @tool_router.get("/tool")
 async def get_tool_list(
-    user_id: str = Query(..., description="The unique identifier of the user"),
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> list[ToolConfig]:
-    tools = storage.load_by_user_id(user_id)
+    tools = storage.load_by_user_id(current_user.id)
     return tools
 
 
@@ -30,17 +32,18 @@ async def get_tool_config(
 
 @tool_router.post("/tool/config")
 async def create_tool_version(
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     tool_config: ToolConfig = Body(...),
-    current_user: UserInDB = Depends(get_current_active_user),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
-    tool_config.owner_id = current_user.username  # Ensure the tool is associated with the user
+    tool_config.owner_id = current_user.id  # Ensure the tool is associated with the user
     tool_id, tool_version = storage.save(tool_config)
     return {"tool_id": tool_id, "tool_version": tool_version}
 
 
 @tool_router.put("/tool/approve")
 async def approve_tool_config(
+    current_superuser: Annotated[UserInDB, Depends(get_current_superuser)],  # noqa: ARG001
     tool_id: str = Query(..., description="The unique identifier of the tool"),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):

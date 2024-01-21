@@ -30,7 +30,7 @@ const WorkflowView = ({}: any) => {
   });
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listWorkflowsUrl = `${serverUrl}/agency?user_id=${user?.id}`;
+  const listWorkflowsUrl = `${serverUrl}/agency`;
   const saveWorkflowsUrl = `${serverUrl}/agency/config`;
   const deleteWorkflowsUrl = `${serverUrl}/agency/delete`;
 

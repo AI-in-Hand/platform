@@ -32,15 +32,12 @@ class AgencyManager:
         agency = self._restore_client_objects(agency)
         return agency
 
-    async def create_agency(self, agency_id: str | None = None) -> str:
-        """Create the agency. If agency_id is not provided, it will be generated.
-        If agency_id is provided, it will be used to load the agency from the firestore.
-        If agency is not found in the firestore, it will be created.
-        """
-        agency_id = agency_id or str(uuid4())
+    async def create_agency(self, owner_id: str) -> str:
+        """Create the agency. It will create the agency in the firestore and also in the cache."""
+        agency_id = str(uuid4())
 
         agency_config_storage = AgencyConfigFirestoreStorage()
-        agency_config = await asyncio.to_thread(agency_config_storage.load_or_create, agency_id)
+        agency_config = await asyncio.to_thread(agency_config_storage.create, agency_id, owner_id)
 
         agents = await self.load_and_construct_agents(agency_config)
         agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)

@@ -11,9 +11,11 @@ class TokenData(BaseModel):
 
 
 class User(BaseModel):
-    username: str
+    username: str  # used as DB ID, FIXME
     disabled: bool = False
+    is_superuser: bool = False
 
 
 class UserInDB(User):
+    id: str
     hashed_password: str

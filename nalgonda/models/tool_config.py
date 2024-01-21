@@ -9,7 +9,7 @@ class ToolConfig(BaseModel):
     name: str = Field(..., description="Name of the tool")
     version: int = Field(1, description="Version of the tool configuration")
     code: str = Field(..., description="The actual code of the tool")
-    approved: bool = Field(False, description="Approval status of the tool configuration")
+    approved: bool | None = Field(None, description="Approval status of the tool configuration")
 
     def increment_version(self):
         """Increment the tool's version."""

@@ -23,14 +23,13 @@ class AgencyConfigFirestoreStorage:
             return AgencyConfig.model_validate(agency_config_snapshot.to_dict())
         return None
 
-    def load_or_create(self, agency_id: str) -> AgencyConfig:
-        agency_config = self.load_by_agency_id(agency_id)
-        if agency_config is None:
-            with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
-                config_data = json.load(default_config_file)
-            config_data["agency_id"] = agency_id
-            agency_config = AgencyConfig.model_validate(config_data)
-            self.save(agency_id, agency_config)
+    def create(self, agency_id: str, owner_id: str) -> AgencyConfig:
+        with open(DEFAULT_AGENCY_CONFIG_FILE) as default_config_file:
+            config_data = json.load(default_config_file)
+        config_data["agency_id"] = agency_id
+        config_data["owner_id"] = owner_id
+        agency_config = AgencyConfig.model_validate(config_data)
+        self.save(agency_id, agency_config)
         return agency_config
 
     def save(self, agency_id: str, agency_config: AgencyConfig) -> None:

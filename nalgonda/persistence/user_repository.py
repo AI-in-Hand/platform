@@ -1,16 +1,17 @@
 from firebase_admin import firestore
 
+from nalgonda.models.auth import UserInDB
+
 
 class UserRepository:
     def __init__(self):
         self.db = firestore.client()
-        self.collection_name = "users"
-        self.collection = self.db.collection(self.collection_name)
+        self.collection = self.db.collection("users")
 
-    def get_user_by_username(self, username: str) -> dict | None:
-        user = self.collection.document(username).get()
+    def get_user_by_id(self, user_id: str) -> dict | None:
+        user = self.collection.document(user_id).get()
         if user.exists:
             return user.to_dict()
 
-    def add_or_update_user(self, user: dict):
-        self.collection.document(user["username"]).set(user)
+    def update_user(self, user: UserInDB):
+        self.collection.document(user.id).set(user)

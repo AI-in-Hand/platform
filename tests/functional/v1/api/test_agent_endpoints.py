@@ -20,7 +20,7 @@ def test_get_agent_config(client, mock_firestore_client):
     assert response.json() == MOCK_DATA
 
 
-def test_update_agent_config(client):
+def test_update_agent_config(client, mock_get_current_active_user):
     agent_config_data = MOCK_DATA.copy()
 
     with patch("nalgonda.services.agent_manager.AgentManager") as mock_agent_manager:
@@ -31,3 +31,5 @@ def test_update_agent_config(client):
 
     assert response.status_code == 200
     assert response.json() == {"agent_id": AGENT_ID}
+
+    mock_get_current_active_user.assert_called_once()

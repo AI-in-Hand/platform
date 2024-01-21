@@ -1228,7 +1228,7 @@ export const SkillLoader = ({
   });
   const serverUrl = getServerUrl();
   const { user } = React.useContext(appContext);
-  const listSkillsUrl = `${serverUrl}/tool?user_id=${user?.id}`;
+  const listSkillsUrl = `${serverUrl}/tool`;
 
   const fetchSkills = () => {
     setError(null);
@@ -1462,7 +1462,7 @@ const AgentModal = ({
 
   const serverUrl = getServerUrl();
   const { user } = React.useContext(appContext);
-  const listAgentsUrl = `${serverUrl}/agent?user_id=${user?.id}`;
+  const listAgentsUrl = `${serverUrl}/agent`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);
   useEffect(() => {

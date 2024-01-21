@@ -26,7 +26,7 @@ const AgentsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listAgentsUrl = `${serverUrl}/agent?user_id=${user?.id}`;
+  const listAgentsUrl = `${serverUrl}/agent`;
   const saveAgentsUrl = `${serverUrl}/agent/config`;
   const deleteAgentUrl = `${serverUrl}/agent/delete`;
 

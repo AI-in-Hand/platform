@@ -5,6 +5,7 @@ from agency_swarm import Agency, Agent
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.services.agency_manager import AgencyManager
+from tests.test_utils import TEST_USER_ID
 
 
 class MockRedisCacheManager:
@@ -42,34 +43,12 @@ async def test_create_agency_with_new_id(agency_manager):
         mock_load_agents.return_value = {}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        new_agency_id = await agency_manager.create_agency()
+        new_agency_id = await agency_manager.create_agency(owner_id=TEST_USER_ID)
 
         assert isinstance(new_agency_id, str)
         mock_load_agents.assert_called_once()
         mock_construct_agency.assert_called_once()
         mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, new_agency_id, None)
-
-
-@pytest.mark.asyncio
-async def test_create_agency_with_provided_id(agency_manager):
-    # Test creating an agency with a provided ID
-    provided_id = "test_id"
-    with patch(
-        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
-    ) as mock_load_agents, patch(
-        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
-    ) as mock_construct_agency, patch(
-        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-    ) as mock_cache_agency:
-        mock_load_agents.return_value = {}
-        mock_construct_agency.return_value = MagicMock(spec=Agency)
-
-        returned_agency_id = await agency_manager.create_agency(agency_id=provided_id)
-
-        assert returned_agency_id == provided_id
-        mock_load_agents.assert_called_once()
-        mock_construct_agency.assert_called_once()
-        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, provided_id, None)
 
 
 @pytest.mark.asyncio
@@ -85,7 +64,7 @@ async def test_create_agency(agency_manager):
         mock_load_agents.return_value = {"agent1": MagicMock(spec=Agent)}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        agency_id = await agency_manager.create_agency()
+        agency_id = await agency_manager.create_agency(owner_id=TEST_USER_ID)
 
         assert isinstance(agency_id, str)
         mock_load_agents.assert_called_once()

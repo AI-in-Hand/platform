@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
-from nalgonda.models.auth import TokenData, User, UserInDB
+from nalgonda.models.auth import TokenData, UserInDB
 from nalgonda.persistence.user_repository import UserRepository
 from nalgonda.settings import settings
 
@@ -12,9 +12,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/api/token")
 
 
 def get_user(username: str) -> UserInDB | None:
-    user = UserRepository().get_user_by_username(username)
+    user = UserRepository().get_user_by_id(username)
     if user:
-        return UserInDB(**user, username=username)
+        return UserInDB(**user)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:
@@ -37,7 +37,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     return user
 
 
-async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]):
+async def get_current_active_user(
+    current_user: Annotated[UserInDB, Depends(get_current_user)],
+) -> UserInDB:
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_current_superuser(
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+) -> UserInDB:
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="The user doesn't have enough privileges")
     return current_user

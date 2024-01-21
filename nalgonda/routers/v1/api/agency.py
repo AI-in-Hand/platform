@@ -10,7 +10,7 @@ from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager, get_thread_manager
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.models.auth import User
+from nalgonda.models.auth import UserInDB
 from nalgonda.models.request_models import AgencyMessagePostRequest, AgencyThreadPostRequest
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
@@ -25,10 +25,10 @@ agency_router = APIRouter(
 
 @agency_router.get("/agency")
 async def get_agency_list(
-    user_id: str = Query(..., description="The unique identifier of the user"),
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> list[AgencyConfig]:
-    agencies = storage.load_by_user_id(user_id)
+    agencies = storage.load_by_user_id(current_user.id)
     return agencies
 
 
@@ -45,28 +45,28 @@ async def get_agency_config(
 
 @agency_router.post("/agency")
 async def create_agency(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ) -> dict:
     """Create a new agency and return its id."""
-    # TODO: check if the current_user has permission to create an agency
-    logger.info(f"Creating agency for user: {current_user.username}")
+    # TODO: check if the current_user has permissions to create an agency
+    logger.info(f"Creating agency for user: {current_user.id}")
 
-    agency_id = await agency_manager.create_agency()
+    agency_id = await agency_manager.create_agency(owner_id=current_user.id)
     return {"agency_id": agency_id}
 
 
 @agency_router.post("/agency/thread")
 async def create_agency_thread(
     request: AgencyThreadPostRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     thread_manager: ThreadManager = Depends(get_thread_manager),
 ) -> dict:
     """Create a new thread for the given agency and return its id."""
     agency_id = request.agency_id
 
-    logger.info(f"Creating a new thread for the agency: {agency_id}, and user: {current_user.username}")
+    logger.info(f"Creating a new thread for the agency: {agency_id}, and user: {current_user.id}")
 
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
@@ -82,7 +82,7 @@ async def create_agency_thread(
 async def update_agency_config(
     agency_id: str,
     updated_data: dict,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ):
@@ -90,7 +90,7 @@ async def update_agency_config(
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
 
-    updated_data["owner_id"] = current_user.username
+    updated_data["owner_id"] = current_user.id
     await agency_manager.update_agency(agency_config, updated_data)
 
     return {"message": "Agency configuration updated successfully"}
