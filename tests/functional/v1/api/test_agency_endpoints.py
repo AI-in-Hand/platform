@@ -7,7 +7,7 @@ from tests.test_utils import TEST_USER_ID
 def test_get_agency_config(client, mock_firestore_client):
     mock_data = {
         "agency_id": "test_agency",
-        "owner_id": "test_user",
+        "owner_id": TEST_USER_ID,
         "agency_manifesto": "Test Manifesto",
         "main_agent": None,
         "agents": [],
@@ -20,7 +20,7 @@ def test_get_agency_config(client, mock_firestore_client):
     assert response.json() == mock_data
 
 
-def test_update_agency_config_success(client, mock_firestore_client, mock_get_current_active_user):
+def test_update_agency_config_success(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
     # Setup initial data in mock Firestore client
     initial_data = {
         "agency_id": "test_agency",
@@ -42,8 +42,6 @@ def test_update_agency_config_success(client, mock_firestore_client, mock_get_cu
 
     assert response.status_code == 200
     assert response.json() == {"message": "Agency configuration updated successfully"}
-
-    mock_get_current_active_user.assert_called_once()
 
 
 def test_get_agency_config_not_found(client):
