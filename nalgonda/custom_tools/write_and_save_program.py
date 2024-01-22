@@ -45,8 +45,7 @@ class File(BaseTool):
 
 
 class WriteAndSaveProgram(BaseTool):
-    """Set of files that represent a complete and correct program/application.
-    This environment has access to all standard Python packages and the internet."""
+    """Set of files that represent a complete and correct program/application"""
 
     chain_of_thought: str = Field(
         ..., description="Think step by step to determine the correct actions that are needed to implement the program."
