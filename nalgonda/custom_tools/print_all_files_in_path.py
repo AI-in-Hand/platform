@@ -31,6 +31,10 @@ class PrintAllFilesInPath(BaseTool):
         output = []
         start_path = self.start_path.resolve()
 
+        # if start_path is a file, just read it
+        if start_path.is_file():
+            return f"{str(start_path)}:\n```\n{self.read_file(start_path)}\n```\n"
+
         for path in start_path.rglob("*"):
             # ignore files in hidden directories
             if any(part.startswith(".") for part in path.parts):
