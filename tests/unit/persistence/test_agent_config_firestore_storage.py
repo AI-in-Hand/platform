@@ -2,6 +2,7 @@ import pytest
 
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from tests.test_utils import TEST_USER_ID
 
 
 @pytest.fixture
@@ -9,7 +10,7 @@ def agent_data():
     return {
         "agent_id": "agent1",
         "name": "example_name",
-        "owner_id": "owner123",
+        "owner_id": TEST_USER_ID,
         "description": "An example agent",
         "instructions": "Do something important",
         "files_folder": None,
@@ -52,7 +53,6 @@ def test_save_new_agent_config(mock_firestore_client, agent_data):
     storage.save(agent_config)
 
     serialized_data = agent_config.model_dump()
-    serialized_data["agent_id"] = None
     assert mock_firestore_client.to_dict() == serialized_data
     # Check that the agent_id was updated
     assert agent_config.agent_id == "new_agent_id"

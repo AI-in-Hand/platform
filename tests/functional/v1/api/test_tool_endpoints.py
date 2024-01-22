@@ -2,10 +2,9 @@ from tests.test_utils import TEST_USER_ID
 
 
 def test_get_tool_list(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
-    user_id = TEST_USER_ID
     tool_config_data = {
         "tool_id": "tool1",
-        "owner_id": user_id,
+        "owner_id": TEST_USER_ID,
         "name": "Tool 1",
         "version": 1,
         "code": 'print("Hello World")',
@@ -22,7 +21,7 @@ def test_approve_tool_config(client, mock_firestore_client, mock_get_current_sup
     tool_id = "tool1"
     tool_config_data = {
         "tool_id": tool_id,
-        "owner_id": "user1",
+        "owner_id": TEST_USER_ID,
         "name": "Tool 1",
         "version": 1,
         "code": 'print("Hello")',

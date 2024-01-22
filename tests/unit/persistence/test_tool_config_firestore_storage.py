@@ -2,13 +2,14 @@ import pytest
 
 from nalgonda.models.tool_config import ToolConfig
 from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
+from tests.test_utils import TEST_USER_ID
 
 
 @pytest.fixture
 def tool_data():
     return {
         "tool_id": "tool1",
-        "owner_id": "user123",
+        "owner_id": TEST_USER_ID,
         "name": "Example Tool",
         "version": 1,
         "code": 'print("Hello, World!")',
@@ -45,13 +46,11 @@ def test_save_new_tool_config(mock_firestore_client, tool_data):
     tool_config = ToolConfig(**new_tool_data)
 
     storage = ToolConfigFirestoreStorage()
-    tool_id, tool_version = storage.save(tool_config)
+    tool_id, _ = storage.save(tool_config)
 
     assert tool_id == "tool2"
-    assert tool_version == 2
 
     serialized_data = tool_config.model_dump()
-    serialized_data["tool_id"] = None
     assert mock_firestore_client.to_dict() == serialized_data
     assert tool_config.tool_id == "tool2"
 
