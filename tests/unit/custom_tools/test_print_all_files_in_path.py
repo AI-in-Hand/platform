@@ -1,3 +1,5 @@
+import pytest
+
 from nalgonda.custom_tools import PrintAllFilesInPath
 
 
@@ -45,3 +47,14 @@ def test_print_all_files_error_reading_file(temp_dir):
     assert "Error reading file" in pafid.run()
 
     unreadable_file.chmod(0o644)  # reset file permissions for cleanup
+
+
+@pytest.mark.parametrize("extension, expected_file", [(".py", "test.py"), (".txt", "test.txt")])
+def test_print_all_files_with_extension_filter(temp_dir, extension, expected_file):
+    pafip = PrintAllFilesInPath(start_path=temp_dir, file_extensions={extension})
+    expected_output = (
+        f"{temp_dir.joinpath('sub', expected_file)}:\n```\n"
+        + temp_dir.joinpath("sub", expected_file).read_text()
+        + "\n```"
+    )
+    assert pafip.run().strip() == expected_output.strip()
