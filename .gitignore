@@ -167,3 +167,4 @@ settings.json
 
 # UI folder
 nalgonda/ui/*
+nalgonda/data/agency_data/*
