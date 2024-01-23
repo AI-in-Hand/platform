@@ -28,7 +28,7 @@ def test_get_agent_config(client, agent_data, mock_firestore_client, mock_get_cu
     assert response.json() == agent_data
 
 
-def test_update_agent_config(client, agent_data, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+def test_update_agent_config_success(client, agent_data, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data)
 
     with patch("nalgonda.services.agent_manager.AgentManager") as mock_agent_manager:
@@ -39,3 +39,14 @@ def test_update_agent_config(client, agent_data, mock_firestore_client, mock_get
 
     assert response.status_code == 200
     assert response.json() == {"agent_id": AGENT_ID}
+
+
+def test_update_agent_config_owner_id_mismatch(client, agent_data, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+    agent_data_db = agent_data.copy()
+    agent_data_db["owner_id"] = "other_user"
+    mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data_db)
+
+    response = client.put("/v1/api/agent/config", json=agent_data)
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
