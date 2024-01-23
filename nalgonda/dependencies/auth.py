@@ -15,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/api/token")
 def get_user(username: str) -> UserInDB | None:
     user = UserRepository().get_user_by_id(username)
     if user:
-        return UserInDB(**user, username=username)
+        return UserInDB(**user)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:

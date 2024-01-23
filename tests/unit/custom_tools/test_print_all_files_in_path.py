@@ -58,3 +58,18 @@ def test_print_all_files_with_extension_filter(temp_dir, extension, expected_fil
         + "\n```"
     )
     assert pafip.run().strip() == expected_output.strip()
+
+
+@pytest.fixture
+def create_file_in_path(tmp_path):
+    # Create a file and write contents to it
+    file_path = tmp_path / "example.txt"
+    file_path.write_text("File content")
+    return file_path
+
+
+def test_print_file_contents(create_file_in_path):
+    tool = PrintAllFilesInPath(start_path=create_file_in_path, file_extensions=[".txt"])
+    result = tool.run()
+    expected_result = f"{str(create_file_in_path)}:\n```\nFile content\n```\n"
+    assert result == expected_result
