@@ -9,14 +9,14 @@ class CacheManager(Generic[T]):
     Specific cache backends should extend this class and implement its methods.
     """
 
-    async def get(self, key: str) -> T | None:
+    def get(self, key: str) -> T | None:
         raise NotImplementedError()
 
-    async def set(self, key: str, value: T) -> None:
+    def set(self, key: str, value: T) -> None:
         raise NotImplementedError()
 
-    async def delete(self, key: str) -> None:
+    def delete(self, key: str) -> None:
         raise NotImplementedError()
 
-    async def close(self) -> None:
+    def close(self) -> None:
         raise NotImplementedError()

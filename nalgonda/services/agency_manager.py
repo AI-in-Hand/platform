@@ -20,7 +20,7 @@ class AgencyManager:
 
     async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, thread_id)
-        agency = await self.cache_manager.get(cache_key)
+        agency = self.cache_manager.get(cache_key)
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
@@ -104,13 +104,13 @@ class AgencyManager:
         """Cache the agency."""
         cache_key = self.get_cache_key(agency_id, thread_id)
         agency_clean = self._remove_client_objects(agency)
-        await self.cache_manager.set(cache_key, agency_clean)
+        self.cache_manager.set(cache_key, agency_clean)
 
     async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
         """Delete the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, thread_id)
 
-        await self.cache_manager.delete(cache_key)
+        self.cache_manager.delete(cache_key)
 
     @staticmethod
     def get_cache_key(agency_id: str, thread_id: str | None = None) -> str:
