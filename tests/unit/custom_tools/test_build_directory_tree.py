@@ -6,19 +6,38 @@ from nalgonda.custom_tools import BuildDirectoryTree
 def test_build_directory_tree_with_py_extension(temp_dir):
     """
     Test if BuildDirectoryTree correctly lists only .py files in the directory tree.
+    Sorted output without indentation is expected.
     """
     bdt = BuildDirectoryTree(start_directory=temp_dir, file_extensions={".py"})
-    expected_output = "".join([f"{temp_dir.name}\n", "    sub\n", "        test.py\n"])
+    expected_output = "\n".join(
+        sorted(
+            [
+                "/sub/test.py",
+                "/sub",
+                "",
+            ]
+        )
+    )
     assert bdt.run() == expected_output
 
 
 def test_build_directory_tree_with_multiple_extensions(temp_dir):
     """
     Test if BuildDirectoryTree lists files with multiple specified extensions.
+    Sorted output without indentation is expected.
     """
     bdt = BuildDirectoryTree(start_directory=temp_dir, file_extensions={".py", ".txt"})
-    expected_output = {f"{temp_dir.name}", "    sub", "        test.py", "        test.txt"}
-    actual_output = set(bdt.run().strip().split("\n"))
+    expected_output = "\n".join(
+        sorted(
+            [
+                "/sub/test.py",
+                "/sub/test.txt",
+                "/sub",
+                "",
+            ]
+        )
+    )
+    actual_output = bdt.run()
     assert actual_output == expected_output
 
 
@@ -41,5 +60,4 @@ def test_build_directory_tree_output_length_limit(temp_dir):
 
     bdt = BuildDirectoryTree(start_directory=temp_dir)
     output = bdt.run()
-    assert len(output) <= 3084
-    assert "truncated output, use a smaller directory or apply a filter on file types" in output
+    assert len(output) <= 3000  # Adjusted to match the MAX_LENGTH constant

@@ -6,6 +6,25 @@ from pydantic import Field, field_validator
 
 from nalgonda.custom_tools.utils import check_directory_traversal
 
+MAX_LENGTH = 3000
+
+
+class DirectoryNode:
+    """Class to represent a directory node in the tree."""
+
+    def __init__(self, path: Path, level: int):
+        self.path = path
+        self.level = level
+        self.children: list[DirectoryNode | "FileNode"] = []  # List of DirectoryNode and FileNode
+
+
+class FileNode:
+    """Class to represent a file node in the tree."""
+
+    def __init__(self, path: Path, level: int):
+        self.path = path
+        self.level = level
+
 
 class BuildDirectoryTree(BaseTool):
     """Print the structure of directories and files.
@@ -24,38 +43,63 @@ class BuildDirectoryTree(BaseTool):
 
     _validate_start_directory = field_validator("start_directory", mode="after")(check_directory_traversal)
 
+    def build_tree(self) -> DirectoryNode:
+        """Builds the directory tree."""
+        root = DirectoryNode(self.start_directory, 0)
+        queue = deque([root])
+
+        while queue:
+            current_node = queue.popleft()
+            children = [p for p in current_node.path.iterdir() if not p.name.startswith(".")]
+
+            for child in children:
+                if child.is_dir():
+                    dir_node = DirectoryNode(child, current_node.level + 1)
+                    current_node.children.append(dir_node)
+                    queue.append(dir_node)
+                elif child.is_file() and (not self.file_extensions or child.suffix in self.file_extensions):
+                    file_node = FileNode(child, current_node.level + 1)
+                    current_node.children.append(file_node)
+
+        return root
+
+    def serialize_tree(self, root: DirectoryNode) -> str:
+        """Serialize the tree into a string with a character limit."""
+        tree_lines = []
+        current_length = 0
+        message = ""
+        cur_dir = str(Path.cwd())
+        queue: deque[DirectoryNode | FileNode] = deque([root])
+
+        while queue:
+            node = queue.popleft()
+            # make sure to remove the prefix (current directory path):
+            node_str = f"{node.path}"
+            if node_str.startswith(cur_dir):
+                node_str = node_str.replace(cur_dir, "")
+
+            if current_length + len(node_str) > MAX_LENGTH:
+                message = "\n...\n[truncated output, use a smaller directory or apply a filter on file types]"
+                break  # Stop adding more nodes if limit is exceeded
+
+            tree_lines.append(node_str)
+            current_length += len(node_str)
+
+            if isinstance(node, DirectoryNode):
+                queue.extend(node.children)
+
+        tree_lines.sort()  # Sorting the tree at the end
+        return "\n".join(tree_lines) + message
+
     def run(self) -> str:
-        """Print the tree of directories and files using breadth-first search."""
-        max_length = 3000
-        tree_str = ""
-        start_path = self.start_directory.resolve()
-        queue = deque([(start_path, 0)])  # Queue of tuples (directory, level)
-
-        while queue and len(tree_str) < max_length:
-            directory, level = queue.popleft()
-            indent = " " * 4 * level
-            tree_str += f"{indent}{directory.name}\n"
-            sub_indent = " " * 4 * (level + 1)
-
-            for path in sorted(directory.iterdir()):
-                # Check the length of tree_str
-                if len(tree_str) >= max_length:
-                    tree_str += "\n... truncated output, use a smaller directory or apply a filter on file types"
-                    return tree_str
-
-                # ignore hidden files and directories
-                if path.is_dir() and not path.name.startswith("."):
-                    queue.append((path, level + 1))
-                elif path.is_file() and (not self.file_extensions or path.suffix in self.file_extensions):
-                    tree_str += f"{sub_indent}{path.name}\n"
-
-        return tree_str
+        """Build and serialize the directory tree within the character limit."""
+        tree_root = self.build_tree()
+        return self.serialize_tree(tree_root)
 
 
 if __name__ == "__main__":
     print(
         BuildDirectoryTree(
-            start_directory=".",
-            file_extensions={".py", ".txt", ".md"},
+            file_extensions={".py", ".md"},
         ).run()
     )
