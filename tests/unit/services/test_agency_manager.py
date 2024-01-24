@@ -74,7 +74,7 @@ async def test_create_agency(agency_manager):
 
 @pytest.mark.asyncio
 async def test_get_agency_from_cache(agency_manager):
-    with patch.object(agency_manager.cache_manager, "get", new_callable=Mock) as mock_get:
+    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get:
         mock_get.return_value = Agency([], "manifesto")
 
         agency = await agency_manager.get_agency("test_agency")
@@ -84,7 +84,7 @@ async def test_get_agency_from_cache(agency_manager):
 
 @pytest.mark.asyncio
 async def test_get_agency_repopulate_cache(agency_manager):
-    with patch.object(agency_manager.cache_manager, "get", new_callable=Mock) as mock_get, patch.object(
+    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
         agency_manager, "repopulate_cache", new_callable=AsyncMock
     ) as mock_repopulate:
         mock_get.return_value = None

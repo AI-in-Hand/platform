@@ -1,5 +1,5 @@
 from fastapi import Depends
-from redis import Redis, from_url
+from redis import asyncio as aioredis
 
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
@@ -9,13 +9,13 @@ from nalgonda.services.thread_manager import ThreadManager
 from nalgonda.settings import settings
 
 
-def get_redis() -> Redis:
+def get_redis() -> aioredis.Redis:
     redis_url = str(settings.redis_tls_url or settings.redis_url)
-    redis = from_url(redis_url, decode_responses=False, ssl_cert_reqs="none")
+    redis = aioredis.from_url(redis_url, decode_responses=False, ssl_cert_reqs="none")
     return redis
 
 
-def get_redis_cache_manager(redis: Redis = Depends(get_redis)) -> RedisCacheManager:
+def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> RedisCacheManager:
     return RedisCacheManager(redis)
 
 
