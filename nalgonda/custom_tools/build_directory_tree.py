@@ -8,14 +8,12 @@ from nalgonda.custom_tools.utils import check_directory_traversal
 
 class BuildDirectoryTree(BaseTool):
     """Print the structure of directories and files.
-    The parameters are: start_path, file_extensions.
     Directory traversal is not allowed (you cannot read /* or ../*).
     """
 
-    start_path: Path = Field(
+    start_directory: Path = Field(
         default_factory=Path.cwd,
-        description="The starting path for the tree, defaults to the current working directory. "
-        "Can be a filename or a partial path.",
+        description="The starting directory for the tree, defaults to the current working directory.",
     )
     file_extensions: set[str] = Field(
         default_factory=set,
@@ -23,12 +21,12 @@ class BuildDirectoryTree(BaseTool):
         "Examples are {'.py', '.txt', '.md'}.",
     )
 
-    _validate_start_path = field_validator("start_path", mode="after")(check_directory_traversal)
+    _validate_start_directory = field_validator("start_directory", mode="after")(check_directory_traversal)
 
     def run(self) -> str:
         """Recursively print the tree of directories and files using pathlib."""
         tree_str = ""
-        start_path = self.start_path.resolve()
+        start_path = self.start_directory.resolve()
 
         def recurse(directory: Path, level: int = 0) -> None:
             nonlocal tree_str

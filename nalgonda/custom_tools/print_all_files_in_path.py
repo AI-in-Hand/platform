@@ -14,7 +14,8 @@ class PrintAllFilesInPath(BaseTool):
 
     start_path: Path = Field(
         default_factory=Path.cwd,
-        description="Directory to search for files, by default the current working directory.",
+        description="The starting path to search for files, defaults to the current working directory. "
+        "Can be a filename or a directory.",
     )
     file_extensions: set[str] = Field(
         default_factory=set,
