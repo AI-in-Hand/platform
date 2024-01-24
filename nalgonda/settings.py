@@ -2,6 +2,7 @@ from pydantic import Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LATEST_GPT_MODEL = "gpt-4-1106-preview"
+CHEAP_GPT_MODEL = "gpt-3.5-turbo-1106"
 
 
 class Settings(BaseSettings):
@@ -13,6 +14,7 @@ class Settings(BaseSettings):
 
     google_credentials: str | None = Field(default=None)
     gpt_model: str = Field(default=LATEST_GPT_MODEL)
+    gpt_cheap_model: str = Field(default=CHEAP_GPT_MODEL)
     openai_api_key: str | None = Field(default=None)
     redis_tls_url: RedisDsn | None = Field(default=None)
     redis_url: RedisDsn = Field(default="redis://localhost:6379/1")

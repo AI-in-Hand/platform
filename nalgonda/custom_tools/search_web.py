@@ -8,7 +8,7 @@ class SearchWeb(BaseTool):
 
     phrase: str = Field(
         ...,
-        description="The search phrase you want to use. " "Optimize the search phrase for an internet search engine.",
+        description="The search phrase you want to use. Optimize the search phrase for an internet search engine.",
     )
     max_results: int = Field(default=10, description="The maximum number of search results to return, default is 10.")
 

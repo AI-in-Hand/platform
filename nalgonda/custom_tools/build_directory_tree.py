@@ -42,6 +42,9 @@ class BuildDirectoryTree(BaseTool):
                     tree_str += f"{sub_indent}{path.name}\n"
 
         recurse(start_path)
+
+        if len(tree_str) > 20000:
+            tree_str = tree_str[:20000] + "\n\n... (truncated output, please use a smaller directory or apply a filter)"
         return tree_str
 
 

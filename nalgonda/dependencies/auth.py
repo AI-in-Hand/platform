@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from nalgonda.models.auth import TokenData, UserInDB
 from nalgonda.persistence.user_repository import UserRepository
@@ -14,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/api/token")
 def get_user(username: str) -> UserInDB | None:
     user = UserRepository().get_user_by_id(username)
     if user:
-        return UserInDB(**user, username=username)
+        return UserInDB(**user)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:
@@ -41,7 +42,7 @@ async def get_current_active_user(
     current_user: Annotated[UserInDB, Depends(get_current_user)],
 ) -> UserInDB:
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_user
 
 
@@ -49,5 +50,5 @@ async def get_current_superuser(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ) -> UserInDB:
     if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="The user doesn't have enough privileges")
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="The user doesn't have enough privileges")
     return current_user

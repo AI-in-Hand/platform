@@ -7,8 +7,8 @@ def test_build_directory_tree_with_py_extension(temp_dir):
     """
     Test if BuildDirectoryTree correctly lists only .py files in the directory tree.
     """
-    bdt = BuildDirectoryTree(start_directory=temp_dir, file_extensions={".py"})
-    expected_output = f"{temp_dir.name}\n    sub\n        test.py\n"
+    bdt = BuildDirectoryTree(start_path=temp_dir, file_extensions={".py"})
+    expected_output = "".join([f"{temp_dir.name}\n", "    sub\n", "        test.py\n"])
     assert bdt.run() == expected_output
 
 
@@ -16,7 +16,7 @@ def test_build_directory_tree_with_multiple_extensions(temp_dir):
     """
     Test if BuildDirectoryTree lists files with multiple specified extensions.
     """
-    bdt = BuildDirectoryTree(start_directory=temp_dir, file_extensions={".py", ".txt"})
+    bdt = BuildDirectoryTree(start_path=temp_dir, file_extensions={".py", ".txt"})
     expected_output = {
         f"{temp_dir.name}",
         "    sub",

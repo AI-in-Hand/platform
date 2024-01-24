@@ -2,15 +2,13 @@ from pathlib import Path
 
 from agency_swarm.util import get_openai_client
 
-from nalgonda.settings import settings
 
-
-def get_chat_completion(user_prompt: str, system_message: str, **kwargs) -> str:
+def get_chat_completion(user_prompt: str, system_message: str, model: str, **kwargs) -> str:
     """Generate a chat completion based on a prompt and a system message.
     This function is a wrapper around the OpenAI API."""
     client = get_openai_client()
     completion = client.chat.completions.create(
-        model=settings.gpt_model,
+        model=model,
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_prompt},
