@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agent_manager
@@ -12,6 +12,11 @@ from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFires
 from nalgonda.services.agent_manager import AgentManager
 
 agent_router = APIRouter(tags=["agent"])
+
+
+# FIXME: agent name should be unique (agency_swarm gets it by name from settings.json).
+# The current workaround: we append the owner id to the agent name to make it unique.
+# Renaming is not supported yet.
 
 
 @agent_router.get("/agent")
@@ -52,9 +57,15 @@ async def update_agent_config(
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
         if agent_config_db.owner_id != current_user.id:
             raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        # Ensure the agent name has not been changed
+        if agent_config.name != agent_config_db.name:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Agent name cannot be changed")
 
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id
+
+    if not agent_config.name.startswith(f"{agent_config.owner_id}-"):
+        agent_config.name = f"{agent_config.owner_id}-{agent_config.name}"
 
     agent_id = await agent_manager.create_or_update_agent(agent_config)
     return {"agent_id": agent_id}

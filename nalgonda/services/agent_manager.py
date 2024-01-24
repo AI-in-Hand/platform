@@ -38,7 +38,7 @@ class AgentManager:
         return agent, agent_config
 
     async def update_agent(self, agent_config: AgentConfig, updated_data: dict) -> None:
-        ...
+        raise NotImplementedError
 
     @staticmethod
     def _construct_agent(agent_config: AgentConfig) -> Agent:
