@@ -62,11 +62,12 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
-        agency_manifesto="Initial manifesto",
+        name="Test agency",
+        shared_instructions="Initial manifesto",
         agents=["agent1_id"],
     )
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config.model_dump())
-    agency_config.agency_manifesto = "New manifesto"
+    agency_config.shared_instructions = "New manifesto"
 
     with patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
@@ -75,7 +76,7 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
 
     mock_repopulate.assert_called_once_with("test_agency_id")
     assert agency_id == "test_agency_id"
-    assert mock_firestore_client.to_dict()["agency_manifesto"] == "New manifesto"
+    assert mock_firestore_client.to_dict()["shared_instructions"] == "New manifesto"
 
 
 @pytest.mark.asyncio
@@ -96,7 +97,8 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
-        agency_manifesto="manifesto",
+        name="Test agency",
+        shared_instructions="manifesto",
         agents=["agent1_id"],
     )
     agent = MagicMock(spec=Agent)
@@ -125,7 +127,8 @@ async def test_load_and_construct_agents_success(agency_manager):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
-        agency_manifesto="Test manifesto",
+        name="Test agency",
+        shared_instructions="Test manifesto",
         agents=["agent1_id"],
     )
     agent_config_mock = Mock()
@@ -151,7 +154,8 @@ async def test_load_and_construct_agents_agent_not_found(agency_manager):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
-        agency_manifesto="Test manifesto",
+        name="Test agency",
+        shared_instructions="Test manifesto",
         agents=["agent1_id"],
     )
 
@@ -172,7 +176,8 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
-        agency_manifesto="manifesto",
+        name="Test agency",
+        shared_instructions="manifesto",
         agents=["agent1_id", "agent2_id"],
         main_agent="agent1_name",
         agency_chart=[["agent1_name", "agent2_name"]],

@@ -9,7 +9,8 @@ def test_get_agency_config(client, mock_firestore_client, mock_get_current_activ
     mock_data = {
         "agency_id": "test_agency_id",
         "owner_id": TEST_USER_ID,
-        "agency_manifesto": "Test Manifesto",
+        "name": "Test agency",
+        "shared_instructions": "Test Manifesto",
         "main_agent": None,
         "agents": [],
         "agency_chart": [],
@@ -31,7 +32,8 @@ def test_get_agency_config_not_found(client, mock_get_current_active_user):  # n
 def test_create_agency_success(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
     template_config = {
         "agency_id": "template_agency_id",
-        "agency_manifesto": "Manifesto",
+        "name": "Test agency",
+        "shared_instructions": "Manifesto",
         "agents": [],
         "agency_chart": [],
     }
@@ -57,14 +59,15 @@ def test_update_agency_success(client, mock_firestore_client, mock_get_current_a
     initial_data = {
         "agency_id": "test_agency_id",
         "owner_id": TEST_USER_ID,
-        "agency_manifesto": "Original Manifesto",
+        "name": "Test agency",
+        "shared_instructions": "Original Manifesto",
         "agents": [],
         "main_agent": None,
         "agency_chart": [],
     }
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", initial_data)
     new_data = initial_data.copy()
-    new_data.update({"agency_manifesto": "Updated Manifesto"})
+    new_data.update({"shared_instructions": "Updated Manifesto"})
 
     with patch(
         "nalgonda.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
@@ -84,14 +87,15 @@ def test_update_agency_owner_id_mismatch(client, mock_firestore_client, mock_get
     initial_data = {
         "agency_id": "test_agency_id",
         "owner_id": "some_other_user",
-        "agency_manifesto": "Original Manifesto",
+        "name": "Test agency",
+        "shared_instructions": "Original Manifesto",
         "agents": [],
         "main_agent": None,
         "agency_chart": [],
     }
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", initial_data)
     new_data = initial_data.copy()
-    new_data.update({"agency_manifesto": "Updated Manifesto"})
+    new_data.update({"shared_instructions": "Updated Manifesto"})
 
     response = client.put("/v1/api/agency", json=new_data)
 
