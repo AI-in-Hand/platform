@@ -69,8 +69,8 @@ async def create_or_update_agent(
     agent_config.owner_id = current_user.id
 
     # FIXME: a workaround explained at the top of the file
-    if not agent_config.name.startswith(f"{agent_config.owner_id}-"):
-        agent_config.name = f"{agent_config.owner_id}-{agent_config.name}"
+    if not agent_config.name.endswith(f" ({agent_config.owner_id})"):
+        agent_config.name = f"{agent_config.name} ({agent_config.owner_id})"
 
     agent_id = await agent_manager.create_or_update_agent(agent_config)
     return {"agent_id": agent_id}
