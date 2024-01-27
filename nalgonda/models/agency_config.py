@@ -1,5 +1,3 @@
-from typing import Any
-
 from pydantic import BaseModel, Field, conlist, field_validator
 
 
@@ -7,7 +5,7 @@ class AgencyConfig(BaseModel):
     """Agency configuration model"""
 
     agency_id: str = Field(..., description="The agency ID")
-    owner_id: str = Field(None, description="The user ID owning this agency configuration")
+    owner_id: str | None = Field(None, description="The user ID owning this agency configuration")
     agency_manifesto: str = Field("Agency Manifesto")
     agents: list[str] = Field(..., description="List of agent IDs used in the agency chart")
     main_agent: str | None = Field(None, description="The main agent name")
@@ -15,11 +13,6 @@ class AgencyConfig(BaseModel):
         default_factory=list,
         description="List representing the agency chart with agent names. Each item is a pair of names.",
     )
-
-    def update(self, update_data: dict[str, Any]) -> None:
-        for key, value in update_data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
 
     @field_validator("agency_chart", mode="after")
     @classmethod

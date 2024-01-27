@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class AgencyThreadPostRequest(BaseModel):
+class ThreadPostRequest(BaseModel):
     agency_id: str = Field(..., description="The unique identifier for the agency.")
 
 

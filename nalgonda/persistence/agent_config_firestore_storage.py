@@ -9,8 +9,8 @@ class AgentConfigFirestoreStorage:
         self.db = firestore.client()
         self.collection = self.db.collection("agent_configs")
 
-    def load_by_user_id(self, user_id: str) -> list[AgentConfig]:
-        query = self.collection.where(filter=FieldFilter("owner_id", "==", user_id))
+    def load_by_owner_id(self, owner_id: str | None = None) -> list[AgentConfig]:
+        query = self.collection.where(filter=FieldFilter("owner_id", "==", owner_id))
         return [AgentConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
     def load_by_agent_id(self, agent_id: str) -> AgentConfig | None:

@@ -11,16 +11,16 @@ from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFiresto
 tool_router = APIRouter(tags=["tool"])
 
 
-@tool_router.get("/tool")
+@tool_router.get("/tool/list")
 async def get_tool_list(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> list[ToolConfig]:
-    tools = storage.load_by_user_id(current_user.id)
+    tools = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
     return tools
 
 
-@tool_router.get("/tool/config")
+@tool_router.get("/tool")
 async def get_tool_config(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     tool_id: str = Query(..., description="The unique identifier of the tool"),
@@ -35,14 +35,17 @@ async def get_tool_config(
     return tool_config
 
 
-@tool_router.post("/tool/config")
+@tool_router.post("/tool")
 async def create_tool_version(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     tool_config: ToolConfig = Body(...),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
-    tool_config_db = None
+    # support template configs:
+    if not tool_config.owner_id:
+        tool_config.tool_id = None
     # check if the current_user has permissions to create a tool
+    tool_config_db = None
     if tool_config.tool_id:
         tool_config_db = storage.load_by_tool_id(tool_config.tool_id)
         if not tool_config_db:

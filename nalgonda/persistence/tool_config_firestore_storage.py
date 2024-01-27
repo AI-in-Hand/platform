@@ -9,8 +9,8 @@ class ToolConfigFirestoreStorage:
         self.db = firestore.client()
         self.collection = self.db.collection("tool_configs")
 
-    def load_by_user_id(self, user_id: str) -> list[ToolConfig]:
-        query = self.collection.where(filter=FieldFilter("owner_id", "==", user_id))
+    def load_by_owner_id(self, owner_id: str | None = None) -> list[ToolConfig]:
+        query = self.collection.where(filter=FieldFilter("owner_id", "==", owner_id))
         return [ToolConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
     def load_by_tool_id(self, tool_id: str) -> ToolConfig | None:

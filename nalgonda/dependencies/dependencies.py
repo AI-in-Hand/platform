@@ -1,6 +1,7 @@
 from fastapi import Depends
 from redis import asyncio as aioredis
 
+from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.agent_manager import AgentManager
@@ -26,8 +27,9 @@ def get_agent_manager(storage: AgentConfigFirestoreStorage = Depends(AgentConfig
 def get_agency_manager(
     cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
+    agency_config_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager)
+    return AgencyManager(cache_manager, agent_manager, agency_config_storage)
 
 
 def get_thread_manager() -> ThreadManager:

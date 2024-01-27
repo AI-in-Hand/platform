@@ -21,7 +21,7 @@ def test_load_tool_config_by_user_id(mock_firestore_client, tool_data):
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_data)
 
     storage = ToolConfigFirestoreStorage()
-    loaded_tool_configs = storage.load_by_user_id(tool_data["owner_id"])
+    loaded_tool_configs = storage.load_by_owner_id(tool_data["owner_id"])
 
     expected_tool_config = ToolConfig.model_validate(tool_data)
     assert loaded_tool_configs == [expected_tool_config]

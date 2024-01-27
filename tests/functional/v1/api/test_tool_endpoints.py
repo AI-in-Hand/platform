@@ -19,7 +19,7 @@ def tool_config_data():
 def test_get_tool_list(tool_config_data, client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
-    response = client.get("/v1/api/tool")
+    response = client.get("/v1/api/tool/list")
     assert response.status_code == 200
     assert response.json() == [tool_config_data]
 
@@ -42,7 +42,7 @@ def test_update_tool_config_success(tool_config_data, client, mock_firestore_cli
     tool_config_data = tool_config_data.copy()
     tool_config_data["name"] = "Tool 1 Updated"
     tool_config_data["code"] = 'print("Hello World Updated")'
-    response = client.post("/v1/api/tool/config", json=tool_config_data)
+    response = client.post("/v1/api/tool", json=tool_config_data)
     assert response.status_code == 200
     assert response.json() == {"tool_id": "tool1", "tool_version": 2}
 
@@ -63,6 +63,6 @@ def test_update_tool_config_owner_id_mismatch(
 
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
-    response = client.post("/v1/api/tool/config", json=tool_config_data)
+    response = client.post("/v1/api/tool", json=tool_config_data)
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}

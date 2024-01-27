@@ -30,8 +30,8 @@ const WorkflowView = ({}: any) => {
   });
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listWorkflowsUrl = `${serverUrl}/agency`;
-  const saveWorkflowsUrl = `${serverUrl}/agency/config`;
+  const listWorkflowsUrl = `${serverUrl}/agency/list`;
+  const saveWorkflowsUrl = `${serverUrl}/agency`;
   const deleteWorkflowsUrl = `${serverUrl}/agency/delete`;
 
   const [workflows, setWorkflows] = React.useState<IFlowConfig[] | null>([]);

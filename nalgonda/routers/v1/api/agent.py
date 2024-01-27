@@ -14,21 +14,21 @@ from nalgonda.services.agent_manager import AgentManager
 agent_router = APIRouter(tags=["agent"])
 
 
-# FIXME: agent name should be unique (agency_swarm gets it by name from settings.json).
+# FIXME: agent name should be unique (agency-swarm gets it by name from settings.json).
 # The current workaround: we append the owner id to the agent name to make it unique.
 # Renaming is not supported yet.
 
 
-@agent_router.get("/agent")
+@agent_router.get("/agent/list")
 async def get_agent_list(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> list[AgentConfig]:
-    agents = storage.load_by_user_id(current_user.id)
+    agents = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
     return agents
 
 
-@agent_router.get("/agent/config")
+@agent_router.get("/agent")
 async def get_agent_config(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agent_id: str = Query(..., description="The unique identifier of the agent"),
@@ -43,13 +43,16 @@ async def get_agent_config(
     return agent_config
 
 
-@agent_router.put("/agent/config")
-async def update_agent_config(
+@agent_router.put("/agent")
+async def create_or_update_agent(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agent_config: AgentConfig = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> dict[str, str]:
+    # support template configs:
+    if not agent_config.owner_id:
+        agent_config.agent_id = None
     # check if the current user is the owner of the agent
     if agent_config.agent_id:
         agent_config_db = storage.load_by_agent_id(agent_config.agent_id)
