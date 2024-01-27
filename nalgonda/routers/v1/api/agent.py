@@ -38,7 +38,7 @@ async def get_agent_config(
     if not agent_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
     # check if the current user is the owner of the agent
-    if agent_config.owner_id != current_user.id:
+    if agent_config.owner_id and agent_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
     return agent_config
 
@@ -68,6 +68,7 @@ async def create_or_update_agent(
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id
 
+    # FIXME: a workaround explained at the top of the file
     if not agent_config.name.startswith(f"{agent_config.owner_id}-"):
         agent_config.name = f"{agent_config.owner_id}-{agent_config.name}"
 

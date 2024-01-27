@@ -38,7 +38,7 @@ async def get_agency_config(
     if not agency_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
     # check if the current_user has permissions to get the agency config
-    if agency_config.owner_id != current_user.id:
+    if agency_config.owner_id and agency_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
     return agency_config
 

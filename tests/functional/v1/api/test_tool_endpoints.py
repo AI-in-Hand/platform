@@ -24,7 +24,7 @@ def test_get_tool_list(tool_config_data, client, mock_firestore_client, mock_get
     assert response.json() == [tool_config_data]
 
 
-def test_approve_tool_config(tool_config_data, client, mock_firestore_client, mock_get_current_superuser):  # noqa: ARG001
+def test_approve_tool(tool_config_data, client, mock_firestore_client, mock_get_current_superuser):  # noqa: ARG001
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
     response = client.post("/v1/api/tool/approve?tool_id=tool1")

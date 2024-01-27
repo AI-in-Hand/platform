@@ -30,7 +30,7 @@ async def get_tool_config(
     if not tool_config:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
     # check if the current_user has permissions to get the tool config
-    if tool_config.owner_id != current_user.id:
+    if tool_config.owner_id and tool_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
     return tool_config
 
@@ -67,7 +67,7 @@ async def create_tool_version(
 
 
 @tool_router.post("/tool/approve")
-async def approve_tool_config(
+async def approve_tool(
     current_superuser: Annotated[UserInDB, Depends(get_current_superuser)],  # noqa: ARG001
     tool_id: str = Query(..., description="The unique identifier of the tool"),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
