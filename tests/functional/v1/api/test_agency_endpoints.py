@@ -39,10 +39,11 @@ def test_create_agency_success(client, mock_firestore_client, mock_get_current_a
     with patch(
         "nalgonda.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
     ) as mock_update_or_create_agency:
-        response = client.put("/v1/api/agency?agency_id=test_agency_id", json=template_config)
+        mock_update_or_create_agency.return_value = "test_agency_id"
+        response = client.put("/v1/api/agency", json=template_config)
 
     assert response.status_code == 200
-    assert response.json() == {"agency_id": mock.ANY}
+    assert response.json() == {"agency_id": "test_agency_id"}
 
     template_config.update({"owner_id": TEST_USER_ID})
     model_template_config = AgencyConfig.model_validate(template_config)
@@ -68,7 +69,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_get_current_a
     with patch(
         "nalgonda.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate_cache:
-        response = client.put("/v1/api/agency?agency_id=test_agency_id", json=new_data)
+        response = client.put("/v1/api/agency", json=new_data)
 
     assert response.status_code == 200
     assert response.json() == {"agency_id": initial_data["agency_id"]}
@@ -92,7 +93,7 @@ def test_update_agency_owner_id_mismatch(client, mock_firestore_client, mock_get
     new_data = initial_data.copy()
     new_data.update({"agency_manifesto": "Updated Manifesto"})
 
-    response = client.put("/v1/api/agency?agency_id=test_agency_id", json=new_data)
+    response = client.put("/v1/api/agency", json=new_data)
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}

@@ -37,13 +37,14 @@ class AgencyManager:
         agency = self._restore_client_objects(agency)
         return agency
 
-    async def update_or_create_agency(self, agency_config: AgencyConfig) -> None:
+    async def update_or_create_agency(self, agency_config: AgencyConfig) -> str:
         """Update or create the agency. It will update the agency in the Firestore and also in the cache.
         repopulate_cache_and_update_assistants method call ensures that the assistants are up-to-date.
         """
         AgencyConfig.model_validate(agency_config.model_dump())
         agency_id = await asyncio.to_thread(self.agency_config_storage.save, agency_config)
         await self.repopulate_cache_and_update_assistants(agency_id)
+        return agency_id
 
     async def repopulate_cache_and_update_assistants(self, agency_id: str) -> Agency | None:
         """Gets the agency config from the Firestore, constructs agents and agency

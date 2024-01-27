@@ -6,11 +6,12 @@ from fastapi.params import Query
 from starlette.status import HTTP_200_OK, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_active_user
-from nalgonda.dependencies.dependencies import get_agency_manager
+from nalgonda.dependencies.dependencies import get_agency_manager, get_agent_manager
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import UserInDB
 from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
+from nalgonda.services.agent_manager import AgentManager
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
@@ -48,13 +49,10 @@ async def update_or_create_agency(
     agency_config: AgencyConfig,
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ):
     """Create or update an agency and return its id"""
-    # TODO: check if the current_user has permissions to create an agency
-
-    agency_id = agency_config.agency_id
-
     # support template configs:
     if not agency_config.owner_id:
         logger.info(f"Creating agency for user: {current_user.id}")
@@ -67,10 +65,17 @@ async def update_or_create_agency(
                 raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
             if agency_config_db.owner_id != current_user.id:
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+            # check that all used agents belong to the current user
+            for agent_id in agency_config.agents:
+                get_result = await agent_manager.get_agent(agent_id)
+                if get_result:
+                    _, agent_config = get_result
+                    if agent_config.owner_id != current_user.id:
+                        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
     # Ensure the agency is associated with the current user
     agency_config.owner_id = current_user.id
 
-    await agency_manager.update_or_create_agency(agency_config)
+    agency_id = await agency_manager.update_or_create_agency(agency_config)
 
     return {"agency_id": agency_id}
