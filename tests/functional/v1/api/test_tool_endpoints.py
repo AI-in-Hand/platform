@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
@@ -10,6 +12,7 @@ def tool_config_data():
         "tool_id": "tool1",
         "owner_id": TEST_USER_ID,
         "name": "Tool 1",
+        "description": "",
         "version": 1,
         "code": 'print("Hello World")',
         "approved": False,
@@ -36,6 +39,7 @@ def test_approve_tool(tool_config_data, client, mock_firestore_client, mock_get_
     assert updated_config["approved"] is True
 
 
+@patch("nalgonda.routers.v1.api.tool.generate_tool_description", MagicMock(return_value="Test description"))
 def test_update_tool_config_success(tool_config_data, client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 

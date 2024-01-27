@@ -4,8 +4,8 @@ from agency_swarm import BaseTool
 from pydantic import Field
 
 from nalgonda.custom_tools import PrintFileContents
-from nalgonda.custom_tools.utils import get_chat_completion
 from nalgonda.settings import settings
+from nalgonda.utils import get_chat_completion
 
 USER_PROMPT_PREFIX = "Summarize the code of the file below.\n\n"
 SYSTEM_MESSAGE = """\
@@ -37,7 +37,7 @@ class SummarizeCode(BaseTool):
         code = PrintFileContents(file_name=self.file_name).run()
         user_prompt = f"{USER_PROMPT_PREFIX}{code}"
         output = get_chat_completion(
-            user_prompt=user_prompt, system_message=SYSTEM_MESSAGE, temperature=0.0, model=settings.gpt_cheap_model
+            system_message=SYSTEM_MESSAGE, user_prompt=user_prompt, temperature=0.0, model=settings.gpt_cheap_model
         )
         return output
 

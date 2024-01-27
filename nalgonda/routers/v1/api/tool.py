@@ -7,8 +7,13 @@ from nalgonda.dependencies.auth import get_current_active_user, get_current_supe
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.tool_config import ToolConfig
 from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
+from nalgonda.services.tool_service import generate_tool_description
 
 tool_router = APIRouter(tags=["tool"])
+
+
+# FIXME: current limitation on tools: we always use common tools (owner_id=None).
+# What needs to be done: support dynamic loading of tools.
 
 
 @tool_router.get("/tool/list")
@@ -61,6 +66,9 @@ async def create_tool_version(
     # Increment version and set approved to False
     tool_config.version = tool_config_db.version + 1 if tool_config_db else 1
     tool_config.approved = False
+
+    if not tool_config.description and tool_config.code:
+        tool_config.description = generate_tool_description(tool_config.code)
 
     tool_id, tool_version = storage.save(tool_config)
     return {"tool_id": tool_id, "tool_version": tool_version}

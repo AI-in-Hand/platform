@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from agency_swarm import get_openai_client
+
 
 def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
     """
@@ -15,3 +17,18 @@ def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
         "static_folder_root": static_folder_root,
     }
     return folders
+
+
+def get_chat_completion(system_message: str, user_prompt: str, model: str, **kwargs) -> str:
+    """Generate a chat completion based on a prompt and a system message.
+    This function is a wrapper around the OpenAI API."""
+    client = get_openai_client()
+    completion = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_prompt},
+        ],
+        **kwargs,
+    )
+    return completion.choices[0].message.content

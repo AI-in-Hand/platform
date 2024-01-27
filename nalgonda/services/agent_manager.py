@@ -35,7 +35,7 @@ class AgentManager:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None
 
-        agent = self._construct_agent(agent_config)
+        agent = await asyncio.to_thread(self._construct_agent, agent_config)
         return agent, agent_config
 
     async def update_agent(self, agent_config: AgentConfig, updated_data: dict) -> None:
