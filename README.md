@@ -10,12 +10,12 @@ and agent management.
 
 ## Key Components
 
-- **Agency Configuration Manager**: Manages configurations for AI agencies.
+- **Configuration Managers**: Manage configurations for AI agencies, agents and tools.
 - **WebSocket Connection Manager**: Handles WebSocket connections for interactive agency-client communication.
 - **Custom Tools**: Includes tools like `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, and more.
-- **Data Persistence**: Uses Firestore for storing tool, agent, and agency configurations.
 - **FastAPI Web Server**: For API routing, CORS middleware, Firebase initialization, and WebSocket communication.
-- **Data Models**: Pydantic models for agencies, agents, and tool configurations.
+- **Data Models**: Pydantic models for agencies, agents, and tool configurations and request validation.
+- **Data Persistence**: Firestore for storing tool, agent, and agency configurations.
 - **Caching**: Redis for efficient caching of agency states.
 
 ## Features
@@ -57,17 +57,8 @@ Start the FastAPI server: `uvicorn nalgonda.main:app --reload`
 To interact with the platform, use the Postman collection, which includes all necessary routes and variables for testing.
 
 ### WebSocket Communication
-Connect to WebSocket endpoints (`/v1/ws/{agency_id}`, `/v1/ws/{agency_id}/{thread_id}`)
+Connect to WebSocket endpoints (`/v1/ws/{agency_id}`, `/v1/ws/{agency_id}/{session_id}`)
 for real-time communication with AI agencies.
-
-## Key Components
-- Agency Configuration Manager: Manages configurations for AI agencies.
-- WebSocket Connection Manager: Handles WebSocket connections for interactive agency-client communication.
-- Custom Tools: Includes tools like SearchWeb, GenerateProposal, BuildDirectoryTree, and more.
-- Data Persistence: Uses JSON-based configurations and Firestore for maintaining agency states.
-- FastAPI Web Server: For API routing, CORS middleware, Firebase initialization, and WebSocket communication.
-- Data Models: Pydantic models for agencies, agents, and tool configurations.
-- Caching: Redis for efficient configuration management.
 
 ## Areas for Improvement
 - Enhanced exception handling, security, documentation, testing, caching logic, and database interactions.
