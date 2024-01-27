@@ -62,8 +62,8 @@ class MockFirestoreClient:
                 matching_docs.append(MockDocumentSnapshot(doc_id, doc))
         return matching_docs
 
-    def add(self, data) -> list[MockDocumentSnapshot]:
+    def add(self, data) -> list:
         # This method should add a new document to the collection
         # and return a list with the new document.
         self.set(data)
-        return [MockDocumentSnapshot(self.current_document_id, data)]
+        return [[], MockDocumentSnapshot(self.current_document_id, data)]

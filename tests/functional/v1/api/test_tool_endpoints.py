@@ -27,7 +27,7 @@ def test_get_tool_list(tool_config_data, client, mock_firestore_client, mock_get
 def test_approve_tool_config(tool_config_data, client, mock_firestore_client, mock_get_current_superuser):  # noqa: ARG001
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
-    response = client.put("/v1/api/tool/approve?tool_id=tool1")
+    response = client.post("/v1/api/tool/approve?tool_id=tool1")
     assert response.status_code == 200
     assert response.json() == {"message": "Tool configuration approved"}
 

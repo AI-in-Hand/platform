@@ -20,7 +20,14 @@ class AgencyConfigFirestoreStorage:
             return AgencyConfig.model_validate(agency_config_snapshot.to_dict())
         return None
 
-    def save(self, agency_id: str, agency_config: AgencyConfig) -> None:
-        document_data = agency_config.model_dump()
-        document_ref = self.collection.document(agency_id)
-        document_ref.set(document_data)
+    def save(self, agency_config: AgencyConfig) -> str:
+        """Save the agency configuration to the Firestore.
+        If the agency_id is not set, it will create a new document and set the agency_id.
+        Returns the agency_id."""
+        if agency_config.agency_id is None:
+            # Create a new document and set the agency_id
+            document_reference = self.collection.add(agency_config.model_dump())[1]
+            agency_config.agency_id = document_reference.id
+
+        self.collection.document(agency_config.agency_id).set(agency_config.model_dump())
+        return agency_config.agency_id

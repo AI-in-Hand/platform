@@ -22,7 +22,7 @@ class ToolConfigFirestoreStorage:
     def save(self, tool_config: ToolConfig) -> tuple[str, int]:
         if tool_config.tool_id is None:
             # Create a new document and set the tool_id
-            document_reference = self.collection.add(tool_config.model_dump())[0]
+            document_reference = self.collection.add(tool_config.model_dump())[1]
             tool_config.tool_id = document_reference.id
         self.collection.document(tool_config.tool_id).set(tool_config.model_dump())
 

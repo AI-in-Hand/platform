@@ -53,16 +53,17 @@ async def create_or_update_agent(
     # support template configs:
     if not agent_config.owner_id:
         agent_config.agent_id = None
-    # check if the current user is the owner of the agent
-    if agent_config.agent_id:
-        agent_config_db = storage.load_by_agent_id(agent_config.agent_id)
-        if not agent_config_db:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
-        if agent_config_db.owner_id != current_user.id:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
-        # Ensure the agent name has not been changed
-        if agent_config.name != agent_config_db.name:
-            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Agent name cannot be changed")
+    else:
+        # check if the current_user has permissions
+        if agent_config.agent_id:
+            agent_config_db = storage.load_by_agent_id(agent_config.agent_id)
+            if not agent_config_db:
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
+            if agent_config_db.owner_id != current_user.id:
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+            # Ensure the agent name has not been changed
+            if agent_config.name != agent_config_db.name:
+                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Agent name cannot be changed")
 
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id

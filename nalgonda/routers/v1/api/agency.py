@@ -1,6 +1,5 @@
 import logging
 from typing import Annotated
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
@@ -59,17 +58,19 @@ async def update_or_create_agency(
     # support template configs:
     if not agency_config.owner_id:
         logger.info(f"Creating agency for user: {current_user.id}")
-        agency_id = str(uuid4())
-        agency_config.agency_id = agency_id
+        agency_config.agency_id = None
     else:
-        # check if the current_user has permissions to update the agency config
-        agency_config_db = storage.load_by_agency_id(agency_config.agency_id)
-        if not agency_config_db:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
-        if agency_config_db.owner_id != current_user.id:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        # check if the current_user has permissions
+        if agency_config.agency_id:
+            agency_config_db = storage.load_by_agency_id(agency_config.agency_id)
+            if not agency_config_db:
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+            if agency_config_db.owner_id != current_user.id:
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
+    # Ensure the agency is associated with the current user
     agency_config.owner_id = current_user.id
-    await agency_manager.update_agency(agency_config)
 
-    return {"message": "Success", "agency_id": agency_id}
+    await agency_manager.update_or_create_agency(agency_config)
+
+    return {"agency_id": agency_id}

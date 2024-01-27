@@ -41,17 +41,19 @@ async def create_tool_version(
     tool_config: ToolConfig = Body(...),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
+    tool_config_db = None
+
     # support template configs:
     if not tool_config.owner_id:
         tool_config.tool_id = None
-    # check if the current_user has permissions to create a tool
-    tool_config_db = None
-    if tool_config.tool_id:
-        tool_config_db = storage.load_by_tool_id(tool_config.tool_id)
-        if not tool_config_db:
-            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
-        if tool_config_db.owner_id != current_user.id:
-            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+    else:
+        # check if the current_user has permissions
+        if tool_config.tool_id:
+            tool_config_db = storage.load_by_tool_id(tool_config.tool_id)
+            if not tool_config_db:
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
+            if tool_config_db.owner_id != current_user.id:
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
     # Ensure the tool is associated with the current user
     tool_config.owner_id = current_user.id
@@ -64,7 +66,7 @@ async def create_tool_version(
     return {"tool_id": tool_id, "tool_version": tool_version}
 
 
-@tool_router.put("/tool/approve")
+@tool_router.post("/tool/approve")
 async def approve_tool_config(
     current_superuser: Annotated[UserInDB, Depends(get_current_superuser)],  # noqa: ARG001
     tool_id: str = Query(..., description="The unique identifier of the tool"),

@@ -20,12 +20,12 @@ class AgentConfigFirestoreStorage:
         return AgentConfig.model_validate(document_snapshot.to_dict())
 
     def save(self, agent_config: AgentConfig) -> str:
-        """Save the agent configuration to the firestore.
+        """Save the agent configuration to the Firestore.
         If the agent_id is not set, it will create a new document and set the agent_id.
         Returns the agent_id."""
         if agent_config.agent_id is None:
             # Create a new document and set the agent_id
-            document_reference = self.collection.add(agent_config.model_dump())[0]
+            document_reference = self.collection.add(agent_config.model_dump())[1]
             agent_config.agent_id = document_reference.id
 
         self.collection.document(agent_config.agent_id).set(agent_config.model_dump())

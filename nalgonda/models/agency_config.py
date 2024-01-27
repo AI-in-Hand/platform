@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field, conlist, field_validator
 class AgencyConfig(BaseModel):
     """Agency configuration model"""
 
-    agency_id: str = Field(..., description="The agency ID")
-    owner_id: str | None = Field(None, description="The user ID owning this agency configuration")
+    agency_id: str | None = Field(None, description="Unique identifier for the configuration")
+    owner_id: str | None = Field(None, description="The user ID owning this configuration")
     agency_manifesto: str = Field("Agency Manifesto")
     agents: list[str] = Field(..., description="List of agent IDs used in the agency chart")
     main_agent: str | None = Field(None, description="The main agent name")

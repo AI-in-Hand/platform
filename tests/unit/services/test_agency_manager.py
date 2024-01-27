@@ -58,7 +58,7 @@ async def test_get_agency_repopulate_cache(agency_manager):
 
 
 @pytest.mark.asyncio
-async def test_update_agency(agency_manager, mock_firestore_client):
+async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id="test_agency_id",
         owner_id=TEST_USER_ID,
@@ -71,7 +71,7 @@ async def test_update_agency(agency_manager, mock_firestore_client):
     with patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate:
-        await agency_manager.update_agency(agency_config)
+        await agency_manager.update_or_create_agency(agency_config)
 
     mock_repopulate.assert_called_once_with("test_agency_id")
     assert mock_firestore_client.to_dict()["agency_manifesto"] == "New manifesto"

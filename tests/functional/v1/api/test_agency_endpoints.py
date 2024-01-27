@@ -37,18 +37,18 @@ def test_create_agency_success(client, mock_firestore_client, mock_get_current_a
     }
 
     with patch(
-        "nalgonda.services.agency_manager.AgencyManager.update_agency", new_callable=AsyncMock
-    ) as mock_update_agency:
+        "nalgonda.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
+    ) as mock_update_or_create_agency:
         response = client.put("/v1/api/agency?agency_id=test_agency_id", json=template_config)
 
     assert response.status_code == 200
-    assert response.json() == {"message": "Success", "agency_id": mock.ANY}
+    assert response.json() == {"agency_id": mock.ANY}
 
     template_config.update({"owner_id": TEST_USER_ID})
     model_template_config = AgencyConfig.model_validate(template_config)
     model_template_config.agency_id = mock.ANY
-    assert mock_update_agency.mock_calls[0].args[0] == model_template_config
-    assert mock_update_agency.mock_calls[0].args[0].agency_id != "template_agency_id"
+    assert mock_update_or_create_agency.mock_calls[0].args[0] == model_template_config
+    assert mock_update_or_create_agency.mock_calls[0].args[0].agency_id != "template_agency_id"
 
 
 def test_update_agency_success(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
@@ -71,7 +71,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_get_current_a
         response = client.put("/v1/api/agency?agency_id=test_agency_id", json=new_data)
 
     assert response.status_code == 200
-    assert response.json() == {"message": "Success", "agency_id": initial_data["agency_id"]}
+    assert response.json() == {"agency_id": initial_data["agency_id"]}
 
     mock_repopulate_cache.assert_called_once_with("test_agency_id")
 
