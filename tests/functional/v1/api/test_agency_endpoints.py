@@ -7,7 +7,7 @@ from tests.test_utils import TEST_USER_ID
 
 def test_get_agency_list_success(client, mock_get_current_active_user, mock_firestore_client):  # noqa: ARG001
     # Setup expected response
-    expected_agency = AgencyConfig(agency_id="agency1", owner_id="test_user_id", name="Test agency", agents=[])
+    expected_agency = AgencyConfig(agency_id="agency1", owner_id="test_user_id", name="Test agency")
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", expected_agency.model_dump())
 
     response = client.get("/v1/api/agency/list")
