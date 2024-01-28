@@ -1,11 +1,14 @@
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
+import pytest
+
 from nalgonda.models.agency_config import AgencyConfig
 from tests.test_utils import TEST_USER_ID
 
 
-def test_get_agency_list_success(client, mock_get_current_active_user, mock_firestore_client):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_agency_list_success(client, mock_firestore_client):
     # Setup expected response
     expected_agency = AgencyConfig(agency_id="agency1", owner_id="test_user_id", name="Test agency")
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", expected_agency.model_dump())
@@ -16,7 +19,8 @@ def test_get_agency_list_success(client, mock_get_current_active_user, mock_fire
     assert response.json() == [expected_agency.model_dump()]
 
 
-def test_get_agency_config(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_agency_config(client, mock_firestore_client):
     mock_data = {
         "agency_id": "test_agency_id",
         "owner_id": TEST_USER_ID,
@@ -33,14 +37,16 @@ def test_get_agency_config(client, mock_firestore_client, mock_get_current_activ
     assert response.json() == mock_data
 
 
-def test_get_agency_config_not_found(client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_agency_config_not_found(client):
     # Simulate non-existent agency by not setting up any data for it
     response = client.get("/v1/api/agency?agency_id=non_existent_agency")
     assert response.status_code == 404
     assert response.json() == {"detail": "Agency not found"}
 
 
-def test_create_agency_success(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user", "mock_firestore_client")
+def test_create_agency_success(client):
     template_config = {
         "agency_id": "template_agency_id",
         "name": "Test agency",
@@ -65,7 +71,8 @@ def test_create_agency_success(client, mock_firestore_client, mock_get_current_a
     assert mock_update_or_create_agency.mock_calls[0].args[0].agency_id != "template_agency_id"
 
 
-def test_update_agency_success(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_agency_success(client, mock_firestore_client):
     # Setup initial data in mock Firestore client
     initial_data = {
         "agency_id": "test_agency_id",
@@ -93,7 +100,8 @@ def test_update_agency_success(client, mock_firestore_client, mock_get_current_a
     assert mock_firestore_client.to_dict() == new_data
 
 
-def test_update_agency_owner_id_mismatch(client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_agency_owner_id_mismatch(client, mock_firestore_client):
     # Setup initial data in mock Firestore client
     initial_data = {
         "agency_id": "test_agency_id",

@@ -4,14 +4,15 @@ from pydantic import Field
 
 
 class SearchWeb(BaseTool):
-    """Search the web with a search phrase and return the results."""
+    """Search the web with a search query and return the results."""
 
-    phrase: str = Field(
+    query: str = Field(
         ...,
-        description="The search phrase you want to use. Optimize the search phrase for an internet search engine.",
+        description="The search query you want to use. Optimize the search query for an internet search engine.",
     )
     max_results: int = Field(default=10, description="The maximum number of search results to return, default is 10.")
 
     def run(self) -> str:
         with DDGS() as ddgs:
-            return "\n".join(str(result) for result in ddgs.text(self.phrase, max_results=self.max_results))
+            results = [str(r) for r in ddgs.text(self.query, max_results=self.max_results)]
+            return "\n".join(results) if results else "No results found."

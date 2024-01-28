@@ -1,7 +1,6 @@
 import logging
 from typing import Annotated
 
-from agency_swarm import Agency
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
@@ -80,14 +79,8 @@ async def post_agency_message(
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
-        response = await process_message(user_message, agency)
+        response = await agency.get_completion(message=user_message, yield_messages=False)
         return {"response": response}
     except Exception as e:
         logger.exception(e)
-        return {"error": str(e)}
-
-
-async def process_message(user_message: str, agency: Agency) -> str:
-    """Process a message from the user and return the response from the User Proxy."""
-    response = agency.get_completion(message=user_message, yield_messages=False)
-    return response
+        raise HTTPException(status_code=500, detail="Something went wrong") from e

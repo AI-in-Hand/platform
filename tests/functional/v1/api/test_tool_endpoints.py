@@ -19,7 +19,8 @@ def tool_config_data():
     }
 
 
-def test_get_tool_list(tool_config_data, client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_tool_list(tool_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
     response = client.get("/v1/api/tool/list")
@@ -27,7 +28,8 @@ def test_get_tool_list(tool_config_data, client, mock_firestore_client, mock_get
     assert response.json() == [tool_config_data]
 
 
-def test_approve_tool(tool_config_data, client, mock_firestore_client, mock_get_current_superuser):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_superuser")
+def test_approve_tool(tool_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
     response = client.post("/v1/api/tool/approve?tool_id=tool1")
@@ -40,7 +42,8 @@ def test_approve_tool(tool_config_data, client, mock_firestore_client, mock_get_
 
 
 @patch("nalgonda.routers.v1.api.tool.generate_tool_description", MagicMock(return_value="Test description"))
-def test_update_tool_config_success(tool_config_data, client, mock_firestore_client, mock_get_current_active_user):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_tool_config_success(tool_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)
 
     tool_config_data = tool_config_data.copy()
@@ -57,12 +60,8 @@ def test_update_tool_config_success(tool_config_data, client, mock_firestore_cli
     assert updated_config.version == 2
 
 
-def test_update_tool_config_owner_id_mismatch(
-    tool_config_data,
-    client,
-    mock_firestore_client,
-    mock_get_current_active_user,  # noqa: ARG001
-):
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_tool_config_owner_id_mismatch(tool_config_data, client, mock_firestore_client):
     tool_config_data["owner_id"] = "another_user"
 
     mock_firestore_client.setup_mock_data("tool_configs", "tool1", tool_config_data)

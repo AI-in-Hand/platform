@@ -9,25 +9,9 @@ from nalgonda.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 
 
-class MockRedisCacheManager:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):  # noqa: ARG001, ARG002
-        return self
-
-    async def get(self, key):  # noqa: ARG002
-        return None
-
-    async def set(self, key, value):
-        pass
-
-    async def delete(self, key):
-        pass
-
-
 @pytest.fixture
-def agency_manager(mock_firestore_client):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_firestore_client")
+def agency_manager():
     yield AgencyManager(
         cache_manager=MagicMock(), agent_manager=MagicMock(), agency_config_storage=AgencyConfigFirestoreStorage()
     )
