@@ -55,7 +55,7 @@ async def update_or_create_agency(
     """Create or update an agency and return its id"""
     # support template configs:
     if not agency_config.owner_id:
-        logger.info(f"Creating agency for user: {current_user.id}")
+        logger.info(f"Creating agency for user: {current_user.id}, agency: {agency_config.name}")
         agency_config.agency_id = None
     else:
         # check if the current_user has permissions
@@ -65,13 +65,17 @@ async def update_or_create_agency(
                 raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
             if agency_config_db.owner_id != current_user.id:
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
-            # check that all used agents belong to the current user
-            for agent_id in agency_config.agents:
-                get_result = await agent_manager.get_agent(agent_id)
-                if get_result:
-                    _, agent_config = get_result
-                    if agent_config.owner_id != current_user.id:
-                        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    # check that all used agents belong to the current user
+    for agent_id in agency_config.agents:
+        get_result = await agent_manager.get_agent(agent_id)
+        if get_result:
+            _, agent_config = get_result
+            if agent_config.owner_id != current_user.id:
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+    # FIXME: current limitation: all agents must belong to the current user.
+    # to fix: If the agent is a template (agent_config.owner_id is None), it should be copied for the current user
+    # (reuse the code from api/agent.py)
 
     # Ensure the agency is associated with the current user
     agency_config.owner_id = current_user.id

@@ -23,6 +23,11 @@ class AgentManager:
         Returns:
             str: agent_id
         """
+
+        # FIXME: a workaround explained at the top of the file api/agent.py
+        if not agent_config.name.endswith(f" ({agent_config.owner_id})"):
+            agent_config.name = f"{agent_config.name} ({agent_config.owner_id})"
+
         agent = self._construct_agent(agent_config)
         agent.init_oai()  # initialize the openai agent to get the id
         agent_config.agent_id = agent.id

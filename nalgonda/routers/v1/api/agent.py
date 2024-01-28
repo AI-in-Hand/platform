@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException
@@ -11,6 +12,7 @@ from nalgonda.models.auth import UserInDB
 from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 
+logger = logging.getLogger(__name__)
 agent_router = APIRouter(tags=["agent"])
 
 
@@ -52,6 +54,7 @@ async def create_or_update_agent(
 ) -> dict[str, str]:
     # support template configs:
     if not agent_config.owner_id:
+        logger.info(f"Creating agent for user: {current_user.id}, agent: {agent_config.name}")
         agent_config.agent_id = None
     else:
         # check if the current_user has permissions
@@ -63,14 +66,11 @@ async def create_or_update_agent(
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed
             if agent_config.name != agent_config_db.name:
-                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Agent name cannot be changed")
+                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id
 
-    # FIXME: a workaround explained at the top of the file
-    if not agent_config.name.endswith(f" ({agent_config.owner_id})"):
-        agent_config.name = f"{agent_config.name} ({agent_config.owner_id})"
-
     agent_id = await agent_manager.create_or_update_agent(agent_config)
+
     return {"agent_id": agent_id}

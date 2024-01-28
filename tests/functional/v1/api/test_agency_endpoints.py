@@ -1,9 +1,11 @@
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from agency_swarm import Agent
 
 from nalgonda.models.agency_config import AgencyConfig
+from nalgonda.models.agent_config import AgentConfig
 from tests.test_utils import TEST_USER_ID
 
 
@@ -120,3 +122,38 @@ def test_update_agency_owner_id_mismatch(client, mock_firestore_client):
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
+
+
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_agency_with_foreign_agent(client, mock_firestore_client):
+    agency_config_data = {
+        "agency_id": "test_agency_id",
+        "owner_id": TEST_USER_ID,
+        "name": "Test Agency",
+        "agents": ["foreign_agent_id"],
+    }
+    foreign_agent_config = AgentConfig(
+        name="Foreign Agent", owner_id="foreign_owner_id", description="Test Agent", instructions="Test Instructions"
+    )
+    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config_data)
+    mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_config.model_dump())
+
+    agent_mock = MagicMock(spec=Agent)
+    expected_agent_return_value = (agent_mock, foreign_agent_config)
+
+    # Mock the AgentManager to return an agent with a different owner when get_agent is called
+    with patch("nalgonda.services.agent_manager.AgentManager.get_agent", new_callable=AsyncMock) as mock_get_agent:
+        mock_get_agent.return_value = expected_agent_return_value
+
+        # Simulate a PUT request to update the agency with agents belonging to a different user
+        response = client.put("/v1/api/agency", json=agency_config_data)
+
+    # Check if the server responds with a 403 Forbidden
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
+
+    # Check if the agent manager was called with the correct arguments
+    mock_get_agent.assert_called_once_with("foreign_agent_id")
+
+    # Check if the agency config was not updated
+    assert mock_firestore_client.collection("agency_configs").to_dict() == agency_config_data
