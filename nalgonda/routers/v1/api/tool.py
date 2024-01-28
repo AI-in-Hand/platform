@@ -33,7 +33,7 @@ async def get_tool_config(
 ) -> ToolConfig:
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
     # check if the current_user has permissions to get the tool config
     if tool_config.owner_id and tool_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -56,7 +56,7 @@ async def create_tool_version(
         if tool_config.tool_id:
             tool_config_db = storage.load_by_tool_id(tool_config.tool_id)
             if not tool_config_db:
-                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
             if tool_config_db.owner_id != current_user.id:
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
@@ -82,7 +82,7 @@ async def approve_tool(
 ):
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
 
     tool_config.approved = True
 

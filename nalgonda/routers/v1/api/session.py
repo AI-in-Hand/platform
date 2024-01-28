@@ -38,7 +38,7 @@ async def create_session(
     # check if the current_user has permissions to create a session for the agency
     agency_config = storage.load_by_agency_id(agency_id)
     if not agency_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
     if agency_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
@@ -46,7 +46,7 @@ async def create_session(
 
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found, create an agency first")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     session_id = thread_manager.create_threads(agency)
 
@@ -65,7 +65,7 @@ async def post_agency_message(
     # check if the current_user has permissions to send a message to the agency
     agency_config = storage.load_by_agency_id(request.agency_id)
     if not agency_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
     if agency_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
@@ -77,7 +77,7 @@ async def post_agency_message(
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found, create an agency first")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
         response = await process_message(user_message, agency)

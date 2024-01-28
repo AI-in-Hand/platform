@@ -36,7 +36,7 @@ async def get_agent_config(
 ) -> AgentConfig:
     agent_config = storage.load_by_agent_id(agent_id)
     if not agent_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent not found")
     # check if the current user is the owner of the agent
     if agent_config.owner_id and agent_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -58,7 +58,7 @@ async def create_or_update_agent(
         if agent_config.agent_id:
             agent_config_db = storage.load_by_agent_id(agent_config.agent_id)
             if not agent_config_db:
-                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent configuration not found")
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent not found")
             if agent_config_db.owner_id != current_user.id:
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed

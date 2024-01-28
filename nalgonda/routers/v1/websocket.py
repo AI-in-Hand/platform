@@ -35,7 +35,7 @@ async def websocket_thread_endpoint(
 
     agency = await agency_manager.get_agency(agency_id, thread_id)
     if not agency:
-        await connection_manager.send_message("Agency not found, create an agency first", websocket)
+        await connection_manager.send_message("Agency not found", websocket)
         await connection_manager.disconnect(websocket)
         await websocket.close()
         return

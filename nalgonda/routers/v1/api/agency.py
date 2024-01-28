@@ -37,7 +37,7 @@ async def get_agency_config(
 ) -> AgencyConfig:
     agency_config = storage.load_by_agency_id(agency_id)
     if not agency_config:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
     # check if the current_user has permissions to get the agency config
     if agency_config.owner_id and agency_config.owner_id != current_user.id:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -62,7 +62,7 @@ async def update_or_create_agency(
         if agency_config.agency_id:
             agency_config_db = storage.load_by_agency_id(agency_config.agency_id)
             if not agency_config_db:
-                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency configuration not found")
+                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
             if agency_config_db.owner_id != current_user.id:
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
             # check that all used agents belong to the current user
