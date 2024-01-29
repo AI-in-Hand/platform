@@ -28,8 +28,10 @@ class AgentManager:
         if not agent_config.name.endswith(f" ({agent_config.owner_id})"):
             agent_config.name = f"{agent_config.name} ({agent_config.owner_id})"
 
-        agent = self._construct_agent(agent_config)
-        agent.init_oai()  # initialize the openai agent to get the id
+        agent = await asyncio.to_thread(self._construct_agent, agent_config)
+        await asyncio.to_thread(agent.init_oai)  # initialize the openai agent to get the id
+        if not agent.id:
+            raise Exception("Agent id could not be initialized.")
         agent_config.agent_id = agent.id
         await asyncio.to_thread(self.storage.save, agent_config)
         return agent.id

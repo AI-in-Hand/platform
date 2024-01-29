@@ -129,8 +129,21 @@ class AgencyManager:
 
     @staticmethod
     def _restore_client_objects(agency: Agency) -> Agency:
-        """Restore all client objects from the agency object"""
+        """Restore all client objects within the agency object"""
+        client = get_openai_client()
+        # Restore client for each agent in the agency
         for agent in agency.agents:
-            agent.client = get_openai_client()
-        agency.main_thread.client = get_openai_client()
+            agent.client = client
+
+        # Restore client for the main thread
+        agency.main_thread.client = client
+
+        # Check and restore client for the recipient agent in the main thread, if it exists
+        if agency.main_thread.recipient_agent:
+            agency.main_thread.recipient_agent.client = client
+
+        # Check and restore client for the CEO, if it exists
+        if agency.ceo:
+            agency.ceo.client = client
+
         return agency
