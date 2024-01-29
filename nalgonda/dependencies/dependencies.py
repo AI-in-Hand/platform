@@ -1,8 +1,8 @@
 from fastapi import Depends
 from redis import asyncio as aioredis
 
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager

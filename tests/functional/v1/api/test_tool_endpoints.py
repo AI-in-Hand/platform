@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
+from nalgonda.repositories.tool_config_firestore_storage import ToolConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 

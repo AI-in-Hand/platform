@@ -9,7 +9,7 @@ from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager, get_thread_manager
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.request_models import AgencyMessagePostRequest, ThreadPostRequest
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.thread_manager import ThreadManager
 
@@ -80,7 +80,9 @@ async def post_agency_message(
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
-        response = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=False)
+        response = await asyncio.to_thread(
+            agency.get_completion, message=user_message, yield_messages=False, message_files=None
+        )
         return {"response": response}
     except Exception as e:
         logger.exception(e)

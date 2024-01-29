@@ -9,7 +9,7 @@ from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager, get_agent_manager
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.auth import UserInDB
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.agent_manager import AgentManager
 

@@ -4,7 +4,7 @@ import pytest
 from agency_swarm import Agency, Agent
 
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 

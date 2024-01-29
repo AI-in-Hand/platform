@@ -5,7 +5,7 @@ from agency_swarm import Agent
 
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
-from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.settings import settings
 
 logger = logging.getLogger(__name__)

@@ -2,45 +2,41 @@
 
 ## Overview
 
-Project Nalgonda is an innovative platform for managing and executing AI-driven swarm agencies.
-Built upon the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview),
-it extends functionality through specialized tools and a sophisticated management system for AI agencies.
-It combines robust FastAPI architecture, Firebase Firestore, and OpenAI's GPT models for dynamic agency
-and agent management.
+Project Nalgonda is an advanced platform designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agencies with specialized tools and a robust management system. Built on a solid FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
 
 ## Key Components
 
-- **Configuration Managers**: Manage configurations for AI agencies, agents and tools.
-- **WebSocket Connection Manager**: Handles WebSocket connections for interactive agency-client communication.
-- **Custom Tools**: Includes tools like `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, and more.
-- **FastAPI Web Server**: For API routing, CORS middleware, Firebase initialization, and WebSocket communication.
-- **Data Models**: Pydantic models for agencies, agents, and tool configurations and request validation.
-- **Data Persistence**: Firestore for storing tool, agent, and agency configurations.
-- **Caching**: Redis for efficient caching of agency states.
+- **Configuration Managers**: Centralized management of configurations for agencies, agents, and individual tools.
+- **WebSocket Connection Manager**: Ensures real-time interactive communication between agencies and clients through WebSocket connections.
+- **Custom Tools**: A suite of specialized tools including `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, among others, designed to augment the functionalities of the AI agents.
+- **FastAPI Web Server**: Manages API routing, initializes CORS middleware, sets up Firebase, and facilitates WebSocket communication.
+- **Data Models**: Utilizes Pydantic models for defining and validating configurations of agencies, agents, tools, as well as the structure of request data.
+- **Repositories**: Utilizes Firestore for robust storage and querying capabilities for tool, agent, and agency configurations -- ensuring a seamless persistence layer.
+- **Caching**: Employs Redis for efficient and scalable caching of agency states (sessions) for optimized performance.
 
 ## Features
 
-- **Tool Configuration**: Configure tools with code and parameters.
-- **Agent Configuration**: Configure agents with knowledge and tools.
-- **Agency Configuration**: Set up agencies with agents.
-- **Tool Execution**: Execute tools for various tasks.
-- **User Management**: Manage user access to different agencies [TODO].
-- **API and WebSocket Routers**: Define API endpoints and WebSocket routes.
-- **Security**: Basic implementations of JWT authentication and authorization [TBD].
+- **Tool Configuration**: Offers extensive flexibility in customizing tools with specific codes and parameters for varied tasks.
+- **Agent Configuration**: Allows detailed setup of agents with specialized knowledge areas and toolsets.
+- **Agency Configuration**: Facilitates the creation and management of agencies composed of configured agents.
+- **Tool Execution**: Executes tools within an established framework for accomplishing a wide range of tasks.
+- **User Management**: User access management features for interaction with different agencies.
+- **API and WebSocket Routers**: Lays down a comprehensive set of API endpoints and WebSocket routes for external interactions and real-time communications.
+- **Security**: Basic implementation of JWT for user authentication and authorization with plans for further enhancements.
 
 ## Installation
 
-1. Ensure Python 3.11+ and Node.js 20.11+ are installed.
-2. Install Python dependencies (from `requirements.txt` or using Poetry).
-3. Set up environment variables in ".env", reference in ".env.testing".
-   - Use `cat ~/ai-in-hand-firebase-adminsdk-....json | jq -c .` for Google Credentials.
-4. In `frontend` directory, run:
-   - for local development: `npm install && npm run start`
-   - for production (builds to nalgonda/ui/ directory and is served by FastAPI):
-   `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build`
+Follow these steps for setting up the environment and running the Nalgonda project locally:
+
+1. Ensure Python 3.11+ and Node.js 20.10+ are installed.
+2. Install Python dependencies either from `requirements.txt` or using Poetry.
+3. Configure environment variables in ".env", taking ".env.testing" as a reference point (used only for local development).
+4. To set up the frontend:
+   - For local development: `npm install && npm run start`
+   - For production: `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build` (builds to nalgonda/ui/ directory to be served by FastAPI)
 
 ### Running the Application
-Start the FastAPI server: `uvicorn nalgonda.main:app --reload`
+Start the FastAPI server with: `uvicorn nalgonda.main:app --reload`
 
 ## Deployment to Heroku
 
@@ -54,11 +50,10 @@ Start the FastAPI server: `uvicorn nalgonda.main:app --reload`
 ## Usage
 
 ### API Endpoints
-To interact with the platform, use the Postman collection, which includes all necessary routes and variables for testing.
+The provided Postman collection encompasses all the necessary routes and variables, facilitating extensive testing and interaction with the platform.
 
 ### WebSocket Communication
-Connect to WebSocket endpoints (`/v1/ws/{agency_id}`, `/v1/ws/{agency_id}/{session_id}`)
-for real-time communication with AI agencies.
+Outlines the process for establishing WebSocket connections (`/v1/ws/{agency_id}/{session_id}`) for real-time interactions.
 
 ## Areas for Improvement
-- Enhanced exception handling, security, documentation, testing, caching logic, and database interactions.
+Enhance exception handling, security measures, documentation quality (e.g. docstrings), testing robustness.

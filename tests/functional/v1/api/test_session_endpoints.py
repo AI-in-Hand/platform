@@ -47,7 +47,7 @@ def test_create_session_agency_not_found(client):
 
 @pytest.fixture
 def mock_get_agency():
-    get_agency_mock = AsyncMock(return_value=MagicMock(get_completion=AsyncMock(return_value="Hello, world!")))
+    get_agency_mock = AsyncMock(return_value=MagicMock(get_completion=MagicMock(return_value="Hello, world!")))
     with patch.object(AgencyManager, "get_agency", get_agency_mock) as mock_get_agency:
         yield mock_get_agency
 

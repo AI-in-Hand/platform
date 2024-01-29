@@ -1,7 +1,7 @@
 import pytest
 
 from nalgonda.models.tool_config import ToolConfig
-from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
+from nalgonda.repositories.tool_config_firestore_storage import ToolConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 

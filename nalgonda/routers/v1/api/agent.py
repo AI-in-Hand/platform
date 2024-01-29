@@ -9,7 +9,7 @@ from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agent_manager
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.models.auth import UserInDB
-from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 
 logger = logging.getLogger(__name__)

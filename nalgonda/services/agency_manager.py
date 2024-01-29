@@ -5,7 +5,7 @@ from copy import copy
 from agency_swarm import Agency, Agent, get_openai_client
 
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
 

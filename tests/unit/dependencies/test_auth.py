@@ -23,7 +23,7 @@ token_data = {"sub": "testuser"}
 
 @pytest.fixture()
 def mock_user_repository():
-    with patch("nalgonda.persistence.user_repository.UserRepository.get_user_by_id") as mock:
+    with patch("nalgonda.repositories.user_repository.UserRepository.get_user_by_id") as mock:
         mock.return_value = user_data
         yield mock
 

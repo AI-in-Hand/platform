@@ -6,7 +6,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from nalgonda.dependencies.auth import get_current_active_user, get_current_superuser
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.tool_config import ToolConfig
-from nalgonda.persistence.tool_config_firestore_storage import ToolConfigFirestoreStorage
+from nalgonda.repositories.tool_config_firestore_storage import ToolConfigFirestoreStorage
 from nalgonda.services.tool_service import generate_tool_description
 
 tool_router = APIRouter(tags=["tool"])
