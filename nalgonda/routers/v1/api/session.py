@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Annotated
 
@@ -79,7 +80,7 @@ async def post_agency_message(
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
-        response = await agency.get_completion(message=user_message, yield_messages=False)
+        response = await asyncio.to_thread(agency.get_completion, message=user_message, yield_messages=False)
         return {"response": response}
     except Exception as e:
         logger.exception(e)
