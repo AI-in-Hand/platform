@@ -48,10 +48,10 @@ async def create_session(
     if not agency:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
-    session_id = thread_manager.create_threads(agency)
+    thread_id = thread_manager.create_threads(agency)
 
-    await agency_manager.cache_agency(agency, agency_id, session_id)
-    return {"session_id": session_id}
+    await agency_manager.cache_agency(agency, agency_id, thread_id)
+    return {"thread_id": thread_id}
 
 
 @session_router.post("/session/message")

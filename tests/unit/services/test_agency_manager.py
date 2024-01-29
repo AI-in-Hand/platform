@@ -38,7 +38,7 @@ async def test_get_agency_repopulate_cache(agency_manager):
         agency = await agency_manager.get_agency("test_agency_id")
         assert agency is not None
         mock_get.assert_called_once_with("test_agency_id")
-        mock_repopulate.assert_called_once_with("test_agency_id")
+        mock_repopulate.assert_called_once_with("test_agency_id", None)
 
 
 @pytest.mark.asyncio
@@ -70,7 +70,7 @@ async def test_repopulate_cache_no_config(agency_manager):
     ) as mock_async_to_thread:
         mock_async_to_thread.return_value = None
 
-        result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id")
+        result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id", None)
         assert result is None
         mock_async_to_thread.assert_called_once()
         mock_logger.error.assert_called_once_with("Agency with id nonexistent_agency_id not found.")
@@ -98,7 +98,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = Agency([], "manifesto")
 
-        result = await agency_manager.repopulate_cache_and_update_assistants("test_agency_id")
+        result = await agency_manager.repopulate_cache_and_update_assistants("test_agency_id", None)
         assert result is not None
         mock_load_agents.assert_called_once_with(agency_config)
         mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})

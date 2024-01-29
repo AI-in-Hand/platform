@@ -14,7 +14,7 @@ def test_create_session_success(client, mock_firestore_client):
     with patch.object(
         AgencyManager, "get_agency", AsyncMock(return_value=MagicMock())
     ) as mock_get_agency, patch.object(
-        ThreadManager, "create_threads", MagicMock(return_value="new_session_id")
+        ThreadManager, "create_threads", MagicMock(return_value="new_thread_id")
     ) as mock_create_threads, patch.object(AgencyManager, "cache_agency", AsyncMock()) as mock_cache_agency:
         # mock Firestore to pass the security owner_id check
         mock_firestore_client.setup_mock_data(
@@ -27,10 +27,10 @@ def test_create_session_success(client, mock_firestore_client):
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions
         assert response.status_code == 200
-        assert response.json() == {"session_id": "new_session_id"}
+        assert response.json() == {"thread_id": "new_thread_id"}
         mock_get_agency.assert_awaited_once_with("test_agency_id", None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
-        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, "test_agency_id", "new_session_id")
+        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, "test_agency_id", "new_thread_id")
 
 
 @pytest.mark.usefixtures("mock_get_current_active_user")

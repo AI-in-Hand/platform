@@ -7,5 +7,5 @@ class ThreadPostRequest(BaseModel):
 
 class AgencyMessagePostRequest(BaseModel):
     agency_id: str = Field(..., description="The unique identifier for the agency.")
-    message: str = Field(..., description="The message to be sent to the agency.")
     thread_id: str = Field(..., description="The identifier for the conversational thread.")
+    message: str = Field(..., description="The message to be sent to the agency.")

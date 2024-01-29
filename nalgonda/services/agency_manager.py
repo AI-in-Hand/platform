@@ -29,7 +29,7 @@ class AgencyManager:
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            agency = await self.repopulate_cache_and_update_assistants(agency_id)
+            agency = await self.repopulate_cache_and_update_assistants(agency_id, thread_id)
             if not agency:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
@@ -46,7 +46,9 @@ class AgencyManager:
         await self.repopulate_cache_and_update_assistants(agency_id)
         return agency_id
 
-    async def repopulate_cache_and_update_assistants(self, agency_id: str) -> Agency | None:
+    async def repopulate_cache_and_update_assistants(
+        self, agency_id: str, thread_id: str | None = None
+    ) -> Agency | None:
         """Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants), and saves the Agency instance to Redis
         (with expiration period, see constants.DEFAULT_CACHE_EXPIRATION).
@@ -59,7 +61,7 @@ class AgencyManager:
         agents = await self.load_and_construct_agents(agency_config)
         agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
 
-        await self.cache_agency(agency, agency_id, None)
+        await self.cache_agency(agency, agency_id, thread_id)
         return agency
 
     async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
