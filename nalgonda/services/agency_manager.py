@@ -1,12 +1,11 @@
 import asyncio
 import logging
 from copy import copy
-from uuid import uuid4
 
 from agency_swarm import Agency, Agent, get_openai_client
 
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.persistence.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
 
@@ -14,7 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class AgencyManager:
-    def __init__(self, cache_manager: RedisCacheManager, agent_manager: AgentManager) -> None:
+    def __init__(
+        self,
+        cache_manager: RedisCacheManager,
+        agent_manager: AgentManager,
+        agency_config_storage: AgencyConfigFirestoreStorage,
+    ) -> None:
+        self.agency_config_storage = agency_config_storage
         self.cache_manager = cache_manager
         self.agent_manager = agent_manager
 
@@ -24,7 +29,7 @@ class AgencyManager:
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            agency = await self.repopulate_cache(agency_id)
+            agency = await self.repopulate_cache_and_update_assistants(agency_id)
             if not agency:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
@@ -32,37 +37,21 @@ class AgencyManager:
         agency = self._restore_client_objects(agency)
         return agency
 
-    async def create_agency(self, owner_id: str) -> str:
-        """Create the agency. It will create the agency in the firestore and also in the cache."""
-        agency_id = str(uuid4())
-
-        agency_config_storage = AgencyConfigFirestoreStorage()
-        agency_config = await asyncio.to_thread(agency_config_storage.create, agency_id, owner_id)
-
-        agents = await self.load_and_construct_agents(agency_config)
-        agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
-
-        await self.cache_agency(agency, agency_id, None)
+    async def update_or_create_agency(self, agency_config: AgencyConfig) -> str:
+        """Update or create the agency. It will update the agency in the Firestore and also in the cache.
+        repopulate_cache_and_update_assistants method call ensures that the assistants are up-to-date.
+        """
+        AgencyConfig.model_validate(agency_config.model_dump())
+        agency_id = await asyncio.to_thread(self.agency_config_storage.save, agency_config)
+        await self.repopulate_cache_and_update_assistants(agency_id)
         return agency_id
 
-    async def update_agency(self, agency_config: AgencyConfig, updated_data: dict) -> None:
-        """Update the agency. It will update the agency in the firestore and also in the cache."""
-        agency_id = agency_config.agency_id
-
-        updated_data.pop("agency_id", None)  # ensure agency_id is not modified
-        agency_config.update(updated_data)
-
-        AgencyConfig.model_validate(agency_config.model_dump())
-
-        agency_config_storage = AgencyConfigFirestoreStorage()
-        await asyncio.to_thread(agency_config_storage.save, agency_id, agency_config)
-
-        # Update the agency in the cache
-        await self.repopulate_cache(agency_id)
-
-    async def repopulate_cache(self, agency_id: str) -> Agency | None:
-        agency_config_storage = AgencyConfigFirestoreStorage()
-        agency_config = await asyncio.to_thread(agency_config_storage.load_by_agency_id, agency_id)
+    async def repopulate_cache_and_update_assistants(self, agency_id: str) -> Agency | None:
+        """Gets the agency config from the Firestore, constructs agents and agency
+        (agency-swarm also updates assistants), and saves the Agency instance to Redis
+        (with expiration period, see constants.DEFAULT_CACHE_EXPIRATION).
+        """
+        agency_config = await asyncio.to_thread(self.agency_config_storage.load_by_agency_id, agency_id)
         if not agency_config:
             logger.error(f"Agency with id {agency_id} not found.")
             return None
@@ -98,7 +87,7 @@ class AgencyManager:
                 new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart]
                 agency_chart.extend(new_agency_chart)
 
-        return Agency(agency_chart, shared_instructions=agency_config.agency_manifesto)
+        return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)
 
     async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
         """Cache the agency."""

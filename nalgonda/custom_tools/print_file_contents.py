@@ -9,9 +9,7 @@ from nalgonda.custom_tools.utils import check_directory_traversal
 class PrintFileContents(BaseTool):
     """Print the contents of a specific file."""
 
-    file_name: Path = Field(
-        ..., description="The name of the file to be printed. It can be a relative or absolute path."
-    )
+    file_name: Path = Field(..., description="The name of the file to be printed. It can be a relative path.")
 
     _validate_file_name = field_validator("file_name", mode="after")(check_directory_traversal)
 

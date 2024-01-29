@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from nalgonda.models.auth import TokenData, UserInDB
-from nalgonda.persistence.user_repository import UserRepository
+from nalgonda.repositories.user_repository import UserRepository
 from nalgonda.settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/api/token")

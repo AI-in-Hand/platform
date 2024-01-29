@@ -5,7 +5,8 @@ from agency_swarm import Agent
 
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
-from nalgonda.persistence.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,11 @@ class AgentManager:
         Returns:
             str: agent_id
         """
+
+        # FIXME: a workaround explained at the top of the file api/agent.py
+        if not agent_config.name.endswith(f" ({agent_config.owner_id})"):
+            agent_config.name = f"{agent_config.name} ({agent_config.owner_id})"
+
         agent = self._construct_agent(agent_config)
         agent.init_oai()  # initialize the openai agent to get the id
         agent_config.agent_id = agent.id
@@ -34,7 +40,7 @@ class AgentManager:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None
 
-        agent = self._construct_agent(agent_config)
+        agent = await asyncio.to_thread(self._construct_agent, agent_config)
         return agent, agent_config
 
     async def update_agent(self, agent_config: AgentConfig, updated_data: dict) -> None:
@@ -49,5 +55,6 @@ class AgentManager:
             instructions=agent_config.instructions,
             files_folder=agent_config.files_folder,
             tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
+            model=settings.gpt_model,
         )
         return agent

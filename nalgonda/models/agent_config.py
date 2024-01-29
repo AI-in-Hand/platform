@@ -4,9 +4,9 @@ from pydantic import BaseModel, Field
 class AgentConfig(BaseModel):
     """Config for an agent"""
 
-    agent_id: str | None = Field(None, description="Unique identifier for the agent configuration")
-    owner_id: str = Field(None, description="The user ID owning this agent configuration")
-    name: str = Field(..., description="Name of the agent (must be unique within an agency). Can use versioning")
+    agent_id: str | None = Field(None, description="Unique identifier for the configuration")
+    owner_id: str | None = Field(None, description="The user ID owning this configuration")
+    name: str = Field(..., description="Name of the agent (must be globally unique)")
     description: str = Field(..., description="Description of the agent")
     instructions: str = Field(..., description="Instructions for the agent")
     files_folder: str | None = Field(None, description="Folder containing agent-related files")

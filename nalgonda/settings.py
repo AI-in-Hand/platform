@@ -1,7 +1,7 @@
 from pydantic import Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-LATEST_GPT_MODEL = "gpt-4-1106-preview"
+LATEST_GPT_MODEL = "gpt-4-turbo-preview"
 CHEAP_GPT_MODEL = "gpt-3.5-turbo-1106"
 
 
