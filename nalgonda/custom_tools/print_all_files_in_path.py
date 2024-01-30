@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field, field_validator
 
-from nalgonda.custom_tools.utils import check_directory_traversal
+from nalgonda.custom_tools.utils import check_directory_traversal, read_file
 
 
 class PrintAllFilesInPath(BaseTool):
@@ -38,14 +38,14 @@ class PrintAllFilesInPath(BaseTool):
 
         # if start_path is a file, just read it
         if start_path.is_file():
-            return f"{str(start_path)}:\n```\n{self.read_file(start_path)}\n```\n"
+            return f"{str(start_path)}:\n```\n{read_file(start_path)}\n```\n"
 
         for path in start_path.rglob("*"):
             # ignore files in hidden directories
             if any(part.startswith(".") for part in path.parts):
                 continue
             if path.is_file() and (not self.file_extensions or path.suffix in self.file_extensions):
-                output.append(f"{str(path)}:\n```\n{self.read_file(path)}\n```\n")
+                output.append(f"{str(path)}:\n```\n{read_file(path)}\n```\n")
 
         output_str = "\n".join(output)
 
@@ -55,14 +55,6 @@ class PrintAllFilesInPath(BaseTool):
                 + "\n\n... (truncated output, please use a smaller directory or apply a filter)"
             )
         return output_str
-
-    @staticmethod
-    def read_file(file_path: Path):
-        """Read and return the contents of a file."""
-        try:
-            return file_path.read_text()
-        except OSError as e:
-            return f"Error reading file {file_path}: {e}"
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field, field_validator
 
-from nalgonda.custom_tools.utils import check_directory_traversal
+from nalgonda.custom_tools.utils import check_directory_traversal, read_file
 
 
 class PrintFileContents(BaseTool):
@@ -18,17 +18,9 @@ class PrintFileContents(BaseTool):
         file_path = Path(self.file_name).resolve()
 
         if file_path.is_file():
-            return f"{str(file_path)}:\n```\n{self.read_file(file_path)}\n```\n"
+            return f"{str(file_path)}:\n```\n{read_file(file_path)}\n```\n"
         else:
             return f"File {self.file_name} not found or is not a file."
-
-    @staticmethod
-    def read_file(file_path: Path):
-        """Read and return the contents of a file."""
-        try:
-            return file_path.read_text()
-        except OSError as e:
-            return f"Error reading file {file_path}: {e}"
 
 
 if __name__ == "__main__":
