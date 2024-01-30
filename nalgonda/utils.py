@@ -40,7 +40,7 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, **kwa
 
 def tokenize(text: str) -> list[int]:
     """Tokenize a string using tiktoken tokenizer."""
-    return tiktoken.get_encoding("gpt-4").encode(text)
+    return tiktoken.get_encoding("cl100k_base").encode(text)
 
 
 def get_token_count(text: str) -> int:
@@ -61,7 +61,7 @@ def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str
             if get_token_count(new_chunk) > max_tokens:
                 logger.warning(f"Part of the input is longer than {max_tokens} tokens.")
                 new_chunk = truncate_oversized_chunk(new_chunk, max_tokens=max_tokens, delimiter=delimiter)
-            chunks.append(new_chunk)
+            chunks.append(new_chunk + delimiter)
             current_chunk = [part]
             current_tokens = part_token_count
         else:
@@ -70,7 +70,7 @@ def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str
 
     # Add the last chunk if it's not empty
     if current_chunk:
-        chunks.append(delimiter.join(current_chunk))
+        chunks.append(delimiter.join(current_chunk) + delimiter)
 
     return chunks
 

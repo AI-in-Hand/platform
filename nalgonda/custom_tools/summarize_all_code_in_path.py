@@ -58,12 +58,12 @@ class SummarizeAllCodeInPath(BaseTool):
         ).run()
 
         # Chunk the input based on token limit
-        chunks = chunk_input_with_token_limit(full_code, max_tokens=16385, delimiter=delimiter)
+        chunks = chunk_input_with_token_limit(full_code, max_tokens=16385 // 2, delimiter=delimiter)
 
         outputs = []
         for chunk in chunks:
             output = get_chat_completion(
-                user_prompt=chunk, system_message=SYSTEM_MESSAGE, temperature=0.0, model=settings.gpt_cheap_model
+                system_message=SYSTEM_MESSAGE, user_prompt=chunk, temperature=0.0, model=settings.gpt_cheap_model
             )
             outputs.append(output)
 
