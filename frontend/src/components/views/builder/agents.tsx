@@ -56,8 +56,7 @@ const AgentsView = ({}: any) => {
       },
       human_input_mode: "NEVER",
       max_consecutive_auto_reply: 8,
-      system_message: " ..",
-      instructions: "",
+      instructions: " ..",
     },
   };
   const [newAgent, setNewAgent] = React.useState<IAgentFlowSpec | null>(
@@ -97,10 +96,9 @@ const AgentsView = ({}: any) => {
     fetchJSON(deleteAgentUrl, payLoad, onSuccess, onError);
   };
 
-  const fetchAgent = () => {
+  const fetchAgents = () => {
     setError(null);
     setLoading(true);
-    // const fetch;
     const payLoad = {
       method: "GET",
       headers: {
@@ -111,7 +109,7 @@ const AgentsView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         // message.success(data.message);
-        console.log("agents", data.data);
+
         setAgents(data.data);
       } else {
         message.error(data.message);
@@ -165,21 +163,9 @@ const AgentsView = ({}: any) => {
   React.useEffect(() => {
     if (user) {
       // console.log("fetching messages", messages);
-      fetchAgent();
+      fetchAgents();
     }
   }, []);
-
-  React.useEffect(() => {
-    if (selectedAgent) {
-      console.log("selected agent", selectedAgent);
-    }
-  }, [selectedAgent]);
-
-  React.useEffect(() => {
-    if (newAgent) {
-      console.log("new agent", newAgent);
-    }
-  }, [newAgent]);
 
   const agentRows = (agents || []).map((agent: IAgentFlowSpec, i: number) => {
     return (

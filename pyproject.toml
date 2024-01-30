@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nalgonda"
-version = "1.0.0"
+version = "0.1.0"
 description = "Nalgonda is a FastAPI app to manage swarm agencies"
 authors = [
     "Nikita Bobrovskiy <39348559+bonk1t@users.noreply.github.com>",

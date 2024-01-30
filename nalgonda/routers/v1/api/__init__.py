@@ -8,6 +8,7 @@ from .auth import auth_router
 from .message import message_router
 from .session import session_router
 from .tool import tool_router
+from .version import version_router
 
 api_router = APIRouter(
     prefix="/api",
@@ -20,3 +21,4 @@ api_router.include_router(agent_router)
 api_router.include_router(agency_router)
 api_router.include_router(session_router)
 api_router.include_router(message_router)
+api_router.include_router(version_router)

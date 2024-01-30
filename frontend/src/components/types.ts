@@ -37,7 +37,6 @@ export interface IAgentConfig {
   llm_config?: ILLMConfig | false;
   human_input_mode: string;
   max_consecutive_auto_reply: number;
-  system_message: string | "";
   instructions: string | "";
   is_termination_msg?: boolean | string;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
@@ -94,6 +93,9 @@ export interface IModelConfig {
   api_version?: string;
   base_url?: string;
   api_type?: string;
+  user_id?: string;
+  timestamp?: string;
+  description?: string;
 }
 
 export interface IMetadataFile {

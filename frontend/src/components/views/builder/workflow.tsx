@@ -2,6 +2,8 @@ import {
   InformationCircleIcon,
   PlusIcon,
   TrashIcon,
+  UserGroupIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Dropdown, MenuProps, Modal, message } from "antd";
 import * as React from "react";
@@ -60,7 +62,7 @@ const WorkflowView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         // message.success(data.message);
-        console.log("workflows", data.data);
+
         setWorkflows(data.data);
       } else {
         message.error(data.message);
@@ -249,17 +251,28 @@ const WorkflowView = ({}: any) => {
   const workflowTypes: MenuProps["items"] = [
     {
       key: "twoagents",
-      label: "Two Agents",
+      label: (
+        <div>
+          {" "}
+          <UsersIcon className="w-5 h-5 inline-block mr-2" />
+          Two Agents
+        </div>
+      ),
     },
     {
       key: "groupchat",
-      label: "Group Chat",
+      label: (
+        <div>
+          <UserGroupIcon className="w-5 h-5 inline-block mr-2" />
+          Group Chat
+        </div>
+      ),
     },
   ];
 
   const workflowTypesOnClick: MenuProps["onClick"] = ({ key }) => {
-    console.log("key", key);
     const newConfig = sampleWorkflowConfig(key);
+
     setNewWorkflow(newConfig);
     setShowNewWorkflowModal(true);
   };
@@ -298,6 +311,7 @@ const WorkflowView = ({}: any) => {
               <Dropdown
                 menu={{ items: workflowTypes, onClick: workflowTypesOnClick }}
                 placement="bottomRight"
+                trigger={["click"]}
               >
                 <div
                   className="inline-flex    rounded   hover:border-accent duration-300 hover:text-accent"
