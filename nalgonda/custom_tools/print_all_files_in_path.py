@@ -22,6 +22,10 @@ class PrintAllFilesInPath(BaseTool):
         description="Set of file extensions to include in the tree. If empty, all files will be included. "
         "Examples are {'.py', '.txt', '.md'}.",
     )
+    truncate_to: int = Field(
+        default=None,
+        description="Truncate the output to this many characters. If None or skipped, the output is not truncated.",
+    )
 
     _validate_start_path = field_validator("start_path", mode="after")(check_directory_traversal)
 
@@ -45,9 +49,10 @@ class PrintAllFilesInPath(BaseTool):
 
         output_str = "\n".join(output)
 
-        if len(output_str) > 20000:
+        if self.truncate_to and len(output_str) > self.truncate_to:
             output_str = (
-                output_str[:20000] + "\n\n... (truncated output, please use a smaller directory or apply a filter)"
+                output_str[: self.truncate_to]
+                + "\n\n... (truncated output, please use a smaller directory or apply a filter)"
             )
         return output_str
 
