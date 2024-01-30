@@ -1,6 +1,10 @@
+import logging
 from pathlib import Path
 
+import tiktoken
 from agency_swarm import get_openai_client
+
+logger = logging.getLogger(__name__)
 
 
 def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
@@ -32,3 +36,50 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, **kwa
         **kwargs,
     )
     return completion.choices[0].message.content
+
+
+def tokenize(text: str) -> list[int]:
+    """Tokenize a string using tiktoken tokenizer."""
+    return tiktoken.get_encoding("gpt-4").encode(text)
+
+
+def get_token_count(text: str) -> int:
+    """Get the number of tokens using tiktoken tokenizer."""
+    return len(tokenize(text))
+
+
+def chunk_input_with_token_limit(input_str: str, max_tokens: int = 16385, delimiter: str = "\n```\n") -> list:
+    chunks = []
+    parts = input_str.split(delimiter)
+    current_chunk: list[str] = []
+
+    current_tokens = 0
+    for part in parts:
+        part_token_count = get_token_count(part + delimiter)
+        if current_tokens + part_token_count > max_tokens:
+            new_chunk = delimiter.join(current_chunk)
+            if get_token_count(new_chunk) > max_tokens:
+                logger.warning(f"Part of the input is longer than {max_tokens} tokens.")
+                new_chunk = truncate_oversized_chunk(new_chunk, max_tokens, delimiter)
+            chunks.append(new_chunk)
+            current_chunk = [part]
+            current_tokens = part_token_count
+        else:
+            current_chunk.append(part)
+            current_tokens += part_token_count
+
+    # Add the last chunk if it's not empty
+    if current_chunk:
+        chunks.append(delimiter.join(current_chunk))
+
+    return chunks
+
+
+def truncate_oversized_chunk(chunk: str, max_tokens: int = 16385, delimiter: str = "\n```\n", margin: int = 10) -> str:
+    """Truncate the chunk if it is longer than max_tokens."""
+    tokens = tokenize(chunk)
+    if len(tokens) > max_tokens:
+        tokens = tokens[: max_tokens - margin]
+        chunk = tiktoken.get_encoding("gpt-4").decode(tokens)
+        chunk += delimiter
+    return chunk

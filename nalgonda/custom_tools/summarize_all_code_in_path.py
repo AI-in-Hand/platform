@@ -5,7 +5,7 @@ from pydantic import Field
 
 from nalgonda.custom_tools import PrintAllFilesInPath
 from nalgonda.settings import settings
-from nalgonda.utils import get_chat_completion
+from nalgonda.utils import chunk_input_with_token_limit, get_chat_completion
 
 USER_PROMPT_PREFIX = "Summarize the code of each file below.\n\n"
 SYSTEM_MESSAGE = """\
@@ -50,22 +50,34 @@ class SummarizeAllCodeInPath(BaseTool):
     )
 
     def run(self) -> str:
+        """Run the tool and return the output."""
+        delimiter = "\n```\n"
+
         full_code = PrintAllFilesInPath(
             start_path=self.start_path,
             file_extensions=self.file_extensions,
         ).run()
         user_prompt = f"{USER_PROMPT_PREFIX}{full_code}"
 
-        output = get_chat_completion(
-            user_prompt=user_prompt, system_message=SYSTEM_MESSAGE, temperature=0.0, model=settings.gpt_cheap_model
-        )
+        # Chunk the input based on token limit
+        chunks = chunk_input_with_token_limit(user_prompt, max_tokens=16385, delimiter=delimiter)
 
-        if self.truncate_to and len(output) > self.truncate_to:
-            output = (
-                output[: self.truncate_to]
+        outputs = []
+        for chunk in chunks:
+            output = get_chat_completion(
+                user_prompt=chunk, system_message=SYSTEM_MESSAGE, temperature=0.0, model=settings.gpt_cheap_model
+            )
+            outputs.append(output)
+
+        # Concatenate and possibly truncate outputs
+        concatenated_output = delimiter.join(outputs)
+        if self.truncate_to and len(concatenated_output) > self.truncate_to:
+            concatenated_output = (
+                concatenated_output[: self.truncate_to]
                 + "\n\n... (truncated output, please use a smaller directory or apply a filter)"
             )
-        return output
+
+        return concatenated_output
 
 
 if __name__ == "__main__":
