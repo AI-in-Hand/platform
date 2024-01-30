@@ -89,7 +89,7 @@ def test_post_agency_message_success(client, mock_get_agency, mock_firestore_cli
     # Sending a message
     message_data = {"agency_id": "test_agency_id", "session_id": "test_session_id", "message": "Hello, world!"}
 
-    response = client.post("/v1/api/session/message", json=message_data)
+    response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
@@ -102,7 +102,7 @@ def test_post_agency_message_success(client, mock_get_agency, mock_firestore_cli
 def test_post_agency_message_agency_config_not_found(client, mock_get_agency):
     # Sending a message
     message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
-    response = client.post("/v1/api/session/message", json=message_data)
+    response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Agency not found"
@@ -117,7 +117,7 @@ def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestor
 
     # Sending a message
     message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
-    response = client.post("/v1/api/session/message", json=message_data)
+    response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Forbidden"
@@ -134,7 +134,7 @@ def test_post_agency_message_processing_failure(client, mock_get_agency, mock_fi
 
     # Sending a message
     message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
-    response = client.post("/v1/api/session/message", json=message_data)
+    response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 500
     assert response.json()["detail"] == "Something went wrong"

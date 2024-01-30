@@ -89,7 +89,7 @@ class AgencyManager:
                 new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart]
                 agency_chart.extend(new_agency_chart)
 
-        return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)
+        return Agency(agency_chart, shared_instructions=agency_config.shared_instructions, async_mode="threading")
 
     async def cache_agency(self, agency: Agency, agency_id: str, session_id: str | None) -> None:
         """Cache the agency."""

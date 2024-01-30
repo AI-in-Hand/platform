@@ -34,7 +34,7 @@ const ChatBox = ({
   const { user } = React.useContext(appContext);
 
   const serverUrl = getServerUrl();
-  const deleteMsgUrl = `${serverUrl}/messages/delete`;
+  const deleteMsgUrl = `${serverUrl}/message/delete`;
 
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");
@@ -287,7 +287,7 @@ const ChatBox = ({
       session_id: session?.id || "",
     };
 
-    const textUrl = `${serverUrl}/agency/message`;
+    const textUrl = `${serverUrl}/message`;
     const postData = {
       method: "POST",
       headers: {
