@@ -25,6 +25,7 @@ message_router = APIRouter(
 async def get_message_list(
     current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     session_id: str,
+    before: str | None = None,
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
 ):
     """Return a list of last 20 messages for the given session."""
@@ -37,7 +38,7 @@ async def get_message_list(
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client()
-    messages = client.beta.threads.messages.list(thread_id=session_id)
+    messages = client.beta.threads.messages.list(thread_id=session_id, limit=20, before=before)
     return messages
 
 
