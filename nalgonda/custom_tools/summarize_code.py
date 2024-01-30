@@ -7,7 +7,6 @@ from nalgonda.custom_tools import PrintFileContents
 from nalgonda.settings import settings
 from nalgonda.utils import get_chat_completion
 
-USER_PROMPT_PREFIX = "Summarize the code of the file below.\n\n"
 SYSTEM_MESSAGE = """\
 Your main job is to handle programming code from A FILE. \
 The file's content is shown within triple backticks and has a FILE PATH as a title. \
@@ -35,9 +34,8 @@ class SummarizeCode(BaseTool):
 
     def run(self) -> str:
         code = PrintFileContents(file_name=self.file_name).run()
-        user_prompt = f"{USER_PROMPT_PREFIX}{code}"
         output = get_chat_completion(
-            system_message=SYSTEM_MESSAGE, user_prompt=user_prompt, temperature=0.0, model=settings.gpt_cheap_model
+            system_message=SYSTEM_MESSAGE, user_prompt=code, temperature=0.0, model=settings.gpt_cheap_model
         )
         return output
 

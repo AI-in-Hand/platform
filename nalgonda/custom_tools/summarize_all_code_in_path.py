@@ -7,7 +7,6 @@ from nalgonda.custom_tools import PrintAllFilesInPath
 from nalgonda.settings import settings
 from nalgonda.utils import chunk_input_with_token_limit, get_chat_completion
 
-USER_PROMPT_PREFIX = "Summarize the code of each file below.\n\n"
 SYSTEM_MESSAGE = """\
 Your main job is to handle programming code from SEVERAL FILES. \
 Each file's content is shown within triple backticks and has a FILE PATH as a title. \
@@ -51,16 +50,15 @@ class SummarizeAllCodeInPath(BaseTool):
 
     def run(self) -> str:
         """Run the tool and return the output."""
-        delimiter = "\n```\n"
+        delimiter = "\n\n```\n"
 
         full_code = PrintAllFilesInPath(
             start_path=self.start_path,
             file_extensions=self.file_extensions,
         ).run()
-        user_prompt = f"{USER_PROMPT_PREFIX}{full_code}"
 
         # Chunk the input based on token limit
-        chunks = chunk_input_with_token_limit(user_prompt, max_tokens=16385, delimiter=delimiter)
+        chunks = chunk_input_with_token_limit(full_code, max_tokens=16385, delimiter=delimiter)
 
         outputs = []
         for chunk in chunks:

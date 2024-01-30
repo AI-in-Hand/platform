@@ -48,7 +48,7 @@ def get_token_count(text: str) -> int:
     return len(tokenize(text))
 
 
-def chunk_input_with_token_limit(input_str: str, max_tokens: int = 16385, delimiter: str = "\n```\n") -> list:
+def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str) -> list:
     chunks = []
     parts = input_str.split(delimiter)
     current_chunk: list[str] = []
@@ -75,11 +75,11 @@ def chunk_input_with_token_limit(input_str: str, max_tokens: int = 16385, delimi
     return chunks
 
 
-def truncate_oversized_chunk(chunk: str, max_tokens: int = 16385, delimiter: str = "\n```\n", margin: int = 10) -> str:
+def truncate_oversized_chunk(chunk: str, max_tokens: int, delimiter: str) -> str:
     """Truncate the chunk if it is longer than max_tokens."""
-    tokens = tokenize(chunk)
+    tokens = tokenize(chunk + delimiter)
     if len(tokens) > max_tokens:
-        tokens = tokens[: max_tokens - margin]
+        tokens = tokens[: max_tokens - get_token_count(delimiter)]
         chunk = tiktoken.get_encoding("gpt-4").decode(tokens)
         chunk += delimiter
     return chunk
