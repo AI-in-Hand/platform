@@ -9,3 +9,8 @@ class SessionMessagePostRequest(BaseModel):
     agency_id: str = Field(..., description="The unique identifier for the agency.")
     session_id: str = Field(..., description="The identifier for the conversational thread.")
     message: str = Field(..., description="The message to be sent to the agency.")
+
+
+class ToolExecutePostRequest(BaseModel):
+    tool_id: str = Field(..., description="The unique identifier for the tool.")
+    user_prompt: str = Field(..., description="The user prompt to extract parameters from.")
