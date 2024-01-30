@@ -9,6 +9,24 @@ from nalgonda.services.thread_manager import ThreadManager
 from tests.test_utils import TEST_USER_ID
 
 
+@pytest.fixture
+def session_config_data():
+    return {
+        "session_id": "test_session_id",
+        "owner_id": TEST_USER_ID,
+        "agency_id": "test_agency_id",
+    }
+
+
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_session_list(session_config_data, client, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
+
+    response = client.get("/v1/api/session/list")
+    assert response.status_code == 200
+    assert response.json() == [session_config_data]
+
+
 @pytest.mark.usefixtures("mock_get_current_active_user")
 def test_create_session_success(client, mock_firestore_client):
     with patch.object(

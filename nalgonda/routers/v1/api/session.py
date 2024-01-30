@@ -10,6 +10,7 @@ from nalgonda.dependencies.dependencies import get_agency_manager, get_thread_ma
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.request_models import AgencyMessagePostRequest, ThreadPostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.thread_manager import ThreadManager
 
@@ -20,9 +21,14 @@ session_router = APIRouter(
 )
 
 
-@session_router.get("/session")
-async def get_sessions():
-    ...
+@session_router.get("/session/list")
+async def get_session_list(
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+):
+    """Return a list of all sessions for the current user."""
+    session_configs = storage.load_by_owner_id(current_user.id)
+    return session_configs
 
 
 @session_router.post("/session")
