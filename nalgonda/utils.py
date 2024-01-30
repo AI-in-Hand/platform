@@ -60,7 +60,7 @@ def chunk_input_with_token_limit(input_str: str, max_tokens: int = 16385, delimi
             new_chunk = delimiter.join(current_chunk)
             if get_token_count(new_chunk) > max_tokens:
                 logger.warning(f"Part of the input is longer than {max_tokens} tokens.")
-                new_chunk = truncate_oversized_chunk(new_chunk, max_tokens, delimiter)
+                new_chunk = truncate_oversized_chunk(new_chunk, max_tokens=max_tokens, delimiter=delimiter)
             chunks.append(new_chunk)
             current_chunk = [part]
             current_tokens = part_token_count
