@@ -3,10 +3,11 @@ from redis import asyncio as aioredis
 
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
-from nalgonda.services.thread_manager import ThreadManager
+from nalgonda.services.session_manager import SessionManager
 from nalgonda.settings import settings
 
 
@@ -32,6 +33,8 @@ def get_agency_manager(
     return AgencyManager(cache_manager, agent_manager, agency_config_storage)
 
 
-def get_thread_manager() -> ThreadManager:
-    """Returns a ThreadManager object"""
-    return ThreadManager()
+def get_session_manager(
+    session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+) -> SessionManager:
+    """Returns a SessionManager object"""
+    return SessionManager(session_storage=session_storage)

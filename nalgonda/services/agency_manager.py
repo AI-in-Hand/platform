@@ -23,13 +23,13 @@ class AgencyManager:
         self.cache_manager = cache_manager
         self.agent_manager = agent_manager
 
-    async def get_agency(self, agency_id: str, thread_id: str | None = None) -> Agency | None:
-        cache_key = self.get_cache_key(agency_id, thread_id)
+    async def get_agency(self, agency_id: str, session_id: str | None = None) -> Agency | None:
+        cache_key = self.get_cache_key(agency_id, session_id)
         agency = await self.cache_manager.get(cache_key)
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            agency = await self.repopulate_cache_and_update_assistants(agency_id, thread_id)
+            agency = await self.repopulate_cache_and_update_assistants(agency_id, session_id)
             if not agency:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
@@ -47,7 +47,7 @@ class AgencyManager:
         return agency_id
 
     async def repopulate_cache_and_update_assistants(
-        self, agency_id: str, thread_id: str | None = None
+        self, agency_id: str, session_id: str | None = None
     ) -> Agency | None:
         """Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants), and saves the Agency instance to Redis
@@ -61,7 +61,7 @@ class AgencyManager:
         agents = await self.load_and_construct_agents(agency_config)
         agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
 
-        await self.cache_agency(agency, agency_id, thread_id)
+        await self.cache_agency(agency, agency_id, session_id)
         return agency
 
     async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
@@ -91,21 +91,21 @@ class AgencyManager:
 
         return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)
 
-    async def cache_agency(self, agency: Agency, agency_id: str, thread_id: str | None) -> None:
+    async def cache_agency(self, agency: Agency, agency_id: str, session_id: str | None) -> None:
         """Cache the agency."""
-        cache_key = self.get_cache_key(agency_id, thread_id)
+        cache_key = self.get_cache_key(agency_id, session_id)
         agency_clean = self._remove_client_objects(agency)
         await self.cache_manager.set(cache_key, agency_clean)
 
-    async def delete_agency_from_cache(self, agency_id: str, thread_id: str | None) -> None:
+    async def delete_agency_from_cache(self, agency_id: str, session_id: str | None) -> None:
         """Delete the agency from the cache."""
-        cache_key = self.get_cache_key(agency_id, thread_id)
+        cache_key = self.get_cache_key(agency_id, session_id)
 
         await self.cache_manager.delete(cache_key)
 
     @staticmethod
-    def get_cache_key(agency_id: str, thread_id: str | None = None) -> str:
-        return f"{agency_id}/{thread_id}" if thread_id else agency_id
+    def get_cache_key(agency_id: str, session_id: str | None = None) -> str:
+        return f"{agency_id}/{session_id}" if session_id else agency_id
 
     @staticmethod
     def _remove_client_objects(agency: Agency) -> Agency:
