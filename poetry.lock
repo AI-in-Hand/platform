@@ -22,7 +22,7 @@ termcolor = "2.3.0"
 type = "git"
 url = "https://github.com/VRSEN/agency-swarm.git"
 reference = "main"
-resolved_reference = "2c598e2e7fa3e531244319627d4b3c270bfcb3f2"
+resolved_reference = "c8068fb9734e536adefe3c0bd999e3b558e13fc0"
 
 [[package]]
 name = "aiohttp"
@@ -647,17 +647,18 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "curl-cffi"
-version = "0.6.0b7"
+version = "0.6.0b9"
 description = "libcurl ffi bindings for Python, with impersonation support"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "curl_cffi-0.6.0b7-cp37-abi3-macosx_10_9_x86_64.whl", hash = "sha256:0939e97e8f999bc51bde6a70e19b23aaee542ccc341955989d81e5b11d616cef"},
-    {file = "curl_cffi-0.6.0b7-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:3dcb245dacaec556ed48dc8e4c609bdf5dfe52b84073a124ee3f5e9342e5a7af"},
-    {file = "curl_cffi-0.6.0b7-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ef7e73e3148b482f69e30c7651dde5fd98900df597c0cdfdf1f433f3fb819037"},
-    {file = "curl_cffi-0.6.0b7-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4df7a48a313688cb0dc2924229a3604b71700494a31ac7920701a2f930b49cdf"},
-    {file = "curl_cffi-0.6.0b7-cp37-abi3-win_amd64.whl", hash = "sha256:271892078905981880a40fbdf2d53c0e5814dcc102836d69d30772b731898de4"},
-    {file = "curl_cffi-0.6.0b7.tar.gz", hash = "sha256:f945aac9de95b53c3d0c77ce18391a7a4c7553b6eeb420631532dafdff298d43"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:a0385edcbb545e58757849308a47292a895ab3b3e36f5f1c2e19e8d8db546022"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:984ac36e20070206e8729abdb00675dae233ea53fffe678c33b3869b26a9c537"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1e18bb9f73a31f7f6c61b7341c1a4742b200779c177fe06276a3a03fdb270b13"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c02e53bf3774a02b20c5a4458af965555d11755119e575d91c2984cedd1baa9c"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-win32.whl", hash = "sha256:92baeb4544a2353eb882a2d827ba546f7430655d04272b0678eedf2ae4618309"},
+    {file = "curl_cffi-0.6.0b9-cp38-abi3-win_amd64.whl", hash = "sha256:00b538b67c60cd1c3286c7319813a3564079c62ccf126cc1462fff428f0c3be5"},
+    {file = "curl_cffi-0.6.0b9.tar.gz", hash = "sha256:7d9a6a68c2aef90359a8d012edf7bdd81eaa1b16af684f21febf00fb54dd8d73"},
 ]
 
 [package.dependencies]
@@ -666,8 +667,8 @@ cffi = ">=1.12.0"
 
 [package.extras]
 build = ["cibuildwheel", "wheel"]
-dev = ["autoflake (==1.4)", "black (==22.8.0)", "coverage (==6.4.1)", "cryptography (==38.0.3)", "flake8 (==6.0.0)", "flake8-bugbear (==22.7.1)", "flake8-pie (==0.15.0)", "httpx (==0.23.1)", "isort (==5.10.1)", "mypy (==0.971)", "pytest (==7.1.2)", "pytest-asyncio (==0.19.0)", "pytest-trio (==0.7.0)", "trio (==0.21.0)", "trio-typing (==0.7.0)", "trustme (==0.9.0)", "types-certifi (==2021.10.8.2)", "uvicorn (==0.18.3)", "websockets (==11.0.3)"]
-test = ["cryptography (==38.0.3)", "httpx (==0.23.1)", "proxy.py (==2.4.3)", "pytest (==7.1.2)", "pytest-asyncio (==0.19.0)", "pytest-trio (==0.7.0)", "trio (==0.21.0)", "trio-typing (==0.7.0)", "trustme (==0.9.0)", "types-certifi (==2021.10.8.2)", "uvicorn (==0.18.3)", "websockets (==11.0.3)"]
+dev = ["autoflake (==1.4)", "black (==22.8.0)", "coverage (==6.4.1)", "cryptography (==38.0.3)", "flake8 (==6.0.0)", "flake8-bugbear (==22.7.1)", "flake8-pie (==0.15.0)", "httpx (==0.23.1)", "isort (==5.10.1)", "mypy (==0.971)", "pytest (==7.1.2)", "pytest-asyncio (==0.19.0)", "pytest-trio (==0.7.0)", "ruff (==0.1.14)", "trio (==0.21.0)", "trio-typing (==0.7.0)", "trustme (==0.9.0)", "types-certifi (==2021.10.8.2)", "uvicorn (==0.18.3)", "websockets (==11.0.3)"]
+test = ["cryptography (==38.0.3)", "fastapi (==0.100.0)", "httpx (==0.23.1)", "proxy.py (==2.4.3)", "pytest (==7.1.2)", "pytest-asyncio (==0.19.0)", "pytest-trio (==0.7.0)", "python-multipart (==0.0.6)", "trio (==0.21.0)", "trio-typing (==0.7.0)", "trustme (==0.9.0)", "types-certifi (==2021.10.8.2)", "uvicorn (==0.18.3)", "websockets (==11.0.3)"]
 
 [[package]]
 name = "deepdiff"
@@ -3180,13 +3181,13 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "uvicorn"
-version = "0.24.0.post1"
+version = "0.27.0.post1"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "uvicorn-0.24.0.post1-py3-none-any.whl", hash = "sha256:7c84fea70c619d4a710153482c0d230929af7bcf76c7bfa6de151f0a3a80121e"},
-    {file = "uvicorn-0.24.0.post1.tar.gz", hash = "sha256:09c8e5a79dc466bdf28dead50093957db184de356fcdc48697bad3bde4c2588e"},
+    {file = "uvicorn-0.27.0.post1-py3-none-any.whl", hash = "sha256:4b85ba02b8a20429b9b205d015cbeb788a12da527f731811b643fd739ef90d5f"},
+    {file = "uvicorn-0.27.0.post1.tar.gz", hash = "sha256:54898fcd80c13ff1cd28bf77b04ec9dbd8ff60c5259b499b4b12bb0917f22907"},
 ]
 
 [package.dependencies]
@@ -3640,4 +3641,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11.0a1,<3.13"
-content-hash = "93af780e36394e0379964328c733fed71151e9296d6a3404e37f326a79fe060e"
+content-hash = "226d0d1cdafd419faa5b4cb20854aeca6051a1118cebbe88036fbb7b0e11fc5a"
