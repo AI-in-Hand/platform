@@ -1,5 +1,4 @@
 import json
-import logging
 
 import firebase_admin
 import openai
@@ -9,23 +8,17 @@ from firebase_admin import credentials
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
-from nalgonda.constants import BASE_DIR
-from nalgonda.exception_handlers import bad_request_exception_handler
-from nalgonda.routers.v1 import v1_router
-from nalgonda.settings import settings
-from nalgonda.utils import init_webserver_folders
+from nalgonda.utils.logging_utils import setup_logging
+
+setup_logging()
+
+from nalgonda.constants import BASE_DIR  # noqa  # isort:skip
+from nalgonda.exception_handlers import bad_request_exception_handler, unhandled_exception_handler  # noqa  # isort:skip
+from nalgonda.routers.v1 import v1_router  # noqa  # isort:skip
+from nalgonda.settings import settings  # noqa  # isort:skip
+from nalgonda.utils import init_webserver_folders  # noqa  # isort:skip
 
 openai.api_key = settings.openai_api_key
-
-# Logging configuration
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],
-)
-# Silence passlib warning messages
-logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
-logger = logging.getLogger(__name__)
 
 
 # FastAPI app initialization
@@ -51,6 +44,7 @@ folders = init_webserver_folders(root_file_path=BASE_DIR)
 v1_api_app = FastAPI(root_path="/v1")
 v1_api_app.include_router(v1_router)
 v1_api_app.add_exception_handler(ValidationError, bad_request_exception_handler)
+v1_api_app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # mount an api route such that the main route serves the ui and the /api
 app.mount("/v1", v1_api_app)

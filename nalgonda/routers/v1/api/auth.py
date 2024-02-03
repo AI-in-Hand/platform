@@ -48,6 +48,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
+        logger.error(f"User {form_data.username} not found")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -55,4 +56,6 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         )
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+
+    logger.info(f"User {form_data.username} logged in")
     return {"access_token": access_token, "token_type": "bearer"}
