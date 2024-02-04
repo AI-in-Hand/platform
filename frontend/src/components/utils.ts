@@ -241,7 +241,6 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     name: "userproxy",
     human_input_mode: "NEVER",
     max_consecutive_auto_reply: 5,
-    system_message: "",
     instructions: "",
     llm_config: false,
     code_execution_config: {
@@ -259,8 +258,6 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     llm_config: llm_config,
     human_input_mode: "NEVER",
     max_consecutive_auto_reply: 8,
-    system_message:
-      "You are a helpful assistant that can use available functions when needed to solve problems. At each point, do your best to determine if the user's request has been addressed. IF THE REQUEST HAS NOT BEEN ADDRESSED, RESPOND WITH CODE TO ADDRESS IT. IF A FAILURE OCCURRED (e.g., due to a missing library) AND SOME ADDITIONAL CODE WAS WRITTEN (e.g. code to install the library), ENSURE THAT THE ORIGINAL CODE TO ADDRESS THE TASK STILL GETS EXECUTED. If the request HAS been addressed, respond with a summary of the result. The summary must be written as a coherent helpful response to the user request e.g. 'Sure, here is result to your request ' or 'The tallest mountain in Africa is ..' etc.  The summary MUST end with the word TERMINATE. If the user request is  pleasantry or greeting, you should respond with a pleasantry or greeting and TERMINATE.",
     instructions:
       "You are a helpful assistant that can use available functions when needed to solve problems. At each point, do your best to determine if the user's request has been addressed. IF THE REQUEST HAS NOT BEEN ADDRESSED, ADDRESS IT. IF A FAILURE OCCURRED AND SOME ADDITIONAL CODE WAS WRITTEN (e.g. code to install the library), ENSURE THAT THE ORIGINAL CODE TO ADDRESS THE TASK STILL GETS EXECUTED. If the request HAS been addressed, respond with a summary of the result. The summary must be written as a coherent helpful response to the user request e.g. 'Sure, here is result to your request ' or 'The tallest mountain in Africa is ..' etc.",
   };
@@ -280,12 +277,17 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     agencyChart: [["CEO", "Developer"], ["CEO", "Virtual Assistant"], ["Virtual Assistant", "Developer"]]
   };
 
+  const groupChatAssistantConfig = Object.assign({}, assistantConfig);
+  groupChatAssistantConfig.name = "groupchat_assistant";
+  groupChatAssistantConfig.instructions =
+    "You are a helpful assistant skilled at coordinating a group of other assistants to solve a task. ";
+
   const groupChatFlowSpec: IGroupChatFlowSpec = {
     type: "groupchat",
-    config: assistantConfig,
+    config: groupChatAssistantConfig,
     groupchat_config: {
-      agents: [assistantFlowSpec],
-      admin_name: "primary_assistant",
+      agents: [assistantFlowSpec, assistantFlowSpec],
+      admin_name: "groupchat_assistant",
       messages: [],
       max_round: 10,
       speaker_selection_method: "auto",
@@ -434,3 +436,16 @@ export const examplePrompts = [
       "paint a picture of a glass of ethiopian coffee, freshly brewed in a tall glass cup, on a table right in front of a lush green forest scenery",
   },
 ];
+
+export const fetchVersion = () => {
+  const versionUrl = getServerUrl() + "/version";
+  return fetch(versionUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      return null;
+    });
+};

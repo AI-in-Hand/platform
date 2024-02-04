@@ -1,9 +1,29 @@
+from datetime import datetime
+
 from agency_swarm import Agency, Agent, get_openai_client
 from agency_swarm.threads import Thread
 
+from nalgonda.models.session_config import SessionConfig
+from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 
-class ThreadManager:
-    def create_threads(self, agency: Agency) -> str:
+
+class SessionManager:
+    def __init__(self, session_storage: SessionConfigFirestoreStorage):
+        self.session_storage = session_storage
+
+    def create_session(self, agency: Agency, agency_id: str, owner_id: str) -> str:
+        """Create a new session for the given agency and return its id."""
+        session_id = self._create_threads(agency)
+        session_config = SessionConfig(
+            session_id=session_id,
+            owner_id=owner_id,
+            agency_id=agency_id,
+            created_at=int(datetime.utcnow().timestamp()),
+        )
+        self.session_storage.save(session_config)
+        return session_id
+
+    def _create_threads(self, agency: Agency) -> str:
         """Create new threads for the given agency and return the thread ID of the main thread."""
         client = get_openai_client()
         self._init_threads(agency, client)

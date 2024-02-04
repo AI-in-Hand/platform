@@ -63,10 +63,11 @@ class MockFirestoreClient:
 
     def stream(self):
         matching_docs = []
-        for doc_id, doc in self._collections.get(self._current_collection, {}).items():
+        collection = self._collections.get(self._current_collection, {})
+        for doc_id, doc in collection.items():
             if doc.get(self._where_field) == self._where_value:
                 matching_docs.append(MockDocumentSnapshot(doc_id, doc))
-        return matching_docs
+        return iter(matching_docs)
 
     def add(self, data) -> list:
         # This method should add a new document to the collection

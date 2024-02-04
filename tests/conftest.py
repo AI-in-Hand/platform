@@ -32,3 +32,9 @@ MOCK_TOOL_MAPPING = {"tool1": tool1, "tool2": tool2}
 def mock_tool_mapping():
     with patch("nalgonda.services.agent_manager.TOOL_MAPPING", MOCK_TOOL_MAPPING):
         yield
+
+
+@pytest.fixture
+def mock_setup_logging():
+    with patch("nalgonda.utils.logging_utils.setup_logging"):
+        yield

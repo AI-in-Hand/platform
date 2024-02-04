@@ -18,22 +18,22 @@ ws_router = APIRouter(
 )
 
 
-@ws_router.websocket("/ws/{agency_id}/{thread_id}")
-async def websocket_thread_endpoint(
+@ws_router.websocket("/ws/{agency_id}/{session_id}")
+async def websocket_session_endpoint(
     websocket: WebSocket,
     agency_id: str,
-    thread_id: str,
+    session_id: str,
     agency_manager: AgencyManager = Depends(get_agency_manager),
 ):
-    """WebSocket endpoint for maintaining conversation with a specific thread.
+    """WebSocket endpoint for maintaining conversation with a specific session.
     Send messages to and from CEO of the given agency."""
 
     # TODO: Add authentication: check if agency_id is valid for the given user
 
     await connection_manager.connect(websocket)
-    logger.info(f"WebSocket connected for agency_id: {agency_id}, thread_id: {thread_id}")
+    logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
-    agency = await agency_manager.get_agency(agency_id, thread_id)
+    agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:
         await connection_manager.send_message("Agency not found", websocket)
         await connection_manager.disconnect(websocket)
@@ -41,7 +41,7 @@ async def websocket_thread_endpoint(
         return
 
     try:
-        await websocket_receive_and_process_messages(websocket, agency_id, agency, thread_id)
+        await websocket_receive_and_process_messages(websocket, agency_id, agency, session_id)
     except (WebSocketDisconnect, ConnectionClosedOK):
         await connection_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
@@ -51,7 +51,7 @@ async def websocket_receive_and_process_messages(
     websocket: WebSocket,
     agency_id: str,
     agency: Agency,
-    thread_id: str,
+    session_id: str,
 ) -> None:
     """Receive messages from the websocket and process them."""
     while True:
@@ -67,7 +67,7 @@ async def websocket_receive_and_process_messages(
         except (WebSocketDisconnect, ConnectionClosedOK) as e:
             raise e
         except Exception:
-            logger.exception(f"Exception while processing message: agency_id: {agency_id}, thread_id: {thread_id}")
+            logger.exception(f"Exception while processing message: agency_id: {agency_id}, session_id: {session_id}")
             await connection_manager.send_message("Something went wrong. Please try again.", websocket)
             continue
 

@@ -16,3 +16,13 @@ def check_directory_traversal(path: Path) -> Path:
         raise ValueError("Directory traversal is not allowed.")
 
     return resolved_path
+
+
+def read_file(file_path: Path):
+    """Read and return the contents of a file."""
+    try:
+        return file_path.read_text()
+    except OSError as e:
+        return f"Error reading file {file_path}: {e}"
+    except UnicodeDecodeError as e:
+        return f"Error decoding file {file_path}: {e}"

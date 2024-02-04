@@ -165,6 +165,8 @@ settings.json
 
 .env
 
+*.log.jsonl
+
 # UI folder
 nalgonda/ui/*
 nalgonda/data/agency_data/*

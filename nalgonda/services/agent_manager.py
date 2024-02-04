@@ -31,7 +31,8 @@ class AgentManager:
         agent = await asyncio.to_thread(self._construct_agent, agent_config)
         await asyncio.to_thread(agent.init_oai)  # initialize the openai agent to get the id
         if not agent.id:
-            raise Exception("Agent id could not be initialized.")
+            logger.error(f"Agent id could not be initialized for {agent_config}.")
+            raise RuntimeError("Agent id could not be initialized.")
         agent_config.agent_id = agent.id
         await asyncio.to_thread(self.storage.save, agent_config)
         return agent.id
@@ -44,9 +45,6 @@ class AgentManager:
 
         agent = await asyncio.to_thread(self._construct_agent, agent_config)
         return agent, agent_config
-
-    async def update_agent(self, agent_config: AgentConfig, updated_data: dict) -> None:
-        raise NotImplementedError
 
     @staticmethod
     def _construct_agent(agent_config: AgentConfig) -> Agent:
