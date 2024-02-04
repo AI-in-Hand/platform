@@ -32,8 +32,10 @@ async def get_message_list(
     # check if the current_user has permissions to send a message to the agency
     session_config = session_storage.load_by_session_id(session_id)
     if not session_config:
+        logger.warning(f"Session not found: {session_id}, requested by user: {current_user.id}")
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Session not found")
     if session_config.owner_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
@@ -53,8 +55,10 @@ async def post_message(
     # check if the current_user has permissions to send a message to the agency
     agency_config = storage.load_by_agency_id(request.agency_id)
     if not agency_config:
+        logger.warning(f"Agency not found: {request.agency_id}, requested by user: {current_user.id}")
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
     if agency_config.owner_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to access agency {request.agency_id}")
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
     user_message = request.message
@@ -65,6 +69,7 @@ async def post_message(
 
     agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:
+        logger.warning(f"Agency not found: {agency_id}, requested by user: {current_user.id}")
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
@@ -73,5 +78,5 @@ async def post_message(
         )
         return {"response": response}
     except Exception as e:
-        logger.exception(e)
+        logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
         raise HTTPException(status_code=500, detail="Something went wrong") from e
