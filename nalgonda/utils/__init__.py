@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 
 import tiktoken
-from agency_swarm import get_openai_client
+
+from nalgonda.services.oai_client import get_openai_client
 
 logger = logging.getLogger(__name__)
 

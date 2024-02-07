@@ -6,6 +6,7 @@ from agency_swarm import Agent
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.services.oai_client import get_openai_client
 from nalgonda.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -57,4 +58,6 @@ class AgentManager:
             tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
             model=settings.gpt_model,
         )
+        # a workaround: agent.client must be replaced with a proper implementation
+        agent.client = get_openai_client()
         return agent

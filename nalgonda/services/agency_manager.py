@@ -2,12 +2,13 @@ import asyncio
 import logging
 from copy import copy
 
-from agency_swarm import Agency, Agent, get_openai_client
+from agency_swarm import Agency, Agent
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
+from nalgonda.services.oai_client import get_openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +30,13 @@ class AgencyManager:
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            agency = await self.repopulate_cache_and_update_assistants(agency_id, session_id)
+            await self.repopulate_cache_and_update_assistants(agency_id, session_id)
+            agency = await self.cache_manager.get(cache_key)
             if not agency:
                 logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
                 return None
 
-        agency = self._restore_client_objects(agency)
+        agency = self._set_client_objects(agency)
         return agency
 
     async def update_or_create_agency(self, agency_config: AgencyConfig) -> str:
@@ -46,9 +48,7 @@ class AgencyManager:
         await self.repopulate_cache_and_update_assistants(agency_id)
         return agency_id
 
-    async def repopulate_cache_and_update_assistants(
-        self, agency_id: str, session_id: str | None = None
-    ) -> Agency | None:
+    async def repopulate_cache_and_update_assistants(self, agency_id: str, session_id: str | None = None) -> None:
         """Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants), and saves the Agency instance to Redis
         (with expiration period, see constants.DEFAULT_CACHE_EXPIRATION).
@@ -62,7 +62,6 @@ class AgencyManager:
         agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
 
         await self.cache_agency(agency, agency_id, session_id)
-        return agency
 
     async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
         agents = {}
@@ -130,7 +129,7 @@ class AgencyManager:
         return agency_copy
 
     @staticmethod
-    def _restore_client_objects(agency: Agency) -> Agency:
+    def _set_client_objects(agency: Agency) -> Agency:
         """Restore all client objects within the agency object"""
         client = get_openai_client()
         # Restore client for each agent in the agency
