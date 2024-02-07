@@ -24,8 +24,9 @@ class ContextEnvVarsManager:
     @classmethod
     def set(cls, key: str, value: Any) -> None:
         """Set an environment variable."""
-        environment_vars_old = cls.environment_vars.get()
-        if environment_vars_old is None:
+        try:
+            environment_vars_old = cls.environment_vars.get()
+        except LookupError:
             environment_vars_old = {}
         environment_vars_old.update({key: value})
         cls.environment_vars.set(environment_vars_old)

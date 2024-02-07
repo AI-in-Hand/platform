@@ -32,12 +32,11 @@ async def test_get_agency_repopulate_cache(agency_manager):
     with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate:
-        mock_get.return_value = None
-        mock_repopulate.return_value = Agency([], "manifesto")
+        mock_get.side_effect = [None, Agency([], "manifesto")]
 
         agency = await agency_manager.get_agency("test_agency_id")
         assert agency is not None
-        mock_get.assert_called_once_with("test_agency_id")
+        mock_get.assert_called_with("test_agency_id")
         mock_repopulate.assert_called_once_with("test_agency_id", None)
 
 
@@ -98,8 +97,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = Agency([], "manifesto")
 
-        result = await agency_manager.repopulate_cache_and_update_assistants("test_agency_id", None)
-        assert result is not None
+        await agency_manager.repopulate_cache_and_update_assistants("test_agency_id", None)
         mock_load_agents.assert_called_once_with(agency_config)
         mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})
         mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, "test_agency_id", None)
