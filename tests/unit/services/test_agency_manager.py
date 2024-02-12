@@ -5,6 +5,7 @@ from agency_swarm import Agency, Agent
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 
@@ -13,7 +14,10 @@ from tests.test_utils import TEST_USER_ID
 @pytest.mark.usefixtures("mock_firestore_client")
 def agency_manager():
     yield AgencyManager(
-        cache_manager=MagicMock(), agent_manager=MagicMock(), agency_config_storage=AgencyConfigFirestoreStorage()
+        cache_manager=MagicMock(),
+        agent_manager=MagicMock(),
+        agency_config_storage=AgencyConfigFirestoreStorage(),
+        env_config_storage=EnvConfigFirestoreStorage(),
     )
 
 

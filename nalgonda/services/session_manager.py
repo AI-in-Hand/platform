@@ -4,12 +4,14 @@ from agency_swarm import Agency, Agent
 from agency_swarm.threads import Thread
 
 from nalgonda.models.session_config import SessionConfig
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.oai_client import get_openai_client
 
 
 class SessionManager:
-    def __init__(self, session_storage: SessionConfigFirestoreStorage):
+    def __init__(self, session_storage: SessionConfigFirestoreStorage, env_config_storage: EnvConfigFirestoreStorage):
+        self.env_config_storage = env_config_storage
         self.session_storage = session_storage
 
     def create_session(self, agency: Agency, agency_id: str, owner_id: str) -> str:
@@ -26,7 +28,7 @@ class SessionManager:
 
     def _create_threads(self, agency: Agency) -> str:
         """Create new threads for the given agency and return the thread ID of the main thread."""
-        client = get_openai_client()
+        client = get_openai_client(self.env_config_storage)
         self._init_threads(agency, client)
         return agency.main_thread.id
 

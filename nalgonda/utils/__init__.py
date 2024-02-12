@@ -3,6 +3,7 @@ from pathlib import Path
 
 import tiktoken
 
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.services.oai_client import get_openai_client
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
 def get_chat_completion(system_message: str, user_prompt: str, model: str, **kwargs) -> str:
     """Generate a chat completion based on a prompt and a system message.
     This function is a wrapper around the OpenAI API."""
-    client = get_openai_client()
+    client = get_openai_client(env_config_storage=EnvConfigFirestoreStorage())
     completion = client.chat.completions.create(
         model=model,
         messages=[

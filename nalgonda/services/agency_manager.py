@@ -6,6 +6,7 @@ from agency_swarm import Agency, Agent
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.caching.redis_cache_manager import RedisCacheManager
 from nalgonda.services.oai_client import get_openai_client
@@ -19,10 +20,12 @@ class AgencyManager:
         cache_manager: RedisCacheManager,
         agent_manager: AgentManager,
         agency_config_storage: AgencyConfigFirestoreStorage,
+        env_config_storage: EnvConfigFirestoreStorage,
     ) -> None:
         self.agency_config_storage = agency_config_storage
-        self.cache_manager = cache_manager
         self.agent_manager = agent_manager
+        self.cache_manager = cache_manager
+        self.env_config_storage = env_config_storage
 
     async def get_agency(self, agency_id: str, session_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, session_id)
@@ -128,10 +131,9 @@ class AgencyManager:
 
         return agency_copy
 
-    @staticmethod
-    def _set_client_objects(agency: Agency) -> Agency:
+    def _set_client_objects(self, agency: Agency) -> Agency:
         """Restore all client objects within the agency object"""
-        client = get_openai_client()
+        client = get_openai_client(env_config_storage=self.env_config_storage)
         # Restore client for each agent in the agency
         for agent in agency.agents:
             agent.client = client
