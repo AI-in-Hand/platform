@@ -26,6 +26,7 @@ def agency():
     agency.agents = agents
     agency.ceo = agent1
     agency.main_thread = main_thread
+    agency.main_recipients = [agent1, agent2]
     return agency
 
 
@@ -67,8 +68,9 @@ class TestRemoveClientObjects:
         # Call the _remove_client_objects function
         AgencyManager._remove_client_objects(agency)
 
-        # Compare the original agency object with its deep copy to ensure it remains unchanged
+        # Ensure the original object is unchanged
         for original_agent, copied_agent in zip(original_agency.agents, agency.agents, strict=True):
-            assert original_agent.client == copied_agent.client
+            assert original_agent.client is not None
+            assert copied_agent.client is None
 
         assert original_agency.main_thread.client == agency.main_thread.client
