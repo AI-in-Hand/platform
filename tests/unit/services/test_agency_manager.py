@@ -69,16 +69,15 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
 
 
 @pytest.mark.asyncio
-async def test_repopulate_cache_no_config(agency_manager):
-    with patch("nalgonda.services.agency_manager.logger") as mock_logger, patch(
-        "asyncio.to_thread", new_callable=AsyncMock
-    ) as mock_async_to_thread:
+async def test_repopulate_cache_no_config(agency_manager, caplog):
+    caplog.set_level("ERROR")
+    with patch("asyncio.to_thread", new_callable=AsyncMock) as mock_async_to_thread:
         mock_async_to_thread.return_value = None
 
         result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id", None)
         assert result is None
         mock_async_to_thread.assert_called_once()
-        mock_logger.error.assert_called_once_with("Agency with id nonexistent_agency_id not found.")
+        assert "Agency with id nonexistent_agency_id not found." in caplog.text
 
 
 @pytest.mark.asyncio
@@ -189,3 +188,13 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     assert len(agency.agents) == 2
     assert agency.agents == [mock_agent_1, mock_agent_2]
     assert agency.shared_instructions == "manifesto"
+
+
+@pytest.mark.asyncio
+async def test_set_client_objects(agency_manager):
+    mock_agency = MagicMock()
+    mock_client = MagicMock()
+    with patch("nalgonda.services.agency_manager.get_openai_client", return_value=mock_client) as mock_get_client:
+        agency_manager._set_client_objects(mock_agency)
+        mock_get_client.assert_called_once()
+        assert mock_agency.main_thread.client == mock_client
