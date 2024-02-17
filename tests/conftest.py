@@ -5,7 +5,8 @@ import pytest
 
 from tests.test_utils.mock_firestore_client import MockFirestoreClient
 
-sys.modules["agency_swarm.util.oai"] = Mock()
+oai_mock = MagicMock(get_openai_client=MagicMock(return_value=MagicMock(timeout=10)))
+sys.modules["agency_swarm.util.oai"] = oai_mock
 sys.modules["nalgonda.services.oai_client"] = Mock()
 
 

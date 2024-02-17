@@ -23,8 +23,10 @@ def agency_manager():
 
 @pytest.mark.asyncio
 async def test_get_agency_from_cache(agency_manager):
-    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get:
-        mock_get.return_value = Agency([], "manifesto")
+    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
+        agency_manager, "_set_client_objects", new_callable=Mock
+    ):
+        mock_get.return_value = MagicMock(spec=Agency)
 
         agency = await agency_manager.get_agency("test_agency_id")
         assert agency is not None
@@ -35,8 +37,8 @@ async def test_get_agency_from_cache(agency_manager):
 async def test_get_agency_repopulate_cache(agency_manager):
     with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
-    ) as mock_repopulate:
-        mock_get.side_effect = [None, Agency([], "manifesto")]
+    ) as mock_repopulate, patch.object(agency_manager, "_set_client_objects", new_callable=Mock):
+        mock_get.side_effect = [None, MagicMock(spec=Agency)]
 
         agency = await agency_manager.get_agency("test_agency_id")
         assert agency is not None
@@ -99,7 +101,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     ) as mock_cache_agency:
         mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
-        mock_construct_agency.return_value = Agency([], "manifesto")
+        mock_construct_agency.return_value = MagicMock(spec=Agency)
 
         await agency_manager.repopulate_cache_and_update_assistants("test_agency_id", None)
         mock_load_agents.assert_called_once_with(agency_config)
