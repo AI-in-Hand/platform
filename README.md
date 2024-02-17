@@ -53,7 +53,7 @@ Start the FastAPI server with: `uvicorn nalgonda.main:app --reload`
 The provided Postman collection encompasses all the necessary routes and variables, facilitating extensive testing and interaction with the platform.
 
 ### WebSocket Communication
-Outlines the process for establishing WebSocket connections (`/v1/ws/{agency_id}/{session_id}`) for real-time interactions.
+Outlines the process for establishing WebSocket connections (`/v1/ws/{user_id}/{agency_id}/{session_id}`) for real-time interactions.
 
 ## Areas for Improvement
 Enhance exception handling, security measures, documentation quality (e.g. docstrings), testing robustness.

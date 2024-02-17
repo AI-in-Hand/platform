@@ -34,12 +34,16 @@ class ContextEnvVarsManager:
     @classmethod
     def get(cls, key: str) -> Any:
         """Get an environment variable."""
-        env_vars_dict = cls.environment_vars.get()
-        if env_vars_dict is None:
+        try:
+            env_vars_dict = cls.environment_vars.get()
+            return env_vars_dict.get(key)
+        except LookupError:
             return None
-        return env_vars_dict.get(key)
 
     @classmethod
-    def get_all(cls) -> dict:
+    def get_all(cls) -> dict | None:
         """Get all environment variables."""
-        return cls.environment_vars.get()
+        try:
+            return cls.environment_vars.get()
+        except LookupError:
+            return None
