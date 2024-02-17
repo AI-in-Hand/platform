@@ -118,6 +118,9 @@ class AgencyManager:
         for agent in agency_copy.agents:
             agent.client = None
 
+        for agent in agency_copy.main_recipients:
+            agent.client = None
+
         agency_copy.main_thread = copy(agency_copy.main_thread)
         agency_copy.main_thread.client = None
 
@@ -136,6 +139,9 @@ class AgencyManager:
         client = get_openai_client(env_config_storage=self.env_config_storage)
         # Restore client for each agent in the agency
         for agent in agency.agents:
+            agent.client = client
+
+        for agent in agency.main_recipients:
             agent.client = client
 
         # Restore client for the main thread
