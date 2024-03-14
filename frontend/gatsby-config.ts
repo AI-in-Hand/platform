@@ -1,13 +1,22 @@
 import type { GatsbyConfig } from "gatsby";
+import fs from 'fs';
+
+const envFile = `.env.${process.env.NODE_ENV}`;
+
+fs.access(envFile, fs.constants.F_OK, (err) => {
+  if (err) {
+    console.warn(`File '${envFile}' is missing. Using default values.`);
+  }
+});
 
 require("dotenv").config({
-  path: `.env.${process.env.NODE_ENV}`,
+  path: envFile,
 });
 
 const config: GatsbyConfig = {
   pathPrefix: `${process.env.PREFIX_PATH_VALUE}`,
   siteMetadata: {
-    title: `AI in Hand Builder Platform`,
+    title: `AI in Hand Builder Platform [Alpha]`,
     description: `Build AI Teams`,
     siteUrl: `http://tbd.place`,
   },

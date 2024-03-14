@@ -7,9 +7,6 @@ import { message } from "antd";
 import SideBarView from "./sidebar";
 import { useConfigStore } from "../../../hooks/store";
 import SessionsView from "./sessions";
-import AgentsWorkflowView from "./workflows";
-import { Square3Stack3DIcon } from "@heroicons/react/24/outline";
-import Icon from "../../icons";
 
 const RAView = () => {
   const session: IChatSession | null = useConfigStore((state) => state.session);
@@ -74,7 +71,6 @@ const RAView = () => {
       fetchMessages();
     }
   }, [session]);
-
   return (
     <div className="h-full   ">
       <div className="flex h-full   ">

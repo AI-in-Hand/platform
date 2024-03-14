@@ -37,8 +37,9 @@ export interface IAgentConfig {
   llm_config?: ILLMConfig | false;
   human_input_mode: string;
   max_consecutive_auto_reply: number;
-  instructions: string | "";
+  system_message: string | "";
   is_termination_msg?: boolean | string;
+  default_auto_reply?: string | null;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
 }
 
@@ -57,7 +58,7 @@ export interface IGroupChatConfig {
   admin_name: string;
   messages: Array<any>;
   max_round: number;
-  speaker_selection_method: string;
+  speaker_selection_method: "auto" | "round_robin" | "random";
   allow_repeat_speaker: boolean | Array<IAgentConfig>;
 }
 
@@ -79,13 +80,9 @@ export interface IFlowConfig {
   type: "twoagents" | "groupchat";
   timestamp?: string;
   summary_method?: "none" | "last" | "llm";
-  mainAgent?: string;
-  agencyChart?: IAgencyChartSpec;
   id?: string;
   user_id?: string;
 }
-
-export type IAgencyChartSpec = Array<[string, string]>;
 
 export interface IModelConfig {
   model: string;
@@ -123,7 +120,7 @@ export interface IGalleryItem {
 
 export interface ISkill {
   title: string;
-  file_name: string;
+  file_name?: string;
   content: string;
   id?: string;
   timestamp?: string;

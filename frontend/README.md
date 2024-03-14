@@ -15,7 +15,7 @@ This should start the server on port 8000.
 
 ## Modifying the UI, Adding Pages
 
-The core of the app can be found in the `src` folder. To add pages, add a new folder in `src/pages` and add a `index.js` file. This will be the entry point for the page. For example to add a route in the app like `/about`, add a folder `about` in `src/pages` and add a `index.tsx` file. You can follow the content style in `src/pages/index.tsx` to add content to the page.
+The core of the app can be found in the `src` folder. To add pages, add a new folder in `src/pages` and add a `index.tsx` file. This will be the entry point for the page. For example to add a route in the app like `/about`, add a folder `about` in `src/pages` and add a `index.tsx` file. You can follow the content style in `src/pages/index.tsx` to add content to the page.
 
 Core logic for each component should be written in the `src/components` folder and then imported in pages as needed.
 
@@ -25,6 +25,7 @@ the front end makes request to the backend api and expects it at /api on localho
 
 ## setting env variables for the UI
 
-- please look at env.default
-- make a copy of this file and name it `env.development`
+- please look at `.env.default`
+- make a copy of this file and name it `.env.development`
 - set the values for the variables in this file
+  - The main variable here is `GATSBY_API_URL` which should be set to `http://localhost:8081/api` for local development. This tells the UI where to make requests to the backend.
