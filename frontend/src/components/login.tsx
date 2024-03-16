@@ -10,7 +10,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'http://localhost:8000/sign-in-verify'}).then((res) => {
+        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://ainhand.com/sign-in-verify'}).then((res) => {
             dispatch(SetEmail(data.email))
         }).catch((error) => {
             console.log(error.message)

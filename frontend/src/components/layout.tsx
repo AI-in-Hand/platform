@@ -27,12 +27,13 @@ const Layout = ({
   restricted = false,
 }: Props) => {
   const firebaseConfig = {
-    apiKey: "AIzaSyCIzUJfhUKoAJQ77khEXZQYxlQbI5nmlrE",
-    authDomain: "autogentest-5f95c.firebaseapp.com",
-    projectId: "autogentest-5f95c",
-    storageBucket: "autogentest-5f95c.appspot.com",
-    messagingSenderId: "872767628817",
-    appId: "1:872767628817:web:47e12642d6abfa6bb373b0"
+    apiKey: "AIzaSyCWIQCLyRF5FD5uQdE4M9l-EDN-NnP09Yg",
+     authDomain: "ai-in-hand.firebaseapp.com",
+     projectId: "ai-in-hand",
+     storageBucket: "ai-in-hand.appspot.com",
+     messagingSenderId: "86070783905",
+     appId: "1:86070783905:web:2b9eed73fcf06902b7a5e0",
+     measurementId: "G-D74MR0JLD5"
   };
   initializeApp(firebaseConfig);
   const { darkMode } = React.useContext(appContext);
