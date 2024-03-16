@@ -2295,17 +2295,17 @@ files = [
 
 [[package]]
 name = "poetry-plugin-export"
-version = "1.6.0"
+version = "1.7.0"
 description = "Poetry plugin to export the dependencies to various formats"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "poetry_plugin_export-1.6.0-py3-none-any.whl", hash = "sha256:2dce6204c9318f1f6509a11a03921fb3f461b201840b59f1c237b6ab454dabcf"},
-    {file = "poetry_plugin_export-1.6.0.tar.gz", hash = "sha256:091939434984267a91abf2f916a26b00cff4eee8da63ec2a24ba4b17cf969a59"},
+    {file = "poetry_plugin_export-1.7.0-py3-none-any.whl", hash = "sha256:2283b28e0209f9f9598c6fe44f30586ec91329ea1558f908708261e0516bf427"},
+    {file = "poetry_plugin_export-1.7.0.tar.gz", hash = "sha256:e73f207fc0e08c2f59ead82cbe39ef259b351a318d5c0bddcec13990bcd324a7"},
 ]
 
 [package.dependencies]
-poetry = ">=1.6.0,<2.0.0"
+poetry = ">=1.8.0,<2.0.0"
 poetry-core = ">=1.7.0,<2.0.0"
 
 [[package]]
@@ -2376,13 +2376,13 @@ files = [
 
 [[package]]
 name = "pyairtable"
-version = "2.3.0.post1"
+version = "2.3.1"
 description = "Python Client for the Airtable API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyairtable-2.3.0.post1-py2.py3-none-any.whl", hash = "sha256:b08da5526e478890aec1e118416177ab58ab6a51ad30323a63a4992e77645c6f"},
-    {file = "pyairtable-2.3.0.post1.tar.gz", hash = "sha256:1d78cd8cdb662d0c05cdb9c551564ff48d31a8311c0f5b25e1f627bc79bd9c1b"},
+    {file = "pyairtable-2.3.1-py2.py3-none-any.whl", hash = "sha256:ef71c53f307c26b15616742f3dcddc308e94514eb046e523f6f6797de8236179"},
+    {file = "pyairtable-2.3.1.tar.gz", hash = "sha256:aefcbf771e9a99cd9189ac4c5f9f99f7d0af1c1b6e1ef9a86dd8194e48cf8af5"},
 ]
 
 [package.dependencies]
@@ -3803,13 +3803,13 @@ multidict = ">=4.0"
 
 [[package]]
 name = "zipp"
-version = "3.18.0"
+version = "3.18.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "zipp-3.18.0-py3-none-any.whl", hash = "sha256:c1bb803ed69d2cce2373152797064f7e79bc43f0a3748eb494096a867e0ebf79"},
-    {file = "zipp-3.18.0.tar.gz", hash = "sha256:df8d042b02765029a09b157efd8e820451045890acc30f8e37dd2f94a060221f"},
+    {file = "zipp-3.18.1-py3-none-any.whl", hash = "sha256:206f5a15f2af3dbaee80769fb7dc6f249695e940acca08dfb2a4769fe61e538b"},
+    {file = "zipp-3.18.1.tar.gz", hash = "sha256:2884ed22e7d8961de1c9a05142eb69a247f120291bc0206a00a7642f09b5b715"},
 ]
 
 [package.extras]
