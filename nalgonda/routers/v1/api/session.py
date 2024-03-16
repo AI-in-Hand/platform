@@ -11,6 +11,7 @@ from nalgonda.models.request_models import SessionPostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
+from nalgonda.services.env_vars_manager import ContextEnvVarsManager
 from nalgonda.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,9 @@ async def create_session(
             f"User {current_user.id} does not have permissions to create a session for the agency: {agency_id}"
         )
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    # Set the owner_id in the context variables
+    ContextEnvVarsManager.set("owner_id", current_user.id)
 
     logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
 

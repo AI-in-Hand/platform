@@ -4,7 +4,8 @@ from agency_swarm import BaseTool
 from pyairtable import Api
 from pydantic import Field
 
-from nalgonda.settings import settings
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from nalgonda.services.env_config_manager import EnvConfigManager
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +20,16 @@ class SaveLeadToAirtable(BaseTool):
     def run(self) -> str:
         """Save a new lead to Airtable."""
         logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.lead_details}")
+        env_config_storage = EnvConfigFirestoreStorage()
+        env_config_manager = EnvConfigManager(env_config_storage)
 
         try:
-            api = Api(settings.airtable_token)
-            table = api.table(settings.airtable_base_id, settings.airtable_table_id)
+            airtable_base_id = env_config_manager.get_by_key("AIRTABLE_BASE_ID")
+            airtable_table_id = env_config_manager.get_by_key("AIRTABLE_TABLE_ID")
+            airtable_token = env_config_manager.get_by_key("AIRTABLE_TOKEN")
+
+            api = Api(airtable_token)
+            table = api.table(airtable_base_id, airtable_table_id)
 
             data = {
                 "Name": self.name,

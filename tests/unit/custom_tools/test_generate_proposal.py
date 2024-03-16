@@ -19,7 +19,7 @@ def test_generate_proposal_with_valid_brief(mock_openai_client, mock_openai_resp
     proposal_tool = GenerateProposal(project_brief="Create a web application.")
     response = proposal_tool.run()
     assert response == "Mocked Proposal"
-    mock_openai_client.assert_called_once_with()
+    mock_openai_client.assert_called_once()
 
 
 @patch("nalgonda.utils.get_openai_client", side_effect=Exception("API failed"))
@@ -28,4 +28,4 @@ def test_generate_proposal_with_api_failure(mock_openai_client):
     with pytest.raises(Exception) as exc_info:
         proposal_tool.run()
     assert "API failed" in str(exc_info.value)
-    mock_openai_client.assert_called_once_with()
+    mock_openai_client.assert_called_once()

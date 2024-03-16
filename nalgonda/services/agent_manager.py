@@ -6,13 +6,16 @@ from agency_swarm import Agent
 from nalgonda.custom_tools import TOOL_MAPPING
 from nalgonda.models.agent_config import AgentConfig
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from nalgonda.services.oai_client import get_openai_client
 from nalgonda.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 class AgentManager:
-    def __init__(self, storage: AgentConfigFirestoreStorage) -> None:
+    def __init__(self, storage: AgentConfigFirestoreStorage, env_config_storage: EnvConfigFirestoreStorage) -> None:
+        self.env_config_storage = env_config_storage
         self.storage = storage
 
     async def create_or_update_agent(self, agent_config: AgentConfig) -> str:
@@ -46,8 +49,7 @@ class AgentManager:
         agent = await asyncio.to_thread(self._construct_agent, agent_config)
         return agent, agent_config
 
-    @staticmethod
-    def _construct_agent(agent_config: AgentConfig) -> Agent:
+    def _construct_agent(self, agent_config: AgentConfig) -> Agent:
         agent = Agent(
             id=agent_config.agent_id,
             name=agent_config.name,
@@ -57,4 +59,6 @@ class AgentManager:
             tools=[TOOL_MAPPING[tool] for tool in agent_config.tools],
             model=settings.gpt_model,
         )
+        # a workaround: agent.client must be replaced with a proper implementation
+        agent.client = get_openai_client(env_config_storage=self.env_config_storage)
         return agent
