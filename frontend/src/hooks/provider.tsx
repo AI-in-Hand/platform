@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import {
-  eraseCookie,
   getLocalStorage,
   setLocalStorage,
 } from "../components/utils";
-import { message } from "antd";
+import {navigate} from "gatsby";
+import {ResetState} from "../store/actions/usersActions";
+import {useDispatch} from "react-redux";
 
 export interface IUser {
   name: string;
@@ -17,7 +18,6 @@ export interface IUser {
 export interface AppContextType {
   user: IUser | null;
   setUser: any;
-  logout: any;
   cookie_name: string;
   darkMode: string;
   setDarkMode: any;
@@ -33,14 +33,6 @@ const Provider = ({ children }: any) => {
   const [darkMode, setDarkMode] = useState(
     storedValue === null ? "light" : storedValue === "dark" ? "dark" : "light"
   );
-
-  const logout = () => {
-    // setUser(null);
-    // eraseCookie(cookie_name);
-    console.log("Please implement your own logout logic");
-    message.info("Please implement your own logout logic");
-  };
-
   const updateDarkMode = (darkMode: string) => {
     setDarkMode(darkMode);
     setLocalStorage("darkmode", darkMode, false);
@@ -54,13 +46,11 @@ const Provider = ({ children }: any) => {
     username: "guestuser",
   };
   const [user, setUser] = useState<IUser | null>(initUser);
-
   return (
     <appContext.Provider
       value={{
         user,
         setUser,
-        logout,
         cookie_name,
         darkMode,
         setDarkMode: updateDarkMode,
