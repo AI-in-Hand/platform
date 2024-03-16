@@ -1,54 +1,30 @@
-import React, {useState} from 'react';
-import {getAuth, sendSignInLinkToEmail} from "firebase/auth";
-import {Link} from "gatsby";
-import {Button, Form, Input, Spin, Typography} from "antd";
-import {REGEXP_EMAIL} from "../helpers/constants";
+import React, {useEffect} from 'react';
+import {getAuth, signInWithEmailLink} from "firebase/auth";
+import { navigate} from "gatsby";
+import {useDispatch, useSelector} from "react-redux";
+import {SignIn} from "../store/actions/usersActions";
 
-const Register = () => {
-    const [loading, setLoading] = useState(false);
-    function handleRegister(data: {email: string, password: string}) {
+const LogInVerify = () => {
+    const dispatch = useDispatch();
+    // @ts-ignore
+    const email = useSelector(store => store.user.email);
+    function handleLogin(email: string) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://ainhand.com/sign-in'}).then((res) => {
-            console.log('register success')
+        // @ts-ignore
+        signInWithEmailLink (auth, email, location.href).then((res) => {
+            // @ts-ignore
+            dispatch(SignIn({token: res.user.accessToken, user: {email: res.user.email, uid: res.user.uid}}))
+            navigate('/')
+            console.log(res.user)
         }).catch((error) => {
             console.log(error.message)
         });
     }
-    return (
-        <Spin spinning={loading}>
-            <div className={"mt-20 max-w-[450px] m-auto w-full"}>
-                <Typography.Title level={3} className={"text-center"}>
-                    Sign Up
-                </Typography.Title>
-                <Form name="login-form" onFinish={handleRegister}>
-                    <Form.Item
-                        name="email"
-                        rules={[
-                            { required: true, message: "Please input your email!" },
-                            () => ({
-                                validator(_, value) {
-                                    if (REGEXP_EMAIL.test(value)) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error("Email not valid"));
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input placeholder="Email" />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button type={'primary'} htmlType="submit">
-                            Sign Up
-                        </Button>
-                    </Form.Item>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <Link to="/sign-in">Sign In</Link>
-                    </div>
-                </Form>
-            </div>
-        </Spin>
-    );
+    useEffect(() => {
+        handleLogin(email);
+        console.log(email)
+    }, []);
+    return null
 };
 
-export default Register;
+export default LogInVerify;

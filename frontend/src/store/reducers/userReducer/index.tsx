@@ -4,6 +4,7 @@ const initialState = {
   loggedIn: false,
   accessToken: null,
   user: {},
+  email: ""
 };
 
 export default (state = initialState, action: any) => {
@@ -16,6 +17,13 @@ export default (state = initialState, action: any) => {
         accessToken: action.payload.token,
         user: action.payload?.user ?? {},
       };
+    case usersActions.SET_EMAIL:
+      return {
+        ...state,
+        email: action.payload
+      };
+    case usersActions.RESET_STATE:
+      return initialState;
     default:
       return state;
   }

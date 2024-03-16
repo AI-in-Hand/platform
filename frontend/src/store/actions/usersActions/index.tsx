@@ -13,3 +13,14 @@ export function SignUp(data: {token: string, user: any}) {
     payload: data,
   };
 }
+export function SetEmail(email: string) {
+  return {
+    type: usersActions.SET_EMAIL,
+    payload: email,
+  };
+}
+export function ResetState() {
+  return {
+    type: usersActions.RESET_STATE,
+  };
+}

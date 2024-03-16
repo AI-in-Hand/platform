@@ -11,17 +11,24 @@ import { Fragment } from "react";
 import { appContext } from "../hooks/provider";
 import { Link } from "gatsby";
 import React from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {ResetState} from "../store/actions/usersActions";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 const Header = ({ meta, link }: any) => {
-  const { user, logout } = React.useContext(appContext);
+  // @ts-ignore
+  const loggedIn = useSelector(store => store.user.loggedIn);
+  const { user } = React.useContext(appContext);
   const userName = user ? user.name : "Unknown";
   const userAvatarUrl = user ? user.avatar_url : "";
   const user_id = user ? user.username : "unknown";
-
+  const dispatch = useDispatch();
+  const logout = () => {
+    dispatch(ResetState());
+  };
   const links: any[] = [
     { name: "Build", href: "/build" },
     { name: "Playground", href: "/" },
@@ -130,7 +137,7 @@ const Header = ({ meta, link }: any) => {
                 <div className="hidden lg:ml-4 md:flex md:items-center">
                   <DarkModeToggle />
 
-                  {user && (
+                  {loggedIn && (
                     <>
                       <div className="ml-3">
                         <div className="text-sm text-primary">{userName}</div>
@@ -181,9 +188,7 @@ const Header = ({ meta, link }: any) => {
                               {({ active }) => (
                                 <a
                                   href="#"
-                                  onClick={() => {
-                                    logout();
-                                  }}
+                                  onClick={logout}
                                   className={classNames(
                                     active ? "bg-secondary" : "",
                                     "block px-4 py-2 text-sm text-primary"
@@ -256,7 +261,7 @@ const Header = ({ meta, link }: any) => {
                   <Disclosure.Button
                     as="a"
                     href="#"
-                    onClick={() => logout()}
+                    onClick={logout}
                     className="block px-4 py-2 text-base font-medium text-secondary hover:text-primary "
                   >
                     Sign out
