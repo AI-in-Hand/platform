@@ -8,6 +8,7 @@ from websockets.exceptions import ConnectionClosedOK
 
 from nalgonda.dependencies.dependencies import get_agency_manager
 from nalgonda.services.agency_manager import AgencyManager
+from nalgonda.services.env_vars_manager import ContextEnvVarsManager
 from nalgonda.services.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
@@ -18,9 +19,10 @@ ws_router = APIRouter(
 )
 
 
-@ws_router.websocket("/ws/{agency_id}/{session_id}")
+@ws_router.websocket("/ws/{owner_id}/{agency_id}/{session_id}")
 async def websocket_session_endpoint(
     websocket: WebSocket,
+    owner_id: str,
     agency_id: str,
     session_id: str,
     agency_manager: AgencyManager = Depends(get_agency_manager),
@@ -28,7 +30,10 @@ async def websocket_session_endpoint(
     """WebSocket endpoint for maintaining conversation with a specific session.
     Send messages to and from CEO of the given agency."""
 
-    # TODO: Add authentication: check if agency_id is valid for the given user
+    # TODO: Add authentication: check if agency_id is valid for the given owner_id
+
+    # Set the owner_id in the context variables
+    ContextEnvVarsManager.set("owner_id", owner_id)
 
     await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
@@ -41,7 +46,7 @@ async def websocket_session_endpoint(
         return
 
     try:
-        await websocket_receive_and_process_messages(websocket, agency_id, agency, session_id)
+        await websocket_receive_and_process_messages(websocket, agency_id, agency, session_id, owner_id)
     except (WebSocketDisconnect, ConnectionClosedOK):
         await connection_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
@@ -52,6 +57,7 @@ async def websocket_receive_and_process_messages(
     agency_id: str,
     agency: Agency,
     session_id: str,
+    owner_id: str,
 ) -> None:
     """Receive messages from the websocket and process them."""
     while True:
@@ -62,7 +68,7 @@ async def websocket_receive_and_process_messages(
                 await connection_manager.send_message("message not provided", websocket)
                 continue
 
-            await process_ws_message(user_message, agency, websocket)
+            await process_ws_message(user_message, agency, websocket, owner_id)
 
         except (WebSocketDisconnect, ConnectionClosedOK) as e:
             raise e
@@ -72,7 +78,7 @@ async def websocket_receive_and_process_messages(
             continue
 
 
-async def process_ws_message(user_message: str, agency: Agency, websocket: WebSocket):
+async def process_ws_message(user_message: str, agency: Agency, websocket: WebSocket, owner_id: str):
     """Process the user message and send the response to the websocket."""
     loop = asyncio.get_running_loop()
 
@@ -80,6 +86,8 @@ async def process_ws_message(user_message: str, agency: Agency, websocket: WebSo
 
     def get_next() -> MessageOutput | None:
         try:
+            # Set the owner_id in the context variables
+            ContextEnvVarsManager.set("owner_id", owner_id)
             return next(gen)
         except StopIteration:
             return None

@@ -18,8 +18,8 @@ from nalgonda.routers.v1 import v1_router  # noqa  # isort:skip
 from nalgonda.settings import settings  # noqa  # isort:skip
 from nalgonda.utils import init_webserver_folders  # noqa  # isort:skip
 
-openai.api_key = settings.openai_api_key
-
+# just a placeholder for compatibility with agency-swarm
+openai.api_key = "sk-1234567890"
 
 # FastAPI app initialization
 app = FastAPI()

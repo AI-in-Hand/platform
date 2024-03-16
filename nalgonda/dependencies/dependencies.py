@@ -3,6 +3,7 @@ from redis import asyncio as aioredis
 
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.agent_manager import AgentManager
@@ -21,20 +22,25 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
     return RedisCacheManager(redis)
 
 
-def get_agent_manager(storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage)) -> AgentManager:
-    return AgentManager(storage)
+def get_agent_manager(
+    storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+) -> AgentManager:
+    return AgentManager(storage, env_config_storage)
 
 
 def get_agency_manager(
     cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
     agency_config_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
 ) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager, agency_config_storage)
+    return AgencyManager(cache_manager, agent_manager, agency_config_storage, env_config_storage)
 
 
 def get_session_manager(
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
 ) -> SessionManager:
     """Returns a SessionManager object"""
-    return SessionManager(session_storage=session_storage)
+    return SessionManager(session_storage=session_storage, env_config_storage=env_config_storage)
