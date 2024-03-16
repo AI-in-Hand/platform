@@ -1,8 +1,6 @@
-from unittest import mock
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
-from agency_swarm import Agent
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.models.agent_config import AgentConfig
@@ -47,6 +45,16 @@ def test_get_agency_config_not_found(client):
     assert response.json() == {"detail": "Agency not found"}
 
 
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_get_agency_config_owner_id_mismatch(client, mock_firestore_client):
+    expected_agency = AgencyConfig(agency_id="agency1", owner_id="different_user_id", name="Test agency")
+    mock_firestore_client.setup_mock_data("agency_configs", "agency1", expected_agency.model_dump())
+
+    response = client.get("/v1/api/agency?agency_id=agency1")
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
+
+
 @pytest.mark.usefixtures("mock_get_current_active_user", "mock_firestore_client")
 def test_create_agency_success(client):
     template_config = {
@@ -68,9 +76,8 @@ def test_create_agency_success(client):
 
     template_config.update({"owner_id": TEST_USER_ID})
     model_template_config = AgencyConfig.model_validate(template_config)
-    model_template_config.agency_id = mock.ANY
-    assert mock_update_or_create_agency.mock_calls[0].args[0] == model_template_config
-    assert mock_update_or_create_agency.mock_calls[0].args[0].agency_id != "template_agency_id"
+    model_template_config.agency_id = None
+    mock_update_or_create_agency.assert_called_once_with(model_template_config)
 
 
 @pytest.mark.usefixtures("mock_get_current_active_user")
@@ -138,22 +145,28 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config_data)
     mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_config.model_dump())
 
-    agent_mock = MagicMock(spec=Agent)
-    expected_agent_return_value = (agent_mock, foreign_agent_config)
-
-    # Mock the AgentManager to return an agent with a different owner when get_agent is called
-    with patch("nalgonda.services.agent_manager.AgentManager.get_agent", new_callable=AsyncMock) as mock_get_agent:
-        mock_get_agent.return_value = expected_agent_return_value
-
-        # Simulate a PUT request to update the agency with agents belonging to a different user
-        response = client.put("/v1/api/agency", json=agency_config_data)
+    # Simulate a PUT request to update the agency with agents belonging to a different user
+    response = client.put("/v1/api/agency", json=agency_config_data)
 
     # Check if the server responds with a 403 Forbidden
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
 
-    # Check if the agent manager was called with the correct arguments
-    mock_get_agent.assert_called_once_with("foreign_agent_id")
-
     # Check if the agency config was not updated
     assert mock_firestore_client.collection("agency_configs").to_dict() == agency_config_data
+
+
+@pytest.mark.usefixtures("mock_get_current_active_user")
+def test_update_or_create_agency_missing_agent(client, mock_firestore_client):
+    agency_data_with_missing_agent = {
+        "agency_id": "existing_agency",
+        "name": "Existing Agency with Missing Agent",
+        "shared_instructions": "Existing",
+        "agents": ["missing_agent_id"],
+        "agency_chart": [],
+    }
+
+    mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent)
+    response = client.put("/v1/api/agency", json=agency_data_with_missing_agent)
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Agent not found: missing_agent_id"}

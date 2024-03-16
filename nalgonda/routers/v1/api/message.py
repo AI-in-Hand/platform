@@ -2,7 +2,6 @@ import asyncio
 import logging
 from typing import Annotated
 
-from agency_swarm import get_openai_client
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
@@ -11,8 +10,11 @@ from nalgonda.dependencies.dependencies import get_agency_manager
 from nalgonda.models.auth import UserInDB
 from nalgonda.models.request_models import SessionMessagePostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
+from nalgonda.services.env_vars_manager import ContextEnvVarsManager
+from nalgonda.services.oai_client import get_openai_client
 
 logger = logging.getLogger(__name__)
 message_router = APIRouter(
@@ -27,6 +29,7 @@ async def get_message_list(
     session_id: str,
     before: str | None = None,
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
 ):
     """Return a list of last 20 messages for the given session."""
     # check if the current_user has permissions to send a message to the agency
@@ -38,8 +41,11 @@ async def get_message_list(
         logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
 
+    # Set the owner_id in the context variables
+    ContextEnvVarsManager.set("owner_id", current_user.id)
+
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
-    client = get_openai_client()
+    client = get_openai_client(env_config_storage)
     messages = client.beta.threads.messages.list(thread_id=session_id, limit=20, before=before)
     return messages
 
@@ -64,6 +70,9 @@ async def post_message(
     user_message = request.message
     agency_id = request.agency_id
     session_id = request.session_id
+
+    # Set the owner_id in the context variables
+    ContextEnvVarsManager.set("owner_id", current_user.id)
 
     logger.info(f"Received message: {user_message}, agency_id: {agency_id}, session_id: {session_id}")
 

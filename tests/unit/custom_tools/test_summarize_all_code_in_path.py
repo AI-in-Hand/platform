@@ -26,7 +26,7 @@ def test_summarize_all_code_in_path_with_valid_codebase(mock_openai_client, mock
     summarize_tool = SummarizeAllCodeInPath(start_path=Path(tmp_path))
     results = summarize_tool.run()
     assert "Summary of the code" in results
-    mock_openai_client.assert_called_once_with()
+    mock_openai_client.assert_called_once()
 
 
 @patch("nalgonda.utils.get_openai_client", side_effect=Exception("API failed"))
@@ -37,4 +37,4 @@ def test_summarize_all_code_in_path_with_api_failure(mock_openai_client, tmp_pat
     with pytest.raises(Exception) as exc_info:
         summarize_tool.run()
     assert "API failed" in str(exc_info.value)
-    mock_openai_client.assert_called_once_with()
+    mock_openai_client.assert_called_once()

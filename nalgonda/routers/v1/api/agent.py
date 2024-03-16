@@ -11,6 +11,7 @@ from nalgonda.models.agent_config import AgentConfig
 from nalgonda.models.auth import UserInDB
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
+from nalgonda.services.env_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(tags=["agent"])
@@ -79,6 +80,9 @@ async def create_or_update_agent(
 
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id
+
+    # Set the owner_id in the context variables
+    ContextEnvVarsManager.set("owner_id", current_user.id)
 
     agent_id = await agent_manager.create_or_update_agent(agent_config)
 
