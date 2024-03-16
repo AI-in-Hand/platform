@@ -38,12 +38,13 @@ const Layout = ({
     </div>
   );
   const firebaseConfig = {
-    apiKey: "AIzaSyBAfsvQ8esXSJNWKU-37DsTG_JFDMLRIHs",
-    authDomain: "test-8fb59.firebaseapp.com",
-    projectId: "test-8fb59",
-    storageBucket: "test-8fb59.appspot.com",
-    messagingSenderId: "831053501821",
-    appId: "1:831053501821:web:70c136fca45ff02e982814"
+    apiKey: "AIzaSyCWIQCLyRF5FD5uQdE4M9l-EDN-NnP09Yg",
+    authDomain: "ai-in-hand.firebaseapp.com",
+    projectId: "ai-in-hand",
+    storageBucket: "ai-in-hand.appspot.com",
+    messagingSenderId: "86070783905",
+    appId: "1:86070783905:web:2b9eed73fcf06902b7a5e0",
+    measurementId: "G-D74MR0JLD5"
   };
   initializeApp(firebaseConfig);
   const { darkMode } = React.useContext(appContext);

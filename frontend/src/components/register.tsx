@@ -8,7 +8,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string, password: string}) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'http://localhost:8000/sign-in'}).then((res) => {
+        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://ainhand.com/sign-in'}).then((res) => {
             console.log('register success')
         }).catch((error) => {
             console.log(error.message)
