@@ -39,9 +39,26 @@ def test_get_all_method_empty():
     assert ContextEnvVarsManager.get_all() is None
 
 
-# Optional: Test for edge cases like setting None or empty strings
 def test_set_method_edge_cases():
     ContextEnvVarsManager.set("", "empty_key")
     ContextEnvVarsManager.set("none_value", None)
     assert ContextEnvVarsManager.get("") == "empty_key"
     assert ContextEnvVarsManager.get("none_value") is None
+
+
+def test_get_method_without_setting():
+    """
+    Test getting an environment variable without setting the context variable.
+    This should trigger the LookupError branch and return None.
+    """
+    # Temporarily replace the class's ContextVar with a fresh one
+    original_var = ContextEnvVarsManager.environment_vars
+    try:
+        # Use a fresh ContextVar to ensure no data is set
+        ContextEnvVarsManager.environment_vars = ContextVar("test_environment_vars")
+
+        # Attempt to get a value, which should return None due to the LookupError
+        assert ContextEnvVarsManager.get("unset_key") is None
+    finally:
+        # Restore the original ContextVar to avoid affecting other tests
+        ContextEnvVarsManager.environment_vars = original_var
