@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Button, Form, Input, Spin, Typography} from "antd";
+import {Button, Form, Input, message, Spin, Typography} from "antd";
 import {REGEXP_EMAIL} from "../helpers/constants";
 import {getAuth, sendSignInLinkToEmail} from "firebase/auth";
 import {useDispatch} from "react-redux";
@@ -12,6 +12,7 @@ const Login = () => {
         const auth = getAuth();
         sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://platform.ainhand.com/sign-in-verify'}).then((res) => {
             dispatch(SetEmail(data.email))
+            message.success("Please check your email for your login link");
         }).catch((error) => {
             console.log(error.message)
         });

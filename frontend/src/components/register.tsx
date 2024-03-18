@@ -15,14 +15,12 @@ const LogInVerify = () => {
             // @ts-ignore
             dispatch(SignIn({token: res.user.accessToken, user: {email: res.user.email, uid: res.user.uid}}))
             navigate('/')
-            console.log(res.user)
         }).catch((error) => {
             console.log(error.message)
         });
     }
     useEffect(() => {
         handleLogin(email);
-        console.log(email)
     }, []);
     return null
 };
