@@ -60,7 +60,6 @@ def test_set_by_key_success(mock_get, mock_firestore_client):
 
     updated_config = mock_firestore_client.collection("env_configs").document(TEST_USER_ID).to_dict()
     assert "NEW_KEY" in updated_config
-    # Assuming the encryption_service.encrypt method is deterministic and re-encrypting new_value would match
     assert EncryptionService(settings.encryption_key).decrypt(updated_config["NEW_KEY"]) == new_value
     mock_get.assert_called_once()
 
