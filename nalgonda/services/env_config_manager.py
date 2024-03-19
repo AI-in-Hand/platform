@@ -41,7 +41,6 @@ class EnvConfigManager:
             raise ValueError("owner_id not found in the environment variables.")
         config = self._env_config_storage.get_config(owner_id)
         if not config:
-            logger.warning(f"Environment variables not set for the user: {owner_id}")
-            raise ValueError(f"Environment variables not set for the user: {owner_id}")
+            config = {}
         config[key] = self._encryption_service.encrypt(value)
         self._env_config_storage.set_config(owner_id, config)
