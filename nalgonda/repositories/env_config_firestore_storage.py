@@ -10,7 +10,6 @@ class EnvConfigFirestoreStorage:
         """Initialize Firestore client and collection name."""
         self.db = firestore.client()
         self.collection_name = "env_configs"
-        # TODO: add encryption/decryption
 
     def get_config(self, owner_id: str) -> dict | None:
         """Fetch environment config based on owner_id"""

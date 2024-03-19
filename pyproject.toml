@@ -10,6 +10,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11.0a1,<3.13"
+cryptography = ">=42.0.5"
 duckduckgo-search = "<4.0.0,>=3.9.11"
 fastapi = ">=0.109.0"
 firebase-admin = ">=6.3.0"
@@ -17,7 +18,7 @@ functions = ">=0.7.0"
 gunicorn = ">=21.2.0"
 instructor = ">=0.4.8"
 openai = ">=1.10.0"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+passlib = {extras = ["bcrypt"], version = ">=1.7.4"}
 pyairtable = ">=2.2.1"
 pydantic = ">=2.5.2"
 pydantic-settings = ">=2.1.0"

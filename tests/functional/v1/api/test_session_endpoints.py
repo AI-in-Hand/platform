@@ -8,6 +8,7 @@ from nalgonda.models.request_models import SessionPostRequest
 from nalgonda.services.agency_manager import AgencyManager
 from nalgonda.services.session_manager import SessionManager
 from tests.test_utils import TEST_USER_ID
+from tests.test_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture
@@ -15,7 +16,7 @@ def session_config_data():
     return {
         "session_id": "test_session_id",
         "owner_id": TEST_USER_ID,
-        "agency_id": "test_agency_id",
+        "agency_id": TEST_AGENCY_ID,
         "created_at": 1234567890,
     }
 
@@ -38,25 +39,25 @@ def test_create_session_success(client, mock_firestore_client):
     ) as mock_create_threads, patch.object(AgencyManager, "cache_agency", AsyncMock()) as mock_cache_agency:
         # mock Firestore to pass the security owner_id check
         mock_firestore_client.setup_mock_data(
-            "agency_configs", "test_agency_id", {"name": "Test agency", "owner_id": TEST_USER_ID}
+            "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "owner_id": TEST_USER_ID}
         )
 
         # Create request data
-        request_data = SessionPostRequest(agency_id="test_agency_id")
+        request_data = SessionPostRequest(agency_id=TEST_AGENCY_ID)
         # Create a test client
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions
         assert response.status_code == 200
         assert response.json() == {"session_id": "new_session_id"}
-        mock_get_agency.assert_awaited_once_with("test_agency_id", None)
+        mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
-        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, "test_agency_id", "new_session_id")
+        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")
 
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {
             "session_id": "new_session_id",
             "owner_id": TEST_USER_ID,
-            "agency_id": "test_agency_id",
+            "agency_id": TEST_AGENCY_ID,
             "created_at": mock.ANY,
         }
 
@@ -65,7 +66,7 @@ def test_create_session_success(client, mock_firestore_client):
 def test_create_session_agency_not_found(client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
         # Create request data
-        request_data = SessionPostRequest(agency_id="test_agency_id")
+        request_data = SessionPostRequest(agency_id=TEST_AGENCY_ID)
         # Create a test client
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions

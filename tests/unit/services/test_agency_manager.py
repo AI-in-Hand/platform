@@ -8,6 +8,7 @@ from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFi
 from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
+from tests.test_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture
@@ -28,9 +29,9 @@ async def test_get_agency_from_cache(agency_manager):
     ):
         mock_get.return_value = MagicMock(spec=Agency)
 
-        agency = await agency_manager.get_agency("test_agency_id")
+        agency = await agency_manager.get_agency(TEST_AGENCY_ID)
         assert agency is not None
-        mock_get.assert_called_once_with("test_agency_id")
+        mock_get.assert_called_once_with(TEST_AGENCY_ID)
 
 
 @pytest.mark.asyncio
@@ -40,22 +41,22 @@ async def test_get_agency_repopulate_cache(agency_manager):
     ) as mock_repopulate, patch.object(agency_manager, "_set_client_objects", new_callable=Mock):
         mock_get.side_effect = [None, MagicMock(spec=Agency)]
 
-        agency = await agency_manager.get_agency("test_agency_id")
+        agency = await agency_manager.get_agency(TEST_AGENCY_ID)
         assert agency is not None
-        mock_get.assert_called_with("test_agency_id")
-        mock_repopulate.assert_called_once_with("test_agency_id", None)
+        mock_get.assert_called_with(TEST_AGENCY_ID)
+        mock_repopulate.assert_called_once_with(TEST_AGENCY_ID, None)
 
 
 @pytest.mark.asyncio
 async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
-        agency_id="test_agency_id",
+        agency_id=TEST_AGENCY_ID,
         owner_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Initial manifesto",
         agents=["agent1_id"],
     )
-    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config.model_dump())
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
     agency_config.shared_instructions = "New manifesto"
 
     with patch.object(
@@ -63,8 +64,8 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     ) as mock_repopulate:
         agency_id = await agency_manager.update_or_create_agency(agency_config)
 
-    mock_repopulate.assert_called_once_with("test_agency_id")
-    assert agency_id == "test_agency_id"
+    mock_repopulate.assert_called_once_with(TEST_AGENCY_ID)
+    assert agency_id == TEST_AGENCY_ID
     assert mock_firestore_client.to_dict()["shared_instructions"] == "New manifesto"
 
 
@@ -83,7 +84,7 @@ async def test_repopulate_cache_no_config(agency_manager, caplog):
 @pytest.mark.asyncio
 async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
-        agency_id="test_agency_id",
+        agency_id=TEST_AGENCY_ID,
         owner_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",
@@ -102,17 +103,17 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        await agency_manager.repopulate_cache_and_update_assistants("test_agency_id", None)
+        await agency_manager.repopulate_cache_and_update_assistants(TEST_AGENCY_ID, None)
         mock_load_agents.assert_called_once_with(agency_config)
         mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})
-        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, "test_agency_id", None)
+        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, TEST_AGENCY_ID, None)
 
 
 # Test successful agent construction
 @pytest.mark.asyncio
 async def test_load_and_construct_agents_success(agency_manager):
     agency_config = AgencyConfig(
-        agency_id="test_agency_id",
+        agency_id=TEST_AGENCY_ID,
         owner_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
@@ -139,7 +140,7 @@ async def test_load_and_construct_agents_success(agency_manager):
 @pytest.mark.asyncio
 async def test_load_and_construct_agents_agent_not_found(agency_manager):
     agency_config = AgencyConfig(
-        agency_id="test_agency_id",
+        agency_id=TEST_AGENCY_ID,
         owner_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
@@ -161,7 +162,7 @@ async def test_load_and_construct_agents_agent_not_found(agency_manager):
 async def test_construct_agency_single_layer_chart(agency_manager):
     # Mock AgencyConfig
     agency_config = AgencyConfig(
-        agency_id="test_agency_id",
+        agency_id=TEST_AGENCY_ID,
         owner_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",

@@ -10,7 +10,8 @@ from tests.test_utils import TEST_USER_ID
 # Test 1: Successful retrieval of an environment variable
 @patch("nalgonda.services.env_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_get_by_key_success(mock_get, mock_firestore_client):
-    mock_firestore_client.setup_mock_data("env_configs", TEST_USER_ID, {"TEST_KEY": "test_value"})
+    test_value = "gAAAAABl-O4Ls1gPlo6wBQw65vexUSBxL_pD2t8Sm-UjE8vdhDNmvKtrBLVIS5cpYWVvqQFb_6Uu6yKvU2las_5G50DtiKp_Kw=="
+    mock_firestore_client.setup_mock_data("env_configs", TEST_USER_ID, {"TEST_KEY": test_value})
     manager = EnvConfigManager(env_config_storage=EnvConfigFirestoreStorage())
     assert manager.get_by_key("TEST_KEY") == "test_value"
     mock_get.assert_called_once()

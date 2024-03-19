@@ -4,6 +4,7 @@ import pytest
 
 from nalgonda.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
+from tests.test_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture
@@ -16,18 +17,18 @@ def mock_get_agency():
 # Successful message sending
 @pytest.mark.usefixtures("mock_get_current_active_user")
 def test_post_agency_message_success(client, mock_get_agency, mock_firestore_client):
-    agency_data = {"owner_id": TEST_USER_ID, "agency_id": "test_agency_id", "name": "Test Agency"}
-    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_data)
+    agency_data = {"owner_id": TEST_USER_ID, "agency_id": TEST_AGENCY_ID, "name": "Test Agency"}
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
     # Sending a message
-    message_data = {"agency_id": "test_agency_id", "session_id": "test_session_id", "message": "Hello, world!"}
+    message_data = {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "message": "Hello, world!"}
 
     response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
     assert response.json().get("response") == "Hello, world!"
-    mock_get_agency.assert_called_once_with("test_agency_id", "test_session_id")
+    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
 
 
 # Agency configuration not found
@@ -80,7 +81,7 @@ def mock_session_firestore_storage(mock_firestore_client):
     session_data = {
         "session_id": "test_session_id",
         "owner_id": TEST_USER_ID,
-        "agency_id": "test_agency_id",
+        "agency_id": TEST_AGENCY_ID,
         "created_at": 1234567890,
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
@@ -115,7 +116,7 @@ def test_get_message_list_unauthorized(client, mock_firestore_client):
     test_session_config = {
         "session_id": "test_session_id",
         "owner_id": "other_user_id",
-        "agency_id": "test_agency_id",
+        "agency_id": TEST_AGENCY_ID,
         "created_at": 1234567890,
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", test_session_config)

@@ -3,10 +3,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from nalgonda.settings import settings
 from tests.test_utils.mock_firestore_client import MockFirestoreClient
 
 oai_mock = MagicMock(get_openai_client=MagicMock(return_value=MagicMock(timeout=10)))
 sys.modules["agency_swarm.util.oai"] = oai_mock
+settings.encryption_key = b"Xf0Wk0vLLd8nKS1QKv9aN0I-GrFospseEFhich6BdNU="
 
 
 @pytest.fixture(autouse=True)

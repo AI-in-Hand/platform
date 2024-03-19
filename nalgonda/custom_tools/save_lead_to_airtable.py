@@ -20,8 +20,7 @@ class SaveLeadToAirtable(BaseTool):
     def run(self) -> str:
         """Save a new lead to Airtable."""
         logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.lead_details}")
-        env_config_storage = EnvConfigFirestoreStorage()
-        env_config_manager = EnvConfigManager(env_config_storage)
+        env_config_manager = EnvConfigManager(EnvConfigFirestoreStorage())
 
         try:
             airtable_base_id = env_config_manager.get_by_key("AIRTABLE_BASE_ID")
