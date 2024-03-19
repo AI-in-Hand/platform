@@ -32,9 +32,6 @@ async def websocket_session_endpoint(
 
     # TODO: Add authentication: check if agency_id is valid for the given owner_id
 
-    # Set the owner_id in the context variables
-    ContextEnvVarsManager.set("owner_id", owner_id)
-
     await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
@@ -68,7 +65,7 @@ async def websocket_receive_and_process_messages(
                 await connection_manager.send_message("message not provided", websocket)
                 continue
 
-            await process_ws_message(user_message, agency, websocket, owner_id)
+            await process_ws_message(user_message, agency, websocket, owner_id, agency_id)
 
         except (WebSocketDisconnect, ConnectionClosedOK) as e:
             raise e
@@ -78,7 +75,9 @@ async def websocket_receive_and_process_messages(
             continue
 
 
-async def process_ws_message(user_message: str, agency: Agency, websocket: WebSocket, owner_id: str):
+async def process_ws_message(
+    user_message: str, agency: Agency, websocket: WebSocket, owner_id: str, agency_id: str
+) -> None:
     """Process the user message and send the response to the websocket."""
     loop = asyncio.get_running_loop()
 
@@ -88,6 +87,7 @@ async def process_ws_message(user_message: str, agency: Agency, websocket: WebSo
         try:
             # Set the owner_id in the context variables
             ContextEnvVarsManager.set("owner_id", owner_id)
+            ContextEnvVarsManager.set("agency_id", agency_id)
             return next(gen)
         except StopIteration:
             return None

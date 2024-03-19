@@ -4,8 +4,7 @@ from agency_swarm import BaseTool
 from pydantic import Field
 
 from nalgonda.constants import AGENCY_DATA_DIR
-from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
-from nalgonda.services.env_config_manager import EnvConfigManager
+from nalgonda.services.env_vars_manager import ContextEnvVarsManager
 
 
 class File(BaseTool):
@@ -27,8 +26,7 @@ class File(BaseTool):
     def run(self):
         if ".." in self.file_name or self.file_name.startswith("/"):
             return "Invalid file path. Directory traversal is not allowed."
-        env_config_manager = EnvConfigManager(EnvConfigFirestoreStorage())
-        agency_id = env_config_manager.get_by_key("_AGENCY_ID")
+        agency_id = ContextEnvVarsManager.get("agency_id")
         agency_path = AGENCY_DATA_DIR / agency_id
 
         # Extract the directory path from the file name

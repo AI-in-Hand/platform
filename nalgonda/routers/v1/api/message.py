@@ -58,27 +58,29 @@ async def post_message(
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> dict:
     """Send a message to the User Proxy of the given agency."""
-    # check if the current_user has permissions to send a message to the agency
-    agency_config = storage.load_by_agency_id(request.agency_id)
-    if not agency_config:
-        logger.warning(f"Agency not found: {request.agency_id}, requested by user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
-    if agency_config.owner_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to access agency {request.agency_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
-
-    user_message = request.message
     agency_id = request.agency_id
+    user_id = current_user.id
+    user_message = request.message
     session_id = request.session_id
 
-    # Set the owner_id in the context variables
-    ContextEnvVarsManager.set("owner_id", current_user.id)
+    # check if the current_user has permissions to send a message to the agency
+    agency_config = storage.load_by_agency_id(agency_id)
+    if not agency_config:
+        logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
+    if agency_config.owner_id != user_id:
+        logger.warning(f"User {user_id} does not have permissions to access agency {agency_id}")
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    # Set the owner_id and agency_id in the context variables
+    ContextEnvVarsManager.set("owner_id", user_id)
+    ContextEnvVarsManager.set("agency_id", agency_id)
 
     logger.info(f"Received message: {user_message}, agency_id: {agency_id}, session_id: {session_id}")
 
     agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:
-        logger.warning(f"Agency not found: {agency_id}, requested by user: {current_user.id}")
+        logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
 
     try:
