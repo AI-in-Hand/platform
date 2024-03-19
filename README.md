@@ -41,6 +41,7 @@ Start the FastAPI server with: `uvicorn nalgonda.main:app --reload`
 ## Deployment to Heroku
 
 1. Update `requirements.txt` with `poetry export --without dev --without-hashes > requirements.txt`.
+All further steps are unnecessary if you are using GitHub Actions for deployment.
 2. Log in to Heroku with `heroku login`.
 3. Set up Heroku remote: `heroku git:remote -a ainhand`.
 4. Deploy: `git push heroku main`.

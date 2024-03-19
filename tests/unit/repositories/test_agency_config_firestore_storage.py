@@ -2,17 +2,17 @@ import pytest
 
 from nalgonda.models.agency_config import AgencyConfig
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from tests.test_utils.constants import TEST_USER_ID
+from tests.test_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 
 @pytest.fixture
 def agency_config_data():
-    return {"agency_id": "test_agency_id", "owner_id": TEST_USER_ID, "name": "Test Agency"}
+    return {"agency_id": TEST_AGENCY_ID, "owner_id": TEST_USER_ID, "name": "Test Agency"}
 
 
 def test_load_agency_config_by_owner_id(mock_firestore_client, agency_config_data):
     mocked_data = AgencyConfig.model_validate(agency_config_data)
-    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config_data)
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
 
     storage = AgencyConfigFirestoreStorage()
     result = storage.load_by_owner_id(TEST_USER_ID)
@@ -23,10 +23,10 @@ def test_load_agency_config_by_owner_id(mock_firestore_client, agency_config_dat
 
 def test_load_agency_config_by_agency_id(mock_firestore_client, agency_config_data):
     mocked_data = AgencyConfig.model_validate(agency_config_data)
-    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_config_data)
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
 
     storage = AgencyConfigFirestoreStorage()
-    result = storage.load_by_agency_id("test_agency_id")
+    result = storage.load_by_agency_id(TEST_AGENCY_ID)
 
     assert result == mocked_data
 
