@@ -1,16 +1,15 @@
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from tests.test_utils.constants import TEST_USER_ID
 
 
 def get_current_active_user_override():
-    return UserInDB(id=TEST_USER_ID, username=TEST_USER_ID, hashed_password="hashed_password_test", disabled=False)
+    return User(id=TEST_USER_ID, username=TEST_USER_ID, disabled=False)
 
 
 def get_current_superuser_override():
-    return UserInDB(
+    return User(
         id=TEST_USER_ID,
         username=TEST_USER_ID,
-        hashed_password="hashed_password_test",
         disabled=False,
         is_superuser=True,
     )

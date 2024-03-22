@@ -5,15 +5,13 @@ from fastapi import HTTPException, status
 from jose import JWTError
 
 from nalgonda.dependencies.auth import get_current_active_user, get_current_superuser, get_current_user
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.settings import settings
 
 user_data = {
-    "username": "testuser",
+    "id": "testuser",
     "disabled": False,
     "is_superuser": False,
-    "id": "testuser",
-    "hashed_password": "hashed_testpassword",
 }
 inactive_user_data = user_data.copy()
 inactive_user_data["disabled"] = True
@@ -38,7 +36,7 @@ def mock_jwt_decode():
 @pytest.mark.asyncio
 async def test_get_current_user_valid(mock_user_repository, mock_jwt_decode):
     user = await get_current_user("valid_token")
-    assert user.username == user_data["username"]
+    assert user.id == user_data["id"]
     assert not user.disabled
     assert not user.is_superuser
     mock_user_repository.assert_called_once_with(user_data["username"])
@@ -58,14 +56,14 @@ async def test_get_current_user_invalid(mock_user_repository, mock_jwt_decode):
 @pytest.mark.asyncio
 async def test_get_current_active_user_disabled(mock_user_repository):
     with pytest.raises(HTTPException) as exc:
-        await get_current_active_user(UserInDB(**inactive_user_data))
+        await get_current_active_user(User(**inactive_user_data))
     assert exc.value.status_code == status.HTTP_400_BAD_REQUEST
     mock_user_repository.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_get_current_superuser_not_superuser(mock_user_repository, mock_jwt_decode):
-    user = UserInDB(**user_data)
+    user = User(**user_data)
     user.is_superuser = False
     with pytest.raises(HTTPException) as exc:
         await get_current_superuser(user)

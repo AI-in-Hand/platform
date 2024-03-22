@@ -8,7 +8,7 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agent_manager
 from nalgonda.models.agent_config import AgentConfig
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agent_manager import AgentManager
 from nalgonda.services.env_vars_manager import ContextEnvVarsManager
@@ -24,7 +24,7 @@ agent_router = APIRouter(tags=["agent"])
 
 @agent_router.get("/agent/list")
 async def get_agent_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> list[AgentConfig]:
     agents = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
@@ -33,7 +33,7 @@ async def get_agent_list(
 
 @agent_router.get("/agent")
 async def get_agent_config(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agent_id: str = Query(..., description="The unique identifier of the agent"),
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> AgentConfig:
@@ -50,7 +50,7 @@ async def get_agent_config(
 
 @agent_router.put("/agent")
 async def create_or_update_agent(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agent_config: AgentConfig = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),

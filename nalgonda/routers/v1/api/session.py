@@ -6,7 +6,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager, get_session_manager
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.models.request_models import SessionPostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
@@ -23,7 +23,7 @@ session_router = APIRouter(
 
 @session_router.get("/session/list")
 async def get_session_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
 ):
     """Return a list of all sessions for the current user."""
@@ -34,7 +34,7 @@ async def get_session_list(
 @session_router.post("/session")
 async def create_session(
     request: SessionPostRequest,
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
     session_manager: SessionManager = Depends(get_session_manager),

@@ -7,7 +7,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.models.request_models import SessionMessagePostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
@@ -25,7 +25,7 @@ message_router = APIRouter(
 
 @message_router.get("/message/list")
 async def get_message_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     session_id: str,
     before: str | None = None,
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
@@ -52,7 +52,7 @@ async def get_message_list(
 
 @message_router.post("/message")
 async def post_message(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     request: SessionMessagePostRequest,
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),

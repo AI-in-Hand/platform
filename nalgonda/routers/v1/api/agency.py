@@ -9,7 +9,7 @@ from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDD
 from nalgonda.dependencies.auth import get_current_active_user
 from nalgonda.dependencies.dependencies import get_agency_manager
 from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
 from nalgonda.services.agency_manager import AgencyManager
@@ -24,7 +24,7 @@ agency_router = APIRouter(
 
 @agency_router.get("/agency/list")
 async def get_agency_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> list[AgencyConfig]:
     agencies = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
@@ -33,7 +33,7 @@ async def get_agency_list(
 
 @agency_router.get("/agency")
 async def get_agency_config(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_id: str = Query(..., description="The unique identifier of the agency"),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> AgencyConfig:
@@ -51,7 +51,7 @@ async def get_agency_config(
 @agency_router.put("/agency", status_code=HTTP_200_OK)
 async def update_or_create_agency(
     agency_config: AgencyConfig,
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
     agent_storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),

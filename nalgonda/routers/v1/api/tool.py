@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_active_user, get_current_superuser
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.models.request_models import ToolExecutePostRequest
 from nalgonda.models.tool_config import ToolConfig
 from nalgonda.repositories.tool_config_firestore_storage import ToolConfigFirestoreStorage
@@ -21,7 +21,7 @@ tool_router = APIRouter(tags=["tool"])
 
 @tool_router.get("/tool/list")
 async def get_tool_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> list[ToolConfig]:
     tools = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
@@ -30,7 +30,7 @@ async def get_tool_list(
 
 @tool_router.get("/tool")
 async def get_tool_config(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     tool_id: str = Query(..., description="The unique identifier of the tool"),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> ToolConfig:
@@ -47,7 +47,7 @@ async def get_tool_config(
 
 @tool_router.post("/tool")
 async def create_tool_version(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     tool_config: ToolConfig = Body(...),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
@@ -85,7 +85,7 @@ async def create_tool_version(
 
 @tool_router.post("/tool/approve")
 async def approve_tool(
-    current_superuser: Annotated[UserInDB, Depends(get_current_superuser)],  # noqa: ARG001
+    current_superuser: Annotated[User, Depends(get_current_superuser)],  # noqa: ARG001
     tool_id: str = Query(..., description="The unique identifier of the tool"),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
@@ -102,7 +102,7 @@ async def approve_tool(
 
 @tool_router.post("/tool/execute")
 async def execute_tool(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     request: ToolExecutePostRequest,
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
     tool_service: ToolService = Depends(ToolService),
