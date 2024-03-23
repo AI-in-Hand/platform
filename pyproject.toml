@@ -3,8 +3,7 @@ name = "nalgonda"
 version = "0.2.0"
 description = "Nalgonda is a FastAPI app to manage swarm agencies"
 authors = [
-    "Nikita Bobrovskiy <39348559+bonk1t@users.noreply.github.com>",
-    "Guilherme Parpinelli <guilheerme.p@gmail.com>",
+    "AI in Hand <hello@ainhand.com>"
 ]
 readme = "README.md"
 
@@ -26,9 +25,9 @@ python-jose = {extras = ["cryptography"], version = ">=3.3.0"}
 python-multipart = ">=0.0.6"
 redis = ">=5.0.1"
 tiktoken = ">=0.6.0"
-uvicorn = {extras = ["standard"], version = ">=0.27.0.post1"}
+uvicorn = {extras = ["standard"], version = ">=0.29.0"}
 # a dependency from a GitHub repository
-agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", version = ">=0.1.4" }
+agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
 
 [tool.poetry.group.dev.dependencies]
 poetry-plugin-export = ">=1.6.0"
