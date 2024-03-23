@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
-from nalgonda.dependencies.auth import get_current_active_user, get_current_superuser
+from nalgonda.dependencies.auth import get_current_superuser, get_current_user
 from nalgonda.models.auth import User
 from nalgonda.models.request_models import ToolExecutePostRequest
 from nalgonda.models.tool_config import ToolConfig
@@ -21,7 +21,7 @@ tool_router = APIRouter(tags=["tool"])
 
 @tool_router.get("/tool/list")
 async def get_tool_list(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> list[ToolConfig]:
     tools = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
@@ -30,7 +30,7 @@ async def get_tool_list(
 
 @tool_router.get("/tool")
 async def get_tool_config(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     tool_id: str = Query(..., description="The unique identifier of the tool"),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ) -> ToolConfig:
@@ -47,7 +47,7 @@ async def get_tool_config(
 
 @tool_router.post("/tool")
 async def create_tool_version(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     tool_config: ToolConfig = Body(...),
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
 ):
@@ -102,7 +102,7 @@ async def approve_tool(
 
 @tool_router.post("/tool/execute")
 async def execute_tool(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     request: ToolExecutePostRequest,
     storage: ToolConfigFirestoreStorage = Depends(ToolConfigFirestoreStorage),
     tool_service: ToolService = Depends(ToolService),
