@@ -13,7 +13,7 @@ develop = false
 deepdiff = "6.7.1"
 instructor = "0.6.2"
 jsonref = "1.1.0"
-openai = "1.12.0"
+openai = "1.14.0"
 python-dotenv = "1.0.0"
 rich = "13.7.0"
 termcolor = "2.3.0"
@@ -22,7 +22,7 @@ termcolor = "2.3.0"
 type = "git"
 url = "https://github.com/VRSEN/agency-swarm.git"
 reference = "main"
-resolved_reference = "867055f745328acc71fceaa7966f828582547b0a"
+resolved_reference = "9edfea6bd2c4facf3e452977b328f494e1211215"
 
 [[package]]
 name = "aiofiles"
@@ -2124,13 +2124,13 @@ setuptools = "*"
 
 [[package]]
 name = "openai"
-version = "1.12.0"
+version = "1.14.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.12.0-py3-none-any.whl", hash = "sha256:a54002c814e05222e413664f651b5916714e4700d041d5cf5724d3ae1a3e3481"},
-    {file = "openai-1.12.0.tar.gz", hash = "sha256:99c5d257d09ea6533d689d1cc77caa0ac679fa21efef8893d8b0832a86877f1b"},
+    {file = "openai-1.14.0-py3-none-any.whl", hash = "sha256:5c9fd3a59f5cbdb4020733ddf79a22f6b7a36d561968cb3f3dd255cdd263d9fe"},
+    {file = "openai-1.14.0.tar.gz", hash = "sha256:e287057adf0ec3315abc32ddcc968d095879abd9b68bf51c0402dab13ab5ae9b"},
 ]
 
 [package.dependencies]
@@ -2377,13 +2377,13 @@ files = [
 
 [[package]]
 name = "pyairtable"
-version = "2.3.2"
+version = "2.3.3"
 description = "Python Client for the Airtable API"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyairtable-2.3.2-py2.py3-none-any.whl", hash = "sha256:092611728eb22a46dec2a245a7b4803fe3988247ea7c1735199879ab28687bf5"},
-    {file = "pyairtable-2.3.2.tar.gz", hash = "sha256:acdf9ade5ef41235d3f1bbf73892632e1a02f8e83a3e6ffa4a618e4fbab1316a"},
+    {file = "pyairtable-2.3.3-py2.py3-none-any.whl", hash = "sha256:2fa872971e31e3e8675cb6d9606362ea8072bbb7971592826edc7010b6afa87b"},
+    {file = "pyairtable-2.3.3.tar.gz", hash = "sha256:6f52bd270d28ba6459b7cc473588e517085a737d70c68e855e6d104972e1121e"},
 ]
 
 [package.dependencies]
