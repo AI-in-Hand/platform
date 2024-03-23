@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
-from firebase_admin.exceptions import FirebaseError
+from firebase_admin.exceptions import InvalidArgumentError, UnknownError
 from starlette.status import HTTP_403_FORBIDDEN
 
 from nalgonda.models.auth import User
@@ -17,7 +17,7 @@ security = HTTPBearer()
 async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> User:
     try:
         user = auth.verify_id_token(credentials.credentials, check_revoked=True)
-    except (ValueError, FirebaseError) as err:
+    except (ValueError, InvalidArgumentError, UnknownError) as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {err}",

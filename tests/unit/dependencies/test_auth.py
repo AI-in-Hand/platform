@@ -4,6 +4,13 @@ from unittest.mock import patch
 import pytest
 from fastapi import HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
+from firebase_admin.auth import (
+    CertificateFetchError,
+    ExpiredIdTokenError,
+    InvalidIdTokenError,
+    RevokedIdTokenError,
+    UserDisabledError,
+)
 
 from nalgonda.dependencies.auth import get_current_superuser, get_current_user
 from nalgonda.models.auth import User
@@ -29,12 +36,23 @@ async def test_get_current_user_valid(mock_verify_id_token):
     mock_verify_id_token.assert_called_once_with("valid_token", check_revoked=True)
 
 
+@pytest.mark.parametrize(
+    "exception",
+    [
+        ValueError("Invalid token"),
+        InvalidIdTokenError("Invalid token"),
+        ExpiredIdTokenError("Expired token", cause="Expired token"),
+        RevokedIdTokenError("Revoked token"),
+        CertificateFetchError("Error fetching certificate", cause="Error fetching certificate"),
+        UserDisabledError("User is disabled"),
+    ],
+)
 @pytest.mark.asyncio
-async def test_get_current_user_invalid(mock_verify_id_token):
-    mock_verify_id_token.side_effect = Exception("Error")
+async def test_get_current_user_invalid(mock_verify_id_token, exception):
+    mock_verify_id_token.side_effect = exception
     with pytest.raises(HTTPException) as exc:
         await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid_token"))
-    assert exc.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert exc.value.status_code == status.HTTP_401_UNAUTHORIZED
     mock_verify_id_token.assert_called_once_with("invalid_token", check_revoked=True)
 
 
