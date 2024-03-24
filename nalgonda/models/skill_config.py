@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 class SkillConfig(BaseModel):
     """Skill configuration model"""
 
-    skill_id: str | None = Field(None, description="Unique identifier for the configuration")
+    id: str | None = Field(None, description="Unique identifier for the configuration")
     owner_id: str | None = Field(None, description="The user ID owning this configuration")
     title: str = Field(..., description="Name of the skill")
     description: str = Field("", description="Description of the skill")

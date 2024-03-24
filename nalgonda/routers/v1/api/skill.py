@@ -24,6 +24,7 @@ async def get_skill_list(
     current_user: Annotated[User, Depends(get_current_user)],
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ) -> list[SkillConfig]:
+    """Get a list of configs for all skills."""
     skills = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
     return skills
 
@@ -31,16 +32,19 @@ async def get_skill_list(
 @skill_router.get("/skill")
 async def get_skill_config(
     current_user: Annotated[User, Depends(get_current_user)],
-    skill_id: str = Query(..., description="The unique identifier of the skill"),
+    id: str = Query(..., description="The unique identifier of the skill"),
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ) -> SkillConfig:
-    config = storage.load_by_skill_id(skill_id)
+    """Get a skill configuration by ID.
+    Note: currently this endpoint is not used in the frontend.
+    """
+    config = storage.load_by_id(id)
     if not config:
-        logger.warning(f"Skill not found: {skill_id}, user: {current_user.id}")
+        logger.warning(f"Skill not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
     # check if the current_user has permissions to get the skill config
     if config.owner_id and config.owner_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to get the skill: {config.skill_id}")
+        logger.warning(f"User {current_user.id} does not have permissions to get the skill: {config.id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     return config
 
@@ -51,22 +55,21 @@ async def create_skill_version(
     config: SkillConfig = Body(...),
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ):
+    """Create a new version of the skill configuration."""
     skill_config_db = None
 
     # support template configs:
     if not config.owner_id:
-        config.skill_id = None
+        config.id = None
     else:
         # check if the current_user has permissions
-        if config.skill_id:
-            skill_config_db = storage.load_by_skill_id(config.skill_id)
+        if config.id:
+            skill_config_db = storage.load_by_id(config.id)
             if not skill_config_db:
-                logger.warning(f"Skill not found: {config.skill_id}, user: {current_user.id}")
+                logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
             if skill_config_db.owner_id != current_user.id:
-                logger.warning(
-                    f"User {current_user.id} does not have permissions to update the skill: {config.skill_id}"
-                )
+                logger.warning(f"User {current_user.id} does not have permissions to update the skill: {config.id}")
                 raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Ensure the skill is associated with the current user
@@ -80,18 +83,19 @@ async def create_skill_version(
         config.description = generate_skill_description(config.content)
 
     skill_id, skill_version = storage.save(config)
-    return {"skill_id": skill_id, "skill_version": skill_version}
+    return {"id": skill_id, "skill_version": skill_version}
 
 
 @skill_router.post("/skill/approve")
 async def approve_skill(
     current_superuser: Annotated[User, Depends(get_current_superuser)],  # noqa: ARG001
-    skill_id: str = Query(..., description="The unique identifier of the skill"),
+    id: str = Query(..., description="The unique identifier of the skill"),
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ):
-    config = storage.load_by_skill_id(skill_id)
+    """Approve a skill configuration."""
+    config = storage.load_by_id(id)
     if not config:
-        logger.warning(f"Skill not found: {skill_id}, user: {current_superuser.id}")
+        logger.warning(f"Skill not found: {id}, user: {current_superuser.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
     config.approved = True
@@ -107,19 +111,20 @@ async def execute_skill(
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
     skill_service: SkillService = Depends(SkillService),
 ):
-    config = storage.load_by_skill_id(request.skill_id)
+    """Execute a skill."""
+    config = storage.load_by_id(request.id)
     if not config:
-        logger.warning(f"Skill not found: {request.skill_id}, user: {current_user.id}")
+        logger.warning(f"Skill not found: {request.id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
     # check if the current_user has permissions to execute the skill
     if config.owner_id and config.owner_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to execute the skill: {config.skill_id}")
+        logger.warning(f"User {current_user.id} does not have permissions to execute the skill: {config.id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # check if the skill is approved
     if not config.approved:
-        logger.warning(f"Skill not approved: {config.skill_id}, user: {current_user.id}")
+        logger.warning(f"Skill not approved: {config.id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Skill not approved")
 
     output = skill_service.execute_skill(config.title, request.user_prompt)
