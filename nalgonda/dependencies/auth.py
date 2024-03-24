@@ -1,11 +1,11 @@
 import logging
+from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from firebase_admin import auth
 from firebase_admin.exceptions import InvalidArgumentError, UnknownError
-from starlette.status import HTTP_403_FORBIDDEN
 
 from nalgonda.models.auth import User
 
@@ -19,7 +19,7 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
         user = auth.verify_id_token(credentials.credentials, check_revoked=True)
     except (ValueError, InvalidArgumentError, UnknownError) as err:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=HTTPStatus.UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {err}",
             headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
         ) from None
@@ -32,5 +32,5 @@ async def get_current_superuser(
 ) -> User:
     if not current_user.is_superuser:
         logger.error(f"User {current_user.id} is not a superuser")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="The user doesn't have enough privileges")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="The user doesn't have enough privileges")
     return current_user

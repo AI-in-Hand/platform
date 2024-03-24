@@ -1,8 +1,8 @@
 import logging
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_user
 from nalgonda.dependencies.dependencies import get_agency_manager, get_session_manager
@@ -45,12 +45,12 @@ async def create_session(
     agency_config_db = agency_storage.load_by_agency_id(agency_id)
     if not agency_config_db:
         logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if agency_config_db.owner_id != current_user.id:
         logger.warning(
             f"User {current_user.id} does not have permissions to create a session for the agency: {agency_id}"
         )
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Set the owner_id in the context variables
     ContextEnvVarsManager.set("owner_id", current_user.id)
@@ -60,7 +60,7 @@ async def create_session(
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
         logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     session_id = session_manager.create_session(agency, agency_id=agency_id, owner_id=current_user.id)
 

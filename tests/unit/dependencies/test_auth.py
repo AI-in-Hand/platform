@@ -2,7 +2,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from firebase_admin.auth import (
     CertificateFetchError,
@@ -52,7 +52,7 @@ async def test_get_current_user_invalid(mock_verify_id_token, exception):
     mock_verify_id_token.side_effect = exception
     with pytest.raises(HTTPException) as exc:
         await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid_token"))
-        assert exc.value.status_code == status.HTTP_401_UNAUTHORIZED
+        assert exc.value.status_code == 401
     mock_verify_id_token.assert_called_once_with("invalid_token", check_revoked=True)
 
 
@@ -62,5 +62,5 @@ async def test_get_current_superuser_not_superuser(mock_verify_id_token):
     user.is_superuser = False
     with pytest.raises(HTTPException) as exc:
         await get_current_superuser(user)
-    assert exc.value.status_code == status.HTTP_403_FORBIDDEN
+    assert exc.value.status_code == 403
     mock_verify_id_token.assert_not_called()

@@ -1,8 +1,8 @@
 import logging
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_superuser, get_current_user
 from nalgonda.models.auth import User
@@ -37,11 +37,11 @@ async def get_tool_config(
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:
         logger.warning(f"Tool not found: {tool_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Tool not found")
     # check if the current_user has permissions to get the tool config
     if tool_config.owner_id and tool_config.owner_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to get the tool: {tool_config.tool_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     return tool_config
 
 
@@ -62,12 +62,12 @@ async def create_tool_version(
             tool_config_db = storage.load_by_tool_id(tool_config.tool_id)
             if not tool_config_db:
                 logger.warning(f"Tool not found: {tool_config.tool_id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Tool not found")
             if tool_config_db.owner_id != current_user.id:
                 logger.warning(
                     f"User {current_user.id} does not have permissions to update the tool: {tool_config.tool_id}"
                 )
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Ensure the tool is associated with the current user
     tool_config.owner_id = current_user.id
@@ -92,7 +92,7 @@ async def approve_tool(
     tool_config = storage.load_by_tool_id(tool_id)
     if not tool_config:
         logger.warning(f"Tool not found: {tool_id}, user: {current_superuser.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Tool not found")
 
     tool_config.approved = True
 
@@ -110,17 +110,17 @@ async def execute_tool(
     tool_config = storage.load_by_tool_id(request.tool_id)
     if not tool_config:
         logger.warning(f"Tool not found: {request.tool_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Tool not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Tool not found")
 
     # check if the current_user has permissions to execute the tool
     if tool_config.owner_id and tool_config.owner_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to execute the tool: {tool_config.tool_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # check if the tool is approved
     if not tool_config.approved:
         logger.warning(f"Tool not approved: {tool_config.tool_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Tool not approved")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Tool not approved")
 
     tool_output = tool_service.execute_tool(tool_config.name, request.user_prompt)
 

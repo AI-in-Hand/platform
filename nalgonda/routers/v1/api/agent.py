@@ -1,9 +1,9 @@
 import logging
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 from nalgonda.dependencies.auth import get_current_user
 from nalgonda.dependencies.dependencies import get_agent_manager
@@ -40,11 +40,11 @@ async def get_agent_config(
     agent_config = storage.load_by_agent_id(agent_id)
     if not agent_config:
         logger.warning(f"Agent not found: {agent_id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
     # check if the current user is the owner of the agent
     if agent_config.owner_id and agent_config.owner_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {agent_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     return agent_config
 
 
@@ -65,18 +65,18 @@ async def create_or_update_agent(
             agent_config_db = storage.load_by_agent_id(agent_config.agent_id)
             if not agent_config_db:
                 logger.warning(f"Agent not found: {agent_config.agent_id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agent not found")
+                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
             if agent_config_db.owner_id != current_user.id:
                 logger.warning(
                     f"User {current_user.id} does not have permissions to access agent: {agent_config.agent_id}"
                 )
-                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed
             if agent_config.name != agent_config_db.name:
                 logger.warning(
                     f"Renaming agents is not supported yet: {agent_config.agent_id}, user: {current_user.id}"
                 )
-                raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Renaming agents is not supported yet")
+                raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     # Ensure the agent is associated with the current user
     agent_config.owner_id = current_user.id
