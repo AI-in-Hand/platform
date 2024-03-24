@@ -11,6 +11,6 @@ class SessionMessagePostRequest(BaseModel):
     message: str = Field(..., description="The message to be sent to the agency.")
 
 
-class ToolExecutePostRequest(BaseModel):
-    tool_id: str = Field(..., description="The unique identifier for the tool.")
+class SkillExecutePostRequest(BaseModel):
+    skill_id: str = Field(..., description="The unique identifier for the skill.")
     user_prompt: str = Field(..., description="The user prompt to extract parameters from.")

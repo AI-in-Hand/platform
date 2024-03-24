@@ -33,9 +33,9 @@ const SkillsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listSkillsUrl = `${serverUrl}/tool/list`;
-  const saveSkillsUrl = `${serverUrl}/tool`;
-  const deleteSkillsUrl = `${serverUrl}/tool/delete`;
+  const listSkillsUrl = `${serverUrl}/skill/list`;
+  const saveSkillsUrl = `${serverUrl}/skill`;
+  const deleteSkillsUrl = `${serverUrl}/skill/delete`;
 
   const [skills, setSkills] = React.useState<ISkill[] | null>([]);
   const [selectedSkill, setSelectedSkill] = React.useState<any>(null);
@@ -117,10 +117,7 @@ const SkillsView = ({}: any) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        skill: skill,
-      }),
+      body: JSON.stringify(skill),
     };
 
     const onSuccess = (data: any) => {

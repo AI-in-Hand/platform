@@ -3,22 +3,22 @@ import logging
 
 from agency_swarm import BaseTool
 
-from nalgonda import custom_tools
+from nalgonda import custom_skills
 from nalgonda.settings import settings
 from nalgonda.utils import get_chat_completion
 
-TOOL_SUMMARY_SYSTEM_MESSAGE = """\
+SKILL_SUMMARY_SYSTEM_MESSAGE = """\
 As a supportive assistant, ensure your responses are concise,
 confined to a single sentence, and rigorously comply with the specified instructions.\
 """
-USER_PROMPT = "In one succinct sentence, describe the functionality of the tool provided below:\n"
+USER_PROMPT = "In one succinct sentence, describe the functionality of the skill provided below:\n"
 
 logger = logging.getLogger(__name__)
 
 
-def generate_tool_description(code: str):
+def generate_skill_description(code: str):
     summary = get_chat_completion(
-        system_message=TOOL_SUMMARY_SYSTEM_MESSAGE,
+        system_message=SKILL_SUMMARY_SYSTEM_MESSAGE,
         user_prompt=f"{USER_PROMPT}```\n{code}\n```",
         temperature=0.0,
         model=settings.gpt_cheap_model,
@@ -26,7 +26,7 @@ def generate_tool_description(code: str):
     return summary
 
 
-class ToolService:
+class SkillService:
     SYSTEM_MESSAGE = """\
 You are an assistant that responds with JSON only. You are presented with a user prompt and a function specification, \
 and you MUST return the function call parameters in JSON format.
@@ -37,23 +37,15 @@ The function call parameters must be returned in JSON format.\
 """
     USER_PROMPT_PREFIX = "Return the function call parameters in JSON format based on the following user prompt: "
 
-    def execute_tool(self, tool_name: str, user_prompt: str):
+    def execute_skill(self, skill_name: str, user_prompt: str):
         """
-        Import the tool from nalgonda.custom_tools package, initialize it (using GPT to fill in kwargs), and run it
+        Import the skill from nalgonda.custom_skills package, initialize it (using GPT to fill in kwargs), and run it
         """
-        tool_class = self._get_tool_class(tool_name)
-        tool_args = self._get_tool_arguments(json.dumps(tool_class.openai_schema), user_prompt)
-        return self._execute_tool(tool_class, tool_args)
+        skill_class = self._get_skill_class(skill_name)
+        skill_args = self._get_skill_arguments(json.dumps(skill_class.openai_schema), user_prompt)
+        return self._execute_skill(skill_class, skill_args)
 
-    def _get_tool_class(self, tool_name: str) -> BaseTool:
-        """Get a tool function by name from nalgonda.custom_tools"""
-        try:
-            return getattr(custom_tools, tool_name)
-        except AttributeError as e:
-            logger.exception(f"Tool {tool_name} not found")
-            raise Exception(f"Tool {tool_name} not found") from e
-
-    def _get_tool_arguments(self, function_spec: str, user_prompt: str) -> str:
+    def _get_skill_arguments(self, function_spec: str, user_prompt: str) -> str:
         user_prompt = (
             f"{self.USER_PROMPT_PREFIX}\n```\n{user_prompt}\n```. \n"
             f"The function specification:\n```{function_spec}```"
@@ -63,14 +55,24 @@ The function call parameters must be returned in JSON format.\
         )
         return args_str.strip("`json\n ").replace("\n", "")
 
-    def _execute_tool(self, tool_class: BaseTool, args: str):
-        if not tool_class:
-            return f"Error: Tool {tool_class.__name__} not found"
+    @staticmethod
+    def _get_skill_class(skill_name: str) -> BaseTool:
+        """Get a skill function by name from nalgonda.custom_skills"""
+        try:
+            return getattr(custom_skills, skill_name)
+        except AttributeError as e:
+            logger.exception(f"Skill {skill_name} not found")
+            raise Exception(f"Skill {skill_name} not found") from e
+
+    @staticmethod
+    def _execute_skill(skill_class: BaseTool, args: str):
+        if not skill_class:
+            return f"Error: Skill {skill_class.__name__} not found"
 
         try:
-            # init tool
-            func = tool_class(**eval(args))
-            # get outputs from the tool
+            # init skill
+            func = skill_class(**eval(args))
+            # get outputs from the skill
             return func.run()
         except Exception as e:
             error_message = f"Error: {e}"

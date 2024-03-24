@@ -6,7 +6,7 @@ from .agency import agency_router
 from .agent import agent_router
 from .message import message_router
 from .session import session_router
-from .tool import tool_router
+from .skill import skill_router
 from .version import version_router
 
 api_router = APIRouter(
@@ -14,7 +14,7 @@ api_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-api_router.include_router(tool_router)
+api_router.include_router(skill_router)
 api_router.include_router(agent_router)
 api_router.include_router(agency_router)
 api_router.include_router(session_router)

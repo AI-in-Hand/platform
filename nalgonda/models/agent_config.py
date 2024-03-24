@@ -10,4 +10,4 @@ class AgentConfig(BaseModel):
     description: str = Field(..., description="Description of the agent")
     instructions: str = Field(..., description="Instructions for the agent")
     files_folder: str | None = Field(None, description="Folder containing agent-related files")
-    tools: list[str] = Field(default_factory=list, description="List of tool names equipped by the agent")
+    skills: list[str] = Field(default_factory=list, description="List of skill names equipped by the agent")

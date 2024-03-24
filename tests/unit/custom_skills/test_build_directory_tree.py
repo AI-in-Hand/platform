@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nalgonda.custom_tools import BuildDirectoryTree
+from nalgonda.custom_skills import BuildDirectoryTree
 
 
 def test_build_directory_tree_with_py_extension(temp_dir):

@@ -126,4 +126,6 @@ export interface ISkill {
   timestamp?: string;
   description?: string;
   user_id?: string;
+  approved?: boolean;
+  version?: number;
 }

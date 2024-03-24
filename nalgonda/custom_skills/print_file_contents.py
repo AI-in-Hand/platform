@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field, field_validator
 
-from nalgonda.custom_tools.utils import check_directory_traversal, read_file
+from nalgonda.custom_skills.utils import check_directory_traversal, read_file
 
 
 class PrintFileContents(BaseTool):

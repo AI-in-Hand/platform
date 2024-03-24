@@ -1442,7 +1442,7 @@ export const SkillLoader = ({
   });
   const serverUrl = getServerUrl();
   const { user } = React.useContext(appContext);
-  const listSkillsUrl = `${serverUrl}/tool/list`;
+  const listSkillsUrl = `${serverUrl}/skill/list`;
 
   const fetchSkills = () => {
     setError(null);

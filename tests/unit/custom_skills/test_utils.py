@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from nalgonda.custom_tools.utils import check_directory_traversal
+from nalgonda.custom_skills.utils import check_directory_traversal
 
 
-@pytest.mark.parametrize("path", [".", "tests", "tests/custom_tools"])
+@pytest.mark.parametrize("path", [".", "tests", "tests/custom_skills"])
 def test_check_directory_traversal_does_not_raise_for_valid_paths(path):
     check_directory_traversal(Path(path))
 

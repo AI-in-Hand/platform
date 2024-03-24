@@ -16,6 +16,6 @@ WebSocket connections, and threading.
 
 - **Thread Manager**: Manages communication threads between agents within an agency, enabling threaded interactions.
 
-- **Tool Service**: Provides tool description generation using GPT-3.
+- **Skill Service**: Provides skill description generation using GPT-3.
 
 - **WebSocket Manager**: Manages WebSocket connections between the frontend and backend.
