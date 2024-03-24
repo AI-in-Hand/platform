@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from nalgonda.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -68,7 +68,7 @@ def test_approve_skill(skill_config_data, client, mock_firestore_client):
     assert updated_config["approved"] is True
 
 
-@patch("nalgonda.routers.v1.api.skill.generate_skill_description", MagicMock(return_value="Test description"))
+@patch("backend.routers.v1.api.skill.generate_skill_description", MagicMock(return_value="Test description"))
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_update_skill_config_success(skill_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
@@ -99,7 +99,7 @@ def test_update_skill_config_owner_id_mismatch(skill_config_data, client, mock_f
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-@patch("nalgonda.services.skill_service.SkillService.execute_skill", MagicMock(return_value="Execution result"))
+@patch("backend.services.skill_service.SkillService.execute_skill", MagicMock(return_value="Execution result"))
 def test_execute_skill_success(skill_config_data, client, mock_firestore_client):
     skill_config_data["approved"] = True
     mock_firestore_client.setup_mock_data("skill_configs", skill_config_data["id"], skill_config_data)

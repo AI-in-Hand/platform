@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.models.agent_config import AgentConfig
+from backend.models.agency_config import AgencyConfig
+from backend.models.agent_config import AgentConfig
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
 
@@ -67,7 +67,7 @@ def test_create_agency_success(client):
     }
 
     with patch(
-        "nalgonda.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
+        "backend.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
     ) as mock_update_or_create_agency:
         mock_update_or_create_agency.return_value = TEST_AGENCY_ID
         response = client.put("/v1/api/agency", json=template_config)
@@ -98,7 +98,7 @@ def test_update_agency_success(client, mock_firestore_client):
     new_data.update({"shared_instructions": "Updated Manifesto"})
 
     with patch(
-        "nalgonda.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
+        "backend.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate_cache:
         response = client.put("/v1/api/agency", json=new_data)
 

@@ -1,6 +1,6 @@
 from cryptography.fernet import Fernet
 
-from nalgonda.services.encryption_service import EncryptionService
+from backend.services.encryption_service import EncryptionService
 
 
 def test_encrypt():

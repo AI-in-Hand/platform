@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from nalgonda.custom_skills import PrintFileContents
+from backend.custom_skills import PrintFileContents
 
 
 @pytest.fixture

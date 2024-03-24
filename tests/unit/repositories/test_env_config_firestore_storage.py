@@ -1,6 +1,6 @@
 import pytest
 
-from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 
