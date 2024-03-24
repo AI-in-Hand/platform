@@ -2,25 +2,14 @@ name: Publish to Google Artifact Registry
 
 on:
   release:
-    types:
-      - created
-
-env:
-  PROJECT_ID: XXX
-  SERVICE_ACCOUNT: XXX
-  WORKLOAD_IDENTITY_PROVIDER: XXX
-  REPOSITORY_URL: XXX
+    types: [published]
 
 jobs:
-  # Build the python package file and push to Google Artifacts Repository
-  push-package:
-    name: Build and publish the Docker image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
-    steps:
+  # Build the Python package and push it to PyPI
+    publish:
+      name: Publish
+      runs-on: ubuntu-latest
+      steps:
       - uses: actions/checkout@v4
       - name: Install poetry
         run: pipx install poetry
@@ -29,18 +18,7 @@ jobs:
           python-version: '3.11'
           cache: 'poetry'
       - run: poetry install
-      - name: Build Package
-        run: poetry build
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ env.PROJECT_ID }}
-          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.SERVICE_ACCOUNT }}
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-      - name: Upload to Artifact Registry
-        run: |
-          python -m pip install keyrings.google-artifactregistry-auth
-          python -m pip install twine
-          python -m twine upload --repository-url $REPOSITORY_URL dist/*
+      - name: Build and publish
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: poetry publish --build
