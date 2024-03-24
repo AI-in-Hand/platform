@@ -15,7 +15,7 @@ def mock_get_agency():
 
 
 # Successful message sending
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_success(client, mock_get_agency, mock_firestore_client):
     agency_data = {"owner_id": TEST_USER_ID, "agency_id": TEST_AGENCY_ID, "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
@@ -32,7 +32,7 @@ def test_post_agency_message_success(client, mock_get_agency, mock_firestore_cli
 
 
 # Agency configuration not found
-@pytest.mark.usefixtures("mock_get_current_active_user", "mock_firestore_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_firestore_client")
 def test_post_agency_message_agency_config_not_found(client, mock_get_agency):
     # Sending a message
     message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
@@ -44,7 +44,7 @@ def test_post_agency_message_agency_config_not_found(client, mock_get_agency):
 
 
 # Current user not the owner of the agency
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestore_client):
     agency_data = {"owner_id": "other_user_id", "agency_id": "test_agency", "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency", agency_data)
@@ -59,7 +59,7 @@ def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestor
 
 
 # Failure in message processing
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_processing_failure(client, mock_get_agency, mock_firestore_client):
     agency_data = {"owner_id": TEST_USER_ID, "agency_id": "test_agency", "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency", agency_data)
@@ -95,7 +95,7 @@ def mock_openai_client():
 
 
 # Successful retrieval of messages
-@pytest.mark.usefixtures("mock_get_current_active_user", "mock_session_firestore_storage", "mock_openai_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_session_firestore_storage", "mock_openai_client")
 def test_get_message_list_success(client):
     response = client.get("/v1/api/message/list?session_id=test_session_id")
     assert response.status_code == 200
@@ -103,7 +103,7 @@ def test_get_message_list_success(client):
 
 
 # Session not found
-@pytest.mark.usefixtures("mock_get_current_active_user", "mock_openai_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_openai_client")
 def test_get_message_list_session_not_found(client):
     response = client.get("/v1/api/message/list?session_id=nonexistent_session_id")
     assert response.status_code == 404
@@ -111,7 +111,7 @@ def test_get_message_list_session_not_found(client):
 
 
 # Current user not authorized
-@pytest.mark.usefixtures("mock_get_current_active_user", "mock_session_firestore_storage", "mock_openai_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_session_firestore_storage", "mock_openai_client")
 def test_get_message_list_unauthorized(client, mock_firestore_client):
     test_session_config = {
         "session_id": "test_session_id",

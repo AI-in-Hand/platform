@@ -2,7 +2,6 @@ from unittest import mock
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import status
 
 from nalgonda.models.request_models import SessionPostRequest
 from nalgonda.services.agency_manager import AgencyManager
@@ -21,7 +20,7 @@ def session_config_data():
     }
 
 
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_get_session_list(session_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
@@ -30,7 +29,7 @@ def test_get_session_list(session_config_data, client, mock_firestore_client):
     assert response.json() == [session_config_data]
 
 
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_success(client, mock_firestore_client):
     with patch.object(
         AgencyManager, "get_agency", AsyncMock(return_value=MagicMock())
@@ -62,7 +61,7 @@ def test_create_session_success(client, mock_firestore_client):
         }
 
 
-@pytest.mark.usefixtures("mock_get_current_active_user")
+@pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_agency_not_found(client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
         # Create request data
@@ -70,5 +69,5 @@ def test_create_session_agency_not_found(client):
         # Create a test client
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.status_code == 404
         assert response.json() == {"detail": "Agency not found"}

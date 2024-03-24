@@ -22,7 +22,7 @@ Project Nalgonda is an advanced platform designed for the orchestration and oper
 - **Tool Execution**: Executes tools within an established framework for accomplishing a wide range of tasks.
 - **User Management**: User access management features for interaction with different agencies.
 - **API and WebSocket Routers**: Lays down a comprehensive set of API endpoints and WebSocket routes for external interactions and real-time communications.
-- **Security**: Basic implementation of JWT for user authentication and authorization with plans for further enhancements.
+- **Security**: Basic implementation of Firebase Auth for user authentication with plans for further enhancements.
 
 ## Installation
 

@@ -1,13 +1,13 @@
 import asyncio
 import logging
+from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
-from nalgonda.dependencies.auth import get_current_active_user
+from nalgonda.dependencies.auth import get_current_user
 from nalgonda.dependencies.dependencies import get_agency_manager
-from nalgonda.models.auth import UserInDB
+from nalgonda.models.auth import User
 from nalgonda.models.request_models import SessionMessagePostRequest
 from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
@@ -25,7 +25,7 @@ message_router = APIRouter(
 
 @message_router.get("/message/list")
 async def get_message_list(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     session_id: str,
     before: str | None = None,
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
@@ -36,10 +36,10 @@ async def get_message_list(
     session_config = session_storage.load_by_session_id(session_id)
     if not session_config:
         logger.warning(f"Session not found: {session_id}, requested by user: {current_user.id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Session not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.owner_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Set the owner_id in the context variables
     ContextEnvVarsManager.set("owner_id", current_user.id)
@@ -52,7 +52,7 @@ async def get_message_list(
 
 @message_router.post("/message")
 async def post_message(
-    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     request: SessionMessagePostRequest,
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
@@ -67,10 +67,10 @@ async def post_message(
     agency_config = storage.load_by_agency_id(agency_id)
     if not agency_config:
         logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if agency_config.owner_id != user_id:
         logger.warning(f"User {user_id} does not have permissions to access agency {agency_id}")
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Set the owner_id and agency_id in the context variables
     ContextEnvVarsManager.set("owner_id", user_id)
@@ -81,7 +81,7 @@ async def post_message(
     agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:
         logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Agency not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     try:
         response = await asyncio.to_thread(
