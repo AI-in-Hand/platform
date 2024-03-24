@@ -2,12 +2,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from nalgonda.services.skill_service import SkillService, generate_skill_description
+from backend.services.skill_service import SkillService, generate_skill_description
 
 
 def test_generate_skill_description():
     with patch(
-        "nalgonda.services.skill_service.get_chat_completion", return_value="Summary of the skill"
+        "backend.services.skill_service.get_chat_completion", return_value="Summary of the skill"
     ) as mock_get_chat:
         code = "def example(): pass"
         result = generate_skill_description(code)
@@ -27,7 +27,7 @@ confined to a single sentence, and rigorously comply with the specified instruct
 
 def test_get_skill_class_found():
     skill_name = "SummarizeCode"
-    with patch("nalgonda.services.skill_service.custom_skills.SummarizeCode", new_callable=MagicMock) as mock_skill:
+    with patch("backend.services.skill_service.custom_skills.SummarizeCode", new_callable=MagicMock) as mock_skill:
         service = SkillService()
         result = service._get_skill_class(skill_name)
         assert result == mock_skill, "The function did not return the correct skill class"
@@ -44,7 +44,7 @@ def test_get_skill_class_not_found():
 
 
 def test_get_skill_arguments():
-    with patch("nalgonda.services.skill_service.get_chat_completion", return_value='{"arg": "value"}') as mock_get_chat:
+    with patch("backend.services.skill_service.get_chat_completion", return_value='{"arg": "value"}') as mock_get_chat:
         service = SkillService()
         result = service._get_skill_arguments("function_spec", "user_prompt")
         expected_args_str = '{"arg": "value"}'
@@ -58,7 +58,7 @@ def test_execute_skill_success():
     skill_instance_mock.run.return_value = "Skill output"
     args = '{"arg":"value"}'
 
-    with patch("nalgonda.services.skill_service.SkillService._get_skill_class", return_value=skill_class_mock):
+    with patch("backend.services.skill_service.SkillService._get_skill_class", return_value=skill_class_mock):
         service = SkillService()
         result = service._execute_skill(skill_class_mock, args)
         assert (
@@ -72,7 +72,7 @@ def test_execute_skill_failure():
     skill_instance_mock.run.side_effect = Exception("Error running skill")
     args = '{"arg":"value"}'
 
-    with patch("nalgonda.services.skill_service.SkillService._get_skill_class", return_value=skill_class_mock):
+    with patch("backend.services.skill_service.SkillService._get_skill_class", return_value=skill_class_mock):
         service = SkillService()
         result = service._execute_skill(skill_class_mock, args)
         assert (

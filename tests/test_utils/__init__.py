@@ -1,4 +1,4 @@
-from nalgonda.models.auth import User
+from backend.models.auth import User
 from tests.test_utils.constants import TEST_USER_EMAIL, TEST_USER_ID
 
 

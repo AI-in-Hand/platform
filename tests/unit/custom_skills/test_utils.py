@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from nalgonda.custom_skills.utils import check_directory_traversal
+from backend.custom_skills.utils import check_directory_traversal
 
 
 @pytest.mark.parametrize("path", [".", "tests", "tests/custom_skills"])

@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from nalgonda.utils.logging_utils import setup_logging
+from backend.utils.logging_utils import setup_logging
 
 
 @pytest.fixture

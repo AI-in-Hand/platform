@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from nalgonda.custom_skills import SummarizeAllCodeInPath
+from backend.custom_skills import SummarizeAllCodeInPath
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def mock_openai_response():
     return MockOpenAIResponse()
 
 
-@patch("nalgonda.utils.get_openai_client")
+@patch("backend.utils.get_openai_client")
 def test_summarize_all_code_in_path_with_valid_codebase(mock_openai_client, mock_openai_response, tmp_path):
     # Create a simple Python file
     (tmp_path / "test.py").write_text('print("Hello, World!")')
@@ -29,7 +29,7 @@ def test_summarize_all_code_in_path_with_valid_codebase(mock_openai_client, mock
     mock_openai_client.assert_called_once()
 
 
-@patch("nalgonda.utils.get_openai_client", side_effect=Exception("API failed"))
+@patch("backend.utils.get_openai_client", side_effect=Exception("API failed"))
 def test_summarize_all_code_in_path_with_api_failure(mock_openai_client, tmp_path):
     # Create a simple Python file
     (tmp_path / "test.py").write_text('print("Hello, World!")')

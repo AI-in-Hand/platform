@@ -2,7 +2,7 @@ from contextvars import ContextVar
 
 import pytest
 
-from nalgonda.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.env_vars_manager import ContextEnvVarsManager
 from tests.test_utils import TEST_USER_ID
 
 

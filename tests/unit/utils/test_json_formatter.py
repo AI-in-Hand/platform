@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from nalgonda.utils.logging_utils.json_formatter import JSONFormatter
+from backend.utils.logging_utils.json_formatter import JSONFormatter
 
 
 @pytest.fixture

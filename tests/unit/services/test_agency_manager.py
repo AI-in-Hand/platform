@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from agency_swarm import Agency, Agent
 
-from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from nalgonda.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
-from nalgonda.services.agency_manager import AgencyManager
+from backend.models.agency_config import AgencyConfig
+from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
 
@@ -24,8 +24,9 @@ def agency_manager():
 
 @pytest.mark.asyncio
 async def test_get_agency_from_cache(agency_manager):
-    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
-        agency_manager, "_set_client_objects", new_callable=Mock
+    with (
+        patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get,
+        patch.object(agency_manager, "_set_client_objects", new_callable=Mock),
     ):
         mock_get.return_value = MagicMock(spec=Agency)
 
@@ -36,9 +37,13 @@ async def test_get_agency_from_cache(agency_manager):
 
 @pytest.mark.asyncio
 async def test_get_agency_repopulate_cache(agency_manager):
-    with patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get, patch.object(
-        agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
-    ) as mock_repopulate, patch.object(agency_manager, "_set_client_objects", new_callable=Mock):
+    with (
+        patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get,
+        patch.object(
+            agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
+        ) as mock_repopulate,
+        patch.object(agency_manager, "_set_client_objects", new_callable=Mock),
+    ):
         mock_get.side_effect = [None, MagicMock(spec=Agency)]
 
         agency = await agency_manager.get_agency(TEST_AGENCY_ID)
@@ -92,13 +97,15 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     )
     agent = MagicMock(spec=Agent)
 
-    with patch(
-        "nalgonda.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
-    ) as mock_load_agents, patch(
-        "nalgonda.services.agency_manager.AgencyManager.construct_agency"
-    ) as mock_construct_agency, patch(
-        "nalgonda.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-    ) as mock_cache_agency:
+    with (
+        patch(
+            "backend.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+        ) as mock_load_agents,
+        patch("backend.services.agency_manager.AgencyManager.construct_agency") as mock_construct_agency,
+        patch(
+            "backend.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
+        ) as mock_cache_agency,
+    ):
         mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
@@ -195,7 +202,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
 async def test_set_client_objects(agency_manager):
     mock_agency = MagicMock()
     mock_client = MagicMock()
-    with patch("nalgonda.services.agency_manager.get_openai_client", return_value=mock_client) as mock_get_client:
+    with patch("backend.services.agency_manager.get_openai_client", return_value=mock_client) as mock_get_client:
         agency_manager._set_client_objects(mock_agency)
         mock_get_client.assert_called_once()
         assert mock_agency.main_thread.client == mock_client

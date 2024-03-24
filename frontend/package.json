@@ -1,6 +1,6 @@
 {
   "name": "ai-in-hand-platform-ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "AI in Hand Platform - Build and Test Your AI Workforce",
   "author": "AI in Hand Team",
@@ -11,7 +11,7 @@
     "develop": "gatsby clean && gatsby develop",
     "dev": "npm run develop",
     "start": "gatsby clean && gatsby develop",
-    "build": "gatsby clean && rm -rf ../nalgonda/ui  && PREFIX_PATH_VALUE='' gatsby build --prefix-paths && cp -r  public/ ../nalgonda/ui",
+    "build": "gatsby clean && rm -rf ../backend/ui  && PREFIX_PATH_VALUE='' gatsby build --prefix-paths && cp -r  public/ ../backend/ui",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "typecheck": "tsc --noEmit"

@@ -1,7 +1,7 @@
 import pytest
 
-from nalgonda.models.session_config import SessionConfig
-from nalgonda.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.models.session_config import SessionConfig
+from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 

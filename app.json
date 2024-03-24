@@ -1,8 +1,8 @@
 {
-  "name": "Nalgonda",
-  "description": "A FastAPI application to manage swarm agencies",
-  "image": "ainhand/nalgonda",
-  "repository": "https://github.com/ainhand/nalgonda",
+  "name": "AI in Hand Platform",
+  "description": "A web application to manage swarm agencies.",
+  "image": "ainhand/platform",
+  "repository": "https://github.com/ai-in-hand/platform",
   "keywords": ["python", "fastapi"],
   "env": {
     "EXAMPLE_SECRET_KEY": {

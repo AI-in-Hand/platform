@@ -1,8 +1,8 @@
-# Project Nalgonda
+# AI in Hand Platform
 
 ## Overview
 
-Project Nalgonda is an advanced platform designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
+AI in Hand Platform is a web application designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
 
 ## Key Components
 
@@ -26,17 +26,17 @@ Project Nalgonda is an advanced platform designed for the orchestration and oper
 
 ## Installation
 
-Follow these steps for setting up the environment and running the Nalgonda project locally:
+Follow these steps for setting up the environment and running the AI in Hand Platform locally:
 
 1. Ensure Python 3.11+ and Node.js 20.10+ are installed.
 2. Install Python dependencies either from `requirements.txt` or using Poetry.
 3. Configure environment variables in ".env", taking ".env.testing" as a reference point (used only for local development).
 4. To set up the frontend:
    - For local development: `npm install && npm run start`
-   - For production: `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build` (builds to nalgonda/ui/ directory to be served by FastAPI)
+   - For production: `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build` (builds to backend/ui/ directory to be served by FastAPI)
 
 ### Running the Application
-Start the FastAPI server with: `uvicorn nalgonda.main:app --reload`
+Start the FastAPI server with: `uvicorn backend.main:app --reload`
 
 ## Deployment to Heroku
 
