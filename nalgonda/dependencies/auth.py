@@ -15,16 +15,19 @@ security = HTTPBearer()
 
 
 async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> User:
+    logger.info(f"Debugging: {credentials.credentials}")
     try:
         user = auth.verify_id_token(credentials.credentials, check_revoked=True)
+        logger.info(f"Debugging: {user}")
     except (ValueError, InvalidArgumentError, UnknownError) as err:
+        logger.error(f"Invalid authentication credentials: {err}")
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail=f"Invalid authentication credentials: {err}",
+            detail="Could not validate credentials",
             headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
         ) from None
-    logger.info(f"Authenticated user: {user}")
-    return User(**user)
+    logger.info(f"Authenticated user: {user['uid']} ({user['email']})")
+    return User(id=user["uid"], email=user["email"])
 
 
 async def get_current_superuser(

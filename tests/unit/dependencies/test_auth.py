@@ -16,8 +16,8 @@ from nalgonda.dependencies.auth import get_current_superuser, get_current_user
 from nalgonda.models.auth import User
 
 user_data: dict[str, Any] = {
-    "id": "testuser",
-    "username": "testuser",
+    "uid": "testuser",
+    "email": "testuser@example.com",
 }
 
 
@@ -31,7 +31,7 @@ def mock_verify_id_token():
 @pytest.mark.asyncio
 async def test_get_current_user_valid(mock_verify_id_token):
     user = await get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid_token"))
-    assert user.id == user_data["id"]
+    assert user.id == user_data["uid"]
     assert not user.is_superuser
     mock_verify_id_token.assert_called_once_with("valid_token", check_revoked=True)
 
@@ -58,7 +58,7 @@ async def test_get_current_user_invalid(mock_verify_id_token, exception):
 
 @pytest.mark.asyncio
 async def test_get_current_superuser_not_superuser(mock_verify_id_token):
-    user = User(**user_data)
+    user = User(id=user_data["uid"], email=user_data["email"])
     user.is_superuser = False
     with pytest.raises(HTTPException) as exc:
         await get_current_superuser(user)
