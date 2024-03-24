@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field
 
-from nalgonda.custom_tools import PrintAllFilesInPath
+from nalgonda.custom_skills import PrintAllFilesInPath
 from nalgonda.settings import settings
 from nalgonda.utils import chunk_input_with_token_limit, get_chat_completion
 
@@ -28,7 +28,7 @@ without extra comments or explanations. Focus on clarity and avoiding repeated i
 
 
 class SummarizeAllCodeInPath(BaseTool):
-    """Summarize code using GPT-3. The tool uses the `PrintAllFilesInPath` tool to get the code to summarize.
+    """Summarize code using GPT-3. The skill uses the `PrintAllFilesInPath` skill to get the code to summarize.
     The parameters are: start_path, file_extensions.
     Directory traversal is not allowed (you cannot read /* or ../*).
     """
@@ -49,7 +49,7 @@ class SummarizeAllCodeInPath(BaseTool):
     )
 
     def run(self) -> str:
-        """Run the tool and return the output."""
+        """Run the skill and return the output."""
         delimiter = "\n\n```\n"
 
         full_code = PrintAllFilesInPath(

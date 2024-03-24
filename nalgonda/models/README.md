@@ -8,9 +8,9 @@ They are essential for the proper functioning of the application, ensuring data 
 
 - **AgencyConfig**: Represents the configuration of an agency, including identifiers, names, instructions, agents, and the agency chart.
 
-- **AgentConfig**: Defines the configuration for an individual agent, detailing identifiers, descriptions, instructions, and tools.
+- **AgentConfig**: Defines the configuration for an individual agent, detailing IDs, descriptions, instructions, and skills.
 
-- **ToolConfig**: Configures tools within the application, describing tool identifiers, names, versions, and approval status.
+- **SkillConfig**: Configures skills within the application, describing skill identifiers, names, versions, and approval status.
 
 - **Auth Models**: Includes models for token generation, user details, and authentication processes.
 

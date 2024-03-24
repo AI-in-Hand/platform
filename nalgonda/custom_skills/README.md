@@ -1,9 +1,9 @@
-# Custom Tools Directory
+# Custom Skills Directory
 
-This directory contains a collection of custom tools developed to extend the functionalities of the Nalgonda project.
-Each tool performs a specific task and can be called upon when needed.
+This directory contains a collection of custom skills developed to extend the functionalities of the Nalgonda project.
+Each skill performs a specific task and can be called upon when needed.
 
-## Tools and Descriptions
+## Skills and Descriptions
 
 - **Build Directory Tree**: Prints the structure of directories and files within a specified directory
 while preventing directory traversal.
@@ -18,7 +18,7 @@ Uses a GPT model to generate text based on input.
 - **Search Web**: Performs a web search and returns the results. It uses the `duckduckgo_search` library.
 
 - **Summarize Code**: Summarizes the code of a specified file using GPT-3.
-It relies on the `PrintFileContents` tool to access the code text.
+It relies on the `PrintFileContents` skill to access the code text.
 
 - **Utils**: Contains utility functions including directory traversal checks.
 

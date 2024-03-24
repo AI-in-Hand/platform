@@ -34,16 +34,16 @@ def mock_init_oai():
         yield mock
 
 
-tool1 = MagicMock()
-tool2 = MagicMock()
-tool1.__name__ = "tool1"
-tool2.__name__ = "tool2"
-MOCK_TOOL_MAPPING = {"tool1": tool1, "tool2": tool2}
+skill1 = MagicMock()
+skill2 = MagicMock()
+skill1.__name__ = "skill1"
+skill2.__name__ = "skill2"
+MOCK_SKILL_MAPPING = {"skill1": skill1, "skill2": skill2}
 
 
 @pytest.fixture(autouse=True)
-def mock_tool_mapping():
-    with patch("nalgonda.services.agent_manager.TOOL_MAPPING", MOCK_TOOL_MAPPING):
+def mock_skill_mapping():
+    with patch("nalgonda.services.agent_manager.SKILL_MAPPING", MOCK_SKILL_MAPPING):
         yield
 
 

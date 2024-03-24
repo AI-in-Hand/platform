@@ -1,6 +1,6 @@
 import pytest
 
-from nalgonda.custom_tools import PrintAllFilesInPath
+from nalgonda.custom_skills import PrintAllFilesInPath
 
 
 def test_print_all_files_no_extension_filter(temp_dir):
@@ -69,7 +69,7 @@ def create_file_in_path(tmp_path):
 
 
 def test_print_file_contents(create_file_in_path):
-    tool = PrintAllFilesInPath(start_path=create_file_in_path, file_extensions=[".txt"])
-    result = tool.run()
+    skill = PrintAllFilesInPath(start_path=create_file_in_path, file_extensions=[".txt"])
+    result = skill.run()
     expected_result = f"{str(create_file_in_path)}:\n```\nFile content\n```\n"
     assert result == expected_result

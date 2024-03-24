@@ -2,24 +2,24 @@
 
 ## Overview
 
-Project Nalgonda is an advanced platform designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agencies with specialized tools and a robust management system. Built on a solid FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
+Project Nalgonda is an advanced platform designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
 
 ## Key Components
 
-- **Configuration Managers**: Centralized management of configurations for agencies, agents, and individual tools.
+- **Configuration Managers**: Centralized management of configurations for agencies, agents, and individual skills.
 - **WebSocket Connection Manager**: Ensures real-time interactive communication between agencies and clients through WebSocket connections.
-- **Custom Tools**: A suite of specialized tools including `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, among others, designed to augment the functionalities of the AI agents.
+- **Custom Skills**: A suite of specialized skills including `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, among others, designed to augment the functionalities of the AI agents.
 - **FastAPI Web Server**: Manages API routing, initializes CORS middleware, sets up Firebase, and facilitates WebSocket communication.
-- **Data Models**: Utilizes Pydantic models for defining and validating configurations of agencies, agents, tools, as well as the structure of request data.
-- **Repositories**: Utilizes Firestore for robust storage and querying capabilities for tool, agent, and agency configurations -- ensuring a seamless persistence layer.
+- **Data Models**: Utilizes Pydantic models for defining and validating configurations of agencies, agents, skills, as well as the structure of request data.
+- **Repositories**: Utilizes Firestore for robust storage and querying capabilities for skill, agent, and agency configurations -- ensuring a seamless persistence layer.
 - **Caching**: Employs Redis for efficient and scalable caching of agency states (sessions) for optimized performance.
 
 ## Features
 
-- **Tool Configuration**: Offers extensive flexibility in customizing tools with specific codes and parameters for varied tasks.
-- **Agent Configuration**: Allows detailed setup of agents with specialized knowledge areas and toolsets.
+- **Skill Configuration**: Offers extensive flexibility in managing skills with specific codes and parameters for varied tasks.
+- **Agent Configuration**: Allows detailed setup of agents with specialized knowledge areas and skillsets.
 - **Agency Configuration**: Facilitates the creation and management of agencies composed of configured agents.
-- **Tool Execution**: Executes tools within an established framework for accomplishing a wide range of tasks.
+- **Skill Execution**: Executes skills within an established framework for accomplishing a wide range of tasks.
 - **User Management**: User access management features for interaction with different agencies.
 - **API and WebSocket Routers**: Lays down a comprehensive set of API endpoints and WebSocket routes for external interactions and real-time communications.
 - **Security**: Basic implementation of Firebase Auth for user authentication with plans for further enhancements.

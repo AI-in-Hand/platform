@@ -16,7 +16,7 @@ def agent_config_data():
         "description": "An example agent.",
         "instructions": "Do something important.",
         "files_folder": None,
-        "tools": ["tool1", "tool2"],
+        "skills": ["skill1", "skill2"],
     }
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field
 
-from nalgonda.custom_tools import PrintFileContents
+from nalgonda.custom_skills import PrintFileContents
 from nalgonda.settings import settings
 from nalgonda.utils import get_chat_completion
 
@@ -26,7 +26,7 @@ without extra comments or explanations. Focus on clarity and avoiding repeated i
 
 
 class SummarizeCode(BaseTool):
-    """Summarize code using GPT-3. The tool uses the `PrintFileContents` tool to get the code to summarize."""
+    """Summarize code using GPT-3. The skill uses the `PrintFileContents` skill to get the code to summarize."""
 
     file_name: Path = Field(
         ..., description="The name of the file to be summarized. It can be a relative or absolute path."
