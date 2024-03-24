@@ -23,10 +23,10 @@ const SessionsView = ({}: any) => {
 
   const { user } = React.useContext(appContext);
   const serverUrl = getServerUrl();
-  const listSessionUrl = `${serverUrl}/sessions`;
-  const createSessionUrl = `${serverUrl}/sessions`;
-  const publishSessionUrl = `${serverUrl}/sessions/publish`;
-  const deleteSessionUrl = `${serverUrl}/sessions/delete`;
+  const listSessionUrl = `${serverUrl}/session/list`;
+  const createSessionUrl = `${serverUrl}/session`;
+  const publishSessionUrl = `${serverUrl}/session/publish`;
+  const deleteSessionUrl = `${serverUrl}/session/delete`;
 
   const sessions = useConfigStore((state) => state.sessions);
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
