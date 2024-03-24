@@ -15,10 +15,8 @@ security = HTTPBearer()
 
 
 async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> User:
-    logger.info(f"Debugging: {credentials.credentials}")
     try:
         user = auth.verify_id_token(credentials.credentials, check_revoked=True)
-        logger.info(f"Debugging: {user}")
     except (ValueError, InvalidArgumentError, UnknownError) as err:
         logger.error(f"Invalid authentication credentials: {err}")
         raise HTTPException(
