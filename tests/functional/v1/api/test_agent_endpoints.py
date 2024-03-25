@@ -42,7 +42,7 @@ def test_get_agent_config(client, agent_config_data, mock_firestore_client):
 def test_update_agent_config_success(client, agent_config_data, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_config_data)
 
-    with patch("nalgonda.services.agent_manager.AgentManager") as mock_agent_manager:
+    with patch("backend.services.agent_manager.AgentManager") as mock_agent_manager:
         mock_agent_manager.return_value = AsyncMock()
         mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
 

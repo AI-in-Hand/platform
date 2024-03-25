@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "nalgonda"
-version = "0.2.0"
-description = "Nalgonda is a FastAPI app to manage swarm agencies"
+name = "ai-in-hand"
+version = "0.3.0"
+description = "A FastAPI app to manage swarm agency configurations."
 authors = [
     "AI in Hand <hello@ainhand.com>"
 ]
@@ -44,14 +44,16 @@ exclude = [".cache"]
 [tool.ruff]
 # https://beta.ruff.rs/docs/configuration/
 line-length = 120
-select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM', 'UP']
-ignore = ['W291', 'W292', 'W293']
 target-version = "py311"
+
+[tool.ruff.lint]
+ignore = ['W291', 'W292', 'W293']
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM', 'UP']
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
 
-[tool.ruff.flake8-bugbear]
+[tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends", "fastapi.Body", "fastapi.params.Body"]
 
 [build-system]

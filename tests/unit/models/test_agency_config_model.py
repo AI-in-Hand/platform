@@ -1,6 +1,6 @@
 import pytest
 
-from nalgonda.models.agency_config import AgencyConfig
+from backend.models.agency_config import AgencyConfig
 
 
 def test_empty_agency_chart():

@@ -1,7 +1,7 @@
 import pytest
 
-from nalgonda.models.agency_config import AgencyConfig
-from nalgonda.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from backend.models.agency_config import AgencyConfig
+from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from tests.test_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 

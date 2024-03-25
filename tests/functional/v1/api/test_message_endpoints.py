@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from nalgonda.services.agency_manager import AgencyManager
+from backend.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
 
@@ -89,7 +89,7 @@ def mock_session_firestore_storage(mock_firestore_client):
 
 @pytest.fixture
 def mock_openai_client():
-    with patch("nalgonda.routers.v1.api.message.get_openai_client") as mock:
+    with patch("backend.routers.v1.api.message.get_openai_client") as mock:
         mock.return_value.beta.threads.messages.list.return_value = ["Message 1", "Message 2"]
         yield mock
 

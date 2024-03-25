@@ -5,7 +5,7 @@ import pytest
 from agency_swarm import Agency, Agent
 from agency_swarm.threads import Thread
 
-from nalgonda.services.agency_manager import AgencyManager
+from backend.services.agency_manager import AgencyManager
 
 
 @pytest.fixture

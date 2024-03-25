@@ -168,5 +168,5 @@ settings.json
 *.log.jsonl
 
 # UI folder
-nalgonda/ui/*
-nalgonda/data/agency_data/*
+backend/ui/*
+backend/data/agency_data/*

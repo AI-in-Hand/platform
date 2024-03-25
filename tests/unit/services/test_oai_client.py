@@ -10,19 +10,19 @@ def mock_env_config_firestore_storage():
 
 @pytest.fixture
 def mock_env_config_manager(recover_oai_client):  # noqa: ARG001
-    with patch("nalgonda.services.oai_client.EnvConfigManager") as mock:
+    with patch("backend.services.oai_client.EnvConfigManager") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_openai_client(recover_oai_client):  # noqa: ARG001
-    with patch("nalgonda.services.oai_client.openai.OpenAI") as mock:
+    with patch("backend.services.oai_client.openai.OpenAI") as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_instructor_patch(recover_oai_client):  # noqa: ARG001
-    with patch("nalgonda.services.oai_client.instructor.patch") as mock:
+    with patch("backend.services.oai_client.instructor.patch") as mock:
         mock.return_value = MagicMock(name="OpenAI_Client_Patched")
         yield mock
 
@@ -31,7 +31,7 @@ def test_get_openai_client_uses_correct_api_key(
     mock_env_config_manager, mock_openai_client, mock_env_config_firestore_storage, mock_instructor_patch
 ):
     # Setup
-    from nalgonda.services.oai_client import get_openai_client
+    from backend.services.oai_client import get_openai_client
 
     expected_api_key = "test_api_key"
     mock_env_config_manager.return_value.get_by_key.return_value = expected_api_key

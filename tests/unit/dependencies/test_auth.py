@@ -12,8 +12,8 @@ from firebase_admin.auth import (
     UserDisabledError,
 )
 
-from nalgonda.dependencies.auth import get_current_superuser, get_current_user
-from nalgonda.models.auth import User
+from backend.dependencies.auth import get_current_superuser, get_current_user
+from backend.models.auth import User
 
 user_data: dict[str, Any] = {
     "uid": "testuser",
@@ -23,7 +23,7 @@ user_data: dict[str, Any] = {
 
 @pytest.fixture()
 def mock_verify_id_token():
-    with patch("nalgonda.dependencies.auth.auth.verify_id_token") as mock:
+    with patch("backend.dependencies.auth.auth.verify_id_token") as mock:
         mock.return_value = user_data
         yield mock
 

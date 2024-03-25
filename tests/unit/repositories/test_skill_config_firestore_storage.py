@@ -1,7 +1,7 @@
 import pytest
 
-from nalgonda.models.skill_config import SkillConfig
-from nalgonda.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.models.skill_config import SkillConfig
+from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 

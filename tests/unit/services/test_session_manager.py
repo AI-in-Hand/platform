@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
-from nalgonda.models.session_config import SessionConfig
-from nalgonda.services.session_manager import SessionManager
+from backend.models.session_config import SessionConfig
+from backend.services.session_manager import SessionManager
 
 
 # Fixtures
@@ -59,7 +59,7 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     # Mock _create_thread to return a mock object with an id attribute
     session_manager._create_thread = MagicMock(return_value=MagicMock(id="main_thread_id"))
 
-    with patch("nalgonda.services.session_manager.datetime") as mock_datetime:
+    with patch("backend.services.session_manager.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(2021, 1, 1, tzinfo=UTC)
         session_id = session_manager.create_session(agency_mock, "agency_id", "owner_id")
 
@@ -73,7 +73,7 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     session_storage_mock.save.assert_called_once_with(expected_session_config)
 
 
-@patch("nalgonda.services.session_manager.get_openai_client")
+@patch("backend.services.session_manager.get_openai_client")
 def test_create_threads(mock_get_openai_client, session_manager, agency_mock):
     mock_client = MagicMock()
     mock_get_openai_client.return_value = mock_client
@@ -105,7 +105,7 @@ def test_init_threads(session_manager, agency_mock, agent_mock, recipient_agent_
     mock_create_thread.assert_has_calls(expected_calls, any_order=True)
 
 
-@patch("nalgonda.services.session_manager.Thread")
+@patch("backend.services.session_manager.Thread")
 def test_create_thread(mock_thread_class, session_manager, agent_mock, recipient_agent_mock):
     client_mock = MagicMock()
     mock_thread_instance = create_mock_thread(agent_mock, recipient_agent_mock)
