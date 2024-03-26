@@ -20,7 +20,7 @@ confined to a single sentence, and rigorously comply with the specified instruct
             + code
             + "\n```",
             temperature=0.0,
-            model="gpt-3.5-turbo-1106",
+            model="gpt-3.5-turbo",
         )
         assert result == "Summary of the skill", "The function did not return the expected summary"
 

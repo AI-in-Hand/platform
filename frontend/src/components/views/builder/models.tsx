@@ -31,7 +31,7 @@ const ModelsView = ({}: any) => {
   });
 
   const defaultModel: IModelConfig = {
-    model: "gpt-4-1106-preview",
+    model: "gpt-4-turbo-preview",
     description: "Sample OpenAI GPT-4 model",
     user_id: user?.email,
   };
