@@ -10,8 +10,7 @@ from backend.utils import chunk_input_with_token_limit, get_chat_completion
 SYSTEM_MESSAGE = """\
 Your main job is to handle programming code from SEVERAL FILES. \
 Each file's content is shown within triple backticks and has a FILE PATH as a title. \
-It's vital to KEEP the FILE PATHS.
-Here's what to do:
+It's vital to KEEP the FILE PATHS. Here's what to do:
 1. ALWAYS KEEP the FILE PATHS for each file.
 2. Start each file with a short SUMMARY of its content. Mention important points but don't repeat details found later.
 3. KEEP important elements like non-trivial imports, function details, type hints, and key constants. \
@@ -29,7 +28,7 @@ without extra comments or explanations. Focus on clarity and avoiding repeated i
 
 class SummarizeAllCodeInPath(BaseTool):
     """Summarize code using GPT-3. The skill uses the `PrintAllFilesInPath` skill to get the code to summarize.
-    The parameters are: start_path, file_extensions.
+    The parameters are: start_path, file_extensions, exclude_directories.
     Directory traversal is not allowed (you cannot read /* or ../*).
     """
 
@@ -38,10 +37,14 @@ class SummarizeAllCodeInPath(BaseTool):
         description="The starting path to search for files, defaults to the current working directory. "
         "Can be a filename or a directory.",
     )
-    file_extensions: set[str] = Field(
-        default_factory=set,
-        description="Set of file extensions to include in the tree. If empty, all files will be included. "
-        "Examples are {'.py', '.txt', '.md'}.",
+    file_extensions: list[str] = Field(
+        default_factory=list,
+        description="List of file extensions to include in the tree. If empty, all files will be included. "
+        "Examples are ['.py', '.txt', '.md'].",
+    )
+    exclude_directories: list[str] | None = Field(
+        default_factory=list,
+        description="List of directories to exclude from the search. Examples are ['__pycache__', '.git'].",
     )
     truncate_to: int = Field(
         default=None,
@@ -51,10 +54,10 @@ class SummarizeAllCodeInPath(BaseTool):
     def run(self) -> str:
         """Run the skill and return the output."""
         delimiter = "\n\n```\n"
-
         full_code = PrintAllFilesInPath(
             start_path=self.start_path,
             file_extensions=self.file_extensions,
+            exclude_directories=self.exclude_directories,
         ).run()
 
         # Chunk the input based on token limit
@@ -82,6 +85,7 @@ if __name__ == "__main__":
     print(
         SummarizeAllCodeInPath(
             start_path=".",
-            file_extensions={".py"},
+            file_extensions=[".py"],
+            exclude_directories=["__pycache__", ".git"],
         ).run()
     )
