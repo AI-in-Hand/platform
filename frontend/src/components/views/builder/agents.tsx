@@ -47,7 +47,7 @@ const AgentsView = ({}: any) => {
       llm_config: {
         config_list: [
           {
-            model: "gpt-4-1106-preview",
+            model: "gpt-4-turbo-preview",
           },
         ],
         temperature: 0.1,

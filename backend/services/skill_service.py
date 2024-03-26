@@ -21,7 +21,7 @@ def generate_skill_description(code: str):
         system_message=SKILL_SUMMARY_SYSTEM_MESSAGE,
         user_prompt=f"{USER_PROMPT}```\n{code}\n```",
         temperature=0.0,
-        model=settings.gpt_cheap_model,
+        model=settings.gpt_small_model,
     )
     return summary
 

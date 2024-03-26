@@ -8,6 +8,7 @@ from backend.repositories.session_firestore_storage import SessionConfigFirestor
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
+from backend.services.env_config_manager import EnvConfigManager
 from backend.services.session_manager import SessionManager
 from backend.settings import settings
 
@@ -22,25 +23,31 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
     return RedisCacheManager(redis)
 
 
+def get_env_config_manager(
+    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+) -> EnvConfigManager:
+    return EnvConfigManager(env_config_storage)
+
+
 def get_agent_manager(
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
-    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> AgentManager:
-    return AgentManager(storage, env_config_storage)
+    return AgentManager(storage, env_config_manager)
 
 
 def get_agency_manager(
     cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
     agency_config_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager, agency_config_storage, env_config_storage)
+    return AgencyManager(cache_manager, agent_manager, agency_config_storage, env_config_manager)
 
 
 def get_session_manager(
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
-    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> SessionManager:
     """Returns a SessionManager object"""
-    return SessionManager(session_storage=session_storage, env_config_storage=env_config_storage)
+    return SessionManager(session_storage=session_storage, env_config_manager=env_config_manager)

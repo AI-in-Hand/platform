@@ -6,9 +6,9 @@ from agency_swarm import Agency, Agent
 
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
+from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
 
 logger = logging.getLogger(__name__)
@@ -20,12 +20,12 @@ class AgencyManager:
         cache_manager: RedisCacheManager,
         agent_manager: AgentManager,
         agency_config_storage: AgencyConfigFirestoreStorage,
-        env_config_storage: EnvConfigFirestoreStorage,
+        env_config_manager: EnvConfigManager,
     ) -> None:
         self.agency_config_storage = agency_config_storage
         self.agent_manager = agent_manager
         self.cache_manager = cache_manager
-        self.env_config_storage = env_config_storage
+        self.env_config_manager = env_config_manager
 
     async def get_agency(self, agency_id: str, session_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(agency_id, session_id)
@@ -136,7 +136,7 @@ class AgencyManager:
 
     def _set_client_objects(self, agency: Agency) -> Agency:
         """Restore all client objects within the agency object"""
-        client = get_openai_client(env_config_storage=self.env_config_storage)
+        client = get_openai_client(env_config_manager=self.env_config_manager)
         # Restore client for each agent in the agency
         for agent in agency.agents:
             agent.client = client

@@ -6,7 +6,7 @@ from agency_swarm import Agent
 from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_config import AgentConfig
 from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
 from backend.settings import settings
 
@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class AgentManager:
-    def __init__(self, storage: AgentConfigFirestoreStorage, env_config_storage: EnvConfigFirestoreStorage) -> None:
-        self.env_config_storage = env_config_storage
+    def __init__(self, storage: AgentConfigFirestoreStorage, env_config_manager: EnvConfigManager) -> None:
+        self.env_config_manager = env_config_manager
         self.storage = storage
 
     async def create_or_update_agent(self, config: AgentConfig) -> str:
@@ -60,5 +60,5 @@ class AgentManager:
             model=settings.gpt_model,
         )
         # a workaround: agent.client must be replaced with a proper implementation
-        agent.client = get_openai_client(env_config_storage=self.env_config_storage)
+        agent.client = get_openai_client(env_config_manager=self.env_config_manager)
         return agent

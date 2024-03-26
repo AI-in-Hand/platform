@@ -1,12 +1,25 @@
+import json
 import logging
 from pathlib import Path
 
+import firebase_admin
 import tiktoken
+from firebase_admin import credentials
 
 from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
+from backend.settings import settings
 
 logger = logging.getLogger(__name__)
+
+
+def init_firebase_app():
+    """Initialize Firebase app."""
+    if settings.google_credentials:
+        cred_json = json.loads(settings.google_credentials)
+        cred = credentials.Certificate(cred_json)
+        firebase_admin.initialize_app(cred)
 
 
 def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
@@ -25,10 +38,13 @@ def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:
     return folders
 
 
-def get_chat_completion(system_message: str, user_prompt: str, model: str, **kwargs) -> str:
+def get_chat_completion(system_message: str, user_prompt: str, model: str, api_key: str | None = None, **kwargs) -> str:
     """Generate a chat completion based on a prompt and a system message.
     This function is a wrapper around the OpenAI API."""
-    client = get_openai_client(env_config_storage=EnvConfigFirestoreStorage())
+    if api_key:
+        client = get_openai_client(api_key=api_key)
+    else:
+        client = get_openai_client(env_config_manager=EnvConfigManager(EnvConfigFirestoreStorage()))
     completion = client.chat.completions.create(
         model=model,
         messages=[

@@ -6,7 +6,7 @@ from pydantic import Field, field_validator
 
 from backend.custom_skills.utils import check_directory_traversal
 
-MAX_LENGTH = 3000
+MAX_LENGTH = 10000
 
 
 class DirectoryNode:
@@ -27,18 +27,20 @@ class FileNode:
 
 
 class BuildDirectoryTree(BaseTool):
-    """Print the structure of directories and files.
-    Directory traversal is not allowed (you cannot read /* or ../*).
-    """
+    """Print the structure of directories and files. Directory traversal is not allowed (you cannot read /* or ../*)."""
 
     start_directory: Path = Field(
         default_factory=Path.cwd,
         description="The starting directory for the tree, defaults to the current working directory.",
     )
-    file_extensions: set[str] = Field(
-        default_factory=set,
-        description="Set of file extensions to include in the tree. If empty, all files will be included. "
-        "Examples are {'.py', '.txt', '.md'}.",
+    file_extensions: list[str] = Field(
+        default_factory=list,
+        description="List of file extensions to include in the tree. If empty, all files will be included. "
+        "Examples are ['.py', '.txt', '.md'].",
+    )
+    exclude_directories: list[str] = Field(
+        default_factory=list,
+        description="List of directories to exclude from the tree. Examples are ['__pycache__', '.git'].",
     )
 
     _validate_start_directory = field_validator("start_directory", mode="after")(check_directory_traversal)
@@ -53,7 +55,7 @@ class BuildDirectoryTree(BaseTool):
             children = [p for p in current_node.path.iterdir() if not p.name.startswith(".")]
 
             for child in children:
-                if child.is_dir():
+                if child.is_dir() and child.name not in self.exclude_directories:
                     dir_node = DirectoryNode(child, current_node.level + 1)
                     current_node.children.append(dir_node)
                     queue.append(dir_node)
@@ -100,6 +102,7 @@ class BuildDirectoryTree(BaseTool):
 if __name__ == "__main__":
     print(
         BuildDirectoryTree(
-            file_extensions={".py", ".md"},
+            file_extensions=[],
+            exclude_directories=["__pycache__", ".git", ".idea", "venv", ".vscode", "node_modules", "build", "dist"],
         ).run()
     )

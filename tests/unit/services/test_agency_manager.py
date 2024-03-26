@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from agency_swarm import Agency, Agent
 
+from backend.dependencies.dependencies import get_env_config_manager
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
@@ -18,7 +19,7 @@ def agency_manager():
         cache_manager=MagicMock(),
         agent_manager=MagicMock(),
         agency_config_storage=AgencyConfigFirestoreStorage(),
-        env_config_storage=EnvConfigFirestoreStorage(),
+        env_config_manager=get_env_config_manager(env_config_storage=EnvConfigFirestoreStorage()),
     )
 
 

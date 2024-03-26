@@ -1,10 +1,6 @@
-import json
-
-import firebase_admin
 import openai
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from firebase_admin import credentials
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
@@ -16,7 +12,7 @@ from backend.constants import BASE_DIR  # noqa  # isort:skip
 from backend.exception_handlers import bad_request_exception_handler, unhandled_exception_handler  # noqa  # isort:skip
 from backend.routers.v1 import v1_router  # noqa  # isort:skip
 from backend.settings import settings  # noqa  # isort:skip
-from backend.utils import init_webserver_folders  # noqa  # isort:skip
+from backend.utils import init_webserver_folders, init_firebase_app  # noqa  # isort:skip
 
 # just a placeholder for compatibility with agency-swarm
 openai.api_key = "sk-1234567890"
@@ -51,10 +47,7 @@ app.mount("/v1", v1_api_app)
 app.mount("/", StaticFiles(directory=folders["static_folder_root"], html=True), name="ui")
 
 # Initialize FireStore
-if settings.google_credentials:
-    cred_json = json.loads(settings.google_credentials)
-    cred = credentials.Certificate(cred_json)
-    firebase_admin.initialize_app(cred)
+init_firebase_app()
 
 
 if __name__ == "__main__":

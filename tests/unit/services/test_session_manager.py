@@ -16,18 +16,13 @@ def agency_mock():
 
 
 @pytest.fixture
-def env_config_storage_mock():
-    return MagicMock()
-
-
-@pytest.fixture
 def session_storage_mock():
     return MagicMock()
 
 
 @pytest.fixture
-def session_manager(env_config_storage_mock, session_storage_mock):
-    return SessionManager(env_config_storage=env_config_storage_mock, session_storage=session_storage_mock)
+def session_manager(session_storage_mock):
+    return SessionManager(env_config_manager=MagicMock(), session_storage=session_storage_mock)
 
 
 @pytest.fixture
