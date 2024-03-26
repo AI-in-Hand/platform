@@ -16,10 +16,13 @@ def test_write_and_save_program_with_valid_files(mock_get, mock_mkdir, mock_file
     ]
     save_program_skill = WriteAndSaveProgram(files=files, chain_of_thought="")
     response = save_program_skill.run()
+
     expected_path1 = Path(AGENCY_DATA_DIR / TEST_AGENCY_ID / "test1.py").as_posix()
     expected_path2 = Path(AGENCY_DATA_DIR / TEST_AGENCY_ID / "test2.py").as_posix()
-    assert "File written to " + expected_path1 in response
-    assert "File written to " + expected_path2 in response
+
+    assert f"File written to {expected_path1}" in response
+    assert f"File written to {expected_path2}" in response
+
     mock_get.assert_called()
     mock_mkdir.assert_called()
     mock_file.assert_called()
@@ -30,5 +33,6 @@ def test_write_and_save_program_with_invalid_path(mock_file):
     files = [File(file_name="../invalid/path.py", body='print("Fail")', chain_of_thought="")]
     save_program_skill = WriteAndSaveProgram(files=files, chain_of_thought="")
     response = save_program_skill.run()
+
     assert "Invalid file path" in response
     mock_file.assert_not_called()
