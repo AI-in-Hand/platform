@@ -65,10 +65,21 @@ class PrintAllFilesInPath(BaseTool):
 
 
 if __name__ == "__main__":
+    # list of extensions: ".py", ".json", ".yaml", ".yml", ".md", ".txt", ".tsx", ".ts", ".js", ".jsx", ".html"
     print(
         PrintAllFilesInPath(
             start_path=".",
-            file_extensions=[".py", ".json", ".yaml", ".yml", ".md", ".txt", ".tsx", ".ts", ".js", ".jsx", ".html"],
-            exclude_directories=["__pycache__", ".git"],
+            file_extensions=[],
+            exclude_directories=[
+                "frontend",
+                "__pycache__",
+                ".git",
+                ".idea",
+                "venv",
+                ".vscode",
+                "node_modules",
+                "build",
+                "dist",
+            ],
         ).run()
     )

@@ -6,13 +6,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_manager
+from backend.dependencies.dependencies import get_agency_manager, get_env_config_manager
 from backend.models.auth import User
 from backend.models.request_models import SessionMessagePostRequest
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from backend.services.agency_manager import AgencyManager
+from backend.services.env_config_manager import EnvConfigManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.services.oai_client import get_openai_client
 
@@ -29,7 +29,7 @@ async def get_message_list(
     session_id: str,
     before: str | None = None,
     session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
-    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ):
     """Return a list of last 20 messages for the given session."""
     # check if the current_user has permissions to send a message to the agency
@@ -45,7 +45,7 @@ async def get_message_list(
     ContextEnvVarsManager.set("owner_id", current_user.id)
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
-    client = get_openai_client(env_config_storage)
+    client = get_openai_client(env_config_manager)
     messages = client.beta.threads.messages.list(thread_id=session_id, limit=20, before=before)
     return messages
 

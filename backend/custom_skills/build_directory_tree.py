@@ -6,7 +6,7 @@ from pydantic import Field, field_validator
 
 from backend.custom_skills.utils import check_directory_traversal
 
-MAX_LENGTH = 3000
+MAX_LENGTH = 10000
 
 
 class DirectoryNode:
@@ -103,6 +103,6 @@ if __name__ == "__main__":
     print(
         BuildDirectoryTree(
             file_extensions=[],
-            exclude_directories=["__pycache__", ".git"],
+            exclude_directories=["__pycache__", ".git", ".idea", "venv", ".vscode", "node_modules", "build", "dist"],
         ).run()
     )

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from agency_swarm import BaseTool
@@ -32,10 +33,14 @@ class SummarizeCode(BaseTool):
         ..., description="The name of the file to be summarized. It can be a relative or absolute path."
     )
 
-    def run(self) -> str:
+    def run(self, api_key: str | None = None) -> str:
         code = PrintFileContents(file_name=self.file_name).run()
         output = get_chat_completion(
-            system_message=SYSTEM_MESSAGE, user_prompt=code, temperature=0.0, model=settings.gpt_cheap_model
+            system_message=SYSTEM_MESSAGE,
+            user_prompt=code,
+            temperature=0.0,
+            model=settings.gpt_small_model,
+            api_key=api_key,
         )
         return output
 
@@ -44,5 +49,5 @@ if __name__ == "__main__":
     print(
         SummarizeCode(
             file_name="example.py",
-        ).run()
+        ).run(api_key=os.getenv("API_KEY"))
     )

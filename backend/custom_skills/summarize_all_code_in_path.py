@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from agency_swarm import BaseTool
@@ -51,7 +52,7 @@ class SummarizeAllCodeInPath(BaseTool):
         description="Truncate the output to this many characters. If None or skipped, the output is not truncated.",
     )
 
-    def run(self) -> str:
+    def run(self, api_key: str | None = None) -> str:
         """Run the skill and return the output."""
         delimiter = "\n\n```\n"
         full_code = PrintAllFilesInPath(
@@ -66,7 +67,11 @@ class SummarizeAllCodeInPath(BaseTool):
         outputs = []
         for chunk in chunks:
             output = get_chat_completion(
-                system_message=SYSTEM_MESSAGE, user_prompt=chunk, temperature=0.0, model=settings.gpt_cheap_model
+                system_message=SYSTEM_MESSAGE,
+                user_prompt=chunk,
+                temperature=0.0,
+                model=settings.gpt_small_model,
+                api_key=api_key,
             )
             outputs.append(output)
 
@@ -86,6 +91,6 @@ if __name__ == "__main__":
         SummarizeAllCodeInPath(
             start_path=".",
             file_extensions=[".py"],
-            exclude_directories=["__pycache__", ".git"],
-        ).run()
+            exclude_directories=["__pycache__", ".git", ".idea", "venv", ".vscode", "node_modules", "build", "dist"],
+        ).run(api_key=os.getenv("API_KEY"))
     )
