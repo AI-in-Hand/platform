@@ -67,28 +67,36 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
 }
 
 export function checkAndRefreshToken() {
-  const state = store.getState();
-  const { expiresIn } = state.user;
+  return new Promise((resolve) => {
+    const state = store.getState();
+    const { expiresIn } = state.user;
 
-  if (Date.now() >= expiresIn) {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (user) {
-      user.getIdToken(true).then((res) => {
-        const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
-        store.dispatch(
-          RefreshToken({
-            token: res.user.accessToken,
-            expiresIn,
-            user: { email: res.user.email, uid: res.user.uid },
-          })
-        );
-      }).catch(error => {
-        console.error("Error refreshing token:", error);
-        message.error("Error refreshing token. Please login again.");
-      });
+    if (Date.now() >= expiresIn) {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        user.getIdToken(true).then((res) => {
+          const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
+          store.dispatch(
+            RefreshToken({
+              token: res.user.accessToken,
+              expiresIn,
+              user: { email: res.user.email, uid: res.user.uid },
+            })
+          );
+          resolve(true);
+        }).catch(error => {
+          console.error("Error refreshing token:", error);
+          message.error("Error refreshing token. Please login again.");
+          resolve(false);
+        });
+      } else {
+        resolve(false);
+      }
+    } else {
+      resolve(true); // Token is still valid
     }
-  }
+  });
 }
 
 export function fetchJSON(
@@ -97,14 +105,22 @@ export function fetchJSON(
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) {
-  checkAndRefreshToken();
-  // @ts-ignore
-  const accessToken = store.getState().user.accessToken;
-  return fetch(url, {
-    method: payload.method,
-    headers: { ...payload.headers, Authorization: `Bearer ${accessToken}` },
-    body: payload.body,
-  })
+  checkAndRefreshToken().then((canProceed) => {
+    if (!canProceed) {
+      console.error("Cannot proceed, token invalid or not refreshed.");
+      onError({
+        status: false,
+        message: "Authentication error: please login again.",
+      });
+      return;
+    }
+
+    const accessToken = store.getState().user.accessToken;
+    fetch(url, {
+      method: payload.method,
+      headers: { ...payload.headers, Authorization: `Bearer ${accessToken}` },
+      body: payload.body,
+    })
     .then(function (response) {
       if (response.status !== 200) {
         console.log(
@@ -116,14 +132,11 @@ export function fetchJSON(
         });
         onError({
           status: false,
-          message:
-            "Connection error " + response.status + " " + response.statusText,
+          message: "Connection error " + response.status + " " + response.statusText,
         });
         return;
       }
-      return response.json().then(function (data) {
-        onSuccess(data);
-      });
+      response.json().then(onSuccess);
     })
     .catch(function (err) {
       console.log("Fetch Error :-S", err);
@@ -132,6 +145,13 @@ export function fetchJSON(
         message: `There was an error connecting to server. (${err}) `,
       });
     });
+  }).catch((error) => {
+    console.error("Error in checkAndRefreshToken:", error);
+    onError({
+      status: false,
+      message: "Error in token refresh process.",
+    });
+  });
 }
 
 export const capitalize = (s: string) => {
