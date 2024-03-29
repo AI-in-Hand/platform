@@ -15,7 +15,13 @@ export default (state = initialState, action: any) => {
         ...state,
         loggedIn: true,
         accessToken: action.payload.token,
+        expirationTime: action.payload.expirationTime,
         user: action.payload?.user ?? {},
+      };
+    case usersActions.REFRESH_TOKEN:
+      return {
+        ...state,
+        accessToken: action.payload,
       };
     case usersActions.SET_EMAIL:
       return {

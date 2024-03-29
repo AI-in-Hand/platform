@@ -8,7 +8,10 @@ import {
   ISkill,
   IStatus,
 } from "./types";
-import {store} from "../store";
+import { message } from "antd";
+import { getAuth, getIdToken } from "firebase/auth";
+import { store } from "../store";
+import { RefreshToken } from "../store/actions/usersActions";
 
 export const getServerUrl = () => {
   return process.env.GATSBY_API_URL || "/v1/api";
@@ -63,12 +66,31 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
   }
 }
 
+export function checkAndRefreshToken() {
+  const state = store.getState();
+  const { expirationTime } = state.user;
+
+  if (Date.now() >= expirationTime) {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      user.getIdToken(true).then((newToken) => {
+        store.dispatch(RefreshToken(newToken));
+      }).catch(error => {
+        console.error("Error refreshing token:", error);
+        message.error("Error refreshing token. Please login again.");
+      });
+    }
+  }
+}
+
 export function fetchJSON(
   url: string | URL,
   payload: any = {},
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) {
+  checkAndRefreshToken();
   // @ts-ignore
   const accessToken = store.getState().user.accessToken;
   return fetch(url, {method: payload.method, headers: {...payload.headers, "Authorization": `Bearer ${accessToken}`}})
@@ -100,6 +122,7 @@ export function fetchJSON(
       });
     });
 }
+
 export const capitalize = (s: string) => {
   if (typeof s !== "string") return "";
   return s.charAt(0).toUpperCase() + s.slice(1);

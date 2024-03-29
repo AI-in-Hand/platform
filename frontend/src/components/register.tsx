@@ -11,13 +11,22 @@ const LogInVerify = () => {
     function handleLogin(email: string) {
         const auth = getAuth();
         // @ts-ignore
-        signInWithEmailLink (auth, email, location.href).then((res) => {
+        signInWithEmailLink(auth, email, location.href)
+          .then((res) => {
             // @ts-ignore
-            dispatch(SignIn({token: res.user.accessToken, user: {email: res.user.email, uid: res.user.uid}}))
-            navigate('/')
-        }).catch((error) => {
-            console.log(error.message)
-        });
+            const expirationTime = Date.now() + 3600 * 1000; // 1 hour from now
+            dispatch(
+              SignIn({
+                token: res.user.accessToken,
+                expirationTime,
+                user: { email: res.user.email, uid: res.user.uid },
+              })
+            );
+            navigate('/');
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
     }
     useEffect(() => {
         handleLogin(email);

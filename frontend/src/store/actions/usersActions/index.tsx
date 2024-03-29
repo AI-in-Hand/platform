@@ -1,7 +1,7 @@
 import * as usersActions from "./constants";
 
 
-export function SignIn(data: {token: string, user: any}) {
+export function SignIn(data: {token: string, expirationTime: number, user: any}) {
   return {
     type: usersActions.SIGN_IN,
     payload: data,
@@ -22,5 +22,11 @@ export function SetEmail(email: string) {
 export function ResetState() {
   return {
     type: usersActions.RESET_STATE,
+  };
+}
+export function RefreshToken(token: string) {
+  return {
+    type: usersActions.REFRESH_TOKEN,
+    payload: token,
   };
 }
