@@ -79,9 +79,8 @@ export function checkAndRefreshToken() {
           const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
           store.dispatch(
             RefreshToken({
-              token: res.user.accessToken,
+              token: res,
               expiresIn,
-              user: { email: res.user.email, uid: res.user.uid },
             })
           );
           resolve(true);
