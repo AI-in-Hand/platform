@@ -7,6 +7,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from backend.dependencies.auth import get_current_superuser, get_current_user
 from backend.models.auth import User
 from backend.models.request_models import SkillExecutePostRequest
+from backend.models.response_models import CreateSkillVersionResponse, GetSkillListResponse
 from backend.models.skill_config import SkillConfig
 from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
 from backend.services.skill_service import SkillService, generate_skill_description
@@ -23,10 +24,10 @@ skill_router = APIRouter(tags=["skill"])
 async def get_skill_list(
     current_user: Annotated[User, Depends(get_current_user)],
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
-) -> list[SkillConfig]:
+) -> GetSkillListResponse:
     """Get a list of configs for all skills."""
     skills = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
-    return skills
+    return GetSkillListResponse(data=skills)
 
 
 @skill_router.get("/skill")
@@ -36,7 +37,7 @@ async def get_skill_config(
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ) -> SkillConfig:
     """Get a skill configuration by ID.
-    Note: currently this endpoint is not used in the frontend.
+    NOTE: currently this endpoint is not used in the frontend.
     """
     config = storage.load_by_id(id)
     if not config:
@@ -54,7 +55,7 @@ async def create_skill_version(
     current_user: Annotated[User, Depends(get_current_user)],
     config: SkillConfig = Body(...),
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
-):
+) -> CreateSkillVersionResponse:
     """Create a new version of the skill configuration."""
     skill_config_db = None
 
@@ -83,7 +84,7 @@ async def create_skill_version(
         config.description = generate_skill_description(config.content)
 
     skill_id, skill_version = storage.save(config)
-    return {"id": skill_id, "skill_version": skill_version}
+    return CreateSkillVersionResponse(data={"id": skill_id, "version": skill_version})
 
 
 @skill_router.post("/skill/approve")

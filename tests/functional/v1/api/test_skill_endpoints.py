@@ -25,7 +25,7 @@ def test_get_skill_list(skill_config_data, client, mock_firestore_client):
 
     response = client.get("/v1/api/skill/list")
     assert response.status_code == 200
-    assert response.json() == [skill_config_data]
+    assert response.json()["data"] == [skill_config_data]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -34,7 +34,7 @@ def test_get_skill_config_success(skill_config_data, client, mock_firestore_clie
 
     response = client.get(f"/v1/api/skill?id={skill_config_data['id']}")
     assert response.status_code == 200
-    assert response.json() == skill_config_data
+    assert response.json()["data"] == skill_config_data
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -78,7 +78,7 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
     skill_config_data["content"] = 'print("Hello World Updated")'
     response = client.post("/v1/api/skill", json=skill_config_data)
     assert response.status_code == 200
-    assert response.json() == {"id": "skill1", "skill_version": 2}
+    assert response.json()["data"] == {"id": "skill1", "version": 2}
 
     # Verify if the skill configuration is updated in the mock Firestore client
     updated_config = SkillConfigFirestoreStorage().load_by_id("skill1")
