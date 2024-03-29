@@ -4,13 +4,15 @@ import {REGEXP_EMAIL} from "../helpers/constants";
 import {getAuth, sendSignInLinkToEmail} from "firebase/auth";
 import {useDispatch} from "react-redux";
 import {SetEmail} from "../store/actions/usersActions";
+import { getServerUrl } from "./utils";
 
 const Login = () => {
     const dispatch = useDispatch();
+    const serverUrl = getServerUrl();
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://platform.ainhand.com/sign-in-verify'}).then((res) => {
+        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: `${serverUrl}/sign-in-verify`}).then((res) => {
             dispatch(SetEmail(data.email))
             message.success("Please check your email for your login link");
         }).catch((error) => {
