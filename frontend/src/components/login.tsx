@@ -4,12 +4,10 @@ import {REGEXP_EMAIL} from "../helpers/constants";
 import {getAuth, sendSignInLinkToEmail} from "firebase/auth";
 import {useDispatch} from "react-redux";
 import {SetEmail} from "../store/actions/usersActions";
-import { getServerUrl } from "./utils";
 
 const Login = () => {
     const dispatch = useDispatch();
-    const serverUrl = getServerUrl();
-    const signInVerifyUrl = `${serverUrl}/sign-in-verify`;
+    const signInVerifyUrl = `${window.location.origin}/sign-in-verify`;
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
         const auth = getAuth();
