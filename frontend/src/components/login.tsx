@@ -9,10 +9,11 @@ import { getServerUrl } from "./utils";
 const Login = () => {
     const dispatch = useDispatch();
     const serverUrl = getServerUrl();
+    const signInVerifyUrl = `${serverUrl}/sign-in-verify`;
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: `${serverUrl}/sign-in-verify`}).then((res) => {
+        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: signInVerifyUrl}).then((res) => {
             dispatch(SetEmail(data.email))
             message.success("Please check your email for your login link");
         }).catch((error) => {
