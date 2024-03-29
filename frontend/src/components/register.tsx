@@ -1,4 +1,5 @@
 import React, {useEffect} from 'react';
+import { message } from "antd";
 import {getAuth, signInWithEmailLink} from "firebase/auth";
 import { navigate} from "gatsby";
 import {useDispatch, useSelector} from "react-redux";
@@ -14,11 +15,11 @@ const LogInVerify = () => {
         signInWithEmailLink(auth, email, location.href)
           .then((res) => {
             // @ts-ignore
-            const expirationTime = Date.now() + 3600 * 1000; // 1 hour from now
+            const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
             dispatch(
               SignIn({
                 token: res.user.accessToken,
-                expirationTime,
+                expiresIn,
                 user: { email: res.user.email, uid: res.user.uid },
               })
             );
@@ -26,6 +27,7 @@ const LogInVerify = () => {
           })
           .catch((error) => {
             console.log(error.message);
+            message.error("Error logging in. Please try again.");
           });
     }
     useEffect(() => {

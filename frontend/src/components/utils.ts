@@ -68,14 +68,21 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
 
 export function checkAndRefreshToken() {
   const state = store.getState();
-  const { expirationTime } = state.user;
+  const { expiresIn } = state.user;
 
-  if (Date.now() >= expirationTime) {
+  if (Date.now() >= expiresIn) {
     const auth = getAuth();
     const user = auth.currentUser;
     if (user) {
-      user.getIdToken(true).then((newToken) => {
-        store.dispatch(RefreshToken(newToken));
+      user.getIdToken(true).then((res) => {
+        const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
+        store.dispatch(
+          RefreshToken({
+            token: res.user.accessToken,
+            expiresIn,
+            user: { email: res.user.email, uid: res.user.uid },
+          })
+        );
       }).catch(error => {
         console.error("Error refreshing token:", error);
         message.error("Error refreshing token. Please login again.");

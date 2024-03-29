@@ -1,13 +1,13 @@
 import * as usersActions from "./constants";
 
 
-export function SignIn(data: {token: string, expirationTime: number, user: any}) {
+export function SignIn(data: {token: string, expiresIn: number, user: any}) {
   return {
     type: usersActions.SIGN_IN,
     payload: data,
   };
 }
-export function SignUp(data: {token: string, user: any}) {
+export function SignUp(data: {token: string, expiresIn: number, user: any}) {
   return {
     type: usersActions.SIGN_UP,
     payload: data,
@@ -24,9 +24,9 @@ export function ResetState() {
     type: usersActions.RESET_STATE,
   };
 }
-export function RefreshToken(token: string) {
+export function RefreshToken(data: {token: string, expiresIn: number, user: any}) {
   return {
     type: usersActions.REFRESH_TOKEN,
-    payload: token,
+    payload: data,
   };
 }
