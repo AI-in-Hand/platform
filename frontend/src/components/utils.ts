@@ -93,7 +93,11 @@ export function fetchJSON(
   checkAndRefreshToken();
   // @ts-ignore
   const accessToken = store.getState().user.accessToken;
-  return fetch(url, {method: payload.method, headers: {...payload.headers, "Authorization": `Bearer ${accessToken}`}})
+  return fetch(url, {
+    method: payload.method,
+    headers: { ...payload.headers, Authorization: `Bearer ${accessToken}` },
+    body: payload.body,
+  })
     .then(function (response) {
       if (response.status !== 200) {
         console.log(
