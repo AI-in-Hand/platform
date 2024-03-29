@@ -5,7 +5,7 @@ import Login from "../../components/login";
 
 const LoginForm = ({ data }: any) => {
   return (
-      <Layout meta={data.site.siteMetadata} title="Sign-In" link={'sing-in'}>
+      <Layout meta={data.site.siteMetadata} title="Sign-In" link={'sign-in'}>
         <Login/>
       </Layout>
   );

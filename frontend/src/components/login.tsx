@@ -7,10 +7,11 @@ import {SetEmail} from "../store/actions/usersActions";
 
 const Login = () => {
     const dispatch = useDispatch();
+    const signInVerifyUrl = `${window.location.origin}/sign-in-verify`;
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
         const auth = getAuth();
-        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: 'https://platform.ainhand.com/sign-in-verify'}).then((res) => {
+        sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: signInVerifyUrl}).then((res) => {
             dispatch(SetEmail(data.email))
             message.success("Please check your email for your login link");
         }).catch((error) => {
