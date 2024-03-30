@@ -61,7 +61,7 @@ def test_approve_skill(skill_config_data, client, mock_firestore_client):
 
     response = client.post("/v1/api/skill/approve?id=skill1")
     assert response.status_code == 200
-    assert response.json() == {"message": "Skill configuration approved"}
+    assert response.json() == {"status": True, "message": "Skill configuration approved"}
 
     # Verify if the skill configuration is approved in the mock Firestore client
     updated_config = mock_firestore_client.to_dict()
