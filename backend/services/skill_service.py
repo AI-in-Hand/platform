@@ -65,7 +65,7 @@ The function call parameters must be returned in JSON format.\
             raise Exception(f"Skill {skill_name} not found") from e
 
     @staticmethod
-    def _execute_skill(skill_class: BaseTool, args: str):
+    def _execute_skill(skill_class: BaseTool, args: str) -> str | None:
         if not skill_class:
             return f"Error: Skill {skill_class.__name__} not found"
 

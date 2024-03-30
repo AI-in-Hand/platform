@@ -14,6 +14,7 @@ def skill_config_data():
         "title": "Skill 1",
         "description": "",
         "version": 1,
+        "timestamp": "2021-01-01T00:00:00Z",
         "content": 'print("Hello World")',
         "approved": False,
     }
@@ -106,7 +107,7 @@ def test_execute_skill_success(skill_config_data, client, mock_firestore_client)
 
     response = client.post("/v1/api/skill/execute", json={"id": skill_config_data["id"], "user_prompt": "test prompt"})
     assert response.status_code == 200
-    assert response.json() == {"skill_output": "Execution result"}
+    assert response.json()["data"] == "Execution result"
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

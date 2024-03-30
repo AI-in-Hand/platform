@@ -12,6 +12,7 @@ from backend.models.response_models import (
     BaseResponse,
     CreateSkillVersionData,
     CreateSkillVersionResponse,
+    ExecuteSkillResponse,
     GetSkillListResponse,
     GetSkillResponse,
 )
@@ -118,7 +119,7 @@ async def execute_skill(
     request: SkillExecutePostRequest,
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
     skill_service: SkillService = Depends(SkillService),
-):
+) -> ExecuteSkillResponse:
     """Execute a skill."""
     config = storage.load_by_id(request.id)
     if not config:
@@ -137,4 +138,4 @@ async def execute_skill(
 
     output = skill_service.execute_skill(config.title, request.user_prompt)
 
-    return {"skill_output": output}
+    return ExecuteSkillResponse(data=output)

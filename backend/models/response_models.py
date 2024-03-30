@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 from backend.models.skill_config import SkillConfig
@@ -23,6 +25,10 @@ class CreateSkillVersionData(BaseModel):
 
 class CreateSkillVersionResponse(BaseResponse):
     data: CreateSkillVersionData = Field(..., description="The data to be returned.")
+
+
+class ExecuteSkillResponse(BaseResponse):
+    data: Any = Field(..., description="The data to be returned.")
 
 
 class VersionData(BaseModel):
