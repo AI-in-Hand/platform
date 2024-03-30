@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 class AgentConfig(BaseModel):
     """Config for an agent"""
 
-    agent_id: str | None = Field(None, description="Unique identifier for the configuration")
+    id: str | None = Field(None, description="Unique identifier for the configuration")
     owner_id: str | None = Field(None, description="The user ID owning this configuration")
     name: str = Field(..., description="Name of the agent (must be globally unique)")
     description: str = Field(..., description="Description of the agent")

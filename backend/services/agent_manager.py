@@ -19,13 +19,7 @@ class AgentManager:
         self.storage = storage
 
     async def create_or_update_agent(self, config: AgentConfig) -> str:
-        """Create or update an agent. If the agent already exists, it will be updated.
-
-        Args:
-            config (AgentConfig): agent configuration
-        Returns:
-            str: agent_id
-        """
+        """Create or update an agent. If the agent already exists, it will be updated."""
 
         # FIXME: a workaround explained at the top of the file api/agent.py
         if not config.name.endswith(f" ({config.owner_id})"):
@@ -36,12 +30,12 @@ class AgentManager:
         if not agent.id:
             logger.error(f"Agent id could not be initialized for {config}.")
             raise RuntimeError("Agent id could not be initialized.")
-        config.agent_id = agent.id
+        config.id = agent.id
         await asyncio.to_thread(self.storage.save, config)
         return agent.id
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentConfig] | None:
-        config = await asyncio.to_thread(self.storage.load_by_agent_id, agent_id)
+        config = await asyncio.to_thread(self.storage.load_by_id, agent_id)
         if not config:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None
@@ -51,7 +45,7 @@ class AgentManager:
 
     def _construct_agent(self, agent_config: AgentConfig) -> Agent:
         agent = Agent(
-            id=agent_config.agent_id,
+            id=agent_config.id,
             name=agent_config.name,
             description=agent_config.description,
             instructions=agent_config.instructions,

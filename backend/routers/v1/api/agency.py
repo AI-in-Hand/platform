@@ -76,7 +76,7 @@ async def update_or_create_agency(
 
     # check that all used agents belong to the current user
     for agent_id in agency_config.agents:
-        agent_config = await asyncio.to_thread(agent_storage.load_by_agent_id, agent_id)
+        agent_config = await asyncio.to_thread(agent_storage.load_by_id, agent_id)
         if not agent_config:
             logger.error(f"Agent not found: {agent_id}, user: {current_user.id}")
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Agent not found: {agent_id}")
