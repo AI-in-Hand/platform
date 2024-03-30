@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
@@ -82,9 +83,9 @@ async def create_skill_version(
     # Ensure the skill is associated with the current user
     config.owner_id = current_user.id
 
-    # Increment version and set approved to False
     config.version = skill_config_db.version + 1 if skill_config_db else 1
     config.approved = False
+    config.timestamp = datetime.now(UTC).isoformat()
 
     if not config.description and config.content:
         config.description = generate_skill_description(config.content)

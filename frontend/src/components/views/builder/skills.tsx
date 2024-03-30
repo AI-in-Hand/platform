@@ -64,7 +64,7 @@ const SkillsView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        setSkills(data.data);
+        fetchSkills();
       } else {
         message.error(data.message);
       }
@@ -124,7 +124,7 @@ const SkillsView = ({}: any) => {
       if (data && data.status) {
         message.success(data.message);
         // console.log("skills", data.data);
-        setSkills(data.data);
+        fetchSkills();
       } else {
         message.error(data.message);
       }
