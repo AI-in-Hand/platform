@@ -9,7 +9,7 @@ import {
   IStatus,
 } from "./types";
 import { message } from "antd";
-import { getAuth, getIdToken } from "firebase/auth";
+import { auth } from '../firebase/firebase-config';
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
 
@@ -72,10 +72,7 @@ export function checkAndRefreshToken() {
     const { expiresIn } = state.user;
 
     if (Date.now() >= expiresIn) {
-      const auth = getAuth();
       const user = auth.currentUser;
-      console.log("Debug: Auth object:", auth);
-      console.log("Debug: Current user:", user);
       if (user) {
         user.getIdToken(true).then((newToken) => {
           const newExpiresIn = Date.now() + (59 * 60) * 1000; // 1 hour from now, minus 1 minute
@@ -93,6 +90,8 @@ export function checkAndRefreshToken() {
         });
       } else {
         console.error("No user found. Please login again.");
+        console.log("Debug: Auth object:", auth);
+        console.log("Debug: Current user:", user);
         resolve(false);
       }
     } else {
