@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import {Button, Form, Input, message, Spin, Typography} from "antd";
 import {REGEXP_EMAIL} from "../helpers/constants";
-import {getAuth, sendSignInLinkToEmail} from "firebase/auth";
+import { sendSignInLinkToEmail } from "firebase/auth";
+import { auth } from '../firebase/firebase-config';
 import {useDispatch} from "react-redux";
 import {SetEmail} from "../store/actions/usersActions";
 
@@ -10,7 +11,6 @@ const Login = () => {
     const signInVerifyUrl = `${window.location.origin}/sign-in-verify`;
     const [loading, setLoading] = useState(false);
     function handleRegister(data: {email: string}) {
-        const auth = getAuth();
         sendSignInLinkToEmail (auth, data.email, {handleCodeInApp: true, url: signInVerifyUrl}).then((res) => {
             dispatch(SetEmail(data.email))
             message.success("Please check your email for your login link");

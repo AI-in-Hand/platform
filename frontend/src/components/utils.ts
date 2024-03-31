@@ -9,7 +9,7 @@ import {
   IStatus,
 } from "./types";
 import { message } from "antd";
-import { getAuth, getIdToken } from "firebase/auth";
+import { auth } from '../firebase/firebase-config';
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
 
@@ -72,15 +72,14 @@ export function checkAndRefreshToken() {
     const { expiresIn } = state.user;
 
     if (Date.now() >= expiresIn) {
-      const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
-        user.getIdToken(true).then((res) => {
-          const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
+        user.getIdToken(true).then((newToken) => {
+          const newExpiresIn = Date.now() + (59 * 60) * 1000; // 1 hour from now, minus 1 minute
           store.dispatch(
             RefreshToken({
-              token: res,
-              expiresIn,
+              token: newToken,
+              expiresIn: newExpiresIn,
             })
           );
           resolve(true);
@@ -90,6 +89,9 @@ export function checkAndRefreshToken() {
           resolve(false);
         });
       } else {
+        console.error("No user found. Please login again.");
+        console.log("Debug: Auth object:", auth);
+        console.log("Debug: Current user:", user);
         resolve(false);
       }
     } else {
@@ -135,7 +137,9 @@ export function fetchJSON(
         });
         return;
       }
-      response.json().then(onSuccess);
+      response.json().then(function (data) {
+        onSuccess(data);
+      });
     })
     .catch(function (err) {
       console.log("Fetch Error :-S", err);
@@ -143,12 +147,6 @@ export function fetchJSON(
         status: false,
         message: `There was an error connecting to server. (${err}) `,
       });
-    });
-  }).catch((error) => {
-    console.error("Error in checkAndRefreshToken:", error);
-    onError({
-      status: false,
-      message: "Error in token refresh process.",
     });
   });
 }

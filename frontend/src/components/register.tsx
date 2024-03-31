@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import { message } from "antd";
-import {getAuth, signInWithEmailLink} from "firebase/auth";
+import { signInWithEmailLink } from "firebase/auth";
+import { auth } from '../firebase/firebase-config';
 import { navigate} from "gatsby";
 import {useDispatch, useSelector} from "react-redux";
 import {SignIn} from "../store/actions/usersActions";
@@ -10,7 +11,6 @@ const LogInVerify = () => {
     // @ts-ignore
     const email = useSelector(store => store.user.email);
     function handleLogin(email: string) {
-        const auth = getAuth();
         // @ts-ignore
         signInWithEmailLink(auth, email, location.href)
           .then((res) => {
