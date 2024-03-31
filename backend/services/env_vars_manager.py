@@ -6,11 +6,11 @@ No need to use:
 environment_vars = ContextVar('environment_vars')
 # in the API routers:
 environment_vars_old = environment_vars.get()
-environment_vars_old.update({'owner_id': owner_id})
+environment_vars_old.update({'user_id': user_id})
 environment_vars.set(environment_vars_old)
 
 # It all turns into one line when using the ContextEnvVarsManager:
-ContextEnvVarsManager.set('owner_id', owner_id)
+ContextEnvVarsManager.set('user_id', user_id)
 """
 
 from contextvars import ContextVar

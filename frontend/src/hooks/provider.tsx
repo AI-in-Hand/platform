@@ -8,6 +8,7 @@ import {ResetState} from "../store/actions/usersActions";
 import {useDispatch} from "react-redux";
 
 export interface IUser {
+  id: string;
   name: string;
   email?: string;
   username?: string;

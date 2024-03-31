@@ -19,14 +19,14 @@ class EnvConfigManager:
 
     def get_by_key(self, key: str) -> str:
         """Get the environment variable by key."""
-        owner_id = ContextEnvVarsManager.get("owner_id")
-        if not owner_id:
-            logger.error("owner_id not found in the environment variables.")
-            raise ValueError("owner_id not found in the environment variables.")
-        config = self._env_config_storage.get_config(owner_id)
+        user_id = ContextEnvVarsManager.get("user_id")
+        if not user_id:
+            logger.error("user_id not found in the environment variables.")
+            raise ValueError("user_id not found in the environment variables.")
+        config = self._env_config_storage.get_config(user_id)
         if not config:
-            logger.warning(f"Environment variables not set for the user: {owner_id}")
-            raise ValueError(f"Environment variables not set for the user: {owner_id}")
+            logger.warning(f"Environment variables not set for the user: {user_id}")
+            raise ValueError(f"Environment variables not set for the user: {user_id}")
         value = config.get(key)
         if not value:
             logger.warning(f"{key} not found for the given user.")
@@ -35,12 +35,12 @@ class EnvConfigManager:
 
     def set_by_key(self, key: str, value: str) -> None:
         """Set the environment variable by key."""
-        owner_id = ContextEnvVarsManager.get("owner_id")
-        if not owner_id:
-            logger.error("owner_id not found in the environment variables.")
-            raise ValueError("owner_id not found in the environment variables.")
-        config = self._env_config_storage.get_config(owner_id)
+        user_id = ContextEnvVarsManager.get("user_id")
+        if not user_id:
+            logger.error("user_id not found in the environment variables.")
+            raise ValueError("user_id not found in the environment variables.")
+        config = self._env_config_storage.get_config(user_id)
         if not config:
             config = {}
         config[key] = self._encryption_service.encrypt(value)
-        self._env_config_storage.set_config(owner_id, config)
+        self._env_config_storage.set_config(user_id, config)

@@ -22,8 +22,8 @@ class AgentManager:
         """Create or update an agent. If the agent already exists, it will be updated."""
 
         # FIXME: a workaround explained at the top of the file api/agent.py
-        if not config.name.endswith(f" ({config.owner_id})"):
-            config.name = f"{config.name} ({config.owner_id})"
+        if not config.name.endswith(f" ({config.user_id})"):
+            config.name = f"{config.name} ({config.user_id})"
 
         agent = await asyncio.to_thread(self._construct_agent, config)
         await asyncio.to_thread(agent.init_oai)  # initialize the openai agent to get the id

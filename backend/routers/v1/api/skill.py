@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 skill_router = APIRouter(tags=["skill"])
 
 
-# FIXME: current limitation on skills: we always use common skills (owner_id=None).
+# FIXME: current limitation on skills: we always use common skills (user_id=None).
 # TODO: support dynamic loading of skills.
 
 
@@ -34,7 +34,7 @@ async def get_skill_list(
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ) -> GetSkillListResponse:
     """Get a list of configs for all skills."""
-    skills = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
+    skills = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
     return GetSkillListResponse(data=skills)
 
 
@@ -52,7 +52,7 @@ async def get_skill_config(
         logger.warning(f"Skill not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
     # check if the current_user has permissions to get the skill config
-    if config.owner_id and config.owner_id != current_user.id:
+    if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to get the skill: {config.id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     return GetSkillResponse(data=config)
@@ -68,7 +68,7 @@ async def create_skill_version(
     skill_config_db = None
 
     # support template configs:
-    if not config.owner_id:
+    if not config.user_id:
         config.id = None
     else:
         # check if the current_user has permissions
@@ -77,12 +77,12 @@ async def create_skill_version(
             if not skill_config_db:
                 logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
-            if skill_config_db.owner_id != current_user.id:
+            if skill_config_db.user_id != current_user.id:
                 logger.warning(f"User {current_user.id} does not have permissions to update the skill: {config.id}")
                 raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Ensure the skill is associated with the current user
-    config.owner_id = current_user.id
+    config.user_id = current_user.id
 
     config.version = skill_config_db.version + 1 if skill_config_db else 1
     config.approved = False
@@ -127,7 +127,7 @@ async def execute_skill(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
     # check if the current_user has permissions to execute the skill
-    if config.owner_id and config.owner_id != current_user.id:
+    if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to execute the skill: {config.id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 

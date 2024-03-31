@@ -10,7 +10,7 @@ def agent_data():
     return {
         "id": "agent1",
         "name": "example_name",
-        "owner_id": TEST_USER_ID,
+        "user_id": TEST_USER_ID,
         "description": "An example agent",
         "instructions": "Do something important",
         "files_folder": None,

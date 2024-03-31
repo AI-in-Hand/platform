@@ -5,7 +5,7 @@ class SkillConfig(BaseModel):
     """Skill configuration model"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
-    owner_id: str | None = Field(None, description="The user ID owning this configuration")
+    user_id: str | None = Field(None, description="The user ID owning this configuration")
     title: str = Field(..., description="Name of the skill")
     description: str = Field("", description="Description of the skill")
     version: int = Field(1, description="Version of the skill configuration")

@@ -10,7 +10,7 @@ from tests.test_utils import TEST_USER_ID
 def skill_config_data():
     return {
         "id": "skill1",
-        "owner_id": TEST_USER_ID,
+        "user_id": TEST_USER_ID,
         "title": "Skill 1",
         "description": "",
         "version": 1,
@@ -40,7 +40,7 @@ def test_get_skill_config_success(skill_config_data, client, mock_firestore_clie
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_skill_config_forbidden(skill_config_data, client, mock_firestore_client):
-    skill_config_data["owner_id"] = "different_user"
+    skill_config_data["user_id"] = "different_user"
     mock_firestore_client.setup_mock_data("skill_configs", skill_config_data["id"], skill_config_data)
 
     response = client.get(f"/v1/api/skill?id={skill_config_data['id']}")
@@ -89,8 +89,8 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_skill_config_owner_id_mismatch(skill_config_data, client, mock_firestore_client):
-    skill_config_data["owner_id"] = "another_user"
+def test_update_skill_config_user_id_mismatch(skill_config_data, client, mock_firestore_client):
+    skill_config_data["user_id"] = "another_user"
 
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
 

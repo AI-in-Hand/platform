@@ -5,7 +5,7 @@ class AgentConfig(BaseModel):
     """Config for an agent"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
-    owner_id: str | None = Field(None, description="The user ID owning this configuration")
+    user_id: str | None = Field(None, description="The user ID owning this configuration")
     name: str = Field(..., description="Name of the agent (must be globally unique)")
     description: str = Field(..., description="Description of the agent")
     instructions: str = Field(..., description="Instructions for the agent")

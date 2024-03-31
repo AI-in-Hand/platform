@@ -27,7 +27,7 @@ async def get_session_list(
     storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
 ):
     """Return a list of all sessions for the current user."""
-    session_configs = storage.load_by_owner_id(current_user.id)
+    session_configs = storage.load_by_user_id(current_user.id)
     return session_configs
 
 
@@ -46,14 +46,14 @@ async def create_session(
     if not agency_config_db:
         logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    if agency_config_db.owner_id != current_user.id:
+    if agency_config_db.user_id != current_user.id:
         logger.warning(
             f"User {current_user.id} does not have permissions to create a session for the agency: {agency_id}"
         )
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
-    # Set the owner_id in the context variables
-    ContextEnvVarsManager.set("owner_id", current_user.id)
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
 
     logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
 
@@ -62,7 +62,7 @@ async def create_session(
         logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
-    session_id = session_manager.create_session(agency, agency_id=agency_id, owner_id=current_user.id)
+    session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
 
     await agency_manager.cache_agency(agency, agency_id, session_id)
     return {"session_id": session_id}

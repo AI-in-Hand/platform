@@ -9,7 +9,7 @@ from tests.test_utils import TEST_USER_ID
 def skill_data():
     return {
         "id": "skill1",
-        "owner_id": TEST_USER_ID,
+        "user_id": TEST_USER_ID,
         "title": "Example Skill",
         "version": 1,
         "content": 'print("Hello, World!")',
@@ -21,7 +21,7 @@ def test_load_skill_config_by_user_id(mock_firestore_client, skill_data):
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_data)
 
     storage = SkillConfigFirestoreStorage()
-    loaded_skill_configs = storage.load_by_owner_id(skill_data["owner_id"])
+    loaded_skill_configs = storage.load_by_user_id(skill_data["user_id"])
 
     expected_skill_config = SkillConfig.model_validate(skill_data)
     assert loaded_skill_configs == [expected_skill_config]

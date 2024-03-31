@@ -37,12 +37,12 @@ async def get_message_list(
     if not session_config:
         logger.warning(f"Session not found: {session_id}, requested by user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
-    if session_config.owner_id != current_user.id:
+    if session_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
-    # Set the owner_id in the context variables
-    ContextEnvVarsManager.set("owner_id", current_user.id)
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client(env_config_manager)
@@ -68,12 +68,12 @@ async def post_message(
     if not agency_config:
         logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    if agency_config.owner_id != user_id:
+    if agency_config.user_id != user_id:
         logger.warning(f"User {user_id} does not have permissions to access agency {agency_id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
-    # Set the owner_id and agency_id in the context variables
-    ContextEnvVarsManager.set("owner_id", user_id)
+    # Set the user_id and agency_id in the context variables
+    ContextEnvVarsManager.set("user_id", user_id)
     ContextEnvVarsManager.set("agency_id", agency_id)
 
     logger.info(f"Received message: {user_message}, agency_id: {agency_id}, session_id: {session_id}")

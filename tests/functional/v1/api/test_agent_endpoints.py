@@ -11,7 +11,7 @@ AGENT_ID = "agent1"
 def agent_config_data():
     return {
         "id": AGENT_ID,
-        "owner_id": TEST_USER_ID,
+        "user_id": TEST_USER_ID,
         "name": "ExampleRole",
         "description": "An example agent.",
         "instructions": "Do something important.",
@@ -53,9 +53,9 @@ def test_update_agent_config_success(client, agent_config_data, mock_firestore_c
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_agent_config_owner_id_mismatch(client, agent_config_data, mock_firestore_client):
+def test_update_agent_config_user_id_mismatch(client, agent_config_data, mock_firestore_client):
     agent_data_db = agent_config_data.copy()
-    agent_data_db["owner_id"] = "other_user"
+    agent_data_db["user_id"] = "other_user"
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data_db)
 
     response = client.put("/v1/api/agent", json=agent_config_data)

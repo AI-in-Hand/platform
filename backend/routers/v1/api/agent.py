@@ -19,7 +19,7 @@ agent_router = APIRouter(tags=["agent"])
 
 
 # FIXME: agent name should be unique (agency-swarm gets it by name from settings.json).
-# The current workaround: we append the owner id to the agent name to make it unique.
+# The current workaround: we append the user_id to the agent name to make it unique.
 # Renaming is not supported yet.
 
 
@@ -28,7 +28,7 @@ async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> GetAgentListResponse:
-    agents = storage.load_by_owner_id(current_user.id) + storage.load_by_owner_id(None)
+    agents = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
     return GetAgentListResponse(data=agents)
 
 
@@ -43,7 +43,7 @@ async def get_agent_config(
         logger.warning(f"Agent not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
     # check if the current user is the owner of the agent
-    if config.owner_id and config.owner_id != current_user.id:
+    if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     return GetAgentResponse(data=config)
@@ -57,7 +57,7 @@ async def create_or_update_agent(
     storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
 ) -> CreateAgentResponse:
     # support template configs:
-    if not config.owner_id:
+    if not config.user_id:
         logger.info(f"Creating agent for user: {current_user.id}, agent: {config.name}")
         config.id = None
     else:
@@ -67,7 +67,7 @@ async def create_or_update_agent(
             if not agent_config_db:
                 logger.warning(f"Agent not found: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-            if agent_config_db.owner_id != current_user.id:
+            if agent_config_db.user_id != current_user.id:
                 logger.warning(f"User {current_user.id} does not have permissions to access agent: {config.id}")
                 raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed
@@ -76,10 +76,10 @@ async def create_or_update_agent(
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     # Ensure the agent is associated with the current user
-    config.owner_id = current_user.id
+    config.user_id = current_user.id
 
-    # Set the owner_id in the context variables
-    ContextEnvVarsManager.set("owner_id", current_user.id)
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
 
     agent_id = await agent_manager.create_or_update_agent(config)
 

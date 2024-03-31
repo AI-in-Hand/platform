@@ -14,12 +14,12 @@ class SessionManager:
         self.env_config_manager = env_config_manager
         self.session_storage = session_storage
 
-    def create_session(self, agency: Agency, agency_id: str, owner_id: str) -> str:
+    def create_session(self, agency: Agency, agency_id: str, user_id: str) -> str:
         """Create a new session for the given agency and return its id."""
         session_id = self._create_threads(agency)
         session_config = SessionConfig(
             session_id=session_id,
-            owner_id=owner_id,
+            user_id=user_id,
             agency_id=agency_id,
             created_at=int(datetime.utcnow().timestamp()),
         )
