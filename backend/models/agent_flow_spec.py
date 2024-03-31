@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, conlist
 
 from backend.models.skill_config import SkillConfig
 
@@ -27,7 +27,9 @@ class AgentFlowSpec(BaseModel):
     type: Literal["assistant", "userproxy", "groupchat"] = Field("userproxy", description="Type of the agent")
     config: AgentConfig = Field(..., description="Agent configuration")
     timestamp: str | None = Field(None, description="Timestamp of the last update")
-    skills: list[str] = Field(default_factory=list, description="List of skill names equipped by the agent")
+    skills: conlist(str, max_length=10) = Field(  # type: ignore
+        default_factory=list, description="List of skill titles"
+    )
     description: str = Field("", description="Description of the agent")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
 
@@ -35,6 +37,6 @@ class AgentFlowSpec(BaseModel):
 class AgentFlowSpecForAPI(AgentFlowSpec):
     """Config for an agent, corresponds to IAgentFlowSpec in the frontend"""
 
-    skills: list[SkillConfig] = Field(  # type: ignore
+    skills: conlist(SkillConfig, max_length=10) = Field(  # type: ignore
         default_factory=list, description="List of skill configurations equipped by the agent"
     )

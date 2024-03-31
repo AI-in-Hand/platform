@@ -65,7 +65,11 @@ class MockFirestoreClient:
         matching_docs = []
         collection = self._collections.get(self._current_collection, {})
         for doc_id, doc in collection.items():
-            if doc.get(self._where_field) == self._where_value:
+            doc_value = doc.get(self._where_field)
+            if self._where_op == "in":
+                if doc_value in self._where_value:
+                    matching_docs.append(MockDocumentSnapshot(doc_id, doc))
+            elif self._where_op == "==" and doc_value == self._where_value:
                 matching_docs.append(MockDocumentSnapshot(doc_id, doc))
         return iter(matching_docs)
 
