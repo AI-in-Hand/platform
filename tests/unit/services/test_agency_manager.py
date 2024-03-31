@@ -57,7 +57,7 @@ async def test_get_agency_repopulate_cache(agency_manager):
 async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id=TEST_AGENCY_ID,
-        owner_id=TEST_USER_ID,
+        user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Initial manifesto",
         agents=["agent1_id"],
@@ -91,7 +91,7 @@ async def test_repopulate_cache_no_config(agency_manager, caplog):
 async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         agency_id=TEST_AGENCY_ID,
-        owner_id=TEST_USER_ID,
+        user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",
         agents=["agent1_id"],
@@ -122,7 +122,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
 async def test_load_and_construct_agents_success(agency_manager):
     agency_config = AgencyConfig(
         agency_id=TEST_AGENCY_ID,
-        owner_id=TEST_USER_ID,
+        user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
         agents=["agent1_id"],
@@ -149,7 +149,7 @@ async def test_load_and_construct_agents_success(agency_manager):
 async def test_load_and_construct_agents_agent_not_found(agency_manager):
     agency_config = AgencyConfig(
         agency_id=TEST_AGENCY_ID,
-        owner_id=TEST_USER_ID,
+        user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
         agents=["agent1_id"],
@@ -171,7 +171,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     # Mock AgencyConfig
     agency_config = AgencyConfig(
         agency_id=TEST_AGENCY_ID,
-        owner_id=TEST_USER_ID,
+        user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",
         agents=["agent1_id", "agent2_id"],

@@ -14,7 +14,7 @@ from tests.test_utils.constants import TEST_AGENCY_ID
 def session_config_data():
     return {
         "session_id": "test_session_id",
-        "owner_id": TEST_USER_ID,
+        "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
         "created_at": 1234567890,
     }
@@ -38,9 +38,9 @@ def test_create_session_success(client, mock_firestore_client):
         ) as mock_create_threads,
         patch.object(AgencyManager, "cache_agency", AsyncMock()) as mock_cache_agency,
     ):
-        # mock Firestore to pass the security owner_id check
+        # mock Firestore to pass the security user_id check
         mock_firestore_client.setup_mock_data(
-            "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "owner_id": TEST_USER_ID}
+            "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "user_id": TEST_USER_ID}
         )
 
         # Create request data
@@ -57,7 +57,7 @@ def test_create_session_success(client, mock_firestore_client):
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {
             "session_id": "new_session_id",
-            "owner_id": TEST_USER_ID,
+            "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
             "created_at": mock.ANY,
         }

@@ -8,7 +8,7 @@ import {
 import { Button, Dropdown, MenuProps, Modal, message } from "antd";
 import * as React from "react";
 import { IChatSession, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
 import { LaunchButton, LoadingOverlay } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
@@ -21,7 +21,7 @@ const SessionsView = ({}: any) => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listSessionUrl = `${serverUrl}/session/list`;
   const createSessionUrl = `${serverUrl}/session`;
@@ -45,10 +45,7 @@ const SessionsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        session: session,
-      }),
+      body: JSON.stringify(session),
     };
 
     const onSuccess = (data: any) => {
@@ -108,7 +105,6 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
       session: session,
       tags: ["published"],
     };
@@ -153,9 +149,7 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
       session: {
-        user_id: user?.email,
         flow_config: workflowConfig,
         session_id: null,
       },

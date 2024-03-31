@@ -21,8 +21,8 @@ def test_set_method():
 
 
 def test_get_method_success():
-    ContextEnvVarsManager.set("owner_id", TEST_USER_ID)
-    assert ContextEnvVarsManager.get("owner_id") == TEST_USER_ID
+    ContextEnvVarsManager.set("user_id", TEST_USER_ID)
+    assert ContextEnvVarsManager.get("user_id") == TEST_USER_ID
 
 
 def test_get_method_no_key():
@@ -31,8 +31,8 @@ def test_get_method_no_key():
 
 
 def test_get_all_method_success():
-    ContextEnvVarsManager.set("owner_id", TEST_USER_ID)
-    assert ContextEnvVarsManager.get_all() == {"owner_id": TEST_USER_ID}
+    ContextEnvVarsManager.set("user_id", TEST_USER_ID)
+    assert ContextEnvVarsManager.get_all() == {"user_id": TEST_USER_ID}
 
 
 def test_get_all_method_empty():

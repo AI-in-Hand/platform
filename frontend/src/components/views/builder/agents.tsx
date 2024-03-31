@@ -6,7 +6,7 @@ import {
 import { Modal, message } from "antd";
 import * as React from "react";
 import { IAgentFlowSpec, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
 import {
   AgentFlowSpecView,
@@ -24,7 +24,7 @@ const AgentsView = ({}: any) => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listAgentsUrl = `${serverUrl}/agent/list`;
   const saveAgentsUrl = `${serverUrl}/agent`;
@@ -41,7 +41,6 @@ const AgentsView = ({}: any) => {
   const sampleAgent: IAgentFlowSpec = {
     type: "assistant",
     description: "Sample assistant",
-    user_id: user?.email,
     config: {
       name: "sample_assistant",
       llm_config: {
@@ -72,17 +71,13 @@ const AgentsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        agent: agent,
-      }),
+      body: JSON.stringify(agent),
     };
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        console.log("agents", data.data);
-        setAgents(data.data);
+        fetchAgents();
       } else {
         message.error(data.message);
       }
@@ -109,7 +104,7 @@ const AgentsView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         // message.success(data.message);
-
+        console.log("agents", data.data);
         setAgents(data.data);
       } else {
         message.error(data.message);
@@ -135,17 +130,13 @@ const AgentsView = ({}: any) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        agent: agent,
-      }),
+      body: JSON.stringify(agent),
     };
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        // console.log("agents", data.data);
-        setAgents(data.data);
+        fetchAgents();
       } else {
         message.error(data.message);
       }
@@ -162,7 +153,6 @@ const AgentsView = ({}: any) => {
 
   React.useEffect(() => {
     if (user) {
-      // console.log("fetching messages", messages);
       fetchAgents();
     }
   }, []);

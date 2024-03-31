@@ -6,7 +6,7 @@ import {
 import { Button, Input, Modal, message } from "antd";
 import * as React from "react";
 import { ISkill, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import {
   fetchJSON,
   getSampleSkill,
@@ -31,7 +31,7 @@ const SkillsView = ({}: any) => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;
@@ -55,16 +55,13 @@ const SkillsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        skill: skill,
-      }),
+      body: JSON.stringify(skill),
     };
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        setSkills(data.data);
+        fetchSkills();
       } else {
         message.error(data.message);
       }
@@ -124,7 +121,7 @@ const SkillsView = ({}: any) => {
       if (data && data.status) {
         message.success(data.message);
         // console.log("skills", data.data);
-        setSkills(data.data);
+        fetchSkills();
       } else {
         message.error(data.message);
       }

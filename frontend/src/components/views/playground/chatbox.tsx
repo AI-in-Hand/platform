@@ -16,7 +16,6 @@ import {
   IStatus,
 } from "../../types";
 import { examplePrompts, fetchJSON, getServerUrl, guid } from "../../utils";
-import { appContext } from "../../../hooks/provider";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
@@ -31,7 +30,6 @@ const ChatBox = ({
   const session: IChatSession | null = useConfigStore((state) => state.session);
   const textAreaInputRef = React.useRef<HTMLTextAreaElement>(null);
   const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
-  const { user } = React.useContext(appContext);
 
   const serverUrl = getServerUrl();
   const deleteMsgUrl = `${serverUrl}/message/delete`;
@@ -249,7 +247,6 @@ const ChatBox = ({
       role: "user",
       content: query,
       msg_id: userMessage.msg_id,
-      user_id: user?.email || "",
       root_msg_id: "0",
       session_id: session?.id || "",
     };

@@ -9,7 +9,7 @@ import {SignIn} from "../store/actions/usersActions";
 const LogInVerify = () => {
     const dispatch = useDispatch();
     // @ts-ignore
-    const email = useSelector(store => store.user.email);
+    const email = useSelector(state => state.user.email);
     function handleLogin(email: string) {
         // @ts-ignore
         signInWithEmailLink(auth, email, location.href)

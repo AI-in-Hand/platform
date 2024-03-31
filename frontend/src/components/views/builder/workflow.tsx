@@ -11,7 +11,7 @@ import {
 import { Button, Dropdown, MenuProps, Modal, Tooltip, message } from "antd";
 import * as React from "react";
 import { IFlowConfig, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import {
   fetchJSON,
   getServerUrl,
@@ -34,7 +34,7 @@ const WorkflowView = ({}: any) => {
     status: true,
     message: "All good",
   });
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listWorkflowsUrl = `${serverUrl}/agency/list`;
   const saveWorkflowsUrl = `${serverUrl}/agency`;
@@ -90,10 +90,7 @@ const WorkflowView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        workflow: workflow,
-      }),
+      body: JSON.stringify(workflow),
     };
 
     const onSuccess = (data: any) => {
@@ -123,10 +120,7 @@ const WorkflowView = ({}: any) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        workflow: workflow,
-      }),
+      body: JSON.stringify(workflow),
     };
 
     const onSuccess = (data: any) => {
@@ -221,7 +215,6 @@ const WorkflowView = ({}: any) => {
                     e.stopPropagation();
                     let newWorkflow = { ...workflow };
                     newWorkflow.name = `${workflow.name} Copy`;
-                    newWorkflow.user_id = user?.email;
                     newWorkflow.timestamp = new Date().toISOString();
                     delete newWorkflow.id;
                     setNewWorkflow(newWorkflow);

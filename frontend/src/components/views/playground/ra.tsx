@@ -2,7 +2,7 @@ import * as React from "react";
 import { IChatSession, IMessage, IStatus } from "../../types";
 import { fetchJSON, getServerUrl, setLocalStorage } from "../../utils";
 import ChatBox from "./chatbox";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { message } from "antd";
 import SideBarView from "./sidebar";
 import { useConfigStore } from "../../../hooks/store";
@@ -30,7 +30,7 @@ const RAView = () => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
   const workflowConfig = useConfigStore((state) => state.workflowConfig);

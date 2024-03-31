@@ -69,9 +69,10 @@ if __name__ == "__main__":
     print(
         PrintAllFilesInPath(
             start_path=".",
-            file_extensions=[],
+            # file_extensions=[],
+            file_extensions=[".tsx", ".ts"],
             exclude_directories=[
-                "frontend",
+                # "frontend",
                 "__pycache__",
                 ".git",
                 ".idea",

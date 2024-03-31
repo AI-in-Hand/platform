@@ -64,13 +64,13 @@ def test_set_by_key_success(mock_get, mock_firestore_client):
     mock_get.assert_called_once()
 
 
-# Test 6: Attempt to set a variable when owner_id is missing
+# Test 6: Attempt to set a variable when user_id is missing
 @patch("backend.services.env_vars_manager.ContextEnvVarsManager.get", return_value=None)
-def test_set_by_key_no_owner_id(mock_get):
+def test_set_by_key_no_user_id(mock_get):
     manager = EnvConfigManager(env_config_storage=EnvConfigFirestoreStorage())
     with pytest.raises(ValueError) as exc_info:
         manager.set_by_key("SOME_KEY", "some_value")
-    assert "owner_id not found in the environment variables." in str(exc_info.value)
+    assert "user_id not found in the environment variables." in str(exc_info.value)
     mock_get.assert_called_once()
 
 

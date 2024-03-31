@@ -4,7 +4,7 @@ import { LoadingOverlay } from "../../atoms";
 import { IFlowConfig, IStatus } from "../../types";
 import { useConfigStore } from "../../../hooks/store";
 import { fetchJSON, getServerUrl } from "../../utils";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { Link } from "gatsby";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 
@@ -18,7 +18,7 @@ const AgentsWorkflowView = () => {
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
   const setWorkflowConfig = useConfigStore((state) => state.setWorkflowConfig);
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listWorkflowsUrl = `${serverUrl}/agency/list`;
 

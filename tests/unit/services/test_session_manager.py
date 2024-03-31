@@ -56,12 +56,12 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
 
     with patch("backend.services.session_manager.datetime") as mock_datetime:
         mock_datetime.utcnow.return_value = datetime(2021, 1, 1, tzinfo=UTC)
-        session_id = session_manager.create_session(agency_mock, "agency_id", "owner_id")
+        session_id = session_manager.create_session(agency_mock, "agency_id", "user_id")
 
     assert session_id == "main_thread_id", "The session ID should be the ID of the main thread."
     expected_session_config = SessionConfig(
         session_id="main_thread_id",
-        owner_id="owner_id",
+        user_id="user_id",
         agency_id="agency_id",
         created_at=int(datetime(2021, 1, 1).timestamp()),
     )
