@@ -21,7 +21,6 @@ function classNames(...classes: string[]) {
 const Header = ({ meta, link }: any) => {
   // @ts-ignore
   const { user, loggedIn } = useSelector((state) => state.user);
-  console.log(`user: `, user);
   const userEmail = loggedIn ? user.email : "";
   const userAvatarUrl = "";
   const dispatch = useDispatch();
