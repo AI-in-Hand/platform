@@ -55,10 +55,7 @@ const SkillsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        skill: skill,
-      }),
+      body: JSON.stringify(skill),
     };
 
     const onSuccess = (data: any) => {

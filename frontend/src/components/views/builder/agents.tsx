@@ -41,7 +41,6 @@ const AgentsView = ({}: any) => {
   const sampleAgent: IAgentFlowSpec = {
     type: "assistant",
     description: "Sample assistant",
-    user_id: user?.email,
     config: {
       name: "sample_assistant",
       llm_config: {

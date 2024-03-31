@@ -215,7 +215,6 @@ const WorkflowView = ({}: any) => {
                     e.stopPropagation();
                     let newWorkflow = { ...workflow };
                     newWorkflow.name = `${workflow.name} Copy`;
-                    newWorkflow.user_id = user?.email;
                     newWorkflow.timestamp = new Date().toISOString();
                     delete newWorkflow.id;
                     setNewWorkflow(newWorkflow);

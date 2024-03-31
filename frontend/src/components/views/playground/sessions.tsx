@@ -45,10 +45,7 @@ const SessionsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        session: session,
-      }),
+      body: JSON.stringify(session),
     };
 
     const onSuccess = (data: any) => {
@@ -108,7 +105,6 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
       session: session,
       tags: ["published"],
     };
@@ -153,9 +149,7 @@ const SessionsView = ({}: any) => {
     setLoading(true);
 
     const body = {
-      user_id: user?.email,
       session: {
-        user_id: user?.email,
         flow_config: workflowConfig,
         session_id: null,
       },

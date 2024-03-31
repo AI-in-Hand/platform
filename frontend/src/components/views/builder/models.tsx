@@ -21,7 +21,7 @@ const ModelsView = ({}: any) => {
 
   const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
-  const listModelsUrl = `${serverUrl}/models?user_id=${user?.email}`;
+  const listModelsUrl = `${serverUrl}/models/list`;
   const saveModelsUrl = `${serverUrl}/models`;
   const deleteModelUrl = `${serverUrl}/models/delete`;
   const testModelUrl = `${serverUrl}/models/test`;
@@ -33,7 +33,6 @@ const ModelsView = ({}: any) => {
   const defaultModel: IModelConfig = {
     model: "gpt-4-turbo-preview",
     description: "Sample OpenAI GPT-4 model",
-    user_id: user?.email,
   };
 
   const [models, setModels] = React.useState<IModelConfig[] | null>([]);
@@ -57,10 +56,7 @@ const ModelsView = ({}: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        model: model,
-      }),
+      body: JSON.stringify(model),
     };
 
     const onSuccess = (data: any) => {
@@ -116,10 +112,7 @@ const ModelsView = ({}: any) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id: user?.email,
-        model: model,
-      }),
+      body: JSON.stringify(model),
     };
 
     const onSuccess = (data: any) => {
@@ -218,10 +211,7 @@ const ModelsView = ({}: any) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          user_id: user?.email,
-          model: model,
-        }),
+        body: JSON.stringify(model),
       };
 
       const onSuccess = (data: any) => {
