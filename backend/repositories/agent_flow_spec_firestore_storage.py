@@ -1,27 +1,27 @@
 from firebase_admin import firestore
 from google.cloud.firestore_v1 import FieldFilter
 
-from backend.models.agent_config import AgentConfig
+from backend.models.agent_flow_spec import AgentFlowSpec
 
 
-class AgentConfigFirestoreStorage:
+class AgentFlowSpecFirestoreStorage:
     def __init__(self):
         self.db = firestore.client()
         self.collection_name = "agent_configs"
 
-    def load_by_user_id(self, user_id: str | None = None) -> list[AgentConfig]:
+    def load_by_user_id(self, user_id: str | None = None) -> list[AgentFlowSpec]:
         collection = self.db.collection(self.collection_name)
         query = collection.where(filter=FieldFilter("user_id", "==", user_id))
-        return [AgentConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
+        return [AgentFlowSpec.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
-    def load_by_id(self, id_: str) -> AgentConfig | None:
+    def load_by_id(self, id_: str) -> AgentFlowSpec | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(id_).get()
         if not document_snapshot.exists:
             return None
-        return AgentConfig.model_validate(document_snapshot.to_dict())
+        return AgentFlowSpec.model_validate(document_snapshot.to_dict())
 
-    def save(self, agent_config: AgentConfig) -> str:
+    def save(self, agent_config: AgentFlowSpec) -> str:
         """Save the agent configuration to the Firestore.
         If the agent id is not set, it will create a new document and set the agent id.
         Returns the agent id."""

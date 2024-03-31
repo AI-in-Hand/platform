@@ -9,7 +9,7 @@ and data for agencies, agents, skills, etc.
 - **AgencyConfigFirestoreStorage.py**: Manages the persistence of agency configurations in Firestore,
 providing methods to load and save these configurations based on owner or agency IDs.
 
-- **AgentConfigFirestoreStorage.py**: Similar to its agency counterpart, this file handles the persistence
+- **AgentFlowSpecFirestoreStorage.py**: Similar to its agency counterpart, this file handles the persistence
 of agent configurations, offering functionalities to load and save agent data.
 
 - **SkillConfigFirestoreStorage.py**: Facilitates storing and retrieving skill configurations in Firestore.

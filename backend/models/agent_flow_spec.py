@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class AgentConfig(BaseModel):
+class AgentFlowSpec(BaseModel):
     """Config for an agent"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")

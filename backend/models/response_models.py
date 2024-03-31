@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from backend.models.agent_config import AgentConfig
+from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
 
 
@@ -41,11 +41,11 @@ class ExecuteSkillResponse(BaseResponse):
 
 
 class GetAgentListResponse(BaseResponse):
-    data: list[AgentConfig] = Field(..., description="The list of agent configurations.")
+    data: list[AgentFlowSpec] = Field(..., description="The list of agent configurations.")
 
 
 class GetAgentResponse(BaseResponse):
-    data: AgentConfig = Field(..., description="The agent configuration.")
+    data: AgentFlowSpec = Field(..., description="The agent configuration.")
 
 
 class CreateAgentData(BaseModel):

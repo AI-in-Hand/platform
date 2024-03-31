@@ -11,7 +11,7 @@ from backend.dependencies.dependencies import get_agency_manager
 from backend.models.agency_config import AgencyConfig
 from backend.models.auth import User
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -54,7 +54,7 @@ async def update_or_create_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-    agent_storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    agent_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ):
     """Create or update an agency and return its id"""
     # support template configs:

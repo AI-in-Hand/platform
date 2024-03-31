@@ -1,7 +1,7 @@
 import pytest
 
-from backend.models.agent_config import AgentConfig
-from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from backend.models.agent_flow_spec import AgentFlowSpec
+from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -23,18 +23,18 @@ def test_load_agent_config(mock_firestore_client, agent_data):
     # setup_mock_data(collection_name, document_name, data)
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
-    storage = AgentConfigFirestoreStorage()
+    storage = AgentFlowSpecFirestoreStorage()
     loaded_agent_config = storage.load_by_id(agent_data["id"])
 
-    expected_agent_config = AgentConfig.model_validate(agent_data)
+    expected_agent_config = AgentFlowSpec.model_validate(agent_data)
     assert loaded_agent_config == expected_agent_config
 
 
 def test_save_existing_agent_config(mock_firestore_client, agent_data):
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
-    agent_config = AgentConfig(**agent_data)
-    storage = AgentConfigFirestoreStorage()
+    agent_config = AgentFlowSpec(**agent_data)
+    storage = AgentFlowSpecFirestoreStorage()
     storage.save(agent_config)
 
     serialized_data = agent_config.model_dump()
@@ -47,9 +47,9 @@ def test_save_new_agent_config(mock_firestore_client, agent_data):
     new_agent_data = agent_data.copy()
     # Remove agent id to simulate a new agent
     del new_agent_data["id"]
-    agent_config = AgentConfig(**new_agent_data)
+    agent_config = AgentFlowSpec(**new_agent_data)
 
-    storage = AgentConfigFirestoreStorage()
+    storage = AgentFlowSpecFirestoreStorage()
     storage.save(agent_config)
 
     serialized_data = agent_config.model_dump()

@@ -2,7 +2,7 @@ from fastapi import Depends
 from redis import asyncio as aioredis
 
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from backend.services.agency_manager import AgencyManager
@@ -30,7 +30,7 @@ def get_env_config_manager(
 
 
 def get_agent_manager(
-    storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
     env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> AgentManager:
     return AgentManager(storage, env_config_manager)

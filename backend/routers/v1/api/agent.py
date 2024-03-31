@@ -7,10 +7,10 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agent_manager
-from backend.models.agent_config import AgentConfig
+from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.auth import User
 from backend.models.response_models import CreateAgentData, CreateAgentResponse, GetAgentListResponse, GetAgentResponse
-from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.agent_manager import AgentManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -26,7 +26,7 @@ agent_router = APIRouter(tags=["agent"])
 @agent_router.get("/agent/list")
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentListResponse:
     agents = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
     return GetAgentListResponse(data=agents)
@@ -36,7 +36,7 @@ async def get_agent_list(
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentResponse:
     config = storage.load_by_id(id)
     if not config:
@@ -52,9 +52,9 @@ async def get_agent_config(
 @agent_router.put("/agent")
 async def create_or_update_agent(
     current_user: Annotated[User, Depends(get_current_user)],
-    config: AgentConfig = Body(...),
+    config: AgentFlowSpec = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
-    storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> CreateAgentResponse:
     # support template configs:
     if not config.user_id:
@@ -63,15 +63,15 @@ async def create_or_update_agent(
     else:
         # check if the current_user has permissions
         if config.id:
-            agent_config_db = storage.load_by_id(config.id)
-            if not agent_config_db:
+            agent_flow_spec_db = storage.load_by_id(config.id)
+            if not agent_flow_spec_db:
                 logger.warning(f"Agent not found: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-            if agent_config_db.user_id != current_user.id:
+            if agent_flow_spec_db.user_id != current_user.id:
                 logger.warning(f"User {current_user.id} does not have permissions to access agent: {config.id}")
                 raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed
-            if config.name != agent_config_db.name:
+            if config.name != agent_flow_spec_db.name:
                 logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 

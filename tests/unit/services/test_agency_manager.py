@@ -127,13 +127,13 @@ async def test_load_and_construct_agents_success(agency_manager):
         shared_instructions="Test manifesto",
         agents=["agent1_id"],
     )
-    agent_config_mock = Mock()
-    agent_config_mock.name = "agent1_name"
+    agent_flow_spec_mock = Mock()
+    agent_flow_spec_mock.name = "agent1_name"
     agent_mock = MagicMock(spec=Agent)
     agent_mock.id = "agent1_id"
 
     agent_manager_mock = AsyncMock()
-    agent_manager_mock.get_agent.return_value = (agent_mock, agent_config_mock)
+    agent_manager_mock.get_agent.return_value = (agent_mock, agent_flow_spec_mock)
 
     agency_manager.agent_manager = agent_manager_mock
 
