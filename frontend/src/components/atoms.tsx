@@ -38,7 +38,6 @@ import {
   IAgentFlowSpec,
   IFlowConfig,
   IGroupChatFlowSpec,
-  ILLMConfig,
   IModelConfig,
   ISkill,
   IStatus,
@@ -1087,11 +1086,6 @@ export const AgentFlowSpecView = ({
   // Event handlers for updating local state and propagating changes
 
   const onControlChange = (value: any, key: string) => {
-    if (key === "llm_config") {
-      if (value.config_list.length === 0) {
-        value = false;
-      }
-    }
     const updatedFlowSpec = {
       ...localFlowSpec,
       config: { ...localFlowSpec.config, [key]: value },
@@ -1099,11 +1093,6 @@ export const AgentFlowSpecView = ({
 
     setLocalFlowSpec(updatedFlowSpec);
     setFlowSpec(updatedFlowSpec);
-  };
-
-  const llm_config: ILLMConfig = localFlowSpec.config.llm_config || {
-    config_list: [],
-    temperature: 0.1,
   };
 
   return (
@@ -1152,66 +1141,9 @@ export const AgentFlowSpecView = ({
           }
         />
 
-        {/* <ControlRowView
-          title="Max Consecutive Auto Reply"
-          className="mt-4"
-          description="Max consecutive auto reply messages before termination."
-          value={flowSpec.config.max_consecutive_auto_reply}
-          control={
-            <Slider
-              min={1}
-              max={30}
-              defaultValue={flowSpec.config.max_consecutive_auto_reply}
-              step={1}
-              onChange={(value: any) => {
-                onControlChange(value, "max_consecutive_auto_reply");
-              }}
-            />
-          }
-        />
-
-        <ControlRowView
-          title="Agent Default Auto Reply"
-          className="mt-4"
-          description="Default auto reply when no code execution or llm-based reply is generated."
-          value={flowSpec.config.default_auto_reply || ""}
-          control={
-            <Input
-              className="mt-2"
-              placeholder="Agent Description"
-              value={flowSpec.config.default_auto_reply || ""}
-              onChange={(e) => {
-                onControlChange(e.target.value, "default_auto_reply");
-              }}
-            />
-          }
-        />
-
-        <ControlRowView
-          title="Human Input Mode"
-          description="Defines when to request human input"
-          value={flowSpec.config.human_input_mode}
-          control={
-            <Select
-              className="mt-2 w-full"
-              defaultValue={flowSpec.config.human_input_mode}
-              onChange={(value: any) => {
-                onControlChange(value, "human_input_mode");
-              }}
-              options={
-                [
-                  { label: "NEVER", value: "NEVER" },
-                  // { label: "TERMINATE", value: "TERMINATE" },
-                  // { label: "ALWAYS", value: "ALWAYS" },
-                ] as any
-              }
-            />
-          }
-        /> */}
-
-        {llm_config && llm_config.config_list.length > 0 && (
+        {(
           <ControlRowView
-            title="System Message"
+            title="Instructions"
             className="mt-4"
             description="Free text to control agent behavior"
             value={flowSpec.config.system_message}
@@ -1223,52 +1155,6 @@ export const AgentFlowSpecView = ({
                 onChange={(e) => {
                   // onDebouncedControlChange(e.target.value, "system_message");
                   onControlChange(e.target.value, "system_message");
-                }}
-              />
-            }
-          />
-        )}
-
-        {llm_config && (
-          <ControlRowView
-            title="Model"
-            className="mt-4"
-            description="Defines which models are used for the agent."
-            value={llm_config?.config_list?.[0]?.model}
-            control={
-              <ModelSelector
-                className="mt-2 w-full"
-                configs={llm_config.config_list || []}
-                setConfigs={(config_list: IModelConfig[]) => {
-                  const llm_config = {
-                    ...(flowSpec.config.llm_config || { temperature: 0.1 }),
-                    config_list,
-                  };
-                  onControlChange(llm_config, "llm_config");
-                }}
-              />
-            }
-          />
-        )} */}
-
-        {llm_config && llm_config.config_list.length > 0 && (
-          <ControlRowView
-            title="Temperature"
-            className="mt-4"
-            description="Defines the randomness of the agent's response."
-            value={llm_config.temperature}
-            control={
-              <Slider
-                min={0}
-                max={2}
-                step={0.1}
-                defaultValue={llm_config.temperature || 0.1}
-                onChange={(value: any) => {
-                  const llm_config = {
-                    ...flowSpec.config.llm_config,
-                    temperature: value,
-                  };
-                  onControlChange(llm_config, "llm_config");
                 }}
               />
             }
@@ -1866,9 +1752,6 @@ export const AgentSelector = ({
               {" "}
               <span className="text-xs">
                 {(flowSpec.skills && flowSpec.skills?.length) || 0} skills
-              </span>
-              <span className="text-xs mx-2 ">
-                | max replies: {flowSpec.config.max_consecutive_auto_reply}
               </span>
             </div>
           </div>

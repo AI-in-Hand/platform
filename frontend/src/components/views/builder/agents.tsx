@@ -43,18 +43,6 @@ const AgentsView = ({}: any) => {
     description: "Sample assistant",
     config: {
       name: "sample_assistant",
-      llm_config: {
-        config_list: [
-          {
-            model: "gpt-4-turbo-preview",
-          },
-        ],
-        temperature: 0.1,
-        timeout: 600,
-        cache_seed: null,
-      },
-      human_input_mode: "NEVER",
-      max_consecutive_auto_reply: 8,
       system_message: " ..",
     },
   };

@@ -12,47 +12,46 @@ def agent_data():
         "name": "example_name",
         "user_id": TEST_USER_ID,
         "description": "An example agent",
-        "instructions": "Do something important",
-        "files_folder": None,
+        "system_message": "Do something important",
         "skills": ["skill1", "skill2"],
     }
 
 
-def test_load_agent_config(mock_firestore_client, agent_data):
+def test_load_agent_flow_spec(mock_firestore_client, agent_data):
     # Setup mock data
     # setup_mock_data(collection_name, document_name, data)
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
     storage = AgentFlowSpecFirestoreStorage()
-    loaded_agent_config = storage.load_by_id(agent_data["id"])
+    loaded_agent_flow_spec = storage.load_by_id(agent_data["id"])
 
-    expected_agent_config = AgentFlowSpec.model_validate(agent_data)
-    assert loaded_agent_config == expected_agent_config
+    expected_agent_flow_spec = AgentFlowSpec.model_validate(agent_data)
+    assert loaded_agent_flow_spec == expected_agent_flow_spec
 
 
-def test_save_existing_agent_config(mock_firestore_client, agent_data):
+def test_save_existing_agent_flow_spec(mock_firestore_client, agent_data):
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
-    agent_config = AgentFlowSpec(**agent_data)
+    agent_flow_spec = AgentFlowSpec(**agent_data)
     storage = AgentFlowSpecFirestoreStorage()
-    storage.save(agent_config)
+    storage.save(agent_flow_spec)
 
-    serialized_data = agent_config.model_dump()
+    serialized_data = agent_flow_spec.model_dump()
     assert mock_firestore_client.to_dict() == serialized_data
 
 
-def test_save_new_agent_config(mock_firestore_client, agent_data):
+def test_save_new_agent_flow_spec(mock_firestore_client, agent_data):
     mock_firestore_client.setup_mock_data("agent_configs", "new_agent_id", agent_data, doc_id="new_agent_id")
 
     new_agent_data = agent_data.copy()
     # Remove agent id to simulate a new agent
     del new_agent_data["id"]
-    agent_config = AgentFlowSpec(**new_agent_data)
+    agent_flow_spec = AgentFlowSpec(**new_agent_data)
 
     storage = AgentFlowSpecFirestoreStorage()
-    storage.save(agent_config)
+    storage.save(agent_flow_spec)
 
-    serialized_data = agent_config.model_dump()
+    serialized_data = agent_flow_spec.model_dump()
     assert mock_firestore_client.to_dict() == serialized_data
     # Check that the agent id was updated
-    assert agent_config.id == "new_agent_id"
+    assert agent_flow_spec.id == "new_agent_id"

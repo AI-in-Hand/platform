@@ -5,6 +5,8 @@ from backend.repositories.agency_config_firestore_storage import AgencyConfigFir
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.services.adapters.agent_flow_spec_adapter import AgentFlowSpecAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
@@ -51,3 +53,9 @@ def get_session_manager(
 ) -> SessionManager:
     """Returns a SessionManager object"""
     return SessionManager(session_storage=session_storage, env_config_manager=env_config_manager)
+
+
+def get_agent_flow_spec_adapter(
+    skill_config_storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+) -> AgentFlowSpecAdapter:
+    return AgentFlowSpecAdapter(skill_config_storage)

@@ -22,8 +22,8 @@ class AgentManager:
         """Create or update an agent. If the agent already exists, it will be updated."""
 
         # FIXME: a workaround explained at the top of the file api/agent.py
-        if not config.name.endswith(f" ({config.user_id})"):
-            config.name = f"{config.name} ({config.user_id})"
+        if not config.config.name.endswith(f" ({config.user_id})"):
+            config.config.name = f"{config.config.name} ({config.user_id})"
 
         agent = await asyncio.to_thread(self._construct_agent, config)
         await asyncio.to_thread(agent.init_oai)  # initialize the openai agent to get the id
@@ -43,14 +43,14 @@ class AgentManager:
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
 
-    def _construct_agent(self, agent_config: AgentFlowSpec) -> Agent:
+    def _construct_agent(self, agent_flow_spec: AgentFlowSpec) -> Agent:
         agent = Agent(
-            id=agent_config.id,
-            name=agent_config.name,
-            description=agent_config.description,
-            instructions=agent_config.instructions,
-            files_folder=agent_config.files_folder,
-            tools=[SKILL_MAPPING[skill] for skill in agent_config.skills],
+            id=agent_flow_spec.id,
+            name=agent_flow_spec.config.name,
+            description=agent_flow_spec.description,
+            instructions=agent_flow_spec.config.system_message,
+            files_folder=agent_flow_spec.config.code_execution_config.work_dir,
+            tools=[SKILL_MAPPING[skill] for skill in agent_flow_spec.skills],
             model=settings.gpt_model,
         )
         # a workaround: agent.client must be replaced with a proper implementation

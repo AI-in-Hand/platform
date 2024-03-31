@@ -14,8 +14,7 @@ def agent_flow_spec_data():
         "user_id": TEST_USER_ID,
         "name": "ExampleRole",
         "description": "An example agent.",
-        "instructions": "Do something important.",
-        "files_folder": None,
+        "system_message": "Do something important.",
         "skills": ["skill1", "skill2"],
     }
 

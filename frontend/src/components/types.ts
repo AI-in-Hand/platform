@@ -25,21 +25,9 @@ export interface IChatMessage {
   msg_id: string;
 }
 
-export interface ILLMConfig {
-  config_list: Array<IModelConfig>;
-  timeout?: number;
-  cache_seed?: number | null;
-  temperature: number;
-}
-
 export interface IAgentConfig {
   name: string;
-  llm_config?: ILLMConfig | false;
-  human_input_mode: string;
-  max_consecutive_auto_reply: number;
   system_message: string | "";
-  is_termination_msg?: boolean | string;
-  default_auto_reply?: string | null;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
 }
 

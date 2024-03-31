@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
@@ -6,11 +7,11 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agent_manager
-from backend.models.agent_flow_spec import AgentFlowSpec
+from backend.dependencies.dependencies import get_agent_flow_spec_adapter, get_agent_manager
 from backend.models.auth import User
 from backend.models.response_models import CreateAgentData, CreateAgentResponse, GetAgentListResponse, GetAgentResponse
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.services.adapters.agent_flow_spec_adapter import AgentFlowSpecAdapter
 from backend.services.agent_manager import AgentManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -26,15 +27,18 @@ agent_router = APIRouter(tags=["agent"])
 @agent_router.get("/agent/list")
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
+    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentListResponse:
-    agents = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
-    return GetAgentListResponse(data=agents)
+    configs = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
+    configs_for_api = [agent_flow_spec_adapter.to_api(config) for config in configs]
+    return GetAgentListResponse(data=configs_for_api)
 
 
 @agent_router.get("/agent")
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
+    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentResponse:
@@ -46,41 +50,45 @@ async def get_agent_config(
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-    return GetAgentResponse(data=config)
+    config_for_api = agent_flow_spec_adapter.to_api(config)
+    return GetAgentResponse(data=config_for_api)
 
 
 @agent_router.put("/agent")
 async def create_or_update_agent(
     current_user: Annotated[User, Depends(get_current_user)],
-    config: AgentFlowSpec = Body(...),
+    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
+    config: dict = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> CreateAgentResponse:
+    config = agent_flow_spec_adapter.to_model(config)
     # support template configs:
     if not config.user_id:
-        logger.info(f"Creating agent for user: {current_user.id}, agent: {config.name}")
+        logger.info(f"Creating agent for user: {current_user.id}, agent: {config.config.name}")
         config.id = None
     else:
         # check if the current_user has permissions
         if config.id:
-            agent_flow_spec_db = storage.load_by_id(config.id)
-            if not agent_flow_spec_db:
+            config_db = storage.load_by_id(config.id)
+            if not config_db:
                 logger.warning(f"Agent not found: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-            if agent_flow_spec_db.user_id != current_user.id:
+            if config_db.user_id != current_user.id:
                 logger.warning(f"User {current_user.id} does not have permissions to access agent: {config.id}")
                 raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
             # Ensure the agent name has not been changed
-            if config.name != agent_flow_spec_db.name:
+            if config.config.name != config_db.config.name:
                 logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user.id}")
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     # Ensure the agent is associated with the current user
     config.user_id = current_user.id
 
+    config.timestamp = datetime.now(UTC).isoformat()
+
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
     agent_id = await agent_manager.create_or_update_agent(config)
-
     return CreateAgentResponse(data=CreateAgentData(id=agent_id))

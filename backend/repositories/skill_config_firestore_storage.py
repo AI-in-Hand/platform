@@ -21,6 +21,14 @@ class SkillConfigFirestoreStorage:
             return None
         return SkillConfig.model_validate(document_snapshot.to_dict())
 
+    def load_by_title(self, title: str) -> SkillConfig | None:
+        collection = self.db.collection(self.collection_name)
+        query = collection.where(filter=FieldFilter("title", "==", title))
+        document_snapshot = query.stream()
+        if not document_snapshot:
+            return None
+        return SkillConfig.model_validate(document_snapshot[0].to_dict())
+
     def save(self, skill_config: SkillConfig) -> tuple[str, int]:
         collection = self.db.collection(self.collection_name)
         if skill_config.id is None:

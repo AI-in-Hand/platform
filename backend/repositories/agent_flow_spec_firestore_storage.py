@@ -21,15 +21,15 @@ class AgentFlowSpecFirestoreStorage:
             return None
         return AgentFlowSpec.model_validate(document_snapshot.to_dict())
 
-    def save(self, agent_config: AgentFlowSpec) -> str:
+    def save(self, agent_flow_spec: AgentFlowSpec) -> str:
         """Save the agent configuration to the Firestore.
         If the agent id is not set, it will create a new document and set the agent id.
         Returns the agent id."""
         collection = self.db.collection(self.collection_name)
-        if agent_config.id is None:
+        if agent_flow_spec.id is None:
             # Create a new document and set the id
-            document_reference = collection.add(agent_config.model_dump())[1]
-            agent_config.id = document_reference.id
+            document_reference = collection.add(agent_flow_spec.model_dump())[1]
+            agent_flow_spec.id = document_reference.id
 
-        collection.document(agent_config.id).set(agent_config.model_dump())
-        return agent_config.id
+        collection.document(agent_flow_spec.id).set(agent_flow_spec.model_dump())
+        return agent_flow_spec.id

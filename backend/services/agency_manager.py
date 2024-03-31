@@ -71,8 +71,8 @@ class AgencyManager:
         for agent_id in agency_config.agents:
             get_result = await self.agent_manager.get_agent(agent_id)
             if get_result:
-                agent, agent_config = get_result
-                agents[agent_config.name] = agent
+                agent, agent_flow_spec = get_result
+                agents[agent_flow_spec.config.name] = agent
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
                 # TODO: Handle this error (raise exception?)

@@ -128,7 +128,7 @@ async def test_load_and_construct_agents_success(agency_manager):
         agents=["agent1_id"],
     )
     agent_flow_spec_mock = Mock()
-    agent_flow_spec_mock.name = "agent1_name"
+    agent_flow_spec_mock.config.name = "agent1_name"
     agent_mock = MagicMock(spec=Agent)
     agent_mock.id = "agent1_id"
 
