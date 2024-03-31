@@ -1,5 +1,4 @@
 import * as React from "react";
-import { appContext } from "../../../hooks/provider";
 import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
 import { IGalleryItem, IStatus } from "../../types";
 import { Button, message } from "antd";
@@ -13,7 +12,6 @@ import ChatBox from "../playground/chatbox";
 
 const GalleryView = ({ location }: any) => {
   const serverUrl = getServerUrl();
-  const { user } = React.useContext(appContext);
   const [loading, setLoading] = React.useState(false);
   const [gallery, setGallery] = React.useState<null | IGalleryItem[]>(null);
   const [currentGallery, setCurrentGallery] =
