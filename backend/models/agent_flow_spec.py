@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from backend.models.skill_config import SkillConfig
+
 
 class CodeExecutionConfig(BaseModel):
     work_dir: str | None = Field(None, description="Working directory for code execution")
@@ -13,7 +15,6 @@ class AgentConfig(BaseModel):
 
     name: str = Field(..., description="Name of the agent")
     system_message: str = Field("", description="System message")
-    default_auto_reply: str | None = Field(None, description="Default auto reply")
     code_execution_config: CodeExecutionConfig = Field(
         CodeExecutionConfig(), description="Configuration for code execution"
     )
@@ -31,7 +32,9 @@ class AgentFlowSpec(BaseModel):
     user_id: str | None = Field(None, description="The user ID owning this configuration")
 
 
-class AgentFlowSpecForApi(AgentFlowSpec):
+class AgentFlowSpecForAPI(AgentFlowSpec):
     """Config for an agent, corresponds to IAgentFlowSpec in the frontend"""
 
-    skills: list[str] = Field(default_factory=list, description="List of skill names equipped by the agent")
+    skills: list[SkillConfig] = Field(  # type: ignore
+        default_factory=list, description="List of skill configurations equipped by the agent"
+    )

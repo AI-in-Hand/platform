@@ -1,4 +1,4 @@
-from backend.models.agent_flow_spec import AgentFlowSpec, AgentFlowSpecForApi
+from backend.models.agent_flow_spec import AgentFlowSpec, AgentFlowSpecForAPI
 from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
 
 
@@ -13,16 +13,17 @@ class AgentFlowSpecAdapter:
         self.skill_config_storage = skill_config_storage
 
     @staticmethod
-    def to_model(agent_flow_spec: dict) -> AgentFlowSpec:
+    def to_model(agent_flow_spec: AgentFlowSpecForAPI) -> AgentFlowSpec:
         """
         Converts the `skills` field from a list of SkillConfig objects to a list of strings.
         """
-        skills = agent_flow_spec.get("skills", [])
-        skill_names = [skill["title"] for skill in skills]
-        agent_flow_spec["skills"] = skill_names
-        return AgentFlowSpec.model_validate(agent_flow_spec)
+        skill_names = [skill.title for skill in agent_flow_spec.skills]
 
-    def to_api(self, agent_flow_spec: AgentFlowSpec) -> AgentFlowSpecForApi:
+        agent_flow_spec_dict = agent_flow_spec.dict()
+        agent_flow_spec_dict["skills"] = skill_names
+        return AgentFlowSpec.model_validate(agent_flow_spec_dict)
+
+    def to_api(self, agent_flow_spec: AgentFlowSpec) -> AgentFlowSpecForAPI:
         """
         Converts the `skills` field from a list of strings to a list of SkillConfig objects.
         """
@@ -31,5 +32,5 @@ class AgentFlowSpecAdapter:
 
         agent_flow_spec_dict = agent_flow_spec.dict()
         agent_flow_spec_dict["skills"] = skill_configs
-        agent_flow_spec_new = AgentFlowSpecForApi.model_validate(agent_flow_spec_dict)
+        agent_flow_spec_new = AgentFlowSpecForAPI.model_validate(agent_flow_spec_dict)
         return agent_flow_spec_new

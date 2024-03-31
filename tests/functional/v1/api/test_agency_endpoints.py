@@ -141,7 +141,12 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client):
         "agents": ["foreign_agent_id"],
     }
     foreign_agent_flow_spec = AgentFlowSpec(
-        name="Foreign Agent", user_id="foreign_user_id", description="Test Agent", system_message="Test Instructions"
+        config={
+            "name": "Foreign Agent",
+            "system_message": "Test Instructions",
+            "code_execution_config": {"work_dir": "/work", "use_docker": False},
+        },
+        user_id="foreign_user_id",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
     mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_flow_spec.model_dump())

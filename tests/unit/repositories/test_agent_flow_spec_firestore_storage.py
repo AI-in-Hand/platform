@@ -9,11 +9,19 @@ from tests.test_utils import TEST_USER_ID
 def agent_data():
     return {
         "id": "agent1",
-        "name": "example_name",
-        "user_id": TEST_USER_ID,
-        "description": "An example agent",
-        "system_message": "Do something important",
+        "type": "userproxy",
+        "config": {
+            "name": "example_name",
+            "system_message": "Do something important",
+            "code_execution_config": {
+                "work_dir": "test_agency_dir",
+                "use_docker": False,
+            },
+        },
+        "timestamp": "2021-09-01T00:00:00",
         "skills": ["skill1", "skill2"],
+        "description": "An example agent",
+        "user_id": TEST_USER_ID,
     }
 
 

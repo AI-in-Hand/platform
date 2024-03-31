@@ -8,6 +8,7 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agent_flow_spec_adapter, get_agent_manager
+from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import CreateAgentData, CreateAgentResponse, GetAgentListResponse, GetAgentResponse
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
@@ -58,7 +59,7 @@ async def get_agent_config(
 async def create_or_update_agent(
     current_user: Annotated[User, Depends(get_current_user)],
     agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
-    config: dict = Body(...),
+    config: AgentFlowSpecForAPI = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> CreateAgentResponse:
