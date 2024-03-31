@@ -31,7 +31,7 @@ const SkillsView = ({}: any) => {
     message: "All good",
   });
 
-  const user = useSelector(store => store.user.user);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;

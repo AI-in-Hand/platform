@@ -8,7 +8,7 @@ import { useLocation } from "@reach/router"
 
 const MainLayouts = ({data}: any) => {
     // @ts-ignore
-    const loggedIn = useSelector(store => store.user.loggedIn);
+    const loggedIn = useSelector(state => state.user.loggedIn);
     const location = useLocation();
     const {restricted, showHeader, children, link, title, meta} = data;
     const layoutContent = (
