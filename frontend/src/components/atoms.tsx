@@ -44,7 +44,6 @@ import {
   IStatus,
 } from "./types";
 import TextArea from "antd/es/input/TextArea";
-import { appContext } from "../hooks/provider";
 
 const { useToken } = theme;
 interface CodeProps {
@@ -629,8 +628,7 @@ export const ModelSelector = ({
   const [models, setModels] = useState<IModelConfig[]>([]);
   const serverUrl = getServerUrl();
 
-  const { user } = React.useContext(appContext);
-  const listModelsUrl = `${serverUrl}/models?user_id=${user?.email}`;
+  const listModelsUrl = `${serverUrl}/models`;
 
   // const sanitizeModelConfig = (config: IModelConfig) => {
   //   const sanitizedConfig: IModelConfig = { model: config.model };
@@ -1441,7 +1439,6 @@ export const SkillLoader = ({
     message: "All good",
   });
   const serverUrl = getServerUrl();
-  const { user } = React.useContext(appContext);
   const listSkillsUrl = `${serverUrl}/skill/list`;
 
   const fetchSkills = () => {
@@ -1728,7 +1725,6 @@ const AgentModal = ({
   const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(0);
 
   const serverUrl = getServerUrl();
-  const { user } = React.useContext(appContext);
   const listAgentsUrl = `${serverUrl}/agent/list`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);

@@ -7,7 +7,7 @@ import {
 import { Button, Input, Modal, message } from "antd";
 import * as React from "react";
 import { IModelConfig, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
 import { BounceLoader, Card, LaunchButton, LoadingOverlay } from "../../atoms";
 import TextArea from "antd/es/input/TextArea";
@@ -19,7 +19,7 @@ const ModelsView = ({}: any) => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(state => state.user.user);
   const serverUrl = getServerUrl();
   const listModelsUrl = `${serverUrl}/models?user_id=${user?.email}`;
   const saveModelsUrl = `${serverUrl}/models`;

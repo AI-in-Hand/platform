@@ -6,7 +6,7 @@ import {
 import { Button, Input, Modal, message } from "antd";
 import * as React from "react";
 import { ISkill, IStatus } from "../../types";
-import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import {
   fetchJSON,
   getSampleSkill,
@@ -31,7 +31,7 @@ const SkillsView = ({}: any) => {
     message: "All good",
   });
 
-  const { user } = React.useContext(appContext);
+  const user = useSelector(store => store.user.user);
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;
