@@ -22,6 +22,7 @@ def generate_skill_description(code: str):
         user_prompt=f"{USER_PROMPT}```\n{code}\n```",
         temperature=0.0,
         model=settings.gpt_small_model,
+        api_key=settings.system_openai_api_key,
     )
     return summary
 
