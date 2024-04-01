@@ -22,9 +22,9 @@ const Login = () => {
     }
     return (
         <Spin spinning={loading}>
-            <div className={"mt-20 max-w-[450px] m-auto w-full"}>
+            <div className={"mt-20 max-w-[350px] m-auto w-full"}>
                 <Typography.Title level={3} className={"text-center"}>
-                    Sign In
+                    Sign In / Register
                 </Typography.Title>
                 <Form name="login-form" onFinish={handleRegister} initialValues={{email: userEmail}}>
                     <Form.Item
@@ -41,11 +41,11 @@ const Login = () => {
                             }),
                         ]}
                     >
-                        <Input placeholder="Email" />
+                        <Input placeholder="Your Email" type="email" />
                     </Form.Item>
-                    <Form.Item>
+                    <Form.Item className={"text-center"}>
                         <Button type={'primary'} htmlType="submit">
-                            Sign In
+                            Send Login Link
                         </Button>
                     </Form.Item>
                 </Form>
