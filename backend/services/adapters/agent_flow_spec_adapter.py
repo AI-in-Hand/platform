@@ -27,6 +27,9 @@ class AgentFlowSpecAdapter:
         """
         Converts the `skills` field from a list of strings to a list of SkillConfig objects.
         """
+        if not agent_flow_spec.skills:
+            return AgentFlowSpecForAPI.model_validate(agent_flow_spec.dict())
+
         skill_configs = self.skill_config_storage.load_by_titles(agent_flow_spec.skills)
 
         agent_flow_spec_dict = agent_flow_spec.dict()
