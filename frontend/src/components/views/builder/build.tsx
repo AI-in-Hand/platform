@@ -38,7 +38,7 @@ const BuildView = () => {
               key: "1",
               children: <SkillsView />,
             },
-            {
+            {/* {
               label: (
                 <div className="w-full  ">
                   {" "}
@@ -48,7 +48,7 @@ const BuildView = () => {
               ),
               key: "2",
               children: <ModelsView />,
-            },
+            }, */}
             {
               label: (
                 <>
