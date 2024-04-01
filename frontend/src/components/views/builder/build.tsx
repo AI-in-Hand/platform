@@ -38,17 +38,6 @@ const BuildView = () => {
               key: "1",
               children: <SkillsView />,
             },
-            {/* {
-              label: (
-                <div className="w-full  ">
-                  {" "}
-                  <CpuChipIcon className="h-4 w-4 inline-block mr-1" />
-                  Models
-                </div>
-              ),
-              key: "2",
-              children: <ModelsView />,
-            }, */}
             {
               label: (
                 <>
