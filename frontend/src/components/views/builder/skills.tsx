@@ -230,8 +230,8 @@ const SkillsView = ({}: any) => {
             onClick={() => {
               setShowSkillModal(false);
               if (editorRef.current) {
-                const value = editorRef.current.getValue();
-                const updatedSkill = { ...localSkill, content: value };
+                const content = editorRef.current.getValue();
+                const updatedSkill = { ...localSkill, content, description: "" };
                 setSkill(updatedSkill);
                 handler(updatedSkill);
               }
