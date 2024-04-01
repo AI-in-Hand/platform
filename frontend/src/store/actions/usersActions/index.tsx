@@ -24,7 +24,7 @@ export function ResetState() {
     type: usersActions.RESET_STATE,
   };
 }
-export function RefreshToken(data: {token: string, expiresIn: number, user: any}) {
+export function RefreshToken(data: {token: string, expiresIn: number}) {
   return {
     type: usersActions.REFRESH_TOKEN,
     payload: data,

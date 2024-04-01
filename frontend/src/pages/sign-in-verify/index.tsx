@@ -5,7 +5,7 @@ import LogInVerify from "../../components/register";
 
 const RegisterForm = ({ data }: any) => {
     return (
-        <Layout meta={data.site.siteMetadata} title="Sign-Up" link={'sing-up'}>
+        <Layout meta={data.site.siteMetadata} title="Sign-Up" link={'sign-up'}>
             <LogInVerify/>
         </Layout>
     );

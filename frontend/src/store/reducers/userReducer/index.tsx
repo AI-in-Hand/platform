@@ -12,7 +12,6 @@ export default (state = initialState, action: any) => {
   switch (action.type) {
     case usersActions.SIGN_IN:
     case usersActions.SIGN_UP:
-    case usersActions.REFRESH_TOKEN:
       return {
         ...state,
         loggedIn: true,
@@ -20,13 +19,23 @@ export default (state = initialState, action: any) => {
         expiresIn: action.payload.expiresIn,
         user: action.payload?.user ?? {},
       };
+    case usersActions.REFRESH_TOKEN:
+      return {
+        ...state,
+        accessToken: action.payload.token,
+        expiresIn: action.payload.expiresIn,
+      };
     case usersActions.SET_EMAIL:
       return {
         ...state,
         email: action.payload
       };
     case usersActions.RESET_STATE:
-      return initialState;
+      // Reset all state except email
+      return {
+        ...initialState,
+        email: state.email
+      };
     default:
       return state;
   }
