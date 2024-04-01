@@ -11,7 +11,7 @@ from backend.dependencies.dependencies import get_agency_manager
 from backend.models.agency_config import AgencyConfig
 from backend.models.auth import User
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.agent_config_firestore_storage import AgentConfigFirestoreStorage
+from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -54,7 +54,7 @@ async def update_or_create_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-    agent_storage: AgentConfigFirestoreStorage = Depends(AgentConfigFirestoreStorage),
+    agent_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ):
     """Create or update an agency and return its id"""
     # support template configs:
@@ -76,15 +76,15 @@ async def update_or_create_agency(
 
     # check that all used agents belong to the current user
     for agent_id in agency_config.agents:
-        agent_config = await asyncio.to_thread(agent_storage.load_by_id, agent_id)
-        if not agent_config:
+        agent_flow_spec = await asyncio.to_thread(agent_storage.load_by_id, agent_id)
+        if not agent_flow_spec:
             logger.error(f"Agent not found: {agent_id}, user: {current_user.id}")
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Agent not found: {agent_id}")
-        if agent_config.user_id != current_user.id:
+        if agent_flow_spec.user_id != current_user.id:
             logger.warning(f"User {current_user.id} does not have permissions to use agent {agent_id}")
             raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
     # FIXME: current limitation: all agents must belong to the current user.
-    # to fix: If the agent is a template (agent_config.user_id is None), it should be copied for the current user
+    # to fix: If the agent is a template (agent_flow_spec.user_id is None), it should be copied for the current user
     # (reuse the code from api/agent.py)
 
     # Ensure the agency is associated with the current user

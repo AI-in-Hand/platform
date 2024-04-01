@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from backend.models.agency_config import AgencyConfig
-from backend.models.agent_config import AgentConfig
+from backend.models.agent_flow_spec import AgentFlowSpec
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
 
@@ -140,11 +140,16 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client):
         "name": "Test Agency",
         "agents": ["foreign_agent_id"],
     }
-    foreign_agent_config = AgentConfig(
-        name="Foreign Agent", user_id="foreign_user_id", description="Test Agent", instructions="Test Instructions"
+    foreign_agent_flow_spec = AgentFlowSpec(
+        config={
+            "name": "Foreign Agent",
+            "system_message": "Test Instructions",
+            "code_execution_config": {"work_dir": "/work", "use_docker": False},
+        },
+        user_id="foreign_user_id",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
-    mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_config.model_dump())
+    mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_flow_spec.model_dump())
 
     # Simulate a PUT request to update the agency with agents belonging to a different user
     response = client.put("/v1/api/agency", json=agency_config_data)

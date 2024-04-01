@@ -18,6 +18,7 @@ from backend.models.response_models import (
 )
 from backend.models.skill_config import SkillConfig
 from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.services.skill_service import SkillService, generate_skill_description
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,9 @@ async def create_skill_version(
     config.version = skill_config_db.version + 1 if skill_config_db else 1
     config.approved = False
     config.timestamp = datetime.now(UTC).isoformat()
+
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
 
     if not config.description and config.content:
         config.description = generate_skill_description(config.content)

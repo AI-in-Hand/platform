@@ -21,6 +21,16 @@ class SkillConfigFirestoreStorage:
             return None
         return SkillConfig.model_validate(document_snapshot.to_dict())
 
+    def load_by_titles(self, titles: list[str]) -> list[SkillConfig]:
+        collection = self.db.collection(self.collection_name)
+        # Firestore `in` query supports up to 10 items in the array.
+        if len(titles) > 10:
+            raise ValueError("Titles list exceeds the maximum size of 10 for an 'in' query in Firestore.")
+
+        query = collection.where(filter=FieldFilter("title", "in", titles))
+        results = [SkillConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
+        return results
+
     def save(self, skill_config: SkillConfig) -> tuple[str, int]:
         collection = self.db.collection(self.collection_name)
         if skill_config.id is None:

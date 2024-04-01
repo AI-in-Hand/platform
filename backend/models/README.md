@@ -8,7 +8,7 @@ They are essential for the proper functioning of the application, ensuring data 
 
 - **AgencyConfig**: Represents the configuration of an agency, including identifiers, names, instructions, agents, and the agency chart.
 
-- **AgentConfig**: Defines the configuration for an individual agent, detailing IDs, descriptions, instructions, and skills.
+- **AgentFlowSpec**: Defines the configuration for an individual agent, detailing IDs, descriptions, instructions, and skills.
 
 - **SkillConfig**: Configures skills within the application, describing skill identifiers, names, versions, and approval status.
 
