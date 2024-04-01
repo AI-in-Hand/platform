@@ -89,8 +89,7 @@ export function checkAndRefreshToken() {
         });
       } else {
         console.error("No user found. Please login again.");
-        console.log("Debug: Auth object:", auth);
-        console.log("Debug: Current user:", user);
+        // console.log("Debug: Auth object:", auth);
         resolve(false);
       }
     } else {
