@@ -157,7 +157,7 @@ const SkillsView = ({}: any) => {
           >
             <div style={{ minHeight: "65px" }} className="my-2   break-words">
               {" "}
-              {truncateText(skill.content, 70)}
+              {truncateText(skill.description, 70) || truncateText(skill.content, 70)}
             </div>
             <div className="text-xs">{timeAgo(skill.timestamp || "")}</div>
             <div
