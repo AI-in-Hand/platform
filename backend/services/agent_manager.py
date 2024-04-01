@@ -1,7 +1,9 @@
 import asyncio
 import logging
+from http import HTTPStatus
 
 from agency_swarm import Agent
+from fastapi import HTTPException
 
 from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_flow_spec import AgentFlowSpec
@@ -27,9 +29,6 @@ class AgentManager:
 
         agent = await asyncio.to_thread(self._construct_agent, config)
         await asyncio.to_thread(agent.init_oai)  # initialize the openai agent to get the id
-        if not agent.id:
-            logger.error(f"Agent id could not be initialized for {config}.")
-            raise RuntimeError("Agent id could not be initialized.")
         config.id = agent.id
         await asyncio.to_thread(self.storage.save, config)
         return agent.id
@@ -42,6 +41,14 @@ class AgentManager:
 
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
+
+    @staticmethod
+    def validate_skills(skills: list[str]) -> None:
+        if unsupported_skills := set(skills) - set(SKILL_MAPPING.keys()):
+            logger.warning(f"Some skills are not supported: {unsupported_skills}")
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not supported: {unsupported_skills}"
+            )
 
     def _construct_agent(self, agent_flow_spec: AgentFlowSpec) -> Agent:
         agent = Agent(

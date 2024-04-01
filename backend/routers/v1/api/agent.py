@@ -63,30 +63,35 @@ async def create_or_update_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> CreateAgentResponse:
+    # transform the API model to the internal model
     config = agent_flow_spec_adapter.to_model(config)
+
     # support template configs:
     if not config.user_id:
         logger.info(f"Creating agent for user: {current_user.id}, agent: {config.config.name}")
         config.id = None
-    else:
-        # check if the current_user has permissions
-        if config.id:
-            config_db = storage.load_by_id(config.id)
-            if not config_db:
-                logger.warning(f"Agent not found: {config.id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-            if config_db.user_id != current_user.id:
-                logger.warning(f"User {current_user.id} does not have permissions to access agent: {config.id}")
-                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-            # Ensure the agent name has not been changed
-            if config.config.name != config_db.config.name:
-                logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
+
+    # check if the current_user has permissions
+    if config.id:
+        config_db = storage.load_by_id(config.id)
+        if not config_db:
+            logger.warning(f"Agent not found: {config.id}, user: {current_user.id}")
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+        if config_db.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} does not have permissions to access agent: {config.id}")
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+
+        # Ensure the agent name has not been changed
+        if config.config.name != config_db.config.name:
+            logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user.id}")
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     # Ensure the agent is associated with the current user
     config.user_id = current_user.id
 
     config.timestamp = datetime.now(UTC).isoformat()
+
+    agent_manager.validate_skills(config.skills)
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)

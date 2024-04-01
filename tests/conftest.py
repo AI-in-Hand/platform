@@ -36,12 +36,12 @@ def mock_init_oai():
 
 skill1 = MagicMock()
 skill2 = MagicMock()
-skill1.__name__ = "skill1"
-skill2.__name__ = "skill2"
-MOCK_SKILL_MAPPING = {"skill1": skill1, "skill2": skill2}
+skill1.__name__ = "GenerateProposal"
+skill2.__name__ = "SearchWeb"
+MOCK_SKILL_MAPPING = {"GenerateProposal": skill1, "SearchWeb": skill2}
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
 def mock_skill_mapping():
     with patch("backend.services.agent_manager.SKILL_MAPPING", MOCK_SKILL_MAPPING):
         yield
