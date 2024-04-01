@@ -11,7 +11,6 @@ from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.auth import User
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.env_config_manager import EnvConfigManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.services.oai_client import get_openai_client
 from backend.settings import settings
 
@@ -42,9 +41,6 @@ class AgentManager:
         config.timestamp = datetime.now(UTC).isoformat()
 
         self._validate_skills(config.skills)
-
-        # Set the user_id in the context variables
-        ContextEnvVarsManager.set("user_id", current_user.id)
 
         return await self.create_or_update_agent(config)
 

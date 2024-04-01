@@ -13,6 +13,7 @@ from backend.models.response_models import CreateAgentData, CreateAgentResponse,
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.adapters.agent_flow_spec_adapter import AgentFlowSpecAdapter
 from backend.services.agent_manager import AgentManager
+from backend.services.env_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(tags=["agent"])
@@ -62,6 +63,9 @@ async def create_or_update_agent(
 ) -> CreateAgentResponse:
     # Transform the API model to the internal model
     internal_config = agent_flow_spec_adapter.to_model(config)
+
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
 
     # Delegate the creation or update process to the agent manager
     agent_id = await agent_manager.handle_agent_creation_or_update(internal_config, current_user)
