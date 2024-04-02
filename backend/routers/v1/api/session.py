@@ -42,7 +42,7 @@ async def create_session(
     """Create a new session for the given agency and return its id."""
     agency_id = request.agency_id
     # check if the current_user has permissions to create a session for the agency
-    agency_config_db = agency_storage.load_by_agency_id(agency_id)
+    agency_config_db = agency_storage.load_by_id(agency_id)
     if not agency_config_db:
         logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")

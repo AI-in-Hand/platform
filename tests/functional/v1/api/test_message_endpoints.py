@@ -17,7 +17,7 @@ def mock_get_agency():
 # Successful message sending
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_success(client, mock_get_agency, mock_firestore_client):
-    agency_data = {"user_id": TEST_USER_ID, "agency_id": TEST_AGENCY_ID, "name": "Test Agency"}
+    agency_data = {"user_id": TEST_USER_ID, "id": TEST_AGENCY_ID, "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
     # Sending a message
@@ -46,7 +46,7 @@ def test_post_agency_message_agency_config_not_found(client, mock_get_agency):
 # Current user not the owner of the agency
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestore_client):
-    agency_data = {"user_id": "other_user_id", "agency_id": "test_agency", "name": "Test Agency"}
+    agency_data = {"user_id": "other_user_id", "id": "test_agency", "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency", agency_data)
 
     # Sending a message
@@ -61,7 +61,7 @@ def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestor
 # Failure in message processing
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_post_agency_message_processing_failure(client, mock_get_agency, mock_firestore_client):
-    agency_data = {"user_id": TEST_USER_ID, "agency_id": "test_agency", "name": "Test Agency"}
+    agency_data = {"user_id": TEST_USER_ID, "id": "test_agency", "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency", agency_data)
 
     mock_get_agency.return_value.get_completion.side_effect = Exception("Test exception")

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, conlist, field_validator
 class AgencyConfig(BaseModel):
     """Agency configuration model"""
 
-    agency_id: str | None = Field(None, description="Unique identifier for the configuration")
+    id: str | None = Field(None, description="Unique identifier for the configuration")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
     name: str = Field(..., description="Name of the agency")
     shared_instructions: str = Field("", description="Agency Manifesto")

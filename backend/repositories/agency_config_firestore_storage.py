@@ -14,22 +14,22 @@ class AgencyConfigFirestoreStorage:
         query = collection.where(filter=FieldFilter("user_id", "==", user_id))
         return [AgencyConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
-    def load_by_agency_id(self, agency_id: str) -> AgencyConfig | None:
+    def load_by_id(self, id_: str) -> AgencyConfig | None:
         collection = self.db.collection(self.collection_name)
-        document_snapshot = collection.document(agency_id).get()
+        document_snapshot = collection.document(id_).get()
         if not document_snapshot.exists:
             return None
         return AgencyConfig.model_validate(document_snapshot.to_dict())
 
     def save(self, agency_config: AgencyConfig) -> str:
         """Save the agency configuration to the Firestore.
-        If the agency_id is not set, it will create a new document and set the agency_id.
-        Returns the agency_id."""
+        If the id is not set, it will create a new document and set the id.
+        Returns the id."""
         collection = self.db.collection(self.collection_name)
-        if agency_config.agency_id is None:
-            # Create a new document and set the agency_id
+        if agency_config.id is None:
+            # Create a new document and set the id
             document_reference = collection.add(agency_config.model_dump())[1]
-            agency_config.agency_id = document_reference.id
+            agency_config.id = document_reference.id
 
-        collection.document(agency_config.agency_id).set(agency_config.model_dump())
-        return agency_config.agency_id
+        collection.document(agency_config.id).set(agency_config.model_dump())
+        return agency_config.id

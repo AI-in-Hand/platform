@@ -64,7 +64,7 @@ async def post_message(
     session_id = request.session_id
 
     # check if the current_user has permissions to send a message to the agency
-    agency_config = storage.load_by_agency_id(agency_id)
+    agency_config = storage.load_by_id(agency_id)
     if not agency_config:
         logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
