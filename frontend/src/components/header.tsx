@@ -20,7 +20,6 @@ function classNames(...classes: string[]) {
 
 const Header = ({ meta, link }: any) => {
   const { email, loggedIn } = useSelector(state => state.user);
-  const userEmail = loggedIn ? email : "";
   const userAvatarUrl = "";
   const dispatch = useDispatch();
   const logout = () => {
@@ -137,7 +136,7 @@ const Header = ({ meta, link }: any) => {
                   {loggedIn && (
                     <>
                       <div className="ml-3">
-                        <div className="text-sm text-primary">{userEmail}</div>
+                        <div className="text-sm text-primary">{email}</div>
                         {/* <div className="text-xs  text-secondary">{user_id}</div> */}
                       </div>
 
@@ -153,9 +152,9 @@ const Header = ({ meta, link }: any) => {
                                 alt=""
                               />
                             )} */}
-                            {!userAvatarUrl && userEmail && (
+                            {!userAvatarUrl && email && (
                               <div className="border-2 bg-accent pt-1 h-8 w-8 align-middle text-sm text-white rounded-full">
-                                {userEmail[0].toUpperCase()}
+                                {email[0].toUpperCase()}
                               </div>
                             )}
                           </Menu.Button>
@@ -236,14 +235,14 @@ const Header = ({ meta, link }: any) => {
                         alt=""
                       />
                     )} */}
-                    {!userAvatarUrl && userEmail && (
+                    {!userAvatarUrl && email && (
                       <div className="border-2 bg-accent text-sm text-white h-8 w-8 pt-1   rounded-full text-center">
-                        {userEmail[0].toUpperCase()}
+                        {email[0].toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div className="ml-3">
-                    <div className="text-sm text-primary">{userEmail}</div>
+                    <div className="text-sm text-primary">{email}</div>
                     {/* <div className="text-xs   text-secondary">{user_id}</div> */}
                   </div>
                   <button

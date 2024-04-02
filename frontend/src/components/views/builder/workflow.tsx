@@ -316,8 +316,8 @@ const WorkflowView = ({}: any) => {
     },
   ];
 
-  const workflowTypesOnClick: MenuProps["onClick"] = ({ key }) => {
-    const newConfig = sampleWorkflowConfig(key);
+  const workflowTypesOnClick: MenuProps["onClick"] = () => {
+    const newConfig = sampleWorkflowConfig();
 
     setNewWorkflow(newConfig);
     setShowNewWorkflowModal(true);
@@ -354,25 +354,19 @@ const WorkflowView = ({}: any) => {
               Workflows ({workflowRows.length}){" "}
             </div>
             <div className=" ">
-              <Dropdown
-                menu={{ items: workflowTypes, onClick: workflowTypesOnClick }}
-                placement="bottomRight"
-                trigger={["click"]}
+              <div
+                className="inline-flex    rounded   hover:border-accent duration-300 hover:text-accent"
+                role="button"
+                onClick={(e) => {
+                  // add agent to flowSpec?.groupchat_config.agents
+                }}
               >
-                <div
-                  className="inline-flex    rounded   hover:border-accent duration-300 hover:text-accent"
-                  role="button"
-                  onClick={(e) => {
-                    // add agent to flowSpec?.groupchat_config.agents
-                  }}
-                >
-                  <LaunchButton className=" text-sm p-2 px-3">
-                    {" "}
-                    <PlusIcon className="w-5 h-5 inline-block mr-1" />
-                    New Workflow
-                  </LaunchButton>
-                </div>
-              </Dropdown>
+                <LaunchButton className=" text-sm p-2 px-3" onClick={workflowTypesOnClick}>
+                  {" "}
+                  <PlusIcon className="w-5 h-5 inline-block mr-1" />
+                  New Workflow
+                </LaunchButton>
+              </div>
             </div>
           </div>
           <div className="text-xs mb-2 pb-1  ">

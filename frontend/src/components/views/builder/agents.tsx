@@ -92,7 +92,7 @@ const AgentsView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         // message.success(data.message);
-        console.log("agents", data.data);
+        // console.log("agents", data.data);
         setAgents(data.data);
       } else {
         message.error(data.message);
