@@ -70,6 +70,7 @@ export function checkAndRefreshToken() {
     const expiresIn = store.getState().user.expiresIn;
 
     if (Date.now() >= expiresIn) {
+      // FIXME: auth is not defined; need to wait for it to become available?
       const user = auth.currentUser;
       if (user) {
         user.getIdToken(true).then((newToken) => {
