@@ -19,7 +19,7 @@ const ModelsView = ({}: any) => {
     message: "All good",
   });
 
-  const user = useSelector(state => state.user.user);
+  const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const listModelsUrl = `${serverUrl}/models/list`;
   const saveModelsUrl = `${serverUrl}/models`;
@@ -134,7 +134,7 @@ const ModelsView = ({}: any) => {
   };
 
   React.useEffect(() => {
-    if (user) {
+    if (loggedIn) {
       // console.log("fetching messages", messages);
       fetchModels();
     }

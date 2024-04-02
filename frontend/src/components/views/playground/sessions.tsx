@@ -21,7 +21,7 @@ const SessionsView = ({}: any) => {
     message: "All good",
   });
 
-  const user = useSelector(state => state.user.user);
+  const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const listSessionUrl = `${serverUrl}/session/list`;
   const createSessionUrl = `${serverUrl}/session`;
@@ -184,7 +184,7 @@ const SessionsView = ({}: any) => {
   };
 
   React.useEffect(() => {
-    if (user) {
+    if (loggedIn) {
       // console.log("fetching messages", messages);
       fetchSessions();
     }

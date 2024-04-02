@@ -67,10 +67,10 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
 
 export function checkAndRefreshToken() {
   return new Promise((resolve) => {
-    const state = store.getState();
-    const { expiresIn } = state.user;
+    const expiresIn = store.getState().user.expiresIn;
 
     if (Date.now() >= expiresIn) {
+      // FIXME: auth is not defined; need to wait for it to become available?
       const user = auth.currentUser;
       if (user) {
         user.getIdToken(true).then((newToken) => {

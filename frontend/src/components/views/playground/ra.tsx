@@ -30,7 +30,7 @@ const RAView = () => {
     message: "All good",
   });
 
-  const user = useSelector(state => state.user.user);
+  const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
@@ -66,7 +66,7 @@ const RAView = () => {
   };
 
   React.useEffect(() => {
-    if (user && session) {
+    if (loggedIn && session) {
       // console.log("fetching messages", messages);
       fetchMessages();
     }

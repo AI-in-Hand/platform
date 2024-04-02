@@ -4,8 +4,8 @@ const initialState = {
   loggedIn: false,
   accessToken: null,
   expiresIn: null,
-  user: {},
-  email: ""
+  email: null,
+  uid: null,
 };
 
 export default (state = initialState, action: any) => {
@@ -17,7 +17,8 @@ export default (state = initialState, action: any) => {
         loggedIn: true,
         accessToken: action.payload.token,
         expiresIn: action.payload.expiresIn,
-        user: action.payload?.user ?? {},
+        email: action.payload.email,
+        uid: action.payload.uid,
       };
     case usersActions.REFRESH_TOKEN:
       return {
@@ -31,7 +32,7 @@ export default (state = initialState, action: any) => {
         email: action.payload
       };
     case usersActions.RESET_STATE:
-      // Reset all state except email
+      // Reset all state except email (for login form)
       return {
         ...initialState,
         email: state.email
