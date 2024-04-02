@@ -19,9 +19,8 @@ function classNames(...classes: string[]) {
 }
 
 const Header = ({ meta, link }: any) => {
-  // @ts-ignore
-  const { user, loggedIn } = useSelector((state) => state.user);
-  const userEmail = loggedIn ? user.email : "";
+  const { email, loggedIn } = useSelector(state => state.user);
+  const userEmail = loggedIn ? email : "";
   const userAvatarUrl = "";
   const dispatch = useDispatch();
   const logout = () => {
@@ -156,7 +155,7 @@ const Header = ({ meta, link }: any) => {
                             )} */}
                             {!userAvatarUrl && userEmail && (
                               <div className="border-2 bg-accent pt-1 h-8 w-8 align-middle text-sm text-white rounded-full">
-                                {userEmail[0]}
+                                {userEmail[0].toUpperCase()}
                               </div>
                             )}
                           </Menu.Button>
@@ -226,7 +225,7 @@ const Header = ({ meta, link }: any) => {
               {" "}
               Dark mode <DarkModeToggle />{" "}
             </div>
-            {user && (
+            {loggedIn && (
               <div className="pt-4 pb-3 border-t border-secondary">
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
@@ -239,7 +238,7 @@ const Header = ({ meta, link }: any) => {
                     )} */}
                     {!userAvatarUrl && userEmail && (
                       <div className="border-2 bg-accent text-sm text-white h-8 w-8 pt-1   rounded-full text-center">
-                        {userEmail[0]}
+                        {userEmail[0].toUpperCase()}
                       </div>
                     )}
                   </div>

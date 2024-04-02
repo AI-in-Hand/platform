@@ -67,8 +67,7 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
 
 export function checkAndRefreshToken() {
   return new Promise((resolve) => {
-    const state = store.getState();
-    const { expiresIn } = state.user;
+    const expiresIn = store.getState().user.expiresIn;
 
     if (Date.now() >= expiresIn) {
       const user = auth.currentUser;

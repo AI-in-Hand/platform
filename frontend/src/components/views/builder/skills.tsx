@@ -31,7 +31,7 @@ const SkillsView = ({}: any) => {
     message: "All good",
   });
 
-  const user = useSelector(state => state.user.user);
+  const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;
@@ -136,7 +136,7 @@ const SkillsView = ({}: any) => {
   };
 
   React.useEffect(() => {
-    if (user) {
+    if (loggedIn) {
       // console.log("fetching messages", messages);
       fetchSkills();
     }

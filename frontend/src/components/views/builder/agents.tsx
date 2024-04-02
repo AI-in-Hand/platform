@@ -24,7 +24,7 @@ const AgentsView = ({}: any) => {
     message: "All good",
   });
 
-  const user = useSelector(state => state.user.user);
+  const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const listAgentsUrl = `${serverUrl}/agent/list`;
   const saveAgentsUrl = `${serverUrl}/agent`;
@@ -140,7 +140,7 @@ const AgentsView = ({}: any) => {
   };
 
   React.useEffect(() => {
-    if (user) {
+    if (loggedIn) {
       fetchAgents();
     }
   }, []);

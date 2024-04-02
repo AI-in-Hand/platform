@@ -1,13 +1,13 @@
 import * as usersActions from "./constants";
 
 
-export function SignIn(data: {token: string, expiresIn: number, user: any}) {
+export function SignIn(data: {token: string, expiresIn: number, email: string, uid: string}) {
   return {
     type: usersActions.SIGN_IN,
     payload: data,
   };
 }
-export function SignUp(data: {token: string, expiresIn: number, user: any}) {
+export function SignUp(data: {token: string, expiresIn: number, email: string, uid: string}) {
   return {
     type: usersActions.SIGN_UP,
     payload: data,

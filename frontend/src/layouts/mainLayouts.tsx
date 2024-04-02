@@ -32,7 +32,7 @@ const MainLayouts = ({data}: any) => {
         <appContext.Consumer>
             {(context: any) => {
                 if (restricted) {
-                    return <div className="h-full">{context.user && layoutContent}</div>;
+                    return <div className="h-full">{loggedIn && layoutContent}</div>;
                 } else {
                     return layoutContent;
                 }

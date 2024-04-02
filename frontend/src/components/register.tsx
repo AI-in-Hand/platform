@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from "react";
 import { message } from "antd";
 import { signInWithEmailLink } from "firebase/auth";
 import { auth } from '../firebase/firebase-config';
@@ -8,19 +8,18 @@ import {SignIn} from "../store/actions/usersActions";
 
 const LogInVerify = () => {
     const dispatch = useDispatch();
-    // @ts-ignore
-    const email = useSelector(state => state.user.email);
+    const userEmail = useSelector(state => state.user.email);
+
     function handleLogin(email: string) {
-        // @ts-ignore
         signInWithEmailLink(auth, email, location.href)
           .then((res) => {
-            // @ts-ignore
             const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
             dispatch(
               SignIn({
                 token: res.user.accessToken,
                 expiresIn,
-                user: { email: res.user.email, uid: res.user.uid },
+                email: res.user.email,
+                uid: res.user.uid,
               })
             );
             navigate('/');
@@ -31,7 +30,7 @@ const LogInVerify = () => {
           });
     }
     useEffect(() => {
-        handleLogin(email);
+        handleLogin(userEmail);
     }, []);
     return null
 };

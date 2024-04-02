@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState} from "react";
 import {Button, Form, Input, message, Spin, Typography} from "antd";
 import {REGEXP_EMAIL} from "../helpers/constants";
 import { sendSignInLinkToEmail } from "firebase/auth";
@@ -10,14 +10,17 @@ const Login = () => {
     const dispatch = useDispatch();
     const signInVerifyUrl = `${window.location.origin}/sign-in-verify`;
     const [loading, setLoading] = useState(false);
-    const userEmail = useSelector(state => state.email);
+    const userEmail = useSelector(state => state.user.email);
 
     function handleRegister(data: {email: string}) {
+        setLoading(true);
         sendSignInLinkToEmail(auth, data.email, {handleCodeInApp: true, url: signInVerifyUrl}).then((res) => {
             dispatch(SetEmail(data.email))
             message.success("Please check your email for your login link");
         }).catch((error) => {
             console.log(error.message)
+        }).finally(() => {
+            setLoading(false);
         });
     }
     return (
