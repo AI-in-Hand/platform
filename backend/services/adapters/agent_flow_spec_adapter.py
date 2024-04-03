@@ -4,7 +4,7 @@ from backend.repositories.skill_config_firestore_storage import SkillConfigFires
 
 class AgentFlowSpecAdapter:
     """
-    Adapter for AgentFlowSpec. Transforms the data from the frontend format to the model and vice versa.
+    Adapter for the AgentFlowSpec model. Transforms the data from the frontend format to the model and vice versa.
     In particular, it converts the `skills` field from a list of strings (model)
     to a list of SkillConfig objects (frontend) and vice versa.
     """

@@ -67,7 +67,6 @@ export interface IFlowConfig {
   receiver: IAgentFlowSpec | IGroupChatFlowSpec;
   type: "twoagents" | "groupchat";
   timestamp?: string;
-  summary_method?: "none" | "last" | "llm";
   id?: string;
   user_id?: string;
 }

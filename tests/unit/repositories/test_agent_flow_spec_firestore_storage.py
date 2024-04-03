@@ -25,6 +25,12 @@ def agent_data():
     }
 
 
+@pytest.fixture
+@pytest.mark.usefixtures("mock_firestore_client")
+def mock_storage():
+    return AgentFlowSpecFirestoreStorage()
+
+
 def test_load_agent_flow_spec(mock_firestore_client, agent_data):
     # Setup mock data
     # setup_mock_data(collection_name, document_name, data)
@@ -63,3 +69,32 @@ def test_save_new_agent_flow_spec(mock_firestore_client, agent_data):
     assert mock_firestore_client.to_dict() == serialized_data
     # Check that the agent id was updated
     assert agent_flow_spec.id == "new_agent_id"
+
+
+def test_load_agent_flow_spec_by_ids(mock_storage, mock_firestore_client, agent_data):
+    # Setup multiple agents in the mock database
+    ids = ["agent1", "agent2"]
+    agent_data2 = agent_data.copy()
+    agent_data2["id"] = "agent2"
+
+    mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
+    mock_firestore_client.setup_mock_data("agent_configs", "agent2", agent_data2)
+
+    loaded_agent_flow_specs = mock_storage.load_by_ids(ids)
+
+    expected_agent_flow_spec1 = AgentFlowSpec.model_validate(agent_data)
+    expected_agent_flow_spec2 = AgentFlowSpec.model_validate(agent_data2)
+
+    # Assert both agents are returned and in any order
+    assert len(loaded_agent_flow_specs) == 2
+    assert expected_agent_flow_spec1 in loaded_agent_flow_specs
+    assert expected_agent_flow_spec2 in loaded_agent_flow_specs
+
+
+def test_load_agent_flow_spec_by_ids_exceeds_max_size(mock_storage):
+    ids = ["agent1"] * 11
+
+    with pytest.raises(ValueError) as excinfo:
+        mock_storage.load_by_ids(ids)
+
+    assert "IDs list exceeds the maximum size of 10 for an 'in' query in Firestore." in str(excinfo.value)
