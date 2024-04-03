@@ -23,14 +23,18 @@ class AgencyConfigAdapter:
         - `main_agent` and `agency_chart` with names of the agents.
         agency_chart has a form: [[sender, receiver], ...]
         """
-        agents = [agency_config.sender.id] + ([agency_config.receiver.id] if agency_config.receiver else [])
+        sender = [agency_config.sender.id] if agency_config.sender else []
+        receiver = [agency_config.receiver.id] if agency_config.receiver else []
+        agents = sender + receiver
         agency_chart = (
-            [[agency_config.sender.config.name, agency_config.receiver.config.name]] if agency_config.receiver else []
+            [[agency_config.sender.config.name, agency_config.receiver.config.name]]
+            if agency_config.sender and agency_config.receiver
+            else []
         )
 
         agency_config_dict = agency_config.model_dump()
         agency_config_dict["agents"] = agents
-        agency_config_dict["main_agent"] = agency_config.sender.config.name
+        agency_config_dict["main_agent"] = agency_config.sender.config.name if agency_config.sender else None
         agency_config_dict["agency_chart"] = agency_chart
         return AgencyConfig(**agency_config_dict)
 

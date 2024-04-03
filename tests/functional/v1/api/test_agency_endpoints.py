@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from backend.models.agency_config import AgencyConfig
+from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
@@ -15,17 +15,18 @@ def mock_agent():
     return {
         "id": "sender_agent_id",
         "config": {"name": "Sender Agent"},
+        "user_id": TEST_USER_ID,
     }
 
 
 @pytest.fixture
 @pytest.mark.usefixtures("mock_firestore_client")
-def mock_adapter():
+def agency_config_adapter():
     return AgencyConfigAdapter(AgentFlowSpecFirestoreStorage())
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_get_agency_list_success(client, mock_firestore_client, mock_adapter):
+def test_get_agency_list_success(client, mock_firestore_client, agency_config_adapter):
     # Setup expected response
     db_agency = AgencyConfig(
         id="agency1",
@@ -42,7 +43,7 @@ def test_get_agency_list_success(client, mock_firestore_client, mock_adapter):
     mock_firestore_client.setup_mock_data(
         "agent_configs", "receiver_agent_id", {"id": "receiver_agent_id", "config": {"name": "Receiver Agent"}}
     )
-    expected_agency = mock_adapter.to_api(db_agency)
+    expected_agency = agency_config_adapter.to_api(db_agency)
 
     response = client.get("/v1/api/agency/list")
 
@@ -51,7 +52,7 @@ def test_get_agency_list_success(client, mock_firestore_client, mock_adapter):
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_get_agency_config(client, mock_firestore_client, mock_adapter):
+def test_get_agency_config(client, mock_firestore_client, agency_config_adapter):
     db_agency = AgencyConfig(
         id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
@@ -65,7 +66,7 @@ def test_get_agency_config(client, mock_firestore_client, mock_adapter):
     mock_firestore_client.setup_mock_data(
         "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
     )
-    expected_agency = mock_adapter.to_api(db_agency)
+    expected_agency = agency_config_adapter.to_api(db_agency)
 
     response = client.get("/v1/api/agency?id=test_agency_id")
     assert response.status_code == 200
@@ -90,32 +91,30 @@ def test_get_agency_config_user_id_mismatch(client, mock_firestore_client):
     assert response.json() == {"detail": "Forbidden"}
 
 
-@pytest.mark.usefixtures("mock_get_current_user", "mock_firestore_client")
-def test_create_agency_success(client, mock_agent):
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_create_agency_success(client, mock_agent, agency_config_adapter, mock_firestore_client):
     template_config = {
         "id": "template_agency_id",
         "name": "Test agency",
         "shared_instructions": "Manifesto",
         "sender": mock_agent,
     }
-
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
     with patch(
         "backend.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
     ) as mock_update_or_create_agency:
         mock_update_or_create_agency.return_value = TEST_AGENCY_ID
         response = client.put("/v1/api/agency", json=template_config)
-
     assert response.status_code == 200
-    assert response.json()["data"] == {"agency_id": TEST_AGENCY_ID}
-
-    template_config.update({"user_id": TEST_USER_ID})
-    model_template_config = AgencyConfig.model_validate(template_config)
+    assert response.json()["data"] == {"id": TEST_AGENCY_ID}
+    model_template_config = agency_config_adapter.to_model(AgencyConfigForAPI(**template_config))
+    model_template_config.user_id = TEST_USER_ID
     model_template_config.id = None
     mock_update_or_create_agency.assert_called_once_with(model_template_config)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_agency_success(client, mock_firestore_client, mock_agent):
+def test_update_agency_success(client, mock_firestore_client, mock_agent, agency_config_adapter):
     # Setup initial data in mock Firestore client
     initial_data = {
         "id": TEST_AGENCY_ID,
@@ -123,23 +122,29 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent):
         "name": "Test agency",
         "description": "Test Description",
         "shared_instructions": "Original Manifesto",
-        "sender": mock_agent,
+        "agents": ["sender_agent_id"],
+        "main_agent": "Sender Agent",
     }
-    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data)
-    new_data = initial_data.copy()
-    new_data.update({"shared_instructions": "Updated Manifesto"})
-
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data, doc_id=TEST_AGENCY_ID)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent, doc_id="sender_agent_id")
+    new_data = {
+        "id": TEST_AGENCY_ID,
+        "name": "Test agency",
+        "description": "Test Description",
+        "shared_instructions": "Updated Manifesto",
+        "sender": mock_agent,
+        "user_id": TEST_USER_ID,
+    }
     with patch(
         "backend.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate_cache:
         response = client.put("/v1/api/agency", json=new_data)
 
     assert response.status_code == 200
-    assert response.json()["data"] == {"agency_id": initial_data["id"]}
-
+    assert response.json()["data"] == {"id": TEST_AGENCY_ID}
     mock_repopulate_cache.assert_called_once_with(TEST_AGENCY_ID)
-
-    assert mock_firestore_client.to_dict() == new_data
+    expected_data = agency_config_adapter.to_model(AgencyConfigForAPI(**new_data)).model_dump()
+    assert mock_firestore_client.collection("agency_configs").to_dict() == expected_data
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -163,32 +168,31 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_agency_with_foreign_agent(client, mock_firestore_client, mock_agent):
-    agency_config_data = {
+def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_config_adapter):
+    db_agency = {
         "id": TEST_AGENCY_ID,
         "user_id": TEST_USER_ID,
         "name": "Test Agency",
-        "sender": mock_agent,
+        "agents": ["sender_agent_id", "foreign_agent_id"],
+        "main_agent": "Sender Agent",
     }
     foreign_agent_flow_spec = AgentFlowSpec(
-        config={
-            "name": "Foreign Agent",
-            "system_message": "Test Instructions",
-        },
+        config={"name": "Foreign Agent"},
         user_id="foreign_user_id",
     )
-    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
+    mock_firestore_client.setup_mock_data(
+        "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
+    )
     mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_flow_spec.model_dump())
-
     # Simulate a PUT request to update the agency with agents belonging to a different user
-    response = client.put("/v1/api/agency", json=agency_config_data)
-
+    expected_data = agency_config_adapter.to_api(AgencyConfigForAPI(**db_agency)).model_dump()
+    response = client.put("/v1/api/agency", json=expected_data)
     # Check if the server responds with a 403 Forbidden
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
-
     # Check if the agency config was not updated
-    assert mock_firestore_client.collection("agency_configs").to_dict() == agency_config_data
+    assert mock_firestore_client.collection("agency_configs").to_dict() == db_agency
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
