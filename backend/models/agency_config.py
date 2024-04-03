@@ -37,7 +37,7 @@ class AgencyConfig(BaseModel):
             raise ValueError("Main agent must be set if agency chart is not empty")
 
         # Check if the main_agent is in the agency chart
-        if main_agent not in [agent for sublist in v for agent in sublist]:
+        if main_agent not in {agent for sublist in v for agent in sublist}:
             raise ValueError("The main agent must be in the agency chart")
 
         return v
