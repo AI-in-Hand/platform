@@ -6,6 +6,7 @@ from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpec
 from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
 from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
 from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.adapters.agent_flow_spec_adapter import AgentFlowSpecAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
@@ -59,3 +60,9 @@ def get_agent_flow_spec_adapter(
     skill_config_storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ) -> AgentFlowSpecAdapter:
     return AgentFlowSpecAdapter(skill_config_storage)
+
+
+def get_agency_config_adapter(
+    agent_flow_spec_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+) -> AgencyConfigAdapter:
+    return AgencyConfigAdapter(agent_flow_spec_storage)

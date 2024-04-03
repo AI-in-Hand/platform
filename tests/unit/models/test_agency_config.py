@@ -5,7 +5,7 @@ from backend.models.agency_config import AgencyConfig
 
 def test_empty_agency_chart():
     # Test should pass with an empty agency chart
-    config = AgencyConfig(id="123", name="Test agency", agents=["Agent1", "Agent2"], agency_chart=[])
+    config = AgencyConfig(id="123", name="Test agency", agents=["Agent1", "Agent2"], agency_chart=[], main_agent="CEO")
     assert config.agency_chart == []
 
 
@@ -63,5 +63,11 @@ def test_duplicate_agents_in_agency_chart():
 
 def test_main_agent_not_set():
     with pytest.raises(ValueError) as excinfo:
-        AgencyConfig(id="123", name="Test agency", agents=["Agent1", "Agent2"], agency_chart=[["Agent1", "Agent2"]])
+        AgencyConfig(
+            id="123",
+            name="Test agency",
+            agents=["Agent1", "Agent2"],
+            agency_chart=[["Agent1", "Agent2"]],
+            main_agent=None,
+        )
     assert "Main agent must be set if agency chart is not empty" in str(excinfo.value)

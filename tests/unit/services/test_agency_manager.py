@@ -60,6 +60,7 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Initial manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
@@ -94,6 +95,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     agent = MagicMock(spec=Agent)
@@ -125,6 +127,7 @@ async def test_load_and_construct_agents_success(agency_manager):
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     agent_flow_spec_mock = Mock()
@@ -152,6 +155,7 @@ async def test_load_and_construct_agents_agent_not_found(agency_manager):
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
 

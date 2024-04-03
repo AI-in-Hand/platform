@@ -7,11 +7,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_manager
-from backend.models.agency_config import AgencyConfig
+from backend.dependencies.dependencies import get_agency_config_adapter, get_agency_manager
+from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
+from backend.models.response_models import (
+    CreateAgencyData,
+    CreateAgencyResponse,
+    GetAgencyListResponse,
+    GetAgencyResponse,
+)
 from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -25,18 +32,21 @@ agency_router = APIRouter(
 @agency_router.get("/agency/list")
 async def get_agency_list(
     current_user: Annotated[User, Depends(get_current_user)],
+    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-) -> list[AgencyConfig]:
+) -> GetAgencyListResponse:
     agencies = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
-    return agencies
+    agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
+    return GetAgencyListResponse(data=agencies_for_api)
 
 
 @agency_router.get("/agency")
 async def get_agency_config(
     current_user: Annotated[User, Depends(get_current_user)],
+    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-) -> AgencyConfig:
+) -> GetAgencyResponse:
     agency_config = storage.load_by_id(id)
     if not agency_config:
         logger.warning(f"Agency not found: {id}, user: {current_user.id}")
@@ -45,18 +55,25 @@ async def get_agency_config(
     if agency_config.user_id and agency_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to get agency {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-    return agency_config
+
+    # Transform the internal model to the API model
+    config_for_api = agency_adapter.to_api(agency_config)
+    return GetAgencyResponse(data=config_for_api)
 
 
 @agency_router.put("/agency", status_code=HTTPStatus.OK)
 async def update_or_create_agency(
-    agency_config: AgencyConfig,
+    agency_config: AgencyConfigForAPI,
     current_user: Annotated[User, Depends(get_current_user)],
+    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
     agent_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ):
     """Create or update an agency and return its id"""
+    # Transform the API model to the internal model
+    agency_config = agency_adapter.to_model(agency_config)
+
     # support template configs:
     if not agency_config.user_id:
         logger.info(f"Creating agency for user: {current_user.id}, agency: {agency_config.name}")
@@ -93,4 +110,4 @@ async def update_or_create_agency(
 
     id_ = await agency_manager.update_or_create_agency(agency_config)
 
-    return {"agency_id": id_}
+    return CreateAgencyResponse(data=CreateAgencyData(id=id_))

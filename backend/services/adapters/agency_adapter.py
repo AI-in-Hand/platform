@@ -2,7 +2,7 @@ from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 
 
-class AgencyAdapter:
+class AgencyConfigAdapter:
     """
     Adapter for the AgencyConfig model. Transforms the data from the frontend format to the model and vice versa.
     In particular, it converts the `agents` field with a list of IDs (AgencyConfig Pydantic model)
@@ -24,11 +24,13 @@ class AgencyAdapter:
         agency_chart has a form: [[sender, receiver], ...]
         """
         agents = [agency_config.sender.id] + ([agency_config.receiver.id] if agency_config.receiver else [])
-        agency_chart = [[agency_config.sender.name, agency_config.receiver.name]] if agency_config.receiver else []
+        agency_chart = (
+            [[agency_config.sender.config.name, agency_config.receiver.config.name]] if agency_config.receiver else []
+        )
 
         agency_config_dict = agency_config.model_dump()
         agency_config_dict["agents"] = agents
-        agency_config_dict["main_agent"] = agency_config.sender.name
+        agency_config_dict["main_agent"] = agency_config.sender.config.name
         agency_config_dict["agency_chart"] = agency_chart
         return AgencyConfig(**agency_config_dict)
 
@@ -42,8 +44,8 @@ class AgencyAdapter:
         The `receiver` field is optional.
         """
         agent_list = self.agent_flow_spec_storage.load_by_ids(agency_config.agents)
-        agents = {agent.name: agent for agent in agent_list}
-        sender = agents[agency_config.main_agent]
+        agents = {agent.config.name: agent for agent in agent_list}
+        sender = agents[agency_config.main_agent] if agency_config.main_agent else None
         receiver = agents[agency_config.agency_chart[0][1]] if agency_config.agency_chart else None
 
         agency_config_dict = agency_config.model_dump()

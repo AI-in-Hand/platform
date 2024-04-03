@@ -46,5 +46,5 @@ class AgencyConfig(BaseModel):
 class AgencyConfigForAPI(AgencyConfig):
     """Agency configuration model for the API"""
 
-    sender: AgentFlowSpec
+    sender: AgentFlowSpec | None = None
     receiver: AgentFlowSpec | None = None

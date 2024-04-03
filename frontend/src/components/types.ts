@@ -63,8 +63,8 @@ export interface IGroupChatFlowSpec {
 export interface IFlowConfig {
   name: string;
   description: string;
-  sender: IAgentFlowSpec;
-  receiver: IAgentFlowSpec | IGroupChatFlowSpec;
+  sender?: IAgentFlowSpec;
+  receiver?: IAgentFlowSpec | IGroupChatFlowSpec;
   type: "twoagents" | "groupchat";
   timestamp?: string;
   id?: string;
