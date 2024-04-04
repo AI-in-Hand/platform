@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -110,6 +111,7 @@ def test_create_agency_success(client, mock_agent, agency_config_adapter, mock_f
     model_template_config = agency_config_adapter.to_model(AgencyConfigForAPI(**template_config))
     model_template_config.user_id = TEST_USER_ID
     model_template_config.id = None
+    model_template_config.timestamp = mock.ANY
     mock_update_or_create_agency.assert_called_once_with(model_template_config)
 
 
@@ -134,6 +136,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
         "shared_instructions": "Updated Manifesto",
         "sender": mock_agent,
         "user_id": TEST_USER_ID,
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
     }
     with patch(
         "backend.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
@@ -144,6 +147,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
     assert response.json()["data"] == {"id": TEST_AGENCY_ID}
     mock_repopulate_cache.assert_called_once_with(TEST_AGENCY_ID)
     expected_data = agency_config_adapter.to_model(AgencyConfigForAPI(**new_data)).model_dump()
+    expected_data["timestamp"] = mock.ANY
     assert mock_firestore_client.collection("agency_configs").to_dict() == expected_data
 
 

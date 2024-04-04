@@ -18,7 +18,7 @@ def agent_data():
                 "use_docker": False,
             },
         },
-        "timestamp": "2021-09-01T00:00:00",
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
         "skills": ["skill1", "skill2"],
         "description": "An example agent",
         "user_id": TEST_USER_ID,

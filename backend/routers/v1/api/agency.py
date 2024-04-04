@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
@@ -104,6 +105,7 @@ async def update_or_create_agency(
 
     # Ensure the agency is associated with the current user
     agency_config.user_id = current_user.id
+    agency_config.timestamp = datetime.now(UTC).isoformat()
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)

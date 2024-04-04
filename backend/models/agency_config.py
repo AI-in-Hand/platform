@@ -18,6 +18,7 @@ class AgencyConfig(BaseModel):
         description="List representing the agency chart with agent names. "
         "Each item is a pair of names: [sender, receiver]",
     )
+    timestamp: str | None = Field(None, description="Timestamp of the last update")
 
     @field_validator("agency_chart", mode="after")
     @classmethod

@@ -47,6 +47,8 @@ class AgencyConfigAdapter:
         Uses the agent_flow_spec_storage.load_by_ids method to get the AgentFlowSpec objects.
         The `receiver` field is optional.
         """
+        if not agency_config.agents:
+            return AgencyConfigForAPI(**agency_config.model_dump())
         agent_list = self.agent_flow_spec_storage.load_by_ids(agency_config.agents)
         agents = {agent.config.name: agent for agent in agent_list}
         sender = agents[agency_config.main_agent] if agency_config.main_agent else None
