@@ -1579,7 +1579,7 @@ export const FlowConfigViewer = ({
   const updateFlowConfig = (key: string, value: string) => {
     // When an updatedFlowConfig is created using localFlowConfig, if the contents of FlowConfigViewer Modal are changed after the Agent Specification Modal is updated, the updated contents of the Agent Specification Modal are not saved. Fixed to localFlowConfig->flowConfig. Fixed a bug.
     const updatedFlowConfig = { ...flowConfig, [key]: value };
-    console.log("updatedFlowConfig: ", updatedFlowConfig);
+    // console.log("updatedFlowConfig: ", updatedFlowConfig);
     setLocalFlowConfig(updatedFlowConfig);
     setFlowConfig(updatedFlowConfig);
   };
