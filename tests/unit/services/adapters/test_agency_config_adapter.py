@@ -1,24 +1,24 @@
 import pytest
 
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
-from backend.models.agent_flow_spec import AgentConfig, AgentFlowSpec
+from backend.models.agent_flow_spec import AgentConfig, AgentFlowSpec, AgentFlowSpecForAPI
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 
 
 @pytest.fixture
-def agent_flow_spec_storage():
+def agent_flow_spec_storage() -> AgentFlowSpecFirestoreStorage:
     return AgentFlowSpecFirestoreStorage()
 
 
 @pytest.fixture
-def agency_adapter(agent_flow_spec_storage):
-    return AgencyConfigAdapter(agent_flow_spec_storage)
+def agency_adapter(agent_flow_spec_storage, agent_adapter) -> AgencyConfigAdapter:
+    return AgencyConfigAdapter(agent_flow_spec_storage, agent_adapter)
 
 
 def test_to_model(agency_adapter):
-    sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
-    receiver = AgentFlowSpec(id="receiver_id", config=AgentConfig(name="Receiver"))
+    sender = AgentFlowSpecForAPI(id="sender_id", config=AgentConfig(name="Sender"))
+    receiver = AgentFlowSpecForAPI(id="receiver_id", config=AgentConfig(name="Receiver"))
     agency_config_api = AgencyConfigForAPI(
         name="Test Agency",
         description="Test Description",
@@ -38,7 +38,7 @@ def test_to_model(agency_adapter):
 
 
 def test_to_model_without_receiver(agency_adapter):
-    sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
+    sender = AgentFlowSpecForAPI(id="sender_id", config=AgentConfig(name="Sender"))
     agency_config_api = AgencyConfigForAPI(
         name="Test Agency",
         description="Test Description",
@@ -56,7 +56,7 @@ def test_to_model_without_receiver(agency_adapter):
     assert agency_config.agency_chart == []
 
 
-def test_to_api(agency_adapter, mocker):
+def test_to_api(agency_adapter, agent_adapter, mocker):
     sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
     receiver = AgentFlowSpec(id="receiver_id", config=AgentConfig(name="Receiver"))
     agency_config = AgencyConfig(
@@ -79,11 +79,11 @@ def test_to_api(agency_adapter, mocker):
     assert agency_config_api.name == "Test Agency"
     assert agency_config_api.description == "Test Description"
     assert agency_config_api.shared_instructions == "Test Instructions"
-    assert agency_config_api.sender == sender
-    assert agency_config_api.receiver == receiver
+    assert agency_config_api.sender == agent_adapter.to_api(sender)
+    assert agency_config_api.receiver == agent_adapter.to_api(receiver)
 
 
-def test_to_api_without_receiver(agency_adapter, mocker):
+def test_to_api_without_receiver(agency_adapter, agent_adapter, mocker):
     sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
     agency_config = AgencyConfig(
         name="Test Agency",
@@ -105,5 +105,5 @@ def test_to_api_without_receiver(agency_adapter, mocker):
     assert agency_config_api.name == "Test Agency"
     assert agency_config_api.description == "Test Description"
     assert agency_config_api.shared_instructions == "Test Instructions"
-    assert agency_config_api.sender == sender
+    assert agency_config_api.sender == agent_adapter.to_api(sender)
     assert agency_config_api.receiver is None

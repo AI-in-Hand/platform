@@ -6,12 +6,12 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agent_flow_spec_adapter, get_agent_manager
+from backend.dependencies.dependencies import get_agent_adapter, get_agent_manager
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import CreateAgentData, CreateAgentResponse, GetAgentListResponse, GetAgentResponse
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
-from backend.services.adapters.agent_flow_spec_adapter import AgentFlowSpecAdapter
+from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agent_manager import AgentManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 
@@ -27,18 +27,18 @@ agent_router = APIRouter(tags=["agent"])
 @agent_router.get("/agent/list")
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
+    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentListResponse:
     configs = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
-    configs_for_api = [agent_flow_spec_adapter.to_api(config) for config in configs]
+    configs_for_api = [agent_adapter.to_api(config) for config in configs]
     return GetAgentListResponse(data=configs_for_api)
 
 
 @agent_router.get("/agent")
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
+    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
     storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
 ) -> GetAgentResponse:
@@ -50,19 +50,19 @@ async def get_agent_config(
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-    config_for_api = agent_flow_spec_adapter.to_api(config)
+    config_for_api = agent_adapter.to_api(config)
     return GetAgentResponse(data=config_for_api)
 
 
 @agent_router.put("/agent")
 async def create_or_update_agent(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_flow_spec_adapter: Annotated[AgentFlowSpecAdapter, Depends(get_agent_flow_spec_adapter)],
+    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     config: AgentFlowSpecForAPI = Body(...),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> CreateAgentResponse:
     # Transform the API model to the internal model
-    internal_config = agent_flow_spec_adapter.to_model(config)
+    internal_config = agent_adapter.to_model(config)
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)

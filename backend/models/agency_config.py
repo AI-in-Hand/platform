@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, conlist, field_validator
 
-from backend.models.agent_flow_spec import AgentFlowSpec
+from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 
 
 class AgencyConfig(BaseModel):
@@ -47,5 +47,5 @@ class AgencyConfig(BaseModel):
 class AgencyConfigForAPI(AgencyConfig):
     """Agency configuration model for the API"""
 
-    sender: AgentFlowSpec | None = None
-    receiver: AgentFlowSpec | None = None
+    sender: AgentFlowSpecForAPI | None = None
+    receiver: AgentFlowSpecForAPI | None = None

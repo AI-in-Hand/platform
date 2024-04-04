@@ -1,5 +1,6 @@
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.services.adapters.agent_adapter import AgentAdapter
 
 
 class AgencyConfigAdapter:
@@ -12,8 +13,9 @@ class AgencyConfigAdapter:
     and vice versa.
     """
 
-    def __init__(self, agent_flow_spec_storage: AgentFlowSpecFirestoreStorage):
+    def __init__(self, agent_flow_spec_storage: AgentFlowSpecFirestoreStorage, agent_adapter: AgentAdapter):
         self.agent_flow_spec_storage = agent_flow_spec_storage
+        self.agent_adapter = agent_adapter
 
     @staticmethod
     def to_model(agency_config: AgencyConfigForAPI) -> AgencyConfig:
@@ -55,6 +57,6 @@ class AgencyConfigAdapter:
         receiver = agents[agency_config.agency_chart[0][1]] if agency_config.agency_chart else None
 
         agency_config_dict = agency_config.model_dump()
-        agency_config_dict["sender"] = sender
-        agency_config_dict["receiver"] = receiver
+        agency_config_dict["sender"] = self.agent_adapter.to_api(sender) if sender else None
+        agency_config_dict["receiver"] = self.agent_adapter.to_api(receiver) if receiver else None
         return AgencyConfigForAPI(**agency_config_dict)
