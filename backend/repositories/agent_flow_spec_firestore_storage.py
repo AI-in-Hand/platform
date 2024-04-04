@@ -21,6 +21,16 @@ class AgentFlowSpecFirestoreStorage:
             return None
         return AgentFlowSpec.model_validate(document_snapshot.to_dict())
 
+    def load_by_ids(self, ids: list[str]) -> list[AgentFlowSpec]:
+        collection = self.db.collection(self.collection_name)
+        # Firestore `in` query supports up to 10 items in the array.
+        if len(ids) > 10:
+            raise ValueError("IDs list exceeds the maximum size of 10 for an 'in' query in Firestore.")
+
+        query = collection.where(filter=FieldFilter("id", "in", ids))
+        results = [AgentFlowSpec.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
+        return results
+
     def save(self, agent_flow_spec: AgentFlowSpec) -> str:
         """Save the agent configuration to the Firestore.
         If the agent id is not set, it will create a new document and set the agent id.

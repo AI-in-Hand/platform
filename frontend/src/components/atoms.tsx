@@ -1078,11 +1078,6 @@ export const AgentFlowSpecView = ({
   const [localFlowSpec, setLocalFlowSpec] =
     React.useState<IAgentFlowSpec>(flowSpec);
 
-  // Required to monitor localAgent updates that occur in GroupChatFlowSpecView and reflect updates.
-  useEffect(() => {
-    setLocalFlowSpec(flowSpec);
-  }, [flowSpec]);
-
   // Event handlers for updating local state and propagating changes
 
   const onControlChange = (value: any, key: string) => {
@@ -1402,198 +1397,6 @@ export const SkillLoader = ({
   );
 };
 
-const GroupChatFlowSpecView = ({
-  flowSpec,
-  setFlowSpec,
-  flowSpecs,
-}: {
-  flowSpec: IGroupChatFlowSpec | null;
-  setFlowSpec: (flowSpec: IGroupChatFlowSpec | null) => void;
-  flowSpecs: IAgentFlowSpec[];
-}) => {
-  const [showAgentModal, setShowAgentModal] = React.useState(false);
-  const [selectedAgent, setSelectedAgent] = React.useState<number | null>(null);
-
-  const handleRemoveAgent = (index: number) => {
-    const updatedAgents = flowSpec?.groupchat_config.agents.filter(
-      (_, i) => i !== index
-    );
-    if (flowSpec?.groupchat_config && updatedAgents) {
-      setFlowSpec({
-        ...flowSpec,
-        groupchat_config: {
-          ...flowSpec?.groupchat_config,
-          agents: updatedAgents,
-        },
-      });
-    }
-  };
-
-  const handleAddAgent = (agent: IAgentFlowSpec) => {
-    if (flowSpec?.groupchat_config && flowSpec?.groupchat_config.agents) {
-      const updatedAgents = [...flowSpec?.groupchat_config.agents, agent];
-      if (flowSpec?.groupchat_config) {
-        setFlowSpec({
-          ...flowSpec,
-          groupchat_config: {
-            ...flowSpec?.groupchat_config,
-            agents: updatedAgents,
-          },
-        });
-      }
-    }
-  };
-
-  const handleAgentUpdate = (updatedAgent: IAgentFlowSpec, index: number) => {
-    const updatedAgents = flowSpec?.groupchat_config.agents.map((agent, i) => {
-      if (i === index) {
-        return updatedAgent;
-      }
-      return agent;
-    });
-    if (flowSpec?.groupchat_config && updatedAgents) {
-      setFlowSpec({
-        ...flowSpec,
-        groupchat_config: {
-          ...flowSpec?.groupchat_config,
-          agents: updatedAgents,
-        },
-      });
-    }
-  };
-
-  const agentItems: MenuProps["items"] = flowSpecs.map(
-    (flowSpec: IAgentFlowSpec, index: number) => ({
-      key: index,
-      label: flowSpec.config.name,
-      value: index,
-    })
-  );
-
-  const agentOnClick: MenuProps["onClick"] = ({ key }) => {
-    const selectedIndex = parseInt(key.toString());
-    const selectedAgent = flowSpecs[selectedIndex];
-    handleAddAgent(selectedAgent);
-  };
-
-  const AgentDropDown = () => {
-    return (
-      <Dropdown
-        menu={{ items: agentItems, onClick: agentOnClick }}
-        placement="bottomRight"
-        trigger={["click"]}
-      >
-        <div
-          className="inline-flex mr-1 mb-1 p-1 px-2 rounded border hover:border-accent duration-300 hover:text-accent"
-          role="button"
-        >
-          add <PlusIcon className="w-4 h-4 inline-block mt-1" />
-        </div>
-      </Dropdown>
-    );
-  };
-
-  const agentsView = flowSpec?.groupchat_config.agents.map(
-    (flowSpec: IAgentFlowSpec, index: number) => {
-      const tooltipText = `Agent: ${flowSpec?.config.name}`;
-      return (
-        <div
-          key={"agent" + index}
-          className="mr-1 mb-1 p-1 px-2 rounded border"
-          role="button"
-          onClick={() => {
-            setSelectedAgent(index);
-          }}
-        >
-          <div className="inline-flex">
-            {" "}
-            <Tooltip title={tooltipText}>
-              <div className="">{flowSpec.config.name} </div>{" "}
-            </Tooltip>
-            <div
-              role="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveAgent(index);
-              }}
-              className="ml-1 text-primary hover:text-accent duration-300"
-            >
-              <XMarkIcon className="w-4 h-4 inline-block" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-  );
-
-  useEffect(() => {
-    if (selectedAgent !== null) {
-      // showAgentModal = true;
-      setShowAgentModal(true);
-    }
-  }, [selectedAgent]);
-
-  return (
-    <div className="mb-4">
-      {showAgentModal &&
-        selectedAgent !== null &&
-        flowSpec?.groupchat_config && (
-          <AgentModal
-            agent={flowSpec?.groupchat_config.agents[selectedAgent]}
-            showAgentModal={showAgentModal}
-            setShowAgentModal={setShowAgentModal}
-            handler={(agent: IAgentFlowSpec | null) => {
-              if (agent) {
-                handleAgentUpdate(agent, selectedAgent);
-                console.log("updating agent at index", selectedAgent, agent);
-              }
-              setSelectedAgent(null);
-            }}
-          />
-        )}
-      <GroupView title=<div className="px-2">Group Chat Agents</div>>
-        <div className="flex flex-wrap mt-3">
-          {agentsView}
-          <AgentDropDown />
-        </div>
-      </GroupView>
-
-      <ControlRowView
-        title="Speaker Selection Method"
-        description="How the next speaker is selected"
-        className="mt-4"
-        value={flowSpec?.groupchat_config?.speaker_selection_method || "auto"}
-        control={
-          <Select
-            className="mt-2 w-full"
-            defaultValue={
-              flowSpec?.groupchat_config?.speaker_selection_method || "auto"
-            }
-            onChange={(value: any) => {
-              if (flowSpec?.groupchat_config) {
-                setFlowSpec({
-                  ...flowSpec,
-                  groupchat_config: {
-                    ...flowSpec?.groupchat_config,
-                    speaker_selection_method: value,
-                  },
-                });
-              }
-            }}
-            options={
-              [
-                { label: "Auto", value: "auto" },
-                { label: "Round Robin", value: "round_robin" },
-                { label: "Random", value: "random" },
-              ] as any
-            }
-          />
-        }
-      />
-    </div>
-  );
-};
-
 const AgentModal = ({
   agent,
   showAgentModal,
@@ -1670,39 +1473,8 @@ const AgentModal = ({
         setLocalAgent(agent);
       }}
     >
-      {agent && (
-        <>
-          {" "}
-          <div className="text-sm text-secondary mt-2">
-            Modify current agent{" "}
-          </div>
-          {localAgent && localAgent.type === "groupchat" && (
-            <div>
-              <GroupChatFlowSpecView
-                flowSpec={localAgent as IGroupChatFlowSpec}
-                setFlowSpec={setLocalAgent}
-                flowSpecs={flowSpecs}
-              />
-            </div>
-          )}
-          {localAgent && (
-            <AgentFlowSpecView
-              title=""
-              flowSpec={localAgent}
-              setFlowSpec={setLocalAgent}
-            />
-          )}
-        </>
-      )}
-
       {agent && agent.type !== "groupchat" && (
         <div>
-          {" "}
-          <div>
-            <div className="text-sm text-secondary mt-2">
-              Or replace with an existing agent{" "}
-            </div>
-          </div>
           <Select
             className="mt-2 w-full"
             defaultValue={selectedFlowSpec}
@@ -1807,7 +1579,7 @@ export const FlowConfigViewer = ({
   const updateFlowConfig = (key: string, value: string) => {
     // When an updatedFlowConfig is created using localFlowConfig, if the contents of FlowConfigViewer Modal are changed after the Agent Specification Modal is updated, the updated contents of the Agent Specification Modal are not saved. Fixed to localFlowConfig->flowConfig. Fixed a bug.
     const updatedFlowConfig = { ...flowConfig, [key]: value };
-    console.log("updatedFlowConfig: ", updatedFlowConfig);
+    // console.log("updatedFlowConfig: ", updatedFlowConfig);
     setLocalFlowConfig(updatedFlowConfig);
     setFlowConfig(updatedFlowConfig);
   };
@@ -1843,25 +1615,6 @@ export const FlowConfigViewer = ({
         }
       />
 
-      <ControlRowView
-        title="Summary Method"
-        description="Defines the method to summarize the conversation"
-        value={localFlowConfig.summary_method || "last"}
-        control={
-          <Select
-            className="mt-2 w-full"
-            defaultValue={localFlowConfig.summary_method || "last"}
-            onChange={(value: any) => updateFlowConfig("summary_method", value)}
-            options={
-              [
-                { label: "last", value: "last" },
-                { label: "none", value: "none" },
-                { label: "llm", value: "llm" },
-              ] as any
-            }
-          />
-        }
-      />
       <div className="flex gap-3 mt-4">
         <div className="w-1/2 ">
           <div className="mb-2  ">Sender</div>

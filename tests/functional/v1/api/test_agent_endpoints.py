@@ -21,7 +21,7 @@ def mock_agent_data_api():
                 "use_docker": False,
             },
         },
-        "timestamp": "2021-01-01T00:00:00Z",
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
         "skills": [SkillConfig(title="GenerateProposal").model_dump(), SkillConfig(title="SearchWeb").model_dump()],
         "description": "An example agent.",
         "user_id": TEST_USER_ID,

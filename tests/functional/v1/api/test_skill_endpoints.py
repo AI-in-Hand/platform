@@ -14,7 +14,7 @@ def skill_config_data():
         "title": "Skill 1",
         "description": "",
         "version": 1,
-        "timestamp": "2021-01-01T00:00:00Z",
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
         "content": 'print("Hello World")',
         "approved": False,
     }

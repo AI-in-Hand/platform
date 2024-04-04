@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ai-in-hand"
-version = "0.5.1"
+version = "0.6.0"
 description = "A FastAPI app to manage swarm agency configurations."
 authors = [
     "AI in Hand <hello@ainhand.com>"
@@ -35,6 +35,7 @@ pre-commit = ">=3.6.0"
 pytest = ">=7.4.3"
 pytest-asyncio = ">=0.23.3"
 pytest-cov = ">=4.1.0"
+pytest-mock = "^3.14.0"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

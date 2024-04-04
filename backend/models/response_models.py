@@ -2,6 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.skill_config import SkillConfig
 
@@ -54,6 +55,26 @@ class CreateAgentData(BaseModel):
 
 class CreateAgentResponse(BaseResponse):
     data: CreateAgentData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
+# Agency API
+
+
+class GetAgencyListResponse(BaseResponse):
+    data: list[AgencyConfigForAPI] = Field(..., description="The list of agency configurations.")
+
+
+class GetAgencyResponse(BaseResponse):
+    data: AgencyConfigForAPI = Field(..., description="The agency configuration.")
+
+
+class CreateAgencyData(BaseModel):
+    id: str = Field(..., description="The unique identifier of the agency.")
+
+
+class CreateAgencyResponse(BaseResponse):
+    data: CreateAgencyData = Field(..., description="The data to be returned.")
 
 
 # =================================================================================================

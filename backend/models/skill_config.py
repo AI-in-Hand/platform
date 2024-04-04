@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class SkillConfig(BaseModel):
-    """Skill configuration model"""
+    """Skill configuration model, corresponds to the ISkill type in the frontend"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
     user_id: str | None = Field(None, description="The user ID owning this configuration")

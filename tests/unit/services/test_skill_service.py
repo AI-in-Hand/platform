@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,7 +22,7 @@ confined to a single sentence, and rigorously comply with the specified instruct
             + "\n```",
             temperature=0.0,
             model="gpt-3.5-turbo",
-            api_key=None,
+            api_key=mock.ANY,
         )
         assert result == "Summary of the skill", "The function did not return the expected summary"
 

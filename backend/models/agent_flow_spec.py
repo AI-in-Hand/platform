@@ -11,7 +11,7 @@ class CodeExecutionConfig(BaseModel):
 
 
 class AgentConfig(BaseModel):
-    """Config for an agent, corresponds to IAgentConfig in the frontend"""
+    """Config for an agent, corresponds to the IAgentConfig in the frontend"""
 
     name: str = Field(..., description="Name of the agent")
     system_message: str = Field("", description="System message")
@@ -35,7 +35,7 @@ class AgentFlowSpec(BaseModel):
 
 
 class AgentFlowSpecForAPI(AgentFlowSpec):
-    """Config for an agent, corresponds to IAgentFlowSpec in the frontend"""
+    """Config for an agent, corresponds to the IAgentFlowSpec in the frontend"""
 
     skills: conlist(SkillConfig, max_length=10) = Field(  # type: ignore
         default_factory=list, description="List of skill configurations equipped by the agent"

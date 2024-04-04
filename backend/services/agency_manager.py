@@ -27,16 +27,16 @@ class AgencyManager:
         self.cache_manager = cache_manager
         self.env_config_manager = env_config_manager
 
-    async def get_agency(self, agency_id: str, session_id: str | None = None) -> Agency | None:
-        cache_key = self.get_cache_key(agency_id, session_id)
+    async def get_agency(self, id_: str, session_id: str | None = None) -> Agency | None:
+        cache_key = self.get_cache_key(id_, session_id)
         agency = await self.cache_manager.get(cache_key)
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            await self.repopulate_cache_and_update_assistants(agency_id, session_id)
+            await self.repopulate_cache_and_update_assistants(id_, session_id)
             agency = await self.cache_manager.get(cache_key)
             if not agency:
-                logger.error(f"Agency configuration for {agency_id} could not be found in the Firestore database.")
+                logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
                 return None
 
         agency = self._set_client_objects(agency)
@@ -47,16 +47,16 @@ class AgencyManager:
         repopulate_cache_and_update_assistants method call ensures that the assistants are up-to-date.
         """
         AgencyConfig.model_validate(agency_config.model_dump())
-        agency_id = await asyncio.to_thread(self.agency_config_storage.save, agency_config)
-        await self.repopulate_cache_and_update_assistants(agency_id)
-        return agency_id
+        id_ = await asyncio.to_thread(self.agency_config_storage.save, agency_config)
+        await self.repopulate_cache_and_update_assistants(id_)
+        return id_
 
     async def repopulate_cache_and_update_assistants(self, agency_id: str, session_id: str | None = None) -> None:
         """Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants), and saves the Agency instance to Redis
         (with expiration period, see constants.DEFAULT_CACHE_EXPIRATION).
         """
-        agency_config = await asyncio.to_thread(self.agency_config_storage.load_by_agency_id, agency_id)
+        agency_config = await asyncio.to_thread(self.agency_config_storage.load_by_id, agency_id)
         if not agency_config:
             logger.error(f"Agency with id {agency_id} not found.")
             return None

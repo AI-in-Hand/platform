@@ -56,10 +56,11 @@ async def test_get_agency_repopulate_cache(agency_manager):
 @pytest.mark.asyncio
 async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
-        agency_id=TEST_AGENCY_ID,
+        id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Initial manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
@@ -68,10 +69,10 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     with patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate:
-        agency_id = await agency_manager.update_or_create_agency(agency_config)
+        id_ = await agency_manager.update_or_create_agency(agency_config)
 
     mock_repopulate.assert_called_once_with(TEST_AGENCY_ID)
-    assert agency_id == TEST_AGENCY_ID
+    assert id_ == TEST_AGENCY_ID
     assert mock_firestore_client.to_dict()["shared_instructions"] == "New manifesto"
 
 
@@ -90,10 +91,11 @@ async def test_repopulate_cache_no_config(agency_manager, caplog):
 @pytest.mark.asyncio
 async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
-        agency_id=TEST_AGENCY_ID,
+        id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     agent = MagicMock(spec=Agent)
@@ -107,7 +109,7 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
             "backend.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
         ) as mock_cache_agency,
     ):
-        mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config)
+        mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
@@ -121,10 +123,11 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
 @pytest.mark.asyncio
 async def test_load_and_construct_agents_success(agency_manager):
     agency_config = AgencyConfig(
-        agency_id=TEST_AGENCY_ID,
+        id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
     agent_flow_spec_mock = Mock()
@@ -148,10 +151,11 @@ async def test_load_and_construct_agents_success(agency_manager):
 @pytest.mark.asyncio
 async def test_load_and_construct_agents_agent_not_found(agency_manager):
     agency_config = AgencyConfig(
-        agency_id=TEST_AGENCY_ID,
+        id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="Test manifesto",
+        main_agent="agent1_name",
         agents=["agent1_id"],
     )
 
@@ -170,7 +174,7 @@ async def test_load_and_construct_agents_agent_not_found(agency_manager):
 async def test_construct_agency_single_layer_chart(agency_manager):
     # Mock AgencyConfig
     agency_config = AgencyConfig(
-        agency_id=TEST_AGENCY_ID,
+        id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
         name="Test agency",
         shared_instructions="manifesto",

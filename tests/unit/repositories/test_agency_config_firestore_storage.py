@@ -7,7 +7,7 @@ from tests.test_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 @pytest.fixture
 def agency_config_data():
-    return {"agency_id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency"}
+    return {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency"}
 
 
 def test_load_agency_config_by_user_id(mock_firestore_client, agency_config_data):
@@ -21,12 +21,12 @@ def test_load_agency_config_by_user_id(mock_firestore_client, agency_config_data
     assert result[0] == mocked_data
 
 
-def test_load_agency_config_by_agency_id(mock_firestore_client, agency_config_data):
+def test_load_agency_config_by_id(mock_firestore_client, agency_config_data):
     mocked_data = AgencyConfig.model_validate(agency_config_data)
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
 
     storage = AgencyConfigFirestoreStorage()
-    result = storage.load_by_agency_id(TEST_AGENCY_ID)
+    result = storage.load_by_id(TEST_AGENCY_ID)
 
     assert result == mocked_data
 
@@ -39,19 +39,19 @@ def test_save_new_agency_config(mock_firestore_client):
     )
 
     storage = AgencyConfigFirestoreStorage()
-    agency_id = storage.save(new_agency_config)
+    id_ = storage.save(new_agency_config)
 
-    assert agency_id is not None
+    assert id_ is not None
 
 
 def test_save_existing_agency_config(mock_firestore_client, agency_config_data):
     agency_config = AgencyConfig.model_validate(agency_config_data)
-    mock_firestore_client.setup_mock_data("agency_configs", agency_config.agency_id, agency_config_data)
+    mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config_data)
 
     storage = AgencyConfigFirestoreStorage()
-    agency_id = storage.save(agency_config)
+    id_ = storage.save(agency_config)
 
     # Assert
-    assert agency_id == agency_config.agency_id
-    saved_data = mock_firestore_client.collection("agency_configs").document(agency_id).get().to_dict()
+    assert id_ == agency_config.id
+    saved_data = mock_firestore_client.collection("agency_configs").document(id_).get().to_dict()
     assert saved_data == agency_config.model_dump()
