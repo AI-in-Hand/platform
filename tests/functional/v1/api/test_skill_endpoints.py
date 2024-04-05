@@ -78,6 +78,14 @@ def test_delete_skill_forbidden(skill_config_data, client, mock_firestore_client
     assert response.json() == {"detail": "Forbidden"}
 
 
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_skill_not_found(client):
+    skill_id = "nonexistent_skill"
+    response = client.delete(f"/v1/api/skill?id={skill_id}")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Skill not found"}
+
+
 @pytest.mark.usefixtures("mock_get_current_superuser")
 def test_approve_skill(skill_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
