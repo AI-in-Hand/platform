@@ -42,10 +42,7 @@ const SessionsView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(session),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {

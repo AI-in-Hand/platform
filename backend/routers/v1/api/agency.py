@@ -118,18 +118,18 @@ async def update_or_create_agency(
 @agency_router.delete("/agency")
 async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
-    config: AgencyConfigForAPI,
+    id: str = Query(..., description="The unique identifier of the agency"),
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
 ) -> BaseResponse:
     """Delete an agency"""
-    agency_config = storage.load_by_id(config.id)
-    if not agency_config:
-        logger.warning(f"Agency not found: {config.id}, user: {current_user.id}")
+    db_config = storage.load_by_id(id)
+    if not db_config:
+        logger.warning(f"Agency not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    if agency_config.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to delete agency {config.id}")
+    if db_config.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to delete agency {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
-    await agency_manager.delete_agency(config.id)
+    await agency_manager.delete_agency(id)
     return BaseResponse(message="Agency deleted")

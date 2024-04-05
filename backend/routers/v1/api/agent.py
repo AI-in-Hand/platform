@@ -81,8 +81,8 @@ async def create_or_update_agent(
 @agent_router.delete("/agent")
 async def delete_agent(
     current_user: Annotated[User, Depends(get_current_user)],
-    config: AgentFlowSpecForAPI = Body(...),
+    id: str = Query(..., description="The unique identifier of the agent"),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> BaseResponse:
-    await agent_manager.delete_agent(config.id, current_user)
+    await agent_manager.delete_agent(id, current_user)
     return BaseResponse(message="Agent configuration deleted")

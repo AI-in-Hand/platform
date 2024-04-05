@@ -101,24 +101,24 @@ async def create_skill_version(
 @skill_router.delete("/skill")
 async def delete_skill(
     current_user: Annotated[User, Depends(get_current_user)],
-    config: SkillConfig = Body(...),
+    id: str = Query(..., description="The unique identifier of the skill"),
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ):
     """Delete a skill configuration."""
-    if not config.id:
-        logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
+    if not id:
+        logger.warning(f"Skill not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
-    skill_config_db = storage.load_by_id(config.id)
-    if not skill_config_db:
-        logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
+    db_config = storage.load_by_id(id)
+    if not db_config:
+        logger.warning(f"Skill not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
-    if skill_config_db.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to delete the skill: {config.id}")
+    if db_config.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to delete the skill: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
-    storage.delete(config.id)
+    storage.delete(id)
     return BaseResponse(message="Skill configuration deleted")
 
 

@@ -53,10 +53,7 @@ const ModelsView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(model),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {
@@ -73,7 +70,7 @@ const ModelsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteModelUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteModelUrl}?id=${model.model}`, payLoad, onSuccess, onError);
   };
 
   const fetchModels = () => {
