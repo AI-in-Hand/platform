@@ -62,7 +62,7 @@ const SessionsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteSessionUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteSessionUrl}?id=${session.id}`, payLoad, onSuccess, onError);
   };
 
   const [newSessionModalVisible, setNewSessionModalVisible] =
