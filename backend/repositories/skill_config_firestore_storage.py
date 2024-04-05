@@ -40,3 +40,7 @@ class SkillConfigFirestoreStorage:
         collection.document(skill_config.id).set(skill_config.model_dump())
 
         return skill_config.id, skill_config.version
+
+    def delete(self, id_: str) -> None:
+        collection = self.db.collection(self.collection_name)
+        collection.document(id_).delete()

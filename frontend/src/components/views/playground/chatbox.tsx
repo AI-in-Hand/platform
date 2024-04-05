@@ -32,7 +32,7 @@ const ChatBox = ({
   const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
 
   const serverUrl = getServerUrl();
-  const deleteMsgUrl = `${serverUrl}/message/delete`;
+  const deleteMsgUrl = `${serverUrl}/message`;
 
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");

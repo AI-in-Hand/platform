@@ -9,7 +9,13 @@ from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agent_adapter, get_agent_manager
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
-from backend.models.response_models import CreateAgentData, CreateAgentResponse, GetAgentListResponse, GetAgentResponse
+from backend.models.response_models import (
+    BaseResponse,
+    CreateAgentData,
+    CreateAgentResponse,
+    GetAgentListResponse,
+    GetAgentResponse,
+)
 from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agent_manager import AgentManager
@@ -67,7 +73,16 @@ async def create_or_update_agent(
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    # Delegate the creation or update process to the agent manager
     agent_id = await agent_manager.handle_agent_creation_or_update(internal_config, current_user)
 
     return CreateAgentResponse(data=CreateAgentData(id=agent_id))
+
+
+@agent_router.delete("/agent")
+async def delete_agent(
+    current_user: Annotated[User, Depends(get_current_user)],
+    config: AgentFlowSpecForAPI = Body(...),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> BaseResponse:
+    await agent_manager.delete_agent(config.id, current_user)
+    return BaseResponse(message="Agent configuration deleted")

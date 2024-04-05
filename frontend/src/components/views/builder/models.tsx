@@ -23,7 +23,7 @@ const ModelsView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listModelsUrl = `${serverUrl}/models/list`;
   const saveModelsUrl = `${serverUrl}/models`;
-  const deleteModelUrl = `${serverUrl}/models/delete`;
+  const deleteModelUrl = `${serverUrl}/models`;
   const testModelUrl = `${serverUrl}/models/test`;
   const [modelStatus, setModelStatus] = React.useState<IStatus | null>({
     status: true,

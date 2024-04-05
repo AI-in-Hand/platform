@@ -55,3 +55,16 @@ def test_save_existing_agency_config(mock_firestore_client, agency_config_data):
     assert id_ == agency_config.id
     saved_data = mock_firestore_client.collection("agency_configs").document(id_).get().to_dict()
     assert saved_data == agency_config.model_dump()
+
+
+def test_delete_agency_config(mock_firestore_client, agency_config_data):
+    agency_config = AgencyConfig.model_validate(agency_config_data)
+    mock_firestore_client.setup_mock_data(
+        "agency_configs", agency_config.id, agency_config_data, doc_id=agency_config.id
+    )
+
+    storage = AgencyConfigFirestoreStorage()
+    storage.delete(agency_config.id)
+
+    # Assert
+    assert mock_firestore_client.collection("agency_configs").document(agency_config.id).get().exists is False

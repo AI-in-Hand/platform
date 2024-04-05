@@ -80,3 +80,9 @@ class MockFirestoreClient:
         current_doc_id = self._current_documents[collection].get("current_document_id")
         self.set(data)
         return [[], MockDocumentSnapshot(current_doc_id, data)]
+
+    def delete(self):
+        collection = self._current_collection
+        current_doc_id = self._current_documents[collection].get("current_document_id")
+        del self._collections[collection][current_doc_id]
+        return None

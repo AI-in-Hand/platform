@@ -20,6 +20,7 @@ def test_to_model(agency_adapter):
     sender = AgentFlowSpecForAPI(id="sender_id", config=AgentConfig(name="Sender"))
     receiver = AgentFlowSpecForAPI(id="receiver_id", config=AgentConfig(name="Receiver"))
     agency_config_api = AgencyConfigForAPI(
+        id="agency_id",
         name="Test Agency",
         description="Test Description",
         shared_instructions="Test Instructions",
@@ -40,6 +41,7 @@ def test_to_model(agency_adapter):
 def test_to_model_without_receiver(agency_adapter):
     sender = AgentFlowSpecForAPI(id="sender_id", config=AgentConfig(name="Sender"))
     agency_config_api = AgencyConfigForAPI(
+        id="agency_id",
         name="Test Agency",
         description="Test Description",
         shared_instructions="Test Instructions",
@@ -60,6 +62,7 @@ def test_to_api(agency_adapter, agent_adapter, mocker):
     sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
     receiver = AgentFlowSpec(id="receiver_id", config=AgentConfig(name="Receiver"))
     agency_config = AgencyConfig(
+        id="agency_id",
         name="Test Agency",
         description="Test Description",
         shared_instructions="Test Instructions",
@@ -86,6 +89,7 @@ def test_to_api(agency_adapter, agent_adapter, mocker):
 def test_to_api_without_receiver(agency_adapter, agent_adapter, mocker):
     sender = AgentFlowSpec(id="sender_id", config=AgentConfig(name="Sender"))
     agency_config = AgencyConfig(
+        id="agency_id",
         name="Test Agency",
         description="Test Description",
         shared_instructions="Test Instructions",

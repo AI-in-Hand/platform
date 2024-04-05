@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI in Hand Platform is a web application designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
+AI in Hand Platform is an open-source web application designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
 
 ## Key Components
 
@@ -36,6 +36,7 @@ Follow these steps for setting up the environment and running the AI in Hand Pla
    - For production: `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build` (builds to backend/ui/ directory to be served by FastAPI)
 
 ### Running the Application
+
 Start the FastAPI server with: `uvicorn backend.main:app --reload`
 
 ## Deployment to Heroku
@@ -51,10 +52,33 @@ All further steps are unnecessary if you are using GitHub Actions for deployment
 ## Usage
 
 ### API Endpoints
+
 The provided Postman collection encompasses all the necessary routes and variables, facilitating extensive testing and interaction with the platform.
 
 ### WebSocket Communication
+
 Outlines the process for establishing WebSocket connections (`/v1/ws/{user_id}/{agency_id}/{session_id}`) for real-time interactions.
 
+## Contributing
+
+We welcome contributions from the open-source community! If you'd like to contribute to the AI in Hand Platform, please follow these steps:
+
+1. Fork the repository
+2. Create a new branch for your feature or bug fix
+3. Make your changes and commit them with descriptive commit messages
+4. Push your changes to your forked repository
+5. Submit a pull request to the main repository
+
+Please ensure that your code adheres to the project's coding standards and includes appropriate tests.
+
 ## Areas for Improvement
+
 Enhance exception handling, security measures, documentation quality (e.g. docstrings), testing robustness.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Disclaimer
+
+Please note that this is an open-source project and is currently in active development. While we strive to maintain a high level of quality, there may be bugs or issues present. Use at your own risk.

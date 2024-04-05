@@ -12,6 +12,7 @@ from backend.dependencies.dependencies import get_agency_config_adapter, get_age
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
+    BaseResponse,
     CreateAgencyData,
     CreateAgencyResponse,
     GetAgencyListResponse,
@@ -78,17 +79,16 @@ async def update_or_create_agency(
     # support template configs:
     if not agency_config.user_id:
         logger.info(f"Creating agency for user: {current_user.id}, agency: {agency_config.name}")
-        agency_config.id = None
-    else:
-        # check if the current_user has permissions
-        if agency_config.id:
-            agency_config_db = agency_storage.load_by_id(agency_config.id)
-            if not agency_config_db:
-                logger.warning(f"Agency not found: {agency_config.id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-            if agency_config_db.user_id != current_user.id:
-                logger.warning(f"User {current_user.id} does not have permissions to update agency {agency_config.id}")
-                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        agency_config.id = None  # type: ignore
+    # check if the current_user has permissions
+    if agency_config.id:
+        agency_config_db = agency_storage.load_by_id(agency_config.id)
+        if not agency_config_db:
+            logger.warning(f"Agency not found: {agency_config.id}, user: {current_user.id}")
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        if agency_config_db.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} does not have permissions to update agency {agency_config.id}")
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # check that all used agents belong to the current user
     for agent_id in agency_config.agents:
@@ -113,3 +113,23 @@ async def update_or_create_agency(
     id_ = await agency_manager.update_or_create_agency(agency_config)
 
     return CreateAgencyResponse(data=CreateAgencyData(id=id_))
+
+
+@agency_router.delete("/agency")
+async def delete_agency(
+    current_user: Annotated[User, Depends(get_current_user)],
+    config: AgencyConfigForAPI,
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+) -> BaseResponse:
+    """Delete an agency"""
+    agency_config = storage.load_by_id(config.id)
+    if not agency_config:
+        logger.warning(f"Agency not found: {config.id}, user: {current_user.id}")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+    if agency_config.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to delete agency {config.id}")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+
+    await agency_manager.delete_agency(config.id)
+    return BaseResponse(message="Agency deleted")

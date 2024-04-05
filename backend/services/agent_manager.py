@@ -57,6 +57,16 @@ class AgentManager:
         await asyncio.to_thread(self.storage.save, config)
         return agent.id
 
+    async def delete_agent(self, agent_id: str, current_user: User) -> None:
+        config = await asyncio.to_thread(self.storage.load_by_id, agent_id)
+        if not config:
+            logger.warning(f"Agent not found: {agent_id}, user: {current_user.id}")
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+        if config.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} does not have permissions to access agent: {agent_id}")
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        await asyncio.to_thread(self.storage.delete, agent_id)
+
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
         config = await asyncio.to_thread(self.storage.load_by_id, agent_id)
         if not config:

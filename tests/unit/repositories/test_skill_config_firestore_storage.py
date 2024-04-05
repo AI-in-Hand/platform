@@ -98,3 +98,11 @@ def test_load_skill_config_by_titles_exceeds_max_size(mock_storage):
         mock_storage.load_by_titles(titles)
 
     assert "Titles list exceeds the maximum size of 10 for an 'in' query in Firestore." in str(excinfo.value)
+
+
+def test_delete_skill_config(mock_storage, mock_firestore_client, skill_data):
+    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_data, doc_id="skill1")
+
+    mock_storage.delete(skill_data["id"])
+
+    assert mock_firestore_client.to_dict() == {}

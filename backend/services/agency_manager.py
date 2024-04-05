@@ -99,10 +99,14 @@ class AgencyManager:
         agency_clean = self._remove_client_objects(agency)
         await self.cache_manager.set(cache_key, agency_clean)
 
+    async def delete_agency(self, agency_id: str) -> None:
+        """Delete the agency from the Firestore and the cache."""
+        await asyncio.to_thread(self.agency_config_storage.delete, agency_id)
+        await self.delete_agency_from_cache(agency_id, None)
+
     async def delete_agency_from_cache(self, agency_id: str, session_id: str | None) -> None:
         """Delete the agency from the cache."""
         cache_key = self.get_cache_key(agency_id, session_id)
-
         await self.cache_manager.delete(cache_key)
 
     @staticmethod

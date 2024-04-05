@@ -35,7 +35,7 @@ const SkillsView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;
-  const deleteSkillsUrl = `${serverUrl}/skill/delete`;
+  const deleteSkillsUrl = `${serverUrl}/skill`;
 
   const [skills, setSkills] = React.useState<ISkill[] | null>([]);
   const [selectedSkill, setSelectedSkill] = React.useState<any>(null);

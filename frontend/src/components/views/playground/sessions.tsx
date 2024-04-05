@@ -26,7 +26,7 @@ const SessionsView = ({}: any) => {
   const listSessionUrl = `${serverUrl}/session/list`;
   const createSessionUrl = `${serverUrl}/session`;
   const publishSessionUrl = `${serverUrl}/session/publish`;
-  const deleteSessionUrl = `${serverUrl}/session/delete`;
+  const deleteSessionUrl = `${serverUrl}/session`;
 
   const sessions = useConfigStore((state) => state.sessions);
   const workflowConfig = useConfigStore((state) => state.workflowConfig);

@@ -98,3 +98,12 @@ def test_load_agent_flow_spec_by_ids_exceeds_max_size(mock_storage):
         mock_storage.load_by_ids(ids)
 
     assert "IDs list exceeds the maximum size of 10 for an 'in' query in Firestore." in str(excinfo.value)
+
+
+def test_delete_agent_flow_spec(mock_storage, mock_firestore_client, agent_data):
+    mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data, doc_id="agent1")
+
+    agent_flow_spec = AgentFlowSpec(**agent_data)
+    mock_storage.delete(agent_flow_spec.id)
+
+    assert mock_firestore_client.to_dict() == {}
