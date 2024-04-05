@@ -24,8 +24,12 @@ logger = logging.getLogger(__name__)
 skill_router = APIRouter(tags=["skill"])
 
 
+# TODO: introduce a SkillManager class (like AgencyManager and AgentManager)
+# TODO: add pagination support for skill list
+
 # FIXME: current limitation on skills: we always use common skills (user_id=None).
-# TODO: support dynamic loading of skills.
+# TODO: support dynamic loading of skills (save skills in /approve to Python files in backend/custom_tools,
+#  and update the skill mapping).
 
 
 @skill_router.get("/skill/list")
@@ -70,16 +74,15 @@ async def create_skill_version(
     # support template configs:
     if not config.user_id:
         config.id = None
-    else:
-        # check if the current_user has permissions
-        if config.id:
-            skill_config_db = storage.load_by_id(config.id)
-            if not skill_config_db:
-                logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
-            if skill_config_db.user_id != current_user.id:
-                logger.warning(f"User {current_user.id} does not have permissions to update the skill: {config.id}")
-                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+    # check if the current_user has permissions
+    if config.id:
+        skill_config_db = storage.load_by_id(config.id)
+        if not skill_config_db:
+            logger.warning(f"Skill not found: {config.id}, user: {current_user.id}")
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
+        if skill_config_db.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} does not have permissions to update the skill: {config.id}")
+            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     # Ensure the skill is associated with the current user
     config.user_id = current_user.id
@@ -93,6 +96,26 @@ async def create_skill_version(
 
     skill_id, skill_version = storage.save(config)
     return CreateSkillVersionResponse(data=CreateSkillVersionData(id=skill_id, version=skill_version))
+
+
+@skill_router.delete("/skill")
+async def delete_skill(
+    current_user: Annotated[User, Depends(get_current_user)],
+    id: str = Query(..., description="The unique identifier of the skill"),
+    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+):
+    """Delete a skill configuration."""
+    db_config = storage.load_by_id(id)
+    if not db_config:
+        logger.warning(f"Skill not found: {id}, user: {current_user.id}")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
+
+    if db_config.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} does not have permissions to delete the skill: {id}")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+
+    storage.delete(id)
+    return BaseResponse(message="Skill configuration deleted")
 
 
 @skill_router.post("/skill/approve")

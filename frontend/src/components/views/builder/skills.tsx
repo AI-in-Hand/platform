@@ -35,7 +35,7 @@ const SkillsView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listSkillsUrl = `${serverUrl}/skill/list`;
   const saveSkillsUrl = `${serverUrl}/skill`;
-  const deleteSkillsUrl = `${serverUrl}/skill/delete`;
+  const deleteSkillsUrl = `${serverUrl}/skill`;
 
   const [skills, setSkills] = React.useState<ISkill[] | null>([]);
   const [selectedSkill, setSelectedSkill] = React.useState<any>(null);
@@ -52,10 +52,7 @@ const SkillsView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(skill),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {
@@ -72,7 +69,7 @@ const SkillsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteSkillsUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteSkillsUrl}?id=${skill.id}`, payLoad, onSuccess, onError);
   };
 
   const fetchSkills = () => {

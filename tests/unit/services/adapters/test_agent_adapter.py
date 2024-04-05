@@ -8,6 +8,7 @@ def test_to_model(agent_adapter):
         SkillConfig(title="Skill 2"),
     ]
     agent_flow_spec_api = AgentFlowSpecForAPI(
+        id="1234",
         type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=skill_configs,
@@ -28,6 +29,7 @@ def test_to_api(agent_adapter, mocker):
         SkillConfig(title="Skill 2"),
     ]
     agent_flow_spec = AgentFlowSpec(
+        id="1234",
         type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=["Skill 1", "Skill 2"],
@@ -50,6 +52,7 @@ def test_to_api(agent_adapter, mocker):
 
 def test_to_api_without_skills(agent_adapter):
     agent_flow_spec = AgentFlowSpec(
+        id="1234",
         type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=[],

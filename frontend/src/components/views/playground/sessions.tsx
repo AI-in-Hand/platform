@@ -26,7 +26,7 @@ const SessionsView = ({}: any) => {
   const listSessionUrl = `${serverUrl}/session/list`;
   const createSessionUrl = `${serverUrl}/session`;
   const publishSessionUrl = `${serverUrl}/session/publish`;
-  const deleteSessionUrl = `${serverUrl}/session/delete`;
+  const deleteSessionUrl = `${serverUrl}/session`;
 
   const sessions = useConfigStore((state) => state.sessions);
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
@@ -42,10 +42,7 @@ const SessionsView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(session),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {
@@ -65,7 +62,7 @@ const SessionsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteSessionUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteSessionUrl}?id=${session.id}`, payLoad, onSuccess, onError);
   };
 
   const [newSessionModalVisible, setNewSessionModalVisible] =

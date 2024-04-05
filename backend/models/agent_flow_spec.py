@@ -37,6 +37,7 @@ class AgentFlowSpec(BaseModel):
 class AgentFlowSpecForAPI(AgentFlowSpec):
     """Config for an agent, corresponds to the IAgentFlowSpec in the frontend"""
 
+    id: str = Field(..., description="Unique identifier for the configuration")
     skills: conlist(SkillConfig, max_length=10) = Field(  # type: ignore
         default_factory=list, description="List of skill configurations equipped by the agent"
     )

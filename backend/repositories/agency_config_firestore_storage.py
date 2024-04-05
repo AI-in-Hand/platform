@@ -33,3 +33,7 @@ class AgencyConfigFirestoreStorage:
 
         collection.document(agency_config.id).set(agency_config.model_dump())
         return agency_config.id
+
+    def delete(self, id_: str) -> None:
+        collection = self.db.collection(self.collection_name)
+        collection.document(id_).delete()

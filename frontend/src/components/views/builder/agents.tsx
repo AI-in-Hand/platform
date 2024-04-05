@@ -28,7 +28,7 @@ const AgentsView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listAgentsUrl = `${serverUrl}/agent/list`;
   const saveAgentsUrl = `${serverUrl}/agent`;
-  const deleteAgentUrl = `${serverUrl}/agent/delete`;
+  const deleteAgentUrl = `${serverUrl}/agent`;
 
   const [agents, setAgents] = React.useState<IAgentFlowSpec[] | null>([]);
   const [selectedAgent, setSelectedAgent] =
@@ -56,10 +56,7 @@ const AgentsView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(agent),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {
@@ -76,7 +73,7 @@ const AgentsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteAgentUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
   };
 
   const fetchAgents = () => {

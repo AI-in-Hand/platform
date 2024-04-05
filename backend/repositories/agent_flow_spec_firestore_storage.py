@@ -43,3 +43,7 @@ class AgentFlowSpecFirestoreStorage:
 
         collection.document(agent_flow_spec.id).set(agent_flow_spec.model_dump())
         return agent_flow_spec.id
+
+    def delete(self, id_: str) -> None:
+        collection = self.db.collection(self.collection_name)
+        collection.document(id_).delete()

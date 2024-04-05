@@ -38,7 +38,7 @@ const WorkflowView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listWorkflowsUrl = `${serverUrl}/agency/list`;
   const saveWorkflowsUrl = `${serverUrl}/agency`;
-  const deleteWorkflowsUrl = `${serverUrl}/agency/delete`;
+  const deleteWorkflowsUrl = `${serverUrl}/agency`;
 
   const [workflows, setWorkflows] = React.useState<IFlowConfig[] | null>([]);
   const [selectedWorkflow, setSelectedWorkflow] =
@@ -87,10 +87,7 @@ const WorkflowView = ({}: any) => {
     // const fetch;
     const payLoad = {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(workflow),
+      headers: {},
     };
 
     const onSuccess = (data: any) => {
@@ -107,7 +104,7 @@ const WorkflowView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(deleteWorkflowsUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
   };
 
   const saveWorkFlow = (workflow: IFlowConfig) => {
