@@ -130,6 +130,17 @@ def test_update_skill_config_user_id_mismatch(skill_config_data, client, mock_fi
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
+def test_update_skill_config_not_found(skill_config_data, client, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
+
+    skill_config_data = skill_config_data.copy()
+    skill_config_data["id"] = "nonexistent_skill"
+    response = client.post("/v1/api/skill", json=skill_config_data)
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Skill not found"}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
 @patch("backend.services.skill_service.SkillService.execute_skill", MagicMock(return_value="Execution result"))
 def test_execute_skill_success(skill_config_data, client, mock_firestore_client):
     skill_config_data["approved"] = True
