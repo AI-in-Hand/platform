@@ -113,3 +113,15 @@ def test_delete_agent_success(client, mock_agent_data_db, mock_firestore_client)
 
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agent configuration deleted"}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_agent_user_id_mismatch(client, mock_agent_data_db, mock_firestore_client):
+    agent_data_db = mock_agent_data_db.copy()
+    agent_data_db["user_id"] = "other_user"
+    mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data_db, doc_id=AGENT_ID)
+
+    response = client.delete(f"/v1/api/agent?id={AGENT_ID}")
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}

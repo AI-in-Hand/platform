@@ -68,6 +68,16 @@ def test_delete_skill_success(skill_config_data, client, mock_firestore_client):
     assert mock_firestore_client.to_dict() == {}
 
 
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_skill_forbidden(skill_config_data, client, mock_firestore_client):
+    skill_config_data["user_id"] = "different_user"
+    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
+
+    response = client.delete("/v1/api/skill?id=skill1")
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
+
+
 @pytest.mark.usefixtures("mock_get_current_superuser")
 def test_approve_skill(skill_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)

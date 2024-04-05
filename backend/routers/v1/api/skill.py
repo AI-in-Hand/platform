@@ -105,10 +105,6 @@ async def delete_skill(
     storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
 ):
     """Delete a skill configuration."""
-    if not id:
-        logger.warning(f"Skill not found: {id}, user: {current_user.id}")
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
-
     db_config = storage.load_by_id(id)
     if not db_config:
         logger.warning(f"Skill not found: {id}, user: {current_user.id}")

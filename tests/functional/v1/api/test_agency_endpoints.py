@@ -235,3 +235,24 @@ def test_delete_agency_success(client, mock_firestore_client):
     assert response.json() == {"status": True, "message": "Agency deleted"}
     assert mock_firestore_client.collection("agency_configs").to_dict() == {}
     mock_delete_agency_from_cache.assert_called_once_with(TEST_AGENCY_ID, None)
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_agency_not_found(client):
+    response = client.delete("/v1/api/agency?id=non_existent_agency")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Agency not found"}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_agency_user_id_mismatch(client, mock_firestore_client):
+    db_agency = {
+        "id": TEST_AGENCY_ID,
+        "user_id": "some_other_user",
+        "name": "Test Agency",
+    }
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
+
+    response = client.delete(f"/v1/api/agency?id={TEST_AGENCY_ID}")
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
