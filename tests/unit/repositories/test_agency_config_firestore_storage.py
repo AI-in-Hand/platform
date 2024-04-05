@@ -67,4 +67,4 @@ def test_delete_agency_config(mock_firestore_client, agency_config_data):
     storage.delete(agency_config.id)
 
     # Assert
-    assert mock_firestore_client.collection("agency_configs").document(agency_config.id).get().exists is False
+    assert mock_firestore_client.to_dict() == {}
