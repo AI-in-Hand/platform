@@ -4,7 +4,7 @@ from google.cloud.firestore_v1 import FieldFilter
 from backend.models.agent_flow_spec import AgentFlowSpec
 
 
-class AgentFlowSpecFirestoreStorage:
+class AgentFlowSpecStorage:
     def __init__(self):
         self.db = firestore.client()
         self.collection_name = "agent_configs"

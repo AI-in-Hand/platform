@@ -4,7 +4,7 @@ from google.cloud.firestore_v1 import FieldFilter
 from backend.models.skill_config import SkillConfig
 
 
-class SkillConfigFirestoreStorage:
+class SkillConfigStorage:
     def __init__(self):
         self.db = firestore.client()
         self.collection_name = "skill_configs"

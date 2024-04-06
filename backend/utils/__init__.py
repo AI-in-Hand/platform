@@ -6,7 +6,7 @@ import firebase_admin
 import tiktoken
 from firebase_admin import credentials
 
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.repositories.env_config_storage import EnvConfigStorage
 from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
 from backend.settings import settings
@@ -44,7 +44,7 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, api_k
     if api_key:
         client = get_openai_client(api_key=api_key)
     else:
-        client = get_openai_client(env_config_manager=EnvConfigManager(EnvConfigFirestoreStorage()))
+        client = get_openai_client(env_config_manager=EnvConfigManager(EnvConfigStorage()))
     completion = client.chat.completions.create(
         model=model,
         messages=[

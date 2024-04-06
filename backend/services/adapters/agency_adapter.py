@@ -1,5 +1,5 @@
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 
 
@@ -13,7 +13,7 @@ class AgencyConfigAdapter:
     and vice versa.
     """
 
-    def __init__(self, agent_flow_spec_storage: AgentFlowSpecFirestoreStorage, agent_adapter: AgentAdapter):
+    def __init__(self, agent_flow_spec_storage: AgentFlowSpecStorage, agent_adapter: AgentAdapter):
         self.agent_flow_spec_storage = agent_flow_spec_storage
         self.agent_adapter = agent_adapter
 

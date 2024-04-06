@@ -1,7 +1,7 @@
 import pytest
 
 from backend.models.session_config import SessionConfig
-from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.repositories.session_storage import SessionConfigStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -18,7 +18,7 @@ def session_data():
 
 @pytest.fixture
 def storage():
-    return SessionConfigFirestoreStorage()
+    return SessionConfigStorage()
 
 
 def test_load_session_config_by_session_id(mock_firestore_client, session_data, storage):

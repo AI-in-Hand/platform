@@ -2,13 +2,13 @@ import pytest
 
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentConfig, AgentFlowSpec, AgentFlowSpecForAPI
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 
 
 @pytest.fixture
-def agent_flow_spec_storage() -> AgentFlowSpecFirestoreStorage:
-    return AgentFlowSpecFirestoreStorage()
+def agent_flow_spec_storage() -> AgentFlowSpecStorage:
+    return AgentFlowSpecStorage()
 
 
 @pytest.fixture

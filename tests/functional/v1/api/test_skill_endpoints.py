@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -112,7 +112,7 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
     assert response.json()["data"] == {"id": "skill1", "version": 2}
 
     # Verify if the skill configuration is updated in the mock Firestore client
-    updated_config = SkillConfigFirestoreStorage().load_by_id("skill1")
+    updated_config = SkillConfigStorage().load_by_id("skill1")
     assert updated_config.title == "Skill 1 Updated"
     assert updated_config.content == 'print("Hello World Updated")'
     assert updated_config.version == 2

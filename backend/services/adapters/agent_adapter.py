@@ -1,5 +1,5 @@
 from backend.models.agent_flow_spec import AgentFlowSpec, AgentFlowSpecForAPI
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 
 
 class AgentAdapter:
@@ -9,7 +9,7 @@ class AgentAdapter:
     to a list of SkillConfig objects (frontend) and vice versa.
     """
 
-    def __init__(self, skill_config_storage: SkillConfigFirestoreStorage):
+    def __init__(self, skill_config_storage: SkillConfigStorage):
         self.skill_config_storage = skill_config_storage
 
     @staticmethod

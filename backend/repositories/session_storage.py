@@ -4,7 +4,7 @@ from google.cloud.firestore_v1 import FieldFilter
 from backend.models.session_config import SessionConfig
 
 
-class SessionConfigFirestoreStorage:
+class SessionConfigStorage:
     def __init__(self):
         self.db = firestore.client()
         self.collection_name = "session_configs"

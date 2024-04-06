@@ -6,7 +6,7 @@ from google.cloud.firestore_v1 import ExistsOption
 logger = logging.getLogger(__name__)
 
 
-class EnvConfigFirestoreStorage:
+class EnvConfigStorage:
     def __init__(self):
         """Initialize Firestore client and collection name."""
         self.db = firestore.client()
