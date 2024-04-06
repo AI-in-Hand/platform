@@ -26,4 +26,4 @@ async def update_secrets(
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> BaseResponse:
     user_secret_manager.update_secrets(user_id=current_user.id, secrets=user_secret)
-    return BaseResponse(message="Environment configuration updated")
+    return BaseResponse(message="Secrets updated successfully")

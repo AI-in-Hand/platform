@@ -9,7 +9,7 @@ from backend.settings import settings
 from tests.test_utils import TEST_USER_ID
 
 
-# Test 1: Successful retrieval of an environment variable
+# Test 1: Successful retrieval of a secret
 @patch("backend.services.env_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_get_by_key_success(mock_get, mock_firestore_client):
     test_value = "gAAAAABl-O4Ls1gPlo6wBQw65vexUSBxL_pD2t8Sm-UjE8vdhDNmvKtrBLVIS5cpYWVvqQFb_6Uu6yKvU2las_5G50DtiKp_Kw=="
@@ -41,16 +41,16 @@ def test_get_by_key_no_env_vars_set(mock_get):
     mock_get.assert_called_once()
 
 
-# Test 4: Successful setting of an environment variable
+# Test 4: Successful setting of a secret
 @patch("backend.services.env_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_set_by_key_success(mock_get, mock_firestore_client):
     new_value = "new_test_value"
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
     manager.set_by_key("NEW_KEY", new_value)
 
-    updated_config = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
-    assert "NEW_KEY" in updated_config
-    assert EncryptionService(settings.encryption_key).decrypt(updated_config["NEW_KEY"]) == new_value
+    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    assert "NEW_KEY" in updated_secrets
+    assert EncryptionService(settings.encryption_key).decrypt(updated_secrets["NEW_KEY"]) == new_value
     mock_get.assert_called_once()
 
 
@@ -67,13 +67,13 @@ def test_set_by_key_no_user_id(mock_get):
 # Test 6: Attempt to set a variable when no context variables are configured for the user
 @patch("backend.services.env_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_set_by_key_no_env_vars_configured(mock_get, mock_firestore_client):
-    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, None)  # Simulate no existing config
+    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, None)  # Simulate no existing secrets
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
 
     manager.set_by_key("NEW_KEY", "new_value")
 
-    updated_config = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
-    assert "NEW_KEY" in updated_config
+    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    assert "NEW_KEY" in updated_secrets
     # Check if the new key's value is correctly encrypted and stored
-    assert EncryptionService(settings.encryption_key).decrypt(updated_config["NEW_KEY"]) == "new_value"
+    assert EncryptionService(settings.encryption_key).decrypt(updated_secrets["NEW_KEY"]) == "new_value"
     mock_get.assert_called_once()

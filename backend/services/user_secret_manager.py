@@ -16,7 +16,7 @@ class UserSecretManager:
         self._encryption_service = EncryptionService(settings.encryption_key)
 
     def get_by_key(self, key: str) -> str:
-        """Get the environment variable by key."""
+        """Get a secret by key."""
         user_id = ContextEnvVarsManager.get("user_id")
         if not user_id:
             logger.error("user_id not found in the context variables.")
@@ -29,22 +29,22 @@ class UserSecretManager:
         return self._encryption_service.decrypt(value)
 
     def set_by_key(self, key: str, value: str) -> None:
-        """Set the environment variable by key."""
+        """Set a secret by key."""
         user_id = ContextEnvVarsManager.get("user_id")
         if not user_id:
             logger.error("user_id not found in the context variables.")
             raise ValueError("user_id not found in the context variables.")
-        config = self._user_secret_storage.get_all_secrets(user_id)
-        if not config:
-            config = {}
-        config[key] = self._encryption_service.encrypt(value)
-        self._user_secret_storage.set_secrets(user_id, config)
+        secrets = self._user_secret_storage.get_all_secrets(user_id)
+        if not secrets:
+            secrets = {}
+        secrets[key] = self._encryption_service.encrypt(value)
+        self._user_secret_storage.set_secrets(user_id, secrets)
 
     def get_secret_names(self, user_id: str) -> list[str]:
-        """Get the user's secrets. Return the keys only."""
-        config = self._user_secret_storage.get_all_secrets(user_id)
-        return list(config.keys()) if config else []
+        """Get the names of all the secrets for a user."""
+        secrets = self._user_secret_storage.get_all_secrets(user_id)
+        return list(secrets.keys()) if secrets else []
 
     def update_secrets(self, user_id: str, secrets: dict) -> None:
-        encrypted_config = {key: self._encryption_service.encrypt(value) for key, value in secrets.items()}
-        self._user_secret_storage.update_secrets(user_id, encrypted_config)
+        encrypted_secrets = {key: self._encryption_service.encrypt(value) for key, value in secrets.items()}
+        self._user_secret_storage.update_secrets(user_id, encrypted_secrets)
