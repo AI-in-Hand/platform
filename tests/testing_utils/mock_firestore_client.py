@@ -14,13 +14,12 @@ class MockFirestoreClient:
     def __init__(self):
         self._collections = {}
         self._current_collection = None
-        self._current_documents = {}  # Tracks the current document ID for each collection
+        self._current_documents = {}
 
     def collection(self, collection_name):
         self._current_collection = collection_name
         self._collections.setdefault(collection_name, {})
-        if collection_name not in self._current_documents:
-            self._current_documents[collection_name] = {"current_document": None}
+        self._current_documents.setdefault(collection_name, {"current_document": None})
         return self
 
     def document(self, document_name):
@@ -49,13 +48,10 @@ class MockFirestoreClient:
 
     def setup_mock_data(self, collection_name, document_name, data):
         self._current_collection = collection_name
-        if collection_name not in self._current_documents:
-            self._current_documents[collection_name] = {}
-        self._current_documents[collection_name]["current_document"] = document_name
+        self._current_documents.setdefault(collection_name, {"current_document": document_name})
         self.set(data)
 
     def where(self, filter: FieldFilter):
-        # Extract field, op, and value from the FieldFilter object
         self._where_field = filter.field_path
         self._where_op = filter.op_string
         self._where_value = filter.value
@@ -79,13 +75,12 @@ class MockFirestoreClient:
         self.set(data)
         return "timestamp", MockDocumentSnapshot(current_doc_id, data)
 
-    def update(self, data: dict, **kwargs):  # noqa: ARG002
+    def update(self, data: dict, option=None):  # noqa: ARG002
         collection = self._current_collection
         current_doc_id = self._current_documents[collection].get("current_document")
         current_data = self._collections[collection].get(current_doc_id, {})
         current_data.update(data)
         self._collections[collection][current_doc_id] = current_data
-        self._current_documents[collection]["current_document"] = current_doc_id
 
     def delete(self):
         collection = self._current_collection
