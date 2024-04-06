@@ -44,3 +44,12 @@ class EnvConfigManager:
             config = {}
         config[key] = self._encryption_service.encrypt(value)
         self._env_config_storage.set_config(user_id, config)
+
+    def get_config_keys(self, user_id: str) -> list[str]:
+        """Get the environment variables for the user. Return the keys only."""
+        config = self._env_config_storage.get_config(user_id)
+        return list(config.keys()) if config else []
+
+    def update_config(self, user_id: str, env_config: dict) -> None:
+        encrypted_config = {key: self._encryption_service.encrypt(value) for key, value in env_config.items()}
+        self._env_config_storage.update_config(user_id, encrypted_config)

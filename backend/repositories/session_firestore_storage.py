@@ -17,9 +17,7 @@ class SessionConfigFirestoreStorage:
     def load_by_session_id(self, session_id: str) -> SessionConfig | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(session_id).get()
-        if not document_snapshot.exists:
-            return None
-        return SessionConfig.model_validate(document_snapshot.to_dict())
+        return SessionConfig.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def save(self, session_config: SessionConfig) -> None:
         collection = self.db.collection(self.collection_name)

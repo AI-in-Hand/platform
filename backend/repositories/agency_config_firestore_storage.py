@@ -17,9 +17,7 @@ class AgencyConfigFirestoreStorage:
     def load_by_id(self, id_: str) -> AgencyConfig | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(id_).get()
-        if not document_snapshot.exists:
-            return None
-        return AgencyConfig.model_validate(document_snapshot.to_dict())
+        return AgencyConfig.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def save(self, agency_config: AgencyConfig) -> str:
         """Save the agency configuration to the Firestore.
