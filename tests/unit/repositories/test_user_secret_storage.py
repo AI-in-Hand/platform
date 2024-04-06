@@ -5,45 +5,33 @@ from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture
-def user_secret_data():
-    return {"API_KEY": "abc123", "SECRET_KEY": "s3cr3t"}
+@pytest.mark.usefixtures("mock_firestore_client")
+def user_secret_storage():
+    return UserSecretStorage()
 
 
-def test_get_all_secrets_exists(mock_firestore_client, user_secret_data):
-    # Setup mock data
-    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, user_secret_data)
-
-    storage = UserSecretStorage()
-    fetched_secrets = storage.get_all_secrets(TEST_USER_ID)
-
-    assert fetched_secrets == user_secret_data, "Fetched secrets should match the setup data"
+def test_get_all_secrets(user_secret_storage, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
+    secrets = user_secret_storage.get_all_secrets(TEST_USER_ID)
+    assert secrets == {"SECRET1": "value1", "SECRET2": "value2"}
 
 
 @pytest.mark.usefixtures("mock_firestore_client")
-def test_get_all_secrets_not_exists():
-    # Assume no setup data, simulating a non-existent document
-    storage = UserSecretStorage()
-    fetched_secrets = storage.get_all_secrets(TEST_USER_ID)
-
-    assert fetched_secrets is None, "Should return None if document does not exist"
+def test_get_all_secrets_no_secrets(user_secret_storage):
+    secrets = user_secret_storage.get_all_secrets(TEST_USER_ID)
+    assert secrets is None
 
 
-def test_set_secrets_new(mock_firestore_client, user_secret_data):
-    # Assume no initial setup data, simulating setting a new document
-    storage = UserSecretStorage()
-    storage.set_secrets(TEST_USER_ID, user_secret_data)
-
-    # Assuming mock_firestore_client.to_dict() retrieves the last set data for the document
-    assert mock_firestore_client.to_dict() == user_secret_data, "The newly set document should match the input data"
+def test_set_secrets(user_secret_storage, mock_firestore_client):
+    secrets = {"SECRET1": "value1", "SECRET2": "value2"}
+    user_secret_storage.set_secrets(TEST_USER_ID, secrets)
+    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    assert updated_secrets == secrets
 
 
-def test_set_secrets_update(mock_firestore_client, user_secret_data):
-    # Setup initial data to simulate an update
-    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, user_secret_data)
-
-    updated_secrets = user_secret_data.copy()
-    updated_secrets["NEW_VAR"] = "newValue"
-    storage = UserSecretStorage()
-    storage.set_secrets(TEST_USER_ID, updated_secrets)
-
-    assert mock_firestore_client.to_dict() == updated_secrets, "The updated document should reflect the new changes"
+def test_update_secrets(user_secret_storage, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
+    secrets = {"SECRET2": "new_value2", "SECRET3": "value3"}
+    user_secret_storage.update_secrets(TEST_USER_ID, secrets)
+    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    assert updated_secrets == {"SECRET1": "value1", "SECRET2": "new_value2", "SECRET3": "value3"}

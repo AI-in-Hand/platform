@@ -34,9 +34,7 @@ def test_load_agency_config_by_id(mock_firestore_client, agency_config_data):
 def test_save_new_agency_config(mock_firestore_client):
     new_agency_data = {"user_id": TEST_USER_ID, "name": "New Test Agency"}
     new_agency_config = AgencyConfig.model_validate(new_agency_data)
-    mock_firestore_client.setup_mock_data(
-        "agency_configs", "new_test_agency_id", new_agency_data, doc_id="new_test_agency_id"
-    )
+    mock_firestore_client.setup_mock_data("agency_configs", "new_test_agency_id", new_agency_data)
 
     storage = AgencyConfigStorage()
     id_ = storage.save(new_agency_config)
@@ -59,9 +57,7 @@ def test_save_existing_agency_config(mock_firestore_client, agency_config_data):
 
 def test_delete_agency_config(mock_firestore_client, agency_config_data):
     agency_config = AgencyConfig.model_validate(agency_config_data)
-    mock_firestore_client.setup_mock_data(
-        "agency_configs", agency_config.id, agency_config_data, doc_id=agency_config.id
-    )
+    mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config_data)
 
     storage = AgencyConfigStorage()
     storage.delete(agency_config.id)

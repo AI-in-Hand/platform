@@ -129,8 +129,8 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
         "agents": ["sender_agent_id"],
         "main_agent": "Sender Agent",
     }
-    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data, doc_id=TEST_AGENCY_ID)
-    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent, doc_id="sender_agent_id")
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
     new_data = {
         "id": TEST_AGENCY_ID,
         "name": "Test agency",
@@ -225,7 +225,7 @@ def test_delete_agency_success(client, mock_firestore_client):
         "user_id": TEST_USER_ID,
         "name": "Test Agency",
     }
-    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency, doc_id=TEST_AGENCY_ID)
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
     with patch(
         "backend.services.agency_manager.AgencyManager.delete_agency_from_cache", new_callable=AsyncMock

@@ -215,9 +215,7 @@ async def test_set_client_objects(agency_manager):
 
 @pytest.mark.asyncio
 async def test_delete_agency(agency_manager, mock_firestore_client):
-    mock_firestore_client.setup_mock_data(
-        "agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID}, doc_id=TEST_AGENCY_ID
-    )
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID})
     with patch.object(agency_manager, "delete_agency_from_cache", new_callable=AsyncMock) as mock_delete_cache:
         await agency_manager.delete_agency(TEST_AGENCY_ID)
 

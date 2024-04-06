@@ -43,7 +43,7 @@ def test_load_skill_config_by_id(mock_storage, mock_firestore_client, skill_data
 
 def test_save_new_skill_config(mock_storage, mock_firestore_client, skill_data):
     # Test case for creating a new skill config
-    mock_firestore_client.setup_mock_data("skill_configs", "skill2", skill_data, doc_id="skill2")
+    mock_firestore_client.setup_mock_data("skill_configs", "skill2", skill_data)
 
     new_skill_data = skill_data.copy()
     del new_skill_data["id"]  # Simulate a new skill without an id
@@ -101,7 +101,7 @@ def test_load_skill_config_by_titles_exceeds_max_size(mock_storage):
 
 
 def test_delete_skill_config(mock_storage, mock_firestore_client, skill_data):
-    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_data, doc_id="skill1")
+    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_data)
 
     mock_storage.delete(skill_data["id"])
 

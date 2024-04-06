@@ -18,8 +18,9 @@ class MockFirestoreClient:
 
     def collection(self, collection_name):
         self._current_collection = collection_name
+        self._collections.setdefault(collection_name, {})
         if collection_name not in self._current_documents:
-            self._current_documents[collection_name] = {"current_document": None, "current_document_id": None}
+            self._current_documents[collection_name] = {"current_document": None}
         return self
 
     def document(self, document_name):
@@ -46,12 +47,11 @@ class MockFirestoreClient:
         current_doc = self._current_documents.get(self._current_collection, {}).get("current_document")
         return collection.get(current_doc, {})
 
-    def setup_mock_data(self, collection_name, document_name, data, doc_id=None):
+    def setup_mock_data(self, collection_name, document_name, data):
         self._current_collection = collection_name
         if collection_name not in self._current_documents:
             self._current_documents[collection_name] = {}
         self._current_documents[collection_name]["current_document"] = document_name
-        self._current_documents[collection_name]["current_document_id"] = doc_id
         self.set(data)
 
     def where(self, filter: FieldFilter):
@@ -73,16 +73,22 @@ class MockFirestoreClient:
                 matching_docs.append(MockDocumentSnapshot(doc_id, doc))
         return iter(matching_docs)
 
-    def add(self, data) -> list:
-        # This method should add a new document to the collection
-        # and return a list with the new document.
+    def add(self, data) -> tuple:
         collection = self._current_collection
-        current_doc_id = self._current_documents[collection].get("current_document_id")
+        current_doc_id = self._current_documents[collection].get("current_document")
         self.set(data)
-        return [[], MockDocumentSnapshot(current_doc_id, data)]
+        return "timestamp", MockDocumentSnapshot(current_doc_id, data)
+
+    def update(self, data: dict, **kwargs):  # noqa: ARG002
+        collection = self._current_collection
+        current_doc_id = self._current_documents[collection].get("current_document")
+        current_data = self._collections[collection].get(current_doc_id, {})
+        current_data.update(data)
+        self._collections[collection][current_doc_id] = current_data
+        self._current_documents[collection]["current_document"] = current_doc_id
 
     def delete(self):
         collection = self._current_collection
-        current_doc_id = self._current_documents[collection].get("current_document_id")
-        del self._collections[collection][current_doc_id]
-        return None
+        current_doc_id = self._current_documents[collection].get("current_document")
+        self._collections[collection].pop(current_doc_id, None)
+        self._current_documents[collection]["current_document"] = None

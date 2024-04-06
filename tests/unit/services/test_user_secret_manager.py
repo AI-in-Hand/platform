@@ -77,3 +77,31 @@ def test_set_by_key_no_secrets_configured(mock_get, mock_firestore_client):
     # Check if the new key's value is correctly encrypted and stored
     assert EncryptionService(settings.encryption_key).decrypt(updated_secrets["NEW_KEY"]) == "new_value"
     mock_get.assert_called_once()
+
+
+# Test 7: Successful retrieval of secret names
+def test_get_secret_names_success(mock_firestore_client):
+    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
+    manager = UserSecretManager(user_secret_storage=UserSecretStorage())
+    secret_names = manager.get_secret_names(TEST_USER_ID)
+    assert secret_names == ["SECRET1", "SECRET2"]
+
+
+# Test 8: Retrieval of secret names when no secrets exist
+def test_get_secret_names_no_secrets(mock_firestore_client):
+    mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {})
+    manager = UserSecretManager(user_secret_storage=UserSecretStorage())
+    secret_names = manager.get_secret_names(TEST_USER_ID)
+    assert secret_names == []
+
+
+# Test 9: Successful update of secrets
+def test_update_secrets_success(mock_firestore_client):
+    secrets = {"SECRET1": "value1", "SECRET2": "value2"}
+    manager = UserSecretManager(user_secret_storage=UserSecretStorage())
+    manager.update_secrets(TEST_USER_ID, secrets)
+    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    assert len(updated_secrets) == 2
+    for key, value in secrets.items():
+        assert key in updated_secrets
+        assert EncryptionService(settings.encryption_key).decrypt(updated_secrets[key]) == value

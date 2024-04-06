@@ -51,7 +51,7 @@ def test_save_session_config(mock_firestore_client, session_data, storage):
 
 
 def test_delete_session_config(mock_firestore_client, session_data, storage):
-    mock_firestore_client.setup_mock_data("session_configs", "session1", session_data, doc_id="session1")
+    mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
 
     storage.delete("session1")
 
