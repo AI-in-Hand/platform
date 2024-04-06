@@ -1,6 +1,6 @@
 import logging
 
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.repositories.env_config_storage import EnvConfigStorage
 from backend.services.encryption_service import EncryptionService
 from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.settings import settings
@@ -13,7 +13,7 @@ class EnvConfigManager:
     Incorporates the logic to get the environment variables from the Firestore.
     """
 
-    def __init__(self, env_config_storage: EnvConfigFirestoreStorage):
+    def __init__(self, env_config_storage: EnvConfigStorage):
         self._env_config_storage = env_config_storage
         self._encryption_service = EncryptionService(settings.encryption_key)
 

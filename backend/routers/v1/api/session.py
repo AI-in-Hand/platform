@@ -8,8 +8,8 @@ from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_session_manager
 from backend.models.auth import User
 from backend.models.request_models import SessionPostRequest
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
@@ -24,7 +24,7 @@ session_router = APIRouter(
 @session_router.get("/session/list")
 async def get_session_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+    storage: SessionConfigStorage = Depends(SessionConfigStorage),
 ):
     """Return a list of all sessions for the current user."""
     session_configs = storage.load_by_user_id(current_user.id)
@@ -36,7 +36,7 @@ async def create_session(
     request: SessionPostRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
-    agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
     """Create a new session for the given agency and return its id."""

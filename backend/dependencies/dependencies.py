@@ -1,11 +1,11 @@
 from fastapi import Depends
 from redis import asyncio as aioredis
 
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
-from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
+from backend.repositories.env_config_storage import EnvConfigStorage
+from backend.repositories.session_storage import SessionConfigStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agency_manager import AgencyManager
@@ -27,13 +27,13 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
 
 
 def get_env_config_manager(
-    env_config_storage: EnvConfigFirestoreStorage = Depends(EnvConfigFirestoreStorage),
+    env_config_storage: EnvConfigStorage = Depends(EnvConfigStorage),
 ) -> EnvConfigManager:
     return EnvConfigManager(env_config_storage)
 
 
 def get_agent_manager(
-    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
     env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> AgentManager:
     return AgentManager(storage, env_config_manager)
@@ -42,14 +42,14 @@ def get_agent_manager(
 def get_agency_manager(
     cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
-    agency_config_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> AgencyManager:
     return AgencyManager(cache_manager, agent_manager, agency_config_storage, env_config_manager)
 
 
 def get_session_manager(
-    session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+    session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ) -> SessionManager:
     """Returns a SessionManager object"""
@@ -57,13 +57,13 @@ def get_session_manager(
 
 
 def get_agent_adapter(
-    skill_config_storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    skill_config_storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> AgentAdapter:
     return AgentAdapter(skill_config_storage)
 
 
 def get_agency_config_adapter(
-    agent_flow_spec_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+    agent_flow_spec_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
     agent_adapter: AgentAdapter = Depends(get_agent_adapter),
 ) -> AgencyConfigAdapter:
     return AgencyConfigAdapter(agent_flow_spec_storage, agent_adapter)

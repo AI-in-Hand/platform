@@ -1,7 +1,7 @@
 import pytest
 
 from backend.models.agency_config import AgencyConfig
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
 from tests.test_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 
@@ -14,7 +14,7 @@ def test_load_agency_config_by_user_id(mock_firestore_client, agency_config_data
     mocked_data = AgencyConfig.model_validate(agency_config_data)
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
 
-    storage = AgencyConfigFirestoreStorage()
+    storage = AgencyConfigStorage()
     result = storage.load_by_user_id(TEST_USER_ID)
 
     assert len(result) == 1
@@ -25,7 +25,7 @@ def test_load_agency_config_by_id(mock_firestore_client, agency_config_data):
     mocked_data = AgencyConfig.model_validate(agency_config_data)
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
 
-    storage = AgencyConfigFirestoreStorage()
+    storage = AgencyConfigStorage()
     result = storage.load_by_id(TEST_AGENCY_ID)
 
     assert result == mocked_data
@@ -38,7 +38,7 @@ def test_save_new_agency_config(mock_firestore_client):
         "agency_configs", "new_test_agency_id", new_agency_data, doc_id="new_test_agency_id"
     )
 
-    storage = AgencyConfigFirestoreStorage()
+    storage = AgencyConfigStorage()
     id_ = storage.save(new_agency_config)
 
     assert id_ is not None
@@ -48,7 +48,7 @@ def test_save_existing_agency_config(mock_firestore_client, agency_config_data):
     agency_config = AgencyConfig.model_validate(agency_config_data)
     mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config_data)
 
-    storage = AgencyConfigFirestoreStorage()
+    storage = AgencyConfigStorage()
     id_ = storage.save(agency_config)
 
     # Assert
@@ -63,7 +63,7 @@ def test_delete_agency_config(mock_firestore_client, agency_config_data):
         "agency_configs", agency_config.id, agency_config_data, doc_id=agency_config.id
     )
 
-    storage = AgencyConfigFirestoreStorage()
+    storage = AgencyConfigStorage()
     storage.delete(agency_config.id)
 
     # Assert

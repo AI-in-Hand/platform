@@ -17,7 +17,7 @@ from backend.models.response_models import (
     GetSkillResponse,
 )
 from backend.models.skill_config import SkillConfig
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.skill_service import SkillService, generate_skill_description
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ skill_router = APIRouter(tags=["skill"])
 @skill_router.get("/skill/list")
 async def get_skill_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> GetSkillListResponse:
     """Get a list of configs for all skills."""
     skills = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
@@ -46,7 +46,7 @@ async def get_skill_list(
 async def get_skill_config(
     current_user: Annotated[User, Depends(get_current_user)],
     id: str = Query(..., description="The unique identifier of the skill"),
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> GetSkillResponse:
     """Get a skill configuration by ID.
     NOTE: currently this endpoint is not used in the frontend.
@@ -66,7 +66,7 @@ async def get_skill_config(
 async def create_skill_version(
     current_user: Annotated[User, Depends(get_current_user)],
     config: SkillConfig = Body(...),
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> CreateSkillVersionResponse:
     """Create a new version of the skill configuration."""
     skill_config_db = None
@@ -102,7 +102,7 @@ async def create_skill_version(
 async def delete_skill(
     current_user: Annotated[User, Depends(get_current_user)],
     id: str = Query(..., description="The unique identifier of the skill"),
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ):
     """Delete a skill configuration."""
     db_config = storage.load_by_id(id)
@@ -122,7 +122,7 @@ async def delete_skill(
 async def approve_skill(
     current_superuser: Annotated[User, Depends(get_current_superuser)],  # noqa: ARG001
     id: str = Query(..., description="The unique identifier of the skill"),
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ):
     """Approve a skill configuration."""
     config = storage.load_by_id(id)
@@ -140,7 +140,7 @@ async def approve_skill(
 async def execute_skill(
     current_user: Annotated[User, Depends(get_current_user)],
     request: SkillExecutePostRequest,
-    storage: SkillConfigFirestoreStorage = Depends(SkillConfigFirestoreStorage),
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
     skill_service: SkillService = Depends(SkillService),
 ) -> ExecuteSkillResponse:
     """Execute a skill."""

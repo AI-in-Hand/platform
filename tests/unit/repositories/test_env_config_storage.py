@@ -1,6 +1,6 @@
 import pytest
 
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.repositories.env_config_storage import EnvConfigStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -13,7 +13,7 @@ def test_get_config_exists(mock_firestore_client, env_config_data):
     # Setup mock data
     mock_firestore_client.setup_mock_data("env_configs", TEST_USER_ID, env_config_data)
 
-    storage = EnvConfigFirestoreStorage()
+    storage = EnvConfigStorage()
     fetched_config = storage.get_config(TEST_USER_ID)
 
     assert fetched_config == env_config_data, "Fetched environment config should match the setup data"
@@ -22,7 +22,7 @@ def test_get_config_exists(mock_firestore_client, env_config_data):
 @pytest.mark.usefixtures("mock_firestore_client")
 def test_get_config_not_exists():
     # Assume no setup data, simulating a non-existent config
-    storage = EnvConfigFirestoreStorage()
+    storage = EnvConfigStorage()
     fetched_config = storage.get_config(TEST_USER_ID)
 
     assert fetched_config is None, "Should return None if config does not exist"
@@ -30,7 +30,7 @@ def test_get_config_not_exists():
 
 def test_set_config_new(mock_firestore_client, env_config_data):
     # Assume no initial setup data, simulating setting a new config
-    storage = EnvConfigFirestoreStorage()
+    storage = EnvConfigStorage()
     storage.set_config(TEST_USER_ID, env_config_data)
 
     # Assuming mock_firestore_client.to_dict() retrieves the last set data for the document
@@ -43,7 +43,7 @@ def test_set_config_update(mock_firestore_client, env_config_data):
 
     updated_config = env_config_data.copy()
     updated_config["NEW_VAR"] = "newValue"
-    storage = EnvConfigFirestoreStorage()
+    storage = EnvConfigStorage()
     storage.set_config(TEST_USER_ID, updated_config)
 
     assert mock_firestore_client.to_dict() == updated_config, "The updated config should reflect the new changes"

@@ -9,8 +9,8 @@ from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_env_config_manager
 from backend.models.auth import User
 from backend.models.request_models import SessionMessagePostRequest
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_config_manager import EnvConfigManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
@@ -28,7 +28,7 @@ async def get_message_list(
     current_user: Annotated[User, Depends(get_current_user)],
     session_id: str,
     before: str | None = None,
-    session_storage: SessionConfigFirestoreStorage = Depends(SessionConfigFirestoreStorage),
+    session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
 ):
     """Return a list of last 20 messages for the given session."""
@@ -55,7 +55,7 @@ async def post_message(
     current_user: Annotated[User, Depends(get_current_user)],
     request: SessionMessagePostRequest,
     agency_manager: AgencyManager = Depends(get_agency_manager),
-    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> dict:
     """Send a message to the User Proxy of the given agency."""
     agency_id = request.agency_id

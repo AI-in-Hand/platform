@@ -1,12 +1,12 @@
 import pytest
 
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 
 
 @pytest.fixture
-def skill_config_storage() -> SkillConfigFirestoreStorage:
-    return SkillConfigFirestoreStorage()
+def skill_config_storage() -> SkillConfigStorage:
+    return SkillConfigStorage()
 
 
 @pytest.fixture
