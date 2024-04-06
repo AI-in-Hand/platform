@@ -19,7 +19,8 @@ class MockFirestoreClient:
     def collection(self, collection_name):
         self._current_collection = collection_name
         self._collections.setdefault(collection_name, {})
-        self._current_documents.setdefault(collection_name, {"current_document": None})
+        if collection_name not in self._current_documents:
+            self._current_documents[collection_name] = {"current_document": None}
         return self
 
     def document(self, document_name):
@@ -48,7 +49,9 @@ class MockFirestoreClient:
 
     def setup_mock_data(self, collection_name, document_name, data):
         self._current_collection = collection_name
-        self._current_documents.setdefault(collection_name, {"current_document": document_name})
+        if collection_name not in self._current_documents:
+            self._current_documents[collection_name] = {}
+        self._current_documents[collection_name]["current_document"] = document_name
         self.set(data)
 
     def where(self, filter: FieldFilter):
