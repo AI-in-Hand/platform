@@ -1,28 +1,29 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends
-from pydantic import Annotated
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_env_config_manager
+from backend.dependencies.dependencies import get_user_secret_manager
 from backend.models.auth import User
 from backend.models.response_models import BaseResponse
-from backend.services.env_config_manager import EnvConfigManager
+from backend.services.user_secret_manager import UserSecretManager
 
 user_router = APIRouter(tags=["user"])
 
 
-@user_router.get("/user/env-config")
-async def get_env_config(
+@user_router.get("/user/settings/secrets")
+async def get_secrets(
     current_user: Annotated[User, Depends(get_current_user)],
-    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
+    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> list[str]:
-    return env_config_manager.get_config_keys(current_user.id)
+    return user_secret_manager.get_secret_names(current_user.id)
 
 
-@user_router.put("/user/env-config")
-async def update_env_config(
+@user_router.put("/user/settings/secrets")
+async def update_secrets(
     current_user: Annotated[User, Depends(get_current_user)],
-    env_config: dict = Body(...),
-    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
+    user_secret: dict = Body(...),
+    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> BaseResponse:
-    env_config_manager.update_config(user_id=current_user.id, env_config=env_config)
+    user_secret_manager.update_secrets(user_id=current_user.id, secrets=user_secret)
     return BaseResponse(message="Environment configuration updated")

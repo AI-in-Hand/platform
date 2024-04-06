@@ -4,7 +4,7 @@ from backend.custom_skills.save_lead_to_airtable import SaveLeadToAirtable
 
 
 @patch(
-    "backend.custom_skills.save_lead_to_airtable.EnvConfigManager.get_by_key",
+    "backend.custom_skills.save_lead_to_airtable.UserSecretManager.get_by_key",
     side_effect=["fake_base_id", "fake_table_id", "fake_token"],
 )
 @patch("pyairtable.Api.table")
@@ -22,7 +22,7 @@ def test_save_lead_to_airtable_success(mock_table, mock_get_by_key):
 
 
 @patch(
-    "backend.custom_skills.save_lead_to_airtable.EnvConfigManager.get_by_key",
+    "backend.custom_skills.save_lead_to_airtable.UserSecretManager.get_by_key",
     side_effect=["fake_base_id", "fake_table_id", "fake_token"],
 )
 @patch("pyairtable.Api.table")

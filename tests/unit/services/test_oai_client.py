@@ -21,14 +21,14 @@ def test_get_openai_client_uses_correct_api_key(mock_openai_client, mock_instruc
     from backend.services.oai_client import get_openai_client
 
     expected_api_key = "test_api_key"
-    mock_env_config_manager = MagicMock()
-    mock_env_config_manager.get_by_key.return_value = expected_api_key
+    mock_user_secret_manager = MagicMock()
+    mock_user_secret_manager.get_by_key.return_value = expected_api_key
 
     # Execute
-    client = get_openai_client(mock_env_config_manager)
+    client = get_openai_client(mock_user_secret_manager)
 
     # Verify
-    mock_env_config_manager.get_by_key.assert_called_with("OPENAI_API_KEY")
+    mock_user_secret_manager.get_by_key.assert_called_with("OPENAI_API_KEY")
     mock_openai_client.assert_called_with(api_key=expected_api_key, max_retries=5)
     mock_instructor_patch.assert_called_once()
     assert client == mock_instructor_patch.return_value, "The function should return a patched OpenAI client"

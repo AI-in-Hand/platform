@@ -1,5 +1,5 @@
 """
-A class to manage environment variables using ContextVar.
+A class to manage context variables using ContextVar.
 
 No need to use:
 # module-level:
@@ -18,7 +18,7 @@ from typing import Any
 
 
 class ContextEnvVarsManager:
-    """A class to manage environment variables using ContextVar."""
+    """A class to manage context variables using ContextVar."""
 
     environment_vars: ContextVar = ContextVar("environment_vars")
 
@@ -43,7 +43,7 @@ class ContextEnvVarsManager:
 
     @classmethod
     def get_all(cls) -> dict | None:
-        """Get all environment variables."""
+        """Get all context variables."""
         try:
             return cls.environment_vars.get()
         except LookupError:

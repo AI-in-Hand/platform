@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from agency_swarm import Agency, Agent
 
-from backend.dependencies.dependencies import get_env_config_manager
+from backend.dependencies.dependencies import get_user_secret_manager
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
-from backend.repositories.env_config_storage import EnvConfigStorage
+from backend.repositories.user_secret_storage import UserSecretStorage
 from backend.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
@@ -19,7 +19,7 @@ def agency_manager():
         cache_manager=MagicMock(),
         agent_manager=MagicMock(),
         agency_config_storage=AgencyConfigStorage(),
-        env_config_manager=get_env_config_manager(env_config_storage=EnvConfigStorage()),
+        user_secret_manager=get_user_secret_manager(user_secret_storage=UserSecretStorage()),
     )
 
 

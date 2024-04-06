@@ -3,16 +3,16 @@ from redis import asyncio as aioredis
 
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from backend.repositories.env_config_storage import EnvConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
+from backend.repositories.user_secret_storage import UserSecretStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
-from backend.services.env_config_manager import EnvConfigManager
 from backend.services.session_manager import SessionManager
+from backend.services.user_secret_manager import UserSecretManager
 from backend.settings import settings
 
 
@@ -26,34 +26,34 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
     return RedisCacheManager(redis)
 
 
-def get_env_config_manager(
-    env_config_storage: EnvConfigStorage = Depends(EnvConfigStorage),
-) -> EnvConfigManager:
-    return EnvConfigManager(env_config_storage)
+def get_user_secret_manager(
+    user_secret_storage: UserSecretStorage = Depends(UserSecretStorage),
+) -> UserSecretManager:
+    return UserSecretManager(user_secret_storage)
 
 
 def get_agent_manager(
     storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
-    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
+    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> AgentManager:
-    return AgentManager(storage, env_config_manager)
+    return AgentManager(storage, user_secret_manager)
 
 
 def get_agency_manager(
     cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
     agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
+    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager, agency_config_storage, env_config_manager)
+    return AgencyManager(cache_manager, agent_manager, agency_config_storage, user_secret_manager)
 
 
 def get_session_manager(
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
-    env_config_manager: EnvConfigManager = Depends(get_env_config_manager),
+    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> SessionManager:
     """Returns a SessionManager object"""
-    return SessionManager(session_storage=session_storage, env_config_manager=env_config_manager)
+    return SessionManager(session_storage=session_storage, user_secret_manager=user_secret_manager)
 
 
 def get_agent_adapter(
