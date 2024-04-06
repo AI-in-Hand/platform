@@ -16,7 +16,7 @@ from backend.models.response_models import (
     GetAgentListResponse,
     GetAgentResponse,
 )
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agent_manager import AgentManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
@@ -34,7 +34,7 @@ agent_router = APIRouter(tags=["agent"])
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
     agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
-    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
 ) -> GetAgentListResponse:
     configs = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
     configs_for_api = [agent_adapter.to_api(config) for config in configs]
@@ -46,7 +46,7 @@ async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
 ) -> GetAgentResponse:
     config = storage.load_by_id(id)
     if not config:

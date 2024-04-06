@@ -1,7 +1,7 @@
 import pytest
 
 from backend.models.skill_config import SkillConfig
-from backend.repositories.skill_config_firestore_storage import SkillConfigFirestoreStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -20,7 +20,7 @@ def skill_data():
 @pytest.fixture
 @pytest.mark.usefixtures("mock_firestore_client")
 def mock_storage():
-    return SkillConfigFirestoreStorage()
+    return SkillConfigStorage()
 
 
 def test_load_skill_config_by_user_id(mock_storage, mock_firestore_client, skill_data):

@@ -1,7 +1,7 @@
 import pytest
 
 from backend.models.agent_flow_spec import AgentFlowSpec
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from tests.test_utils import TEST_USER_ID
 
 
@@ -28,7 +28,7 @@ def agent_data():
 @pytest.fixture
 @pytest.mark.usefixtures("mock_firestore_client")
 def mock_storage():
-    return AgentFlowSpecFirestoreStorage()
+    return AgentFlowSpecStorage()
 
 
 def test_load_agent_flow_spec(mock_firestore_client, agent_data):
@@ -36,7 +36,7 @@ def test_load_agent_flow_spec(mock_firestore_client, agent_data):
     # setup_mock_data(collection_name, document_name, data)
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
-    storage = AgentFlowSpecFirestoreStorage()
+    storage = AgentFlowSpecStorage()
     loaded_agent_flow_spec = storage.load_by_id(agent_data["id"])
 
     expected_agent_flow_spec = AgentFlowSpec.model_validate(agent_data)
@@ -47,7 +47,7 @@ def test_save_existing_agent_flow_spec(mock_firestore_client, agent_data):
     mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
     agent_flow_spec = AgentFlowSpec(**agent_data)
-    storage = AgentFlowSpecFirestoreStorage()
+    storage = AgentFlowSpecStorage()
     storage.save(agent_flow_spec)
 
     serialized_data = agent_flow_spec.model_dump()
@@ -62,7 +62,7 @@ def test_save_new_agent_flow_spec(mock_firestore_client, agent_data):
     del new_agent_data["id"]
     agent_flow_spec = AgentFlowSpec(**new_agent_data)
 
-    storage = AgentFlowSpecFirestoreStorage()
+    storage = AgentFlowSpecStorage()
     storage.save(agent_flow_spec)
 
     serialized_data = agent_flow_spec.model_dump()

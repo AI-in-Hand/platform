@@ -77,7 +77,7 @@ def test_post_agency_message_processing_failure(client, mock_get_agency, mock_fi
 
 
 @pytest.fixture
-def mock_session_firestore_storage(mock_firestore_client):
+def mock_session_storage(mock_firestore_client):
     session_data = {
         "session_id": "test_session_id",
         "user_id": TEST_USER_ID,
@@ -95,7 +95,7 @@ def mock_openai_client():
 
 
 # Successful retrieval of messages
-@pytest.mark.usefixtures("mock_get_current_user", "mock_session_firestore_storage", "mock_openai_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage", "mock_openai_client")
 def test_get_message_list_success(client):
     response = client.get("/v1/api/message/list?session_id=test_session_id")
     assert response.status_code == 200
@@ -111,7 +111,7 @@ def test_get_message_list_session_not_found(client):
 
 
 # Current user not authorized
-@pytest.mark.usefixtures("mock_get_current_user", "mock_session_firestore_storage", "mock_openai_client")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage", "mock_openai_client")
 def test_get_message_list_unauthorized(client, mock_firestore_client):
     test_session_config = {
         "session_id": "test_session_id",

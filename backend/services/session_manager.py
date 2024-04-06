@@ -4,13 +4,13 @@ from agency_swarm import Agency, Agent
 from agency_swarm.threads import Thread
 
 from backend.models.session_config import SessionConfig
-from backend.repositories.session_firestore_storage import SessionConfigFirestoreStorage
+from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
 
 
 class SessionManager:
-    def __init__(self, session_storage: SessionConfigFirestoreStorage, env_config_manager: EnvConfigManager):
+    def __init__(self, session_storage: SessionConfigStorage, env_config_manager: EnvConfigManager):
         self.env_config_manager = env_config_manager
         self.session_storage = session_storage
 

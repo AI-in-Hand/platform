@@ -18,8 +18,8 @@ from backend.models.response_models import (
     GetAgencyListResponse,
     GetAgencyResponse,
 )
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.env_vars_manager import ContextEnvVarsManager
@@ -35,7 +35,7 @@ agency_router = APIRouter(
 async def get_agency_list(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
-    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyListResponse:
     agencies = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
     agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
@@ -47,7 +47,7 @@ async def get_agency_config(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
-    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
     agency_config = storage.load_by_id(id)
     if not agency_config:
@@ -69,8 +69,8 @@ async def update_or_create_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
-    agency_storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
-    agent_storage: AgentFlowSpecFirestoreStorage = Depends(AgentFlowSpecFirestoreStorage),
+    agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
+    agent_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
 ):
     """Create or update an agency and return its id"""
     # Transform the API model to the internal model
@@ -120,7 +120,7 @@ async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     id: str = Query(..., description="The unique identifier of the agency"),
     agency_manager: AgencyManager = Depends(get_agency_manager),
-    storage: AgencyConfigFirestoreStorage = Depends(AgencyConfigFirestoreStorage),
+    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> BaseResponse:
     """Delete an agency"""
     db_config = storage.load_by_id(id)

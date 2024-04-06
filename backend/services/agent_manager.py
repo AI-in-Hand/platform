@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.auth import User
-from backend.repositories.agent_flow_spec_firestore_storage import AgentFlowSpecFirestoreStorage
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.env_config_manager import EnvConfigManager
 from backend.services.oai_client import get_openai_client
 from backend.settings import settings
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class AgentManager:
-    def __init__(self, storage: AgentFlowSpecFirestoreStorage, env_config_manager: EnvConfigManager) -> None:
+    def __init__(self, storage: AgentFlowSpecStorage, env_config_manager: EnvConfigManager) -> None:
         self.env_config_manager = env_config_manager
         self.storage = storage
 

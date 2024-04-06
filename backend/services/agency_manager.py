@@ -5,7 +5,7 @@ from copy import copy
 from agency_swarm import Agency, Agent
 
 from backend.models.agency_config import AgencyConfig
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
 from backend.services.env_config_manager import EnvConfigManager
@@ -19,7 +19,7 @@ class AgencyManager:
         self,
         cache_manager: RedisCacheManager,
         agent_manager: AgentManager,
-        agency_config_storage: AgencyConfigFirestoreStorage,
+        agency_config_storage: AgencyConfigStorage,
         env_config_manager: EnvConfigManager,
     ) -> None:
         self.agency_config_storage = agency_config_storage

@@ -5,8 +5,8 @@ from agency_swarm import Agency, Agent
 
 from backend.dependencies.dependencies import get_env_config_manager
 from backend.models.agency_config import AgencyConfig
-from backend.repositories.agency_config_firestore_storage import AgencyConfigFirestoreStorage
-from backend.repositories.env_config_firestore_storage import EnvConfigFirestoreStorage
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.env_config_storage import EnvConfigStorage
 from backend.services.agency_manager import AgencyManager
 from tests.test_utils import TEST_USER_ID
 from tests.test_utils.constants import TEST_AGENCY_ID
@@ -18,8 +18,8 @@ def agency_manager():
     yield AgencyManager(
         cache_manager=MagicMock(),
         agent_manager=MagicMock(),
-        agency_config_storage=AgencyConfigFirestoreStorage(),
-        env_config_manager=get_env_config_manager(env_config_storage=EnvConfigFirestoreStorage()),
+        agency_config_storage=AgencyConfigStorage(),
+        env_config_manager=get_env_config_manager(env_config_storage=EnvConfigStorage()),
     )
 
 
