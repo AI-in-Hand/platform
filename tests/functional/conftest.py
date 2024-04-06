@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.dependencies.auth import get_current_user
-from tests.test_utils import get_current_superuser_override, get_current_user_override
+from tests.testing_utils import get_current_superuser_override, get_current_user_override
 
 
 @pytest.mark.usefixtures("mock_setup_logging")

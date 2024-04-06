@@ -8,8 +8,8 @@ from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.user_secret_storage import UserSecretStorage
 from backend.services.agency_manager import AgencyManager
-from tests.test_utils import TEST_USER_ID
-from tests.test_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils import TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture

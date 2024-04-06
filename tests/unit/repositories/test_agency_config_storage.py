@@ -2,7 +2,7 @@ import pytest
 
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
-from tests.test_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 
 @pytest.fixture

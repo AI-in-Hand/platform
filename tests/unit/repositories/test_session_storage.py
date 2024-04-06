@@ -2,7 +2,7 @@ import pytest
 
 from backend.models.session_config import SessionConfig
 from backend.repositories.session_storage import SessionConfigStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture

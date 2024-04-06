@@ -1,7 +1,7 @@
 import pytest
 
 from backend.repositories.user_secret_storage import UserSecretStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture

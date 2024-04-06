@@ -11,7 +11,7 @@ from backend.models.request_models import SessionPostRequest
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)

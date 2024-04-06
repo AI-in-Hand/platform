@@ -12,7 +12,7 @@ from backend.models.request_models import SessionMessagePostRequest
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.oai_client import get_openai_client
 from backend.services.user_secret_manager import UserSecretManager
 

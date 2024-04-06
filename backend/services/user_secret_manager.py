@@ -1,8 +1,8 @@
 import logging
 
 from backend.repositories.user_secret_storage import UserSecretStorage
+from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.encryption_service import EncryptionService
-from backend.services.env_vars_manager import ContextEnvVarsManager
 from backend.settings import settings
 
 logger = logging.getLogger(__name__)

@@ -22,7 +22,7 @@ from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agency_adapter import AgencyConfigAdapter
 from backend.services.agency_manager import AgencyManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(

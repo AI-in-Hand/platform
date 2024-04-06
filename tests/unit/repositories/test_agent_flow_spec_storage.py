@@ -2,7 +2,7 @@ import pytest
 
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture

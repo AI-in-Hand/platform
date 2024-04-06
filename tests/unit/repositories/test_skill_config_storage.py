@@ -2,7 +2,7 @@ import pytest
 
 from backend.models.skill_config import SkillConfig
 from backend.repositories.skill_config_storage import SkillConfigStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture
