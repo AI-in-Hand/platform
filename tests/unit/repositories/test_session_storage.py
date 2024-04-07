@@ -9,7 +9,7 @@ from tests.testing_utils import TEST_USER_ID
 def session_data():
     # Using an integer for the created_at field to align with the model definition
     return {
-        "session_id": "session1",
+        "id": "session1",
         "user_id": TEST_USER_ID,
         "agency_id": "agency1",
         "created_at": 161803398874,  # Example integer timestamp
@@ -27,7 +27,7 @@ def test_load_session_config_by_session_id(mock_firestore_client, session_data, 
     loaded_session_config = storage.load_by_session_id("session1")
 
     assert loaded_session_config is not None
-    assert loaded_session_config.session_id == "session1"
+    assert loaded_session_config.id == "session1"
     assert loaded_session_config.model_dump() == session_data
 
 
@@ -47,7 +47,7 @@ def test_save_session_config(mock_firestore_client, session_data, storage):
     session_to_save = SessionConfig(**session_data)
     storage.save(session_to_save)
 
-    assert mock_firestore_client.to_dict()["session_id"] == "session1"
+    assert mock_firestore_client.to_dict()["id"] == "session1"
 
 
 def test_delete_session_config(mock_firestore_client, session_data, storage):

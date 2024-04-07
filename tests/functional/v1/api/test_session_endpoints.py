@@ -13,7 +13,7 @@ from tests.testing_utils.constants import TEST_AGENCY_ID
 @pytest.fixture
 def session_config_data():
     return {
-        "session_id": "test_session_id",
+        "id": "test_session_id",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
         "created_at": 1234567890,
@@ -49,14 +49,14 @@ def test_create_session_success(client, mock_firestore_client):
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions
         assert response.status_code == 200
-        assert response.json() == {"session_id": "new_session_id"}
+        assert response.json() == {"id": "new_session_id"}
         mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
         mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")
 
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {
-            "session_id": "new_session_id",
+            "id": "new_session_id",
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
             "created_at": mock.ANY,

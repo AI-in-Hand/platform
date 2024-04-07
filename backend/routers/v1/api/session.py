@@ -65,4 +65,4 @@ async def create_session(
     session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
 
     await agency_manager.cache_agency(agency, agency_id, session_id)
-    return {"session_id": session_id}
+    return {"id": session_id}

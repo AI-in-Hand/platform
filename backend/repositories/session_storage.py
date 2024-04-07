@@ -21,7 +21,7 @@ class SessionConfigStorage:
 
     def save(self, session_config: SessionConfig) -> None:
         collection = self.db.collection(self.collection_name)
-        collection.document(session_config.session_id).set(session_config.model_dump())
+        collection.document(session_config.id).set(session_config.model_dump())
 
     def delete(self, session_id: str) -> None:
         collection = self.db.collection(self.collection_name)
