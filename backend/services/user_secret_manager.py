@@ -43,7 +43,7 @@ class UserSecretManager:
     def get_secret_names(self, user_id: str) -> list[str]:
         """Get the names of all the secrets for a user."""
         secrets = self._user_secret_storage.get_all_secrets(user_id)
-        return list(secrets.keys()) if secrets else []
+        return sorted(secrets.keys()) if secrets else []
 
     def update_or_create_secrets(self, user_id: str, secrets: dict[str, str]) -> None:
         """Update or create secrets for a user.
