@@ -1,99 +1,121 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Form, message } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { fetchJSON, getServerUrl } from './utils';
-import { PlusOutlined } from '@ant-design/icons';
 
 const UserVariables = () => {
+  const [form] = Form.useForm();
   const [secrets, setSecrets] = useState<string[]>([]);
-  const [dynamicFields, setDynamicFields] = useState<Record<string, string>[]>([{ key: '', value: '' }]);
-  const [loading, setLoading] = useState(false);
+
   const serverUrl = getServerUrl();
   const getUserSecretsUrl = `${serverUrl}/user/settings/secrets`;
 
   useEffect(() => {
-    const fetchSecrets = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchJSON(getUserSecretsUrl, { method: 'GET' });
-        if (response.status && Array.isArray(response.data)) {
-          setSecrets(response.data);
-        } else {
-          throw new Error('Invalid response format');
-        }
-      } catch (error) {
-        message.error('Failed to fetch secrets: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchSecrets();
   }, []);
 
-  const handleFieldChange = (index, keyOrValue, value) => {
-    setDynamicFields((prevFields) => {
-      const newFields = [...prevFields];
-      newFields[index][keyOrValue] = value;
-      if (index === prevFields.length - 1 && (newFields[index].key || newFields[index].value)) {
-        newFields.push({ key: '', value: '' }); // Add a new field when the last field is edited
+  const fetchSecrets = () => {
+    const payLoad = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const onSuccess = (data: any) => {
+      if (data && data.status) {
+        setSecrets(data.data);
+      } else {
+        message.error(data.message);
       }
-      return newFields;
-    });
+    };
+
+    const onError = (err: any) => {
+      message.error(err.message);
+    };
+
+    fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
   };
 
-  const handleUpdateSecrets = async () => {
-    setLoading(true);
-    try {
-      const payload = dynamicFields.reduce((acc, field) => {
-        if (field.key && field.value) {
-          acc[field.key] = field.value;
-        }
-        return acc;
-      }, {});
-      await fetchJSON(getUserSecretsUrl, {
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
-      message.success('Secrets updated successfully');
-      setDynamicFields([{ key: '', value: '' }]); // Reset for more additions
-    } catch (error) {
-      message.error('Failed to update secrets');
-    } finally {
-      setLoading(false);
-    }
+  const saveSecrets = (values: any) => {
+    const updatedSecrets: { [key: string]: string } = {};
+
+    Object.entries(values).forEach(([key, value]) => {
+      if (value && value !== '***') {
+        updatedSecrets[key] = value;
+      }
+    });
+
+    const payLoad = {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedSecrets),
+    };
+
+    const onSuccess = (data: any) => {
+      if (data && data.status) {
+        message.success('Secrets updated successfully');
+        fetchSecrets();
+      } else {
+        message.error(data.message);
+      }
+    };
+
+    const onError = (err: any) => {
+      message.error(err.message);
+    };
+
+    fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
   };
 
   return (
-    <Form layout="vertical" onFinish={handleUpdateSecrets}>
-      {secrets.map((secret, index) => (
-        <Form.Item key={index} label={secret}>
-          <Input placeholder="***" disabled />
+    <div>
+      <h2>Settings</h2>
+      <Form form={form} onFinish={saveSecrets}>
+        {secrets.map((secret) => (
+          <Form.Item
+            key={secret}
+            label={secret}
+            name={secret}
+            initialValue="***"
+          >
+            <Input.Password />
+          </Form.Item>
+        ))}
+        <Form.List name="newSecrets">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField }) => (
+                <div key={key} style={{ display: 'flex', marginBottom: 8 }}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'key']}
+                    style={{ marginRight: 8 }}
+                  >
+                    <Input placeholder="Secret Name" />
+                  </Form.Item>
+                  <Form.Item {...restField} name={[name, 'value']}>
+                    <Input.Password placeholder="Secret Value" />
+                  </Form.Item>
+                  <Button onClick={() => remove(name)}>Remove</Button>
+                </div>
+              ))}
+              <Form.Item>
+                <Button type="dashed" onClick={() => add()} block>
+                  Add Secret
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Save
+          </Button>
         </Form.Item>
-      ))}
-      {dynamicFields.map((field, index) => (
-        <React.Fragment key={index}>
-          <Form.Item
-            label="Key"
-            name={`key-${index}`}
-            rules={[{ required: index !== dynamicFields.length - 1, message: 'Please input the key!' }]}
-          >
-            <Input value={field.key} onChange={(e) => handleFieldChange(index, 'key', e.target.value)} />
-          </Form.Item>
-          <Form.Item
-            label="Value"
-            name={`value-${index}`}
-            rules={[{ required: index !== dynamicFields.length - 1, message: 'Please input the value!' }]}
-          >
-            <Input value={field.value} onChange={(e) => handleFieldChange(index, 'value', e.target.value)} />
-          </Form.Item>
-        </React.Fragment>
-      ))}
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          Update Secrets
-        </Button>
-      </Form.Item>
-    </Form>
+      </Form>
+    </div>
   );
 };
 
