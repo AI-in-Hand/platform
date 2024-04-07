@@ -2,7 +2,7 @@ import pytest
 
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture
@@ -55,7 +55,7 @@ def test_save_existing_agent_flow_spec(mock_firestore_client, agent_data):
 
 
 def test_save_new_agent_flow_spec(mock_firestore_client, agent_data):
-    mock_firestore_client.setup_mock_data("agent_configs", "new_agent_id", agent_data, doc_id="new_agent_id")
+    mock_firestore_client.setup_mock_data("agent_configs", "new_agent_id", agent_data)
 
     new_agent_data = agent_data.copy()
     # Remove agent id to simulate a new agent
@@ -101,7 +101,7 @@ def test_load_agent_flow_spec_by_ids_exceeds_max_size(mock_storage):
 
 
 def test_delete_agent_flow_spec(mock_storage, mock_firestore_client, agent_data):
-    mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data, doc_id="agent1")
+    mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
 
     agent_flow_spec = AgentFlowSpec(**agent_data)
     mock_storage.delete(agent_flow_spec.id)

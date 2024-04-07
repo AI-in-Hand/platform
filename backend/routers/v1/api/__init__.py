@@ -5,6 +5,7 @@ from .agent import agent_router
 from .message import message_router
 from .session import session_router
 from .skill import skill_router
+from .user import user_router
 from .version import version_router
 
 api_router = APIRouter(
@@ -18,3 +19,4 @@ api_router.include_router(agency_router)
 api_router.include_router(session_router)
 api_router.include_router(message_router)
 api_router.include_router(version_router)
+api_router.include_router(user_router)

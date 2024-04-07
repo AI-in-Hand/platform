@@ -17,9 +17,7 @@ class AgentFlowSpecStorage:
     def load_by_id(self, id_: str) -> AgentFlowSpec | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(id_).get()
-        if not document_snapshot.exists:
-            return None
-        return AgentFlowSpec.model_validate(document_snapshot.to_dict())
+        return AgentFlowSpec.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def load_by_ids(self, ids: list[str]) -> list[AgentFlowSpec]:
         collection = self.db.collection(self.collection_name)

@@ -2,14 +2,14 @@ from contextvars import ContextVar
 
 import pytest
 
-from backend.services.env_vars_manager import ContextEnvVarsManager
-from tests.test_utils import TEST_USER_ID
+from backend.services.context_vars_manager import ContextEnvVarsManager
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture(autouse=True)
-def reset_env_vars():
+def reset_context_vars():
     # Reset the context variable to its default state before each test
-    ContextEnvVarsManager.environment_vars = ContextVar("environment_vars")
+    ContextEnvVarsManager.context_vars = ContextVar("context_vars")
     yield
     # No teardown needed, but you could add one if necessary
 
@@ -52,13 +52,13 @@ def test_get_method_without_setting():
     This should trigger the LookupError branch and return None.
     """
     # Temporarily replace the class's ContextVar with a fresh one
-    original_var = ContextEnvVarsManager.environment_vars
+    original_var = ContextEnvVarsManager.context_vars
     try:
         # Use a fresh ContextVar to ensure no data is set
-        ContextEnvVarsManager.environment_vars = ContextVar("test_environment_vars")
+        ContextEnvVarsManager.context_vars = ContextVar("test_context_vars")
 
         # Attempt to get a value, which should return None due to the LookupError
         assert ContextEnvVarsManager.get("unset_key") is None
     finally:
         # Restore the original ContextVar to avoid affecting other tests
-        ContextEnvVarsManager.environment_vars = original_var
+        ContextEnvVarsManager.context_vars = original_var

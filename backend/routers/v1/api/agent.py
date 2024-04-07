@@ -19,7 +19,7 @@ from backend.models.response_models import (
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agent_manager import AgentManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(tags=["agent"])

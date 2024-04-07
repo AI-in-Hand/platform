@@ -6,8 +6,8 @@ import pytest
 from backend.models.request_models import SessionPostRequest
 from backend.services.agency_manager import AgencyManager
 from backend.services.session_manager import SessionManager
-from tests.test_utils import TEST_USER_ID
-from tests.test_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils import TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture

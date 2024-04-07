@@ -8,7 +8,7 @@ from websockets.exceptions import ConnectionClosedOK
 
 from backend.dependencies.dependencies import get_agency_manager
 from backend.services.agency_manager import AgencyManager
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)

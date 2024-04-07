@@ -3,13 +3,13 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from agency_swarm import Agency, Agent
 
-from backend.dependencies.dependencies import get_env_config_manager
+from backend.dependencies.dependencies import get_user_secret_manager
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
-from backend.repositories.env_config_storage import EnvConfigStorage
+from backend.repositories.user_secret_storage import UserSecretStorage
 from backend.services.agency_manager import AgencyManager
-from tests.test_utils import TEST_USER_ID
-from tests.test_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils import TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def agency_manager():
         cache_manager=MagicMock(),
         agent_manager=MagicMock(),
         agency_config_storage=AgencyConfigStorage(),
-        env_config_manager=get_env_config_manager(env_config_storage=EnvConfigStorage()),
+        user_secret_manager=get_user_secret_manager(user_secret_storage=UserSecretStorage()),
     )
 
 
@@ -215,9 +215,7 @@ async def test_set_client_objects(agency_manager):
 
 @pytest.mark.asyncio
 async def test_delete_agency(agency_manager, mock_firestore_client):
-    mock_firestore_client.setup_mock_data(
-        "agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID}, doc_id=TEST_AGENCY_ID
-    )
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID})
     with patch.object(agency_manager, "delete_agency_from_cache", new_callable=AsyncMock) as mock_delete_cache:
         await agency_manager.delete_agency(TEST_AGENCY_ID)
 

@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.services.agency_manager import AgencyManager
-from tests.test_utils import TEST_USER_ID
-from tests.test_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils import TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture

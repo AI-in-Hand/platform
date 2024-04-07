@@ -3,10 +3,10 @@ from unittest.mock import mock_open, patch
 
 from backend.constants import AGENCY_DATA_DIR
 from backend.custom_skills.write_and_save_program import File, WriteAndSaveProgram
-from tests.test_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
-@patch("backend.services.env_vars_manager.ContextEnvVarsManager.get", return_value=TEST_AGENCY_ID)
+@patch("backend.services.context_vars_manager.ContextEnvVarsManager.get", return_value=TEST_AGENCY_ID)
 @patch("builtins.open", new_callable=mock_open)
 @patch("pathlib.Path.mkdir")
 def test_write_and_save_program_with_valid_files(mock_get, mock_mkdir, mock_file):

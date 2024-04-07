@@ -9,7 +9,7 @@ from backend.models.skill_config import SkillConfig
 
 class BaseResponse(BaseModel):
     status: bool = Field(True, description="The status of the response.")
-    message: str = Field("", description="The message to be displayed.")
+    message: str = Field("Success", description="The message to be displayed.")
 
 
 # =================================================================================================
@@ -87,3 +87,11 @@ class VersionData(BaseModel):
 
 class VersionResponse(BaseResponse):
     data: VersionData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
+# User API
+
+
+class UserSecretsResponse(BaseResponse):
+    data: list[str] = Field(..., description="The list of secret names.")

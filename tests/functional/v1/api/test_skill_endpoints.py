@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backend.repositories.skill_config_storage import SkillConfigStorage
-from tests.test_utils import TEST_USER_ID
+from tests.testing_utils import TEST_USER_ID
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test_get_skill_config_not_found(client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_delete_skill_success(skill_config_data, client, mock_firestore_client):
-    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data, doc_id="skill1")
+    mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
 
     response = client.delete("/v1/api/skill?id=skill1")
     assert response.status_code == 200

@@ -22,7 +22,7 @@ def session_storage_mock():
 
 @pytest.fixture
 def session_manager(session_storage_mock):
-    return SessionManager(env_config_manager=MagicMock(), session_storage=session_storage_mock)
+    return SessionManager(user_secret_manager=MagicMock(), session_storage=session_storage_mock)
 
 
 @pytest.fixture

@@ -17,9 +17,7 @@ class SkillConfigStorage:
     def load_by_id(self, id_: str) -> SkillConfig | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(id_).get()
-        if not document_snapshot.exists:
-            return None
-        return SkillConfig.model_validate(document_snapshot.to_dict())
+        return SkillConfig.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def load_by_titles(self, titles: list[str]) -> list[SkillConfig]:
         collection = self.db.collection(self.collection_name)

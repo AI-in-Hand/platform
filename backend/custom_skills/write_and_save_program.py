@@ -4,7 +4,7 @@ from agency_swarm import BaseTool
 from pydantic import Field
 
 from backend.constants import AGENCY_DATA_DIR
-from backend.services.env_vars_manager import ContextEnvVarsManager
+from backend.services.context_vars_manager import ContextEnvVarsManager
 
 
 class File(BaseTool):
