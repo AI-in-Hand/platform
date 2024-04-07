@@ -87,3 +87,11 @@ class VersionData(BaseModel):
 
 class VersionResponse(BaseResponse):
     data: VersionData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
+# User API
+
+
+class UserSecretsResponse(BaseResponse):
+    data: list[str] = Field(..., description="The list of secret names.")
