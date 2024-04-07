@@ -41,7 +41,16 @@ def test_get_by_key_no_secrets_set(mock_get):
     mock_get.assert_called_once()
 
 
-# Test 4: Successful setting of a secret
+# Test 4: No context variables are set for the user
+@pytest.mark.usefixtures("mock_firestore_client")
+def test_get_by_key_no_user_id():
+    manager = UserSecretManager(user_secret_storage=UserSecretStorage())
+    with pytest.raises(ValueError) as exc_info:
+        manager.get_by_key("ANY_KEY")
+    assert "user_id not found in the context variables." in str(exc_info.value)
+
+
+# Test 5: Successful setting of a secret
 @patch("backend.services.context_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_set_by_key_success(mock_get, mock_firestore_client):
     new_value = "new_test_value"
@@ -54,7 +63,7 @@ def test_set_by_key_success(mock_get, mock_firestore_client):
     mock_get.assert_called_once()
 
 
-# Test 5: Attempt to set a variable when user_id is missing
+# Test 6: Attempt to set a variable when user_id is missing
 @patch("backend.services.context_vars_manager.ContextEnvVarsManager.get", return_value=None)
 def test_set_by_key_no_user_id(mock_get):
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
@@ -64,7 +73,7 @@ def test_set_by_key_no_user_id(mock_get):
     mock_get.assert_called_once()
 
 
-# Test 6: Attempt to set a variable when no context variables are configured for the user
+# Test 7: Attempt to set a variable when no context variables are configured for the user
 @patch("backend.services.context_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_set_by_key_no_secrets_configured(mock_get, mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, None)  # Simulate no existing secrets
@@ -79,7 +88,7 @@ def test_set_by_key_no_secrets_configured(mock_get, mock_firestore_client):
     mock_get.assert_called_once()
 
 
-# Test 7: Successful retrieval of secret names
+# Test 8: Successful retrieval of secret names
 def test_get_secret_names_success(mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
@@ -87,7 +96,7 @@ def test_get_secret_names_success(mock_firestore_client):
     assert secret_names == ["SECRET1", "SECRET2"]
 
 
-# Test 8: Retrieval of secret names when no secrets exist
+# Test 9: Retrieval of secret names when no secrets exist
 def test_get_secret_names_no_secrets(mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {})
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
@@ -95,7 +104,7 @@ def test_get_secret_names_no_secrets(mock_firestore_client):
     assert secret_names == []
 
 
-# Test 9: Successful update of secrets
+# Test 10: Successful update of secrets
 def test_update_secrets_success(mock_firestore_client):
     secrets = {"SECRET1": "value1", "SECRET2": "value2"}
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
