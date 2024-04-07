@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Form, message } from 'antd';
-import { fetchJSON } from './utils';
+import { fetchJSON, getServerUrl } from './utils';
 import { PlusOutlined } from '@ant-design/icons';
 
 const UserVariables = () => {
   const [secrets, setSecrets] = useState<string[]>([]);
   const [dynamicFields, setDynamicFields] = useState<Record<string, string>[]>([{ key: '', value: '' }]);
   const [loading, setLoading] = useState(false);
+  const serverUrl = getServerUrl();
+  const getUserSecretsUrl = `${serverUrl}/user/settings/secrets`;
 
   useEffect(() => {
     const fetchSecrets = async () => {
       setLoading(true);
       try {
-        const response = await fetchJSON('/user/settings/secrets', { method: 'GET' });
+        const response = await fetchJSON(getUserSecretsUrl, { method: 'GET' });
         setSecrets(response);
       } catch (error) {
         message.error('Failed to fetch secrets');
@@ -44,7 +46,7 @@ const UserVariables = () => {
         }
         return acc;
       }, {});
-      await fetchJSON('/user/settings/secrets', {
+      await fetchJSON(getUserSecretsUrl, {
         method: 'PATCH',
         body: JSON.stringify(payload),
       });
