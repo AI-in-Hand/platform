@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Form, message } from 'antd';
 import { fetchJSON } from './utils';
+import { PlusOutlined } from '@ant-design/icons';
 
 const UserVariables = () => {
   const [secrets, setSecrets] = useState<string[]>([]);
-  const [dynamicFields, setDynamicFields] = useState<Record<string, string>[]>([]);
+  const [dynamicFields, setDynamicFields] = useState<Record<string, string>[]>([{ key: '', value: '' }]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,8 +24,15 @@ const UserVariables = () => {
     fetchSecrets();
   }, []);
 
-  const handleAddField = () => {
-    setDynamicFields([...dynamicFields, { key: '', value: '' }]);
+  const handleFieldChange = (index, keyOrValue, value) => {
+    setDynamicFields((prevFields) => {
+      const newFields = [...prevFields];
+      newFields[index][keyOrValue] = value;
+      if (index === prevFields.length - 1 && (newFields[index].key || newFields[index].value)) {
+        newFields.push({ key: '', value: '' }); // Add a new field when the last field is edited
+      }
+      return newFields;
+    });
   };
 
   const handleUpdateSecrets = async () => {
@@ -36,7 +44,7 @@ const UserVariables = () => {
         }
         return acc;
       }, {});
-      const updatedSecrets = await fetchJSON('/user/settings/secrets', {
+      await fetchJSON('/user/settings/secrets', {
         method: 'PATCH',
         body: JSON.stringify(payload),
       });
@@ -48,12 +56,6 @@ const UserVariables = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (dynamicFields.length === 0 || dynamicFields[dynamicFields.length - 1].key || dynamicFields[dynamicFields.length - 1].value) {
-      handleAddField();
-    }
-  }, [dynamicFields]);
 
   return (
     <Form layout="vertical" onFinish={handleUpdateSecrets}>
@@ -67,30 +69,24 @@ const UserVariables = () => {
           <Form.Item
             label="Key"
             name={`key-${index}`}
-            rules={[{ required: true, message: 'Please input the key!' }]}
+            rules={[{ required: index !== dynamicFields.length - 1, message: 'Please input the key!' }]}
           >
-            <Input value={field.key} onChange={(e) => {
-              const newFields = [...dynamicFields];
-              newFields[index].key = e.target.value;
-              setDynamicFields(newFields);
-            }} />
+            <Input value={field.key} onChange={(e) => handleFieldChange(index, 'key', e.target.value)} />
           </Form.Item>
           <Form.Item
             label="Value"
             name={`value-${index}`}
-            rules={[{ required: true, message: 'Please input the value!' }]}
+            rules={[{ required: index !== dynamicFields.length - 1, message: 'Please input the value!' }]}
           >
-            <Input value={field.value} onChange={(e) => {
-              const newFields = [...dynamicFields];
-              newFields[index].value = e.target.value;
-              setDynamicFields(newFields);
-            }} />
+            <Input value={field.value} onChange={(e) => handleFieldChange(index, 'value', e.target.value)} />
           </Form.Item>
         </React.Fragment>
       ))}
-      <Button type="primary" htmlType="submit" loading={loading}>
-        Update Secrets
-      </Button>
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={loading}>
+          Update Secrets
+        </Button>
+      </Form.Item>
     </Form>
   );
 };
