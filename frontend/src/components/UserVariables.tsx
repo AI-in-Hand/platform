@@ -5,6 +5,7 @@ import { fetchJSON, getServerUrl } from './utils';
 const UserVariables = () => {
   const [form] = Form.useForm();
   const [secrets, setSecrets] = useState<string[]>([]);
+  const [hasNewSecrets, setHasNewSecrets] = useState(false);
   const serverUrl = getServerUrl();
   const getUserSecretsUrl = `${serverUrl}/user/settings/secrets`;
 
@@ -66,20 +67,17 @@ const UserVariables = () => {
     fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
   };
 
-  const isFormEmpty = () => {
-    const values = form.getFieldsValue();
-    return (
-      !values.newSecrets ||
-      values.newSecrets.every(
-        (secret: { key: string; value: string }) => !secret.key && !secret.value
-      )
+  const checkNewSecrets = (values: any) => {
+    const hasNewSecrets = Object.entries(values.newSecrets || {}).some(
+      ([_, { key, value }]) => key && value
     );
+    setHasNewSecrets(hasNewSecrets);
   };
 
   return (
     <div>
       <h2>Settings</h2>
-      <Form form={form} onFinish={saveSecrets}>
+      <Form form={form} onFinish={saveSecrets} onValuesChange={checkNewSecrets}>
         {secrets.map((secret) => (
           <Form.Item
             key={secret}
@@ -117,7 +115,7 @@ const UserVariables = () => {
           )}
         </Form.List>
         <Form.Item>
-          <Button type="primary" htmlType="submit" disabled={isFormEmpty()}>
+          <Button type="primary" htmlType="submit" disabled={!hasNewSecrets}>
             Save
           </Button>
         </Form.Item>
