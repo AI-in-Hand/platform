@@ -97,14 +97,6 @@ export interface IChatSession {
   flow_config: IFlowConfig;
 }
 
-export interface IGalleryItem {
-  id: string;
-  messages: Array<IMessage>;
-  session: IChatSession;
-  tags: Array<string>;
-  timestamp: string;
-}
-
 export interface ISkill {
   title: string;
   file_name?: string;
