@@ -22,7 +22,6 @@ const UserVariables = () => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         setSecrets(data.data);
-        form.setFieldsValue(data.data.reduce((acc, key) => ({ ...acc, [key]: '***' }), {}));
       } else {
         message.error(data.message);
       }
@@ -35,8 +34,8 @@ const UserVariables = () => {
 
   const saveSecrets = (values: any) => {
     const updatedSecrets: { [key: string]: string } = {};
-    Object.entries(values).forEach(([key, value]) => {
-      if (value && value !== '***') {
+    Object.entries(values.newSecrets || {}).forEach(([_, { key, value }]) => {
+      if (key && value) {
         updatedSecrets[key] = value;
       }
     });
@@ -66,7 +65,12 @@ const UserVariables = () => {
       <h2>Settings</h2>
       <Form form={form} onFinish={saveSecrets}>
         {secrets.map((secret) => (
-          <Form.Item key={secret} label={secret} name={secret}>
+          <Form.Item
+            key={secret}
+            label={secret}
+            name={secret}
+            initialValue="***"
+          >
             <Input.Password />
           </Form.Item>
         ))}
@@ -75,7 +79,11 @@ const UserVariables = () => {
             <>
               {fields.map(({ key, name, ...restField }) => (
                 <div key={key} style={{ display: 'flex', marginBottom: 8 }}>
-                  <Form.Item {...restField} name={[name, 'key']} style={{ marginRight: 8 }}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'key']}
+                    style={{ marginRight: 8 }}
+                  >
                     <Input placeholder="Secret Name" />
                   </Form.Item>
                   <Form.Item {...restField} name={[name, 'value']}>
