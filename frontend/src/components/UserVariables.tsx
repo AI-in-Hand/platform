@@ -39,6 +39,12 @@ const UserVariables = () => {
         updatedSecrets[key] = value;
       }
     });
+
+    if (Object.keys(updatedSecrets).length === 0) {
+      message.error('Please provide at least one secret');
+      return;
+    }
+
     const payLoad = {
       method: 'PATCH',
       headers: {
@@ -48,7 +54,7 @@ const UserVariables = () => {
     };
     const onSuccess = (data: any) => {
       if (data && data.status) {
-        message.success('Secrets updated successfully');
+        message.success(data.message);
         fetchSecrets();
       } else {
         message.error(data.message);
@@ -58,6 +64,16 @@ const UserVariables = () => {
       message.error(err.message);
     };
     fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
+  };
+
+  const isFormEmpty = () => {
+    const values = form.getFieldsValue();
+    return (
+      !values.newSecrets ||
+      values.newSecrets.every(
+        (secret: { key: string; value: string }) => !secret.key && !secret.value
+      )
+    );
   };
 
   return (
@@ -101,7 +117,7 @@ const UserVariables = () => {
           )}
         </Form.List>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" disabled={isFormEmpty()}>
             Save
           </Button>
         </Form.Item>
