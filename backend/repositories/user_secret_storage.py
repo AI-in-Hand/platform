@@ -1,7 +1,6 @@
 import logging
 
 from firebase_admin import firestore
-from google.cloud.firestore_v1 import ExistsOption
 
 logger = logging.getLogger(__name__)
 
@@ -28,4 +27,4 @@ class UserSecretStorage:
     def update_secrets(self, user_id: str, config: dict) -> None:
         logger.info(f"Updating user secrets for user_id: {user_id}")
         collection = self.db.collection(self.collection_name)
-        collection.document(user_id).update(config, option=ExistsOption(False))
+        collection.document(user_id).update(config)

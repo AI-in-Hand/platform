@@ -45,6 +45,10 @@ class UserSecretManager:
         secrets = self._user_secret_storage.get_all_secrets(user_id)
         return list(secrets.keys()) if secrets else []
 
-    def update_secrets(self, user_id: str, secrets: dict) -> None:
+    def update_or_create_secrets(self, user_id: str, secrets: dict) -> None:
+        """Update or create secrets for a user."""
         encrypted_secrets = {key: self._encryption_service.encrypt(value) for key, value in secrets.items()}
-        self._user_secret_storage.update_secrets(user_id, encrypted_secrets)
+        if self._user_secret_storage.get_all_secrets(user_id):
+            self._user_secret_storage.update_secrets(user_id, encrypted_secrets)
+        else:
+            self._user_secret_storage.set_secrets(user_id, encrypted_secrets)

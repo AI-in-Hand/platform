@@ -40,6 +40,6 @@ async def update_secrets(
     Existing secrets are updated based on the keys provided in the request body.
     This functionality supports partial updates; non-specified secrets remain unchanged.
     """
-    user_secret_manager.update_secrets(user_id=current_user.id, secrets=user_secrets)
+    user_secret_manager.update_or_create_secrets(user_id=current_user.id, secrets=user_secrets)
     user_secret_names = user_secret_manager.get_secret_names(current_user.id)
     return UserSecretsResponse(message="Secrets updated successfully", data=user_secret_names)
