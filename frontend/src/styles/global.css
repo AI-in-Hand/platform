@@ -289,15 +289,63 @@ iiz__zoom-img {
 .ant-modal-footer {
   @apply border-secondary !important;
 }
-.ant-btn {
-  @apply text-primary !important;
+
+/* Default button styles */
+.ant-btn,
+.ant-btn-default {
+  @apply bg-primary text-primary border-primary;
 }
+
+.ant-btn:hover,
+.ant-btn-default:hover {
+  @apply text-accent border-accent;
+}
+
+.ant-btn:focus,
+.ant-btn-default:focus {
+  @apply text-accent border-accent;
+}
+
+.ant-btn:active,
+.ant-btn-default:active {
+  @apply text-accent border-accent;
+}
+
+/* Primary button styles */
 .ant-btn-primary {
-  @apply bg-accent text-white !important;
+  @apply bg-accent border-accent text-white;
 }
+
 .ant-btn-primary:hover {
-  @apply bg-accent text-white drop-shadow-md !important;
+  @apply bg-accent border-accent text-white drop-shadow-md;
 }
+
+.ant-btn-primary:focus {
+  @apply bg-accent border-accent text-white;
+}
+
+.ant-btn-primary:active {
+  @apply bg-accent border-accent text-white;
+}
+
+/* Dashed button styles */
+.ant-btn-dashed {
+  @apply bg-transparent text-primary border-primary;
+}
+
+.ant-btn-dashed:hover {
+  @apply border-dashed border-accent text-accent;
+}
+
+.ant-btn-dashed:focus {
+  @apply border-dashed border-accent text-accent;
+}
+
+.ant-btn-dashed:active {
+  @apply border-dashed border-accent text-accent;
+}
+
+
 .ant-modal-close {
   @apply text-primary   duration-200   !important;
 }
@@ -350,4 +398,18 @@ div#___gatsby,
 div#gatsby-focus-wrapper {
   height: 100%;
   /* border: 1px solid green; */
+}
+
+/* Table styles */
+.ant-table-thead > tr > th,
+.ant-table-thead > tr > td {
+  @apply bg-primary text-primary border-b border-secondary;
+}
+
+.ant-table-tbody > tr > td {
+  @apply bg-secondary text-secondary;
+}
+
+.ant-table-wrapper .ant-table-tbody .ant-table-row:hover > td {
+  @apply bg-light text-primary;
 }
