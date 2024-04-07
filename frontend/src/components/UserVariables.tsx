@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Table } from 'antd';
 import { fetchJSON, getServerUrl } from './utils';
 
 const UserVariables = () => {
   const [form] = Form.useForm();
-  const [secrets, setSecrets] = useState<string[]>([]);
-  const [hasNewSecrets, setHasNewSecrets] = useState(false);
+  const [secrets, setSecrets] = useState<{ [key: string]: string }>({});
   const serverUrl = getServerUrl();
   const getUserSecretsUrl = `${serverUrl}/user/settings/secrets`;
 
@@ -22,7 +21,11 @@ const UserVariables = () => {
     };
     const onSuccess = (data: any) => {
       if (data && data.status) {
-        setSecrets(data.data);
+        const fetchedSecrets = {};
+        data.data.forEach((key) => {
+          fetchedSecrets[key] = '***';
+        });
+        setSecrets(fetchedSecrets);
       } else {
         message.error(data.message);
       }
@@ -35,19 +38,19 @@ const UserVariables = () => {
 
   const saveSecrets = (values: any) => {
     const updatedSecrets: { [key: string]: string } = {};
+    Object.keys(secrets).forEach((key) => {
+      if (values[key] !== '***') {
+        updatedSecrets[key] = values[key] || '';
+      }
+    });
     Object.entries(values.newSecrets || {}).forEach(([_, { key, value }]) => {
-      if (key && value) {
-        updatedSecrets[key] = value;
+      if (key) {
+        updatedSecrets[key] = value || '';
       }
     });
 
-    if (Object.keys(updatedSecrets).length === 0) {
-      message.error('Please provide at least one secret');
-      return;
-    }
-
     const payLoad = {
-      method: 'PATCH',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -56,7 +59,12 @@ const UserVariables = () => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        fetchSecrets();
+        const newSecrets = {};
+        data.data.forEach((key) => {
+          newSecrets[key] = '***';
+        });
+        setSecrets(newSecrets);
+        form.resetFields();
       } else {
         message.error(data.message);
       }
@@ -67,27 +75,47 @@ const UserVariables = () => {
     fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
   };
 
-  const checkNewSecrets = (values: any) => {
-    const hasNewSecrets = Object.entries(values.newSecrets || {}).some(
-      ([_, { key, value }]) => key && value
-    );
-    setHasNewSecrets(hasNewSecrets);
-  };
+  const columns = [
+    {
+      title: 'Secret Name',
+      dataIndex: 'key',
+      key: 'key',
+    },
+    {
+      title: 'Secret Value',
+      dataIndex: 'value',
+      key: 'value',
+      render: (_, record: any) => (
+        <Form.Item name={record.key}>
+          <Input.Password placeholder="***" autoComplete="new-password" />
+        </Form.Item>
+      ),
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record: any) => (
+        <Button onClick={() => {
+          const newSecrets = { ...secrets };
+          delete newSecrets[record.key];
+          setSecrets(newSecrets);
+          form.setFieldsValue({ [record.key]: undefined });
+        }}>
+          Remove
+        </Button>
+      ),
+    },
+  ];
+
+  const data = Object.keys(secrets).map((key) => ({
+    key,
+    value: secrets[key],
+  }));
 
   return (
     <div>
-      <h2>Settings</h2>
-      <Form form={form} onFinish={saveSecrets} onValuesChange={checkNewSecrets}>
-        {secrets.map((secret) => (
-          <Form.Item
-            key={secret}
-            label={secret}
-            name={secret}
-            initialValue="***"
-          >
-            <Input.Password />
-          </Form.Item>
-        ))}
+      <Form form={form} onFinish={saveSecrets}>
+        <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
         <Form.List name="newSecrets">
           {(fields, { add, remove }) => (
             <>
@@ -96,12 +124,16 @@ const UserVariables = () => {
                   <Form.Item
                     {...restField}
                     name={[name, 'key']}
-                    style={{ marginRight: 8 }}
+                    style={{ marginRight: 8, width: '50%' }}
                   >
                     <Input placeholder="Secret Name" />
                   </Form.Item>
-                  <Form.Item {...restField} name={[name, 'value']}>
-                    <Input.Password placeholder="Secret Value" />
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'value']}
+                    style={{ width: '50%' }}
+                  >
+                    <Input.Password placeholder="Secret Value" autoComplete="new-password" />
                   </Form.Item>
                   <Button onClick={() => remove(name)}>Remove</Button>
                 </div>
@@ -115,7 +147,7 @@ const UserVariables = () => {
           )}
         </Form.List>
         <Form.Item>
-          <Button type="primary" htmlType="submit" disabled={!hasNewSecrets}>
+          <Button type="primary" htmlType="submit">
             Save
           </Button>
         </Form.Item>

@@ -25,7 +25,7 @@ async def get_secrets(
     return UserSecretsResponse(data=user_secrets)
 
 
-@user_router.patch("/user/settings/secrets")
+@user_router.put("/user/settings/secrets")
 async def update_secrets(
     current_user: Annotated[User, Depends(get_current_user)],
     user_secrets: dict[str, str] = Body(...),
@@ -35,10 +35,8 @@ async def update_secrets(
     Update or create the secrets associated with the current user.
 
     This endpoint allows for updating the user's secrets.
-    For simplicity, if no secrets exist for the user, it will create a new document with the provided secrets
-    (although in the future, we may want to consider creating a separate POST endpoint for this purpose).
     Existing secrets are updated based on the keys provided in the request body.
-    This functionality supports partial updates; non-specified secrets remain unchanged.
+    This functionality supports partial updates; secrets with "" values remain unchanged.
     """
     user_secret_manager.update_or_create_secrets(user_id=current_user.id, secrets=user_secrets)
     user_secret_names = user_secret_manager.get_secret_names(current_user.id)

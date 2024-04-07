@@ -14,12 +14,12 @@ def test_get_secrets(client, mock_firestore_client):
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_update_secrets(client, mock_firestore_client):
     secrets = {"SECRET1": "value1", "SECRET2": "value2"}
-    response = client.patch("/v1/api/user/settings/secrets", json=secrets)
+    response = client.put("/v1/api/user/settings/secrets", json=secrets)
     assert response.status_code == 200
     assert response.json() == {
         "message": "Secrets updated successfully",
         "status": True,
         "data": ["SECRET1", "SECRET2"],
     }
-    updated_secrets = mock_firestore_client.collection("user_secrets").document(TEST_USER_ID).to_dict()
+    updated_secrets = mock_firestore_client.to_dict()
     assert len(updated_secrets) == 2

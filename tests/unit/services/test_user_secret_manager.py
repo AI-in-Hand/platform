@@ -119,7 +119,7 @@ def test_create_secrets_success(mock_firestore_client):
 # Test 11: Successful update of existing secrets
 def test_update_secrets_success(mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
-    secrets = {"SECRET1": "new_value", "SECRET3": "value3"}
+    secrets = {"SECRET1": "new_value", "SECRET2": "", "SECRET3": "value3"}
 
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
     manager.update_or_create_secrets(TEST_USER_ID, secrets)
@@ -127,5 +127,5 @@ def test_update_secrets_success(mock_firestore_client):
     updated_secrets = mock_firestore_client.to_dict()
     assert len(updated_secrets) == 3
     assert EncryptionService(settings.encryption_key).decrypt(updated_secrets["SECRET1"]) == "new_value"
-    assert "SECRET2" in updated_secrets
+    assert updated_secrets["SECRET2"] == "value2"
     assert EncryptionService(settings.encryption_key).decrypt(updated_secrets["SECRET3"]) == "value3"

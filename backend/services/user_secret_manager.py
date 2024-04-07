@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserSecretManager:
-    """Manage user secrets. Incorporates the logic to get user secrets from the Firestore."""
+    """Manage user secrets. Incorporates the logic for setting, getting, and updating user secrets."""
 
     def __init__(self, user_secret_storage: UserSecretStorage):
         self._user_secret_storage = user_secret_storage
@@ -46,9 +46,24 @@ class UserSecretManager:
         return list(secrets.keys()) if secrets else []
 
     def update_or_create_secrets(self, user_id: str, secrets: dict[str, str]) -> None:
-        """Update or create secrets for a user."""
-        encrypted_secrets = {key: self._encryption_service.encrypt(value) for key, value in secrets.items()}
-        if self._user_secret_storage.get_all_secrets(user_id):
-            self._user_secret_storage.update_secrets(user_id, encrypted_secrets)
-        else:
-            self._user_secret_storage.set_secrets(user_id, encrypted_secrets)
+        """Update or create secrets for a user.
+        :param user_id: The ID of the user whose secrets are being updated.
+        :param secrets: A dictionary containing the secrets to be updated or created.
+                        The dictionary may contain the following types of changes:
+            - Removed keys: If a key is missing, it will be removed from the secrets.
+            - New/updated keys: If the value is not an empty string, the value will be encrypted and updated.
+            - Unchanged keys: If the value is an empty string, the value will not be updated.
+        """
+        existing_secrets = self._user_secret_storage.get_all_secrets(user_id) or {}
+
+        # Encrypt and update new or changed secrets
+        for key, value in secrets.items():
+            if value:  # Only update if the value is not an empty string
+                existing_secrets[key] = self._encryption_service.encrypt(value)
+
+        # Remove secrets that are no longer present
+        keys_to_remove = set(existing_secrets) - set(secrets)
+        for key in keys_to_remove:
+            del existing_secrets[key]
+
+        self._user_secret_storage.set_secrets(user_id, existing_secrets)
