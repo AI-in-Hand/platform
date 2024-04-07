@@ -32,3 +32,16 @@ def test_get_openai_client_uses_correct_api_key(mock_openai_client, mock_instruc
     mock_openai_client.assert_called_with(api_key=expected_api_key, max_retries=5)
     mock_instructor_patch.assert_called_once()
     assert client == mock_instructor_patch.return_value, "The function should return a patched OpenAI client"
+
+
+@pytest.mark.usefixtures("recover_oai_client")
+def test_get_openai_client_raises_error_when_no_api_key_and_user_secret_manager():
+    # Setup
+    from backend.services.oai_client import get_openai_client
+
+    # Execute
+    with pytest.raises(ValueError) as e:
+        get_openai_client()
+
+    # Verify
+    assert str(e.value) == "Either user_secret_manager or api_key must be provided"
