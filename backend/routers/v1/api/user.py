@@ -28,7 +28,7 @@ async def get_secrets(
 @user_router.patch("/user/settings/secrets")
 async def update_secrets(
     current_user: Annotated[User, Depends(get_current_user)],
-    user_secrets: dict = Body(...),
+    user_secrets: dict[str, str] = Body(...),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> UserSecretsResponse:
     """
