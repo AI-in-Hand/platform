@@ -5,11 +5,13 @@ import WorkflowView from "./workflow";
 import { Tabs } from "antd";
 import {
   BugAntIcon,
+  Cog8ToothIcon,
   CpuChipIcon,
   Square2StackIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import ModelsView from "./models";
+import UserSettings from '../../UserSettings';
 
 const BuildView = () => {
   return (
@@ -57,6 +59,16 @@ const BuildView = () => {
               ),
               key: "4",
               children: <WorkflowView />,
+            },
+            {
+              label: (
+                <>
+                  <Cog8ToothIcon className="h-4 w-4 inline-block mr-1" />
+                  Settings
+                </>
+              ),
+              key: "5",
+              children: <UserSecretsSettings />,
             },
           ]}
         />
