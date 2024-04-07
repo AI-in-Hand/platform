@@ -4,14 +4,12 @@ import AgentsView from "./agents";
 import WorkflowView from "./workflow";
 import { Tabs } from "antd";
 import {
-  BugAntIcon,
-  Cog8ToothIcon,
-  CpuChipIcon,
-  Square2StackIcon,
-  Square3Stack3DIcon,
+  VariableIcon,
+  UserIcon,
+  UserGroupIcon,
+  WrenchIcon,
 } from "@heroicons/react/24/outline";
-import ModelsView from "./models";
-import UserSettings from '../../UserSettings';
+import UserVariables from '../../UserVariables';
 
 const BuildView = () => {
   return (
@@ -33,7 +31,7 @@ const BuildView = () => {
               label: (
                 <div className="w-full  ">
                   {" "}
-                  <BugAntIcon className="h-4 w-4 inline-block mr-1" />
+                  <WrenchIcon className="h-4 w-4 inline-block mr-1" />
                   Skills
                 </div>
               ),
@@ -43,7 +41,7 @@ const BuildView = () => {
             {
               label: (
                 <>
-                  <Square2StackIcon className="h-4 w-4 inline-block mr-1" />
+                  <UserIcon className="h-4 w-4 inline-block mr-1" />
                   Agents
                 </>
               ),
@@ -53,7 +51,7 @@ const BuildView = () => {
             {
               label: (
                 <>
-                  <Square3Stack3DIcon className="h-4 w-4 inline-block mr-1" />
+                  <UserGroupIcon className="h-4 w-4 inline-block mr-1" />
                   Workflows
                 </>
               ),
@@ -63,12 +61,12 @@ const BuildView = () => {
             {
               label: (
                 <>
-                  <Cog8ToothIcon className="h-4 w-4 inline-block mr-1" />
-                  Settings
+                  <VariableIcon className="h-4 w-4 inline-block mr-1" />
+                  Variables
                 </>
               ),
               key: "5",
-              children: <UserSecretsSettings />,
+              children: <UserVariables />,
             },
           ]}
         />
