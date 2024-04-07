@@ -15,9 +15,13 @@ const UserVariables = () => {
       setLoading(true);
       try {
         const response = await fetchJSON(getUserSecretsUrl, { method: 'GET' });
-        setSecrets(response);
+        if (response.status && Array.isArray(response.data)) {
+          setSecrets(response.data);
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (error) {
-        message.error('Failed to fetch secrets');
+        message.error('Failed to fetch secrets: ' + error.message);
       } finally {
         setLoading(false);
       }
