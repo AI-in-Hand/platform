@@ -1460,6 +1460,7 @@ const AgentModal = ({
       open={showAgentModal}
       onOk={() => {
         if (handler) {
+          handleAgentChange(selectedFlowSpec);
           handler(localAgent);
         }
         setShowAgentModal(false);
