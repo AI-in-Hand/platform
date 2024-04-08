@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Table } from 'antd';
 import { fetchJSON, getServerUrl } from './utils';
+import { MinusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {
   const [form] = Form.useForm();
@@ -114,6 +115,28 @@ const UserVariables = () => {
 
   return (
     <div>
+      <h1>API Keys</h1>
+      <section aria-labelledby="secrets-introduction">
+        <h2 id="secrets-introduction">Introduction</h2>
+        <p>
+          These secret variables can be used in your skills to securely access sensitive information, such as API keys.
+          They are encrypted at rest and only decrypted when used in a skill.
+        </p>
+        <p>
+          Note: We do not reveal the value of a secret once it is saved. Should you forget its value, you can replace it with a new one.
+        </p>
+      </section>
+
+      <section aria-labelledby="usage-instructions">
+        <h2 id="usage-instructions">Using Secrets in Your Skills</h2>
+        <p>To incorporate secrets into your skills, follow the example below (may be simplified in the future):</p>
+        <pre><code>
+          from backend.services.user_secret_manager import UserSecretManager
+          user_secret_manager = UserSecretManager(UserSecretStorage())
+          airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")
+        </code></pre>
+        <p>This demonstrates how to retrieve the value of the secret named <code>AIRTABLE_TOKEN</code>.</p>
+      </section>
       <Form form={form} onFinish={saveSecrets}>
         <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
         <Form.List name="newSecrets">
@@ -135,7 +158,8 @@ const UserVariables = () => {
                   >
                     <Input.Password placeholder="Secret Value" autoComplete="new-password" />
                   </Form.Item>
-                  <Button onClick={() => remove(name)}>Remove</Button>
+
+                  <Button icon={MinusIcon} onClick={() => remove(name)}></Button>
                 </div>
               ))}
               <Form.Item>

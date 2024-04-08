@@ -56,6 +56,19 @@ body {
 }
 /* @import "antd/dist/antd.css"; */
 
+/* define H1 and H2 to be bold */
+h1 {
+  @apply font-bold !important;
+}
+h2 {
+  @apply font-bold !important;
+}
+
+/* Preserve newlines and wrap long lines */
+pre {
+  white-space: pre-wrap;
+}
+
 .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   @apply text-accent !important;
   font-weight: 500;

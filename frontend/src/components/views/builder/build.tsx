@@ -4,7 +4,7 @@ import AgentsView from "./agents";
 import WorkflowView from "./workflow";
 import { Tabs } from "antd";
 import {
-  VariableIcon,
+  KeyIcon,
   UserIcon,
   UserGroupIcon,
   WrenchIcon,
@@ -61,8 +61,8 @@ const BuildView = () => {
             {
               label: (
                 <>
-                  <VariableIcon className="h-4 w-4 inline-block mr-1" />
-                  Variables
+                  <KeyIcon className="h-4 w-4 inline-block mr-1" />
+                  API Keys
                 </>
               ),
               key: "5",
