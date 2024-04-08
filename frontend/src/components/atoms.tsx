@@ -1407,10 +1407,8 @@ const AgentModal = ({
   setShowAgentModal: (show: boolean) => void;
   handler?: (agent: IAgentFlowSpec | null) => void;
 }) => {
-  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(
-    agent
-  );
-  const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(0);
+  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(agent);
+  const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(null);
 
   const serverUrl = getServerUrl();
   const listAgentsUrl = `${serverUrl}/agent/list`;
@@ -1419,11 +1417,6 @@ const AgentModal = ({
   useEffect(() => {
     fetchAgents();
   }, []);
-
-  // Required to synchronize localAgent changes between GroupChatFlowSpecView and AgentFlowSpecView
-  useEffect(() => {
-    setLocalAgent(localAgent);
-  }, [localAgent]);
 
   const fetchAgents = () => {
     const onSuccess = (data: any) => {
