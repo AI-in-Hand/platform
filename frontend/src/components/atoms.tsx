@@ -1411,7 +1411,7 @@ const AgentModal = ({
   const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(null);
 
   const serverUrl = getServerUrl();
-  const listAgentsUrl = `${serverUrl}/agent/list`;
+  const listAgentsUrl = `${serverUrl}/agent/list?owned_by_user=true`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);
 

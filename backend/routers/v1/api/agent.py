@@ -34,9 +34,10 @@ agent_router = APIRouter(tags=["agent"])
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
     agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
+    owned_by_user: bool = Query(False, description="Filter agents owned by the current user"),
     storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
 ) -> GetAgentListResponse:
-    configs = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
+    configs = storage.load_by_user_id(current_user.id) + (storage.load_by_user_id(None) if not owned_by_user else [])
     configs_for_api = [agent_adapter.to_api(config) for config in configs]
     return GetAgentListResponse(data=configs_for_api)
 
