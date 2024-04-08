@@ -3,7 +3,7 @@ from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 
 
-class AgencyConfigAdapter:
+class AgencyAdapter:
     """
     Adapter for the AgencyConfig model. Transforms the data from the frontend format to the model and vice versa.
     In particular, it converts the `agents` field with a list of IDs (AgencyConfig Pydantic model)
