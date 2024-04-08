@@ -5,7 +5,7 @@ from backend.services.adapters.agency_adapter import AgencyAdapter
 
 class SessionAdapter:
     """
-    Adapter for the SessionConfig model. Transforms the data from the frontend format to the model and vice versa.
+    Adapter for the SessionConfig model. Transforms the data from the backend (model) to the frontend format.
     In particular, it fills the `flow_config` field with an AgencyConfigForAPI object based on an agency_id string.
     """
 
