@@ -421,6 +421,7 @@ div#gatsby-focus-wrapper {
 
 .ant-table-tbody > tr > td {
   @apply bg-secondary text-secondary;
+  vertical-align: baseline;
 }
 
 .ant-table-wrapper .ant-table-tbody .ant-table-row:hover > td {

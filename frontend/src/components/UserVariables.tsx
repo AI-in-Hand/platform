@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Table } from 'antd';
 import { fetchJSON, getServerUrl } from './utils';
-import { MinusIcon } from "@heroicons/react/24/outline";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {
   const [form] = Form.useForm();
@@ -78,12 +78,12 @@ const UserVariables = () => {
 
   const columns = [
     {
-      title: 'Secret Name',
+      title: 'Name',
       dataIndex: 'key',
       key: 'key',
     },
     {
-      title: 'Secret Value',
+      title: 'Value',
       dataIndex: 'value',
       key: 'value',
       render: (_, record: any) => (
@@ -93,7 +93,7 @@ const UserVariables = () => {
       ),
     },
     {
-      title: 'Action',
+      title: '',
       key: 'action',
       render: (_, record: any) => (
         <Button onClick={() => {
@@ -102,7 +102,7 @@ const UserVariables = () => {
           setSecrets(newSecrets);
           form.setFieldsValue({ [record.key]: undefined });
         }}>
-          Remove
+          {MinusIcon}
         </Button>
       ),
     },
@@ -147,22 +147,22 @@ const UserVariables = () => {
                     name={[name, 'key']}
                     style={{ marginRight: 8, width: '50%' }}
                   >
-                    <Input placeholder="Secret Name" />
+                    <Input placeholder="Name" />
                   </Form.Item>
                   <Form.Item
                     {...restField}
                     name={[name, 'value']}
                     style={{ width: '50%' }}
                   >
-                    <Input.Password placeholder="Secret Value" autoComplete="new-password" />
+                    <Input.Password placeholder="Value" autoComplete="new-password" />
                   </Form.Item>
 
-                  <Button icon={MinusIcon} onClick={() => remove(name)}></Button>
+                  <Button onClick={() => remove(name)}>{MinusIcon}</Button>
                 </div>
               ))}
               <Form.Item>
                 <Button type="dashed" onClick={() => add()} block>
-                  Add Secret
+                  {PlusIcon} Add Secret
                 </Button>
               </Form.Item>
             </>
