@@ -132,6 +132,7 @@ async def delete_agency(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     await agency_manager.delete_agency(id)
+
     agencies = await agency_manager.get_agency_list(current_user.id)
     agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
     return AgencyListResponse(message="Agency deleted", data=agencies_for_api)
