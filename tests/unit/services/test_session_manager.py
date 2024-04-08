@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -54,18 +55,17 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     # Mock _create_thread to return a mock object with an id attribute
     session_manager._create_thread = MagicMock(return_value=MagicMock(id="main_thread_id"))
 
-    with patch("backend.services.session_manager.datetime") as mock_datetime:
-        mock_datetime.utcnow.return_value = datetime(2021, 1, 1, tzinfo=UTC)
-        session_id = session_manager.create_session(agency_mock, "agency_id", "user_id")
+    session_id = session_manager.create_session(agency_mock, "agency_id", "user_id")
 
     assert session_id == "main_thread_id", "The session ID should be the ID of the main thread."
     expected_session_config = SessionConfig(
-        session_id="main_thread_id",
+        id="main_thread_id",
         user_id="user_id",
         agency_id="agency_id",
-        created_at=int(datetime(2021, 1, 1).timestamp()),
+        timestamp=datetime.now(UTC).isoformat(),
     )
-    session_storage_mock.save.assert_called_once_with(expected_session_config)
+    expected_session_config.timestamp = mock.ANY
+    assert session_storage_mock.save.call_args_list == [call(expected_session_config)]
 
 
 @patch("backend.services.session_manager.get_openai_client")

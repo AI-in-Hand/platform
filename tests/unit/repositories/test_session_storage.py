@@ -7,12 +7,11 @@ from tests.testing_utils import TEST_USER_ID
 
 @pytest.fixture
 def session_data():
-    # Using an integer for the created_at field to align with the model definition
     return {
         "id": "session1",
         "user_id": TEST_USER_ID,
         "agency_id": "agency1",
-        "created_at": 161803398874,  # Example integer timestamp
+        "timestamp": "2021-01-01T00:00:00Z",
     }
 
 

@@ -16,7 +16,7 @@ def session_config_data():
         "id": "test_session_id",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
-        "created_at": 1234567890,
+        "timestamp": "2021-10-01T00:00:00Z",
     }
 
 
@@ -59,7 +59,7 @@ def test_create_session_success(client, mock_firestore_client):
             "id": "new_session_id",
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
-            "created_at": mock.ANY,
+            "timestamp": mock.ANY,
         }
 
 
