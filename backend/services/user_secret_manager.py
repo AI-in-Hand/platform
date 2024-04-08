@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 class UserSecretManager:
     """Manage user secrets. Incorporates the logic for setting, getting, and updating user secrets."""
 
+    DEFAULT_SECRET_NAMES: set[str] = {"OPENAI_API_KEY"}
+
     def __init__(self, user_secret_storage: UserSecretStorage):
         self._user_secret_storage = user_secret_storage
         self._encryption_service = EncryptionService(settings.encryption_key)
@@ -43,7 +45,10 @@ class UserSecretManager:
     def get_secret_names(self, user_id: str) -> list[str]:
         """Get the names of all the secrets for a user."""
         secrets = self._user_secret_storage.get_all_secrets(user_id)
-        return sorted(secrets.keys()) if secrets else []
+        secret_names = set(secrets.keys()) if secrets else set()
+        # Combine user's secrets with the default ones and sort them
+        all_secrets = secret_names.union(self.DEFAULT_SECRET_NAMES)
+        return sorted(all_secrets)
 
     def update_or_create_secrets(self, user_id: str, secrets: dict[str, str]) -> None:
         """Update or create secrets for a user.
