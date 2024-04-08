@@ -62,20 +62,12 @@ class CreateAgentResponse(BaseResponse):
 # Agency API
 
 
-class GetAgencyListResponse(BaseResponse):
+class AgencyListResponse(BaseResponse):
     data: list[AgencyConfigForAPI] = Field(..., description="The list of agency configurations.")
 
 
 class GetAgencyResponse(BaseResponse):
     data: AgencyConfigForAPI = Field(..., description="The agency configuration.")
-
-
-class CreateAgencyData(BaseModel):
-    id: str = Field(..., description="The unique identifier of the agency.")
-
-
-class CreateAgencyResponse(BaseResponse):
-    data: CreateAgencyData = Field(..., description="The data to be returned.")
 
 
 # =================================================================================================

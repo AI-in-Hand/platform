@@ -23,6 +23,24 @@ def agency_manager():
     )
 
 
+# test get_agency_list method
+@pytest.mark.asyncio
+async def test_get_agency_list(agency_manager, mock_firestore_client):
+    agency_config = AgencyConfig(
+        id=TEST_AGENCY_ID,
+        user_id=TEST_USER_ID,
+        name="Test agency",
+        shared_instructions="manifesto",
+        main_agent="agent1_name",
+        agents=["agent1_id"],
+    )
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
+
+    agency_list = await agency_manager.get_agency_list(TEST_USER_ID)
+    assert len(agency_list) == 1
+    assert agency_list[0] == agency_config
+
+
 @pytest.mark.asyncio
 async def test_get_agency_from_cache(agency_manager):
     with (

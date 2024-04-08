@@ -7,7 +7,7 @@ import { Modal, message } from "antd";
 import * as React from "react";
 import { IAgentFlowSpec, IStatus } from "../../types";
 import { useSelector } from "react-redux";
-import { fetchJSON, getServerUrl, timeAgo, truncateText } from "../../utils";
+import { fetchJSON, getServerUrl, assistantConfigSystemMessage, timeAgo, truncateText } from "../../utils";
 import {
   AgentFlowSpecView,
   BounceLoader,
@@ -43,7 +43,7 @@ const AgentsView = ({}: any) => {
     description: "Sample assistant",
     config: {
       name: "sample_assistant",
-      system_message: " ..",
+      system_message: assistantConfigSystemMessage,
     },
   };
   const [newAgent, setNewAgent] = React.useState<IAgentFlowSpec | null>(

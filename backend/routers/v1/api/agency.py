@@ -12,10 +12,7 @@ from backend.dependencies.dependencies import get_agency_adapter, get_agency_man
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
-    BaseResponse,
-    CreateAgencyData,
-    CreateAgencyResponse,
-    GetAgencyListResponse,
+    AgencyListResponse,
     GetAgencyResponse,
 )
 from backend.repositories.agency_config_storage import AgencyConfigStorage
@@ -35,11 +32,11 @@ agency_router = APIRouter(
 async def get_agency_list(
     current_user: Annotated[User, Depends(get_current_user)],
     agency_adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
-    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-) -> GetAgencyListResponse:
-    agencies = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+) -> AgencyListResponse:
+    agencies = await agency_manager.get_agency_list(current_user.id)
     agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
-    return GetAgencyListResponse(data=agencies_for_api)
+    return AgencyListResponse(data=agencies_for_api)
 
 
 @agency_router.get("/agency")
@@ -71,7 +68,7 @@ async def update_or_create_agency(
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     agent_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
-):
+) -> AgencyListResponse:
     """Create or update an agency and return its id"""
     # Transform the API model to the internal model
     agency_config = agency_adapter.to_model(agency_config)
@@ -110,18 +107,21 @@ async def update_or_create_agency(
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    id_ = await agency_manager.update_or_create_agency(agency_config)
+    await agency_manager.update_or_create_agency(agency_config)
 
-    return CreateAgencyResponse(data=CreateAgencyData(id=id_))
+    agencies = await agency_manager.get_agency_list(current_user.id)
+    agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
+    return AgencyListResponse(message="Agency updated", data=agencies_for_api)
 
 
 @agency_router.delete("/agency")
 async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
+    agency_adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-) -> BaseResponse:
+) -> AgencyListResponse:
     """Delete an agency"""
     db_config = storage.load_by_id(id)
     if not db_config:
@@ -132,4 +132,7 @@ async def delete_agency(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     await agency_manager.delete_agency(id)
-    return BaseResponse(message="Agency deleted")
+
+    agencies = await agency_manager.get_agency_list(current_user.id)
+    agencies_for_api = [agency_adapter.to_api(agency) for agency in agencies]
+    return AgencyListResponse(message="Agency deleted", data=agencies_for_api)

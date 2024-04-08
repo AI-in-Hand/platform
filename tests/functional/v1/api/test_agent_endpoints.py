@@ -37,11 +37,28 @@ def mock_agent_data_db(mock_agent_data_api):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_agent_list(mock_agent_data_api, mock_agent_data_db, client, mock_firestore_client):
+    # define a template agent configuration
+    mock_agent_data_db_template = mock_agent_data_db.copy()
+    mock_agent_data_db_template["id"] = "agent2"
+    mock_agent_data_db_template["user_id"] = None
+
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("agent_configs", "agent2", mock_agent_data_db_template)
     mock_firestore_client.setup_mock_data("skill_configs", "GenerateProposal", {"title": "GenerateProposal"})
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb"})
 
     response = client.get("/v1/api/agent/list")
+    assert response.status_code == 200
+    assert response.json()["data"] == [mock_agent_data_api]
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_get_agent_list_owned_by_user(mock_agent_data_api, mock_agent_data_db, client, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("skill_configs", "GenerateProposal", {"title": "GenerateProposal"})
+    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb"})
+
+    response = client.get("/v1/api/agent/list?owned_by_user=true")
     assert response.status_code == 200
     assert response.json()["data"] == [mock_agent_data_api]
 

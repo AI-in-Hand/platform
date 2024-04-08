@@ -37,7 +37,6 @@ import { fetchJSON, getServerUrl, obscureString, truncateText } from "./utils";
 import {
   IAgentFlowSpec,
   IFlowConfig,
-  IGroupChatFlowSpec,
   IModelConfig,
   ISkill,
   IStatus,
@@ -1408,23 +1407,17 @@ const AgentModal = ({
   setShowAgentModal: (show: boolean) => void;
   handler?: (agent: IAgentFlowSpec | null) => void;
 }) => {
-  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(
-    agent
-  );
-  const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(0);
+  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(agent);
+  const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(null);
 
   const serverUrl = getServerUrl();
-  const listAgentsUrl = `${serverUrl}/agent/list`;
+  const listAgentsUrl = `${serverUrl}/agent/list?owned_by_user=true`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);
+
   useEffect(() => {
     fetchAgents();
   }, []);
-
-  // Required to synchronize localAgent changes between GroupChatFlowSpecView and AgentFlowSpecView
-  useEffect(() => {
-    setLocalAgent(localAgent);
-  }, [localAgent]);
 
   const fetchAgents = () => {
     const onSuccess = (data: any) => {
@@ -1473,7 +1466,7 @@ const AgentModal = ({
         setLocalAgent(agent);
       }}
     >
-      {agent && agent.type !== "groupchat" && (
+      {(
         <div>
           <Select
             className="mt-2 w-full"
@@ -1508,22 +1501,20 @@ export const AgentSelector = ({
         onClick={() => setIsModalVisible(true)}
         className="hover:bg-secondary h-full duration-300  border border-dashed rounded p-2"
       >
-        {flowSpec && (
+        {(
           <div className=" ">
-            {flowSpec.type === "groupchat" ? (
-              <UserGroupIcon className="w-5 h-5 inline-block mr-2" />
-            ) : (
+            {(
               <UsersIcon className="w-5 h-5 inline-block mr-2" />
             )}
-            {flowSpec.config.name}
+            {flowSpec?.config.name || "Select Agent"}
             <div className="mt-2 text-secondary text-sm">
               {" "}
-              {flowSpec.description || flowSpec.config.name}
+              {flowSpec?.description || flowSpec?.config.name || ""}
             </div>
             <div className="mt-2 text-secondary text-sm">
               {" "}
               <span className="text-xs">
-                {(flowSpec.skills && flowSpec.skills?.length) || 0} skills
+                {(flowSpec?.skills && flowSpec?.skills?.length) || 0} skills
               </span>
             </div>
           </div>
@@ -1544,6 +1535,7 @@ export const AgentSelector = ({
     </div>
   );
 };
+
 export const FlowConfigViewer = ({
   flowConfig,
   setFlowConfig,

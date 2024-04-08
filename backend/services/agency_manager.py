@@ -27,6 +27,12 @@ class AgencyManager:
         self.cache_manager = cache_manager
         self.user_secret_manager = user_secret_manager
 
+    async def get_agency_list(self, user_id: str) -> list[AgencyConfig]:
+        """Get the list of agencies for the user. It will return the agencies for the user and the templates."""
+        user_agencies = await asyncio.to_thread(self.agency_config_storage.load_by_user_id, user_id)
+        template_agencies = await asyncio.to_thread(self.agency_config_storage.load_by_user_id, None)
+        return user_agencies + template_agencies
+
     async def get_agency(self, id_: str, session_id: str | None = None) -> Agency | None:
         cache_key = self.get_cache_key(id_, session_id)
         agency = await self.cache_manager.get(cache_key)

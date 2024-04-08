@@ -50,21 +50,11 @@ export interface IGroupChatConfig {
   allow_repeat_speaker: boolean | Array<IAgentConfig>;
 }
 
-export interface IGroupChatFlowSpec {
-  type: "groupchat";
-  config: IAgentConfig;
-  groupchat_config: IGroupChatConfig;
-  id?: string;
-  timestamp?: string;
-  user_id?: string;
-  description?: string;
-}
-
 export interface IFlowConfig {
   name: string;
   description: string;
   sender?: IAgentFlowSpec;
-  receiver?: IAgentFlowSpec | IGroupChatFlowSpec;
+  receiver?: IAgentFlowSpec;
   type: "twoagents" | "groupchat";
   timestamp?: string;
   id?: string;

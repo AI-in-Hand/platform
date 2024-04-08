@@ -4,7 +4,7 @@ from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 
 
 class AgencyConfig(BaseModel):
-    """Agency configuration model, corresponds to the IFlowConfig type in the frontend"""
+    """Agency configuration model"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
     name: str = Field(..., description="Name of the agency")
@@ -44,9 +44,15 @@ class AgencyConfig(BaseModel):
         return v
 
 
-class AgencyConfigForAPI(AgencyConfig):
-    """Agency configuration model for the API"""
+class AgencyConfigForAPI(BaseModel):
+    """Agency configuration model for the API, corresponds to the IFlowConfig type in the frontend"""
 
     id: str = Field(..., description="Unique identifier for the configuration")
     sender: AgentFlowSpecForAPI | None = None
     receiver: AgentFlowSpecForAPI | None = None
+
+    name: str = Field(..., description="Name of the agency")
+    description: str = Field("", description="Description of the agency")
+    user_id: str | None = Field(None, description="The user ID owning this configuration")
+    shared_instructions: str = Field("", description="Agency Manifesto")
+    timestamp: str | None = Field(None, description="Timestamp of the last update")
