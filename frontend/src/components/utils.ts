@@ -335,8 +335,8 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
   const workFlowConfig: IFlowConfig = {
     name: "Default Agent Workflow",
     description: "Default Agent Workflow",
-    sender: userProxyFlowSpec,
-    receiver: assistantFlowSpec,
+    sender: null,
+    receiver: null,
     type: "twoagents",
   };
 
