@@ -47,7 +47,7 @@ class AgencyConfig(BaseModel):
 class AgencyConfigForAPI(BaseModel):
     """Agency configuration model for the API, corresponds to the IFlowConfig type in the frontend"""
 
-    id: str = Field(..., description="Unique identifier for the configuration")
+    id: str | None = Field(None, description="Unique identifier for the configuration")
     sender: AgentFlowSpecForAPI | None = None
     receiver: AgentFlowSpecForAPI | None = None
 
