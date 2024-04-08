@@ -1414,6 +1414,7 @@ const AgentModal = ({
   const listAgentsUrl = `${serverUrl}/agent/list`;
 
   const [flowSpecs, setFlowSpecs] = useState<IAgentFlowSpec[]>([]);
+
   useEffect(() => {
     fetchAgents();
   }, []);
