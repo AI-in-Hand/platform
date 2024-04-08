@@ -114,7 +114,7 @@ const UserVariables = () => {
   }));
 
   return (
-    <div>
+    <div className=" text-primary ">
       <h1>API Keys</h1>
       <section aria-labelledby="secrets-introduction">
         <h2 id="secrets-introduction">Introduction</h2>
@@ -130,11 +130,9 @@ const UserVariables = () => {
       <section aria-labelledby="usage-instructions">
         <h2 id="usage-instructions">Using Secrets in Your Skills</h2>
         <p>To incorporate secrets into your skills, follow the example below (may be simplified in the future):</p>
-        <pre><code>
-          from backend.services.user_secret_manager import UserSecretManager
+        <pre><code>from backend.services.user_secret_manager import UserSecretManager
           user_secret_manager = UserSecretManager(UserSecretStorage())
-          airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")
-        </code></pre>
+          airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code></pre>
         <p>This demonstrates how to retrieve the value of the secret named <code>AIRTABLE_TOKEN</code>.</p>
       </section>
       <Form form={form} onFinish={saveSecrets}>
