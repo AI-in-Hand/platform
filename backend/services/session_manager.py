@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from agency_swarm import Agency, Agent
 from agency_swarm.threads import Thread
@@ -18,13 +18,17 @@ class SessionManager:
         """Create a new session for the given agency and return its id."""
         session_id = self._create_threads(agency)
         session_config = SessionConfig(
-            session_id=session_id,
+            id=session_id,
             user_id=user_id,
             agency_id=agency_id,
-            created_at=int(datetime.utcnow().timestamp()),
+            timestamp=datetime.now(UTC).isoformat(),
         )
         self.session_storage.save(session_config)
         return session_id
+
+    def delete_session(self, session_id: str) -> None:
+        """Delete the session with the given ID."""
+        self.session_storage.delete(session_id)
 
     def _create_threads(self, agency: Agency) -> str:
         """Create new threads for the given agency and return the thread ID of the main thread."""

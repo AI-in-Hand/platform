@@ -21,13 +21,13 @@ def test_post_agency_message_success(client, mock_get_agency, mock_firestore_cli
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
     # Sending a message
-    message_data = {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "message": "Hello, world!"}
+    message_data = {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "content": "Hello, world!"}
 
     response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
-    assert response.json().get("response") == "Hello, world!"
+    assert response.json().get("message") == "Hello, world!"
     mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
 
 
@@ -35,7 +35,7 @@ def test_post_agency_message_success(client, mock_get_agency, mock_firestore_cli
 @pytest.mark.usefixtures("mock_get_current_user", "mock_firestore_client")
 def test_post_agency_message_agency_config_not_found(client, mock_get_agency):
     # Sending a message
-    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
+    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "content": "Hello, world!"}
     response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 404
@@ -50,7 +50,7 @@ def test_post_agency_message_unauthorized(client, mock_get_agency, mock_firestor
     mock_firestore_client.setup_mock_data("agency_configs", "test_agency", agency_data)
 
     # Sending a message
-    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
+    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "content": "Hello, world!"}
     response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 403
@@ -67,7 +67,7 @@ def test_post_agency_message_processing_failure(client, mock_get_agency, mock_fi
     mock_get_agency.return_value.get_completion.side_effect = Exception("Test exception")
 
     # Sending a message
-    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "message": "Hello, world!"}
+    message_data = {"agency_id": "test_agency", "session_id": "test_session_id", "content": "Hello, world!"}
     response = client.post("/v1/api/message", json=message_data)
 
     assert response.status_code == 500
@@ -79,10 +79,10 @@ def test_post_agency_message_processing_failure(client, mock_get_agency, mock_fi
 @pytest.fixture
 def mock_session_storage(mock_firestore_client):
     session_data = {
-        "session_id": "test_session_id",
+        "id": "test_session_id",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
-        "created_at": 1234567890,
+        "timestamp": "2021-01-01T00:00:00Z",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
 
@@ -114,10 +114,10 @@ def test_get_message_list_session_not_found(client):
 @pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage", "mock_openai_client")
 def test_get_message_list_unauthorized(client, mock_firestore_client):
     test_session_config = {
-        "session_id": "test_session_id",
+        "id": "test_session_id",
         "user_id": "other_user_id",
         "agency_id": TEST_AGENCY_ID,
-        "created_at": 1234567890,
+        "timestamp": "2021-01-01T00:00:00Z",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", test_session_config)
 

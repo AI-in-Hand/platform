@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
+from backend.models.session_config import SessionConfig
 from backend.models.skill_config import SkillConfig
 
 
@@ -78,6 +79,22 @@ class CreateAgencyResponse(BaseResponse):
 
 
 # =================================================================================================
+# Session API
+
+
+class SessionListResponse(BaseResponse):
+    data: list[SessionConfig] = Field(..., description="The list of session configurations.")
+
+
+# =================================================================================================
+# User API
+
+
+class UserSecretsResponse(BaseResponse):
+    data: list[str] = Field(..., description="The list of secret names.")
+
+
+# =================================================================================================
 # Version API
 
 
@@ -87,11 +104,3 @@ class VersionData(BaseModel):
 
 class VersionResponse(BaseResponse):
     data: VersionData = Field(..., description="The data to be returned.")
-
-
-# =================================================================================================
-# User API
-
-
-class UserSecretsResponse(BaseResponse):
-    data: list[str] = Field(..., description="The list of secret names.")

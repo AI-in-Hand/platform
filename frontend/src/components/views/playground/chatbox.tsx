@@ -19,6 +19,7 @@ import { examplePrompts, fetchJSON, getServerUrl, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
+import { store } from "../../../store";
 
 const ChatBox = ({
   initMessages,
@@ -32,7 +33,7 @@ const ChatBox = ({
   const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
 
   const serverUrl = getServerUrl();
-  const deleteMsgUrl = `${serverUrl}/message`;
+  const postMsgUrl = `${serverUrl}/message`;
 
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");
@@ -65,7 +66,6 @@ const ChatBox = ({
         text: message.content,
         sender: message.role === "user" ? "user" : "bot",
         metadata: meta,
-        msg_id: message.msg_id,
       };
       return msg;
     });
@@ -238,33 +238,29 @@ const ChatBox = ({
     const userMessage: IChatMessage = {
       text: query,
       sender: "user",
-      msg_id: guid(),
     };
     messageHolder.push(userMessage);
     setMessages(messageHolder);
 
     const messagePayload: IMessage = {
-      role: "user",
-      content: query,
-      msg_id: userMessage.msg_id,
-      root_msg_id: "0",
+      agency_id: workflowConfig.id,
       session_id: session?.id || "",
+      content: query,
     };
 
-    const textUrl = `${serverUrl}/message`;
+    const accessToken = store.getState().user.accessToken;
     const postData = {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`
       },
-      body: JSON.stringify({
-        message: messagePayload,
-        flow_config: workflowConfig,
-      }),
+      body: JSON.stringify(messagePayload),
     };
+
     setLoading(true);
-    fetch(textUrl, postData)
+    fetch(postMsgUrl, postData)
       .then((res) => {
         setLoading(false);
         if (res.status === 200) {
@@ -273,26 +269,20 @@ const ChatBox = ({
               const botMesage: IChatMessage = {
                 text: data.message,
                 sender: "bot",
-                metadata: data.metadata,
-                msg_id: data.msg_id,
+                metadata: data.metadata || null,
               };
-              // if (data.metadata) {
-              //   setMetadata(data.metadata);
-              // }
               messageHolder.push(botMesage);
               messageHolder = Object.assign([], messageHolder);
               setMessages(messageHolder);
             } else {
               console.log("error", data);
-              // setError(data);
-              message.error(data.message);
+              message.error(data.error || "An unknown error occurred");
             }
           });
         } else {
           res.json().then((data) => {
             console.log("error", data);
-            // setError(data);
-            message.error(data.message);
+            message.error(data.error || "An unknown error occurred");
           });
           message.error("Connection error. Ensure server is up and running.");
         }
@@ -328,14 +318,14 @@ const ChatBox = ({
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}
-        <div className="text-xs"> {session?.flow_config.name}</div>
+        <div className="text-xs"> {workflowConfig.name}</div>
       </div>
       <div
         style={{ zIndex: 100 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}
-        <div className="text-xs"> {session?.flow_config.name}</div>
+        <div className="text-xs"> {workflowConfig.name}</div>
       </div>
       <div
         ref={messageBoxInputRef}

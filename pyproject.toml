@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ai-in-hand"
-version = "0.8.1"
+version = "0.9.0"
 description = "A FastAPI app to manage swarm agency configurations."
 authors = [
     "AI in Hand <hello@ainhand.com>"

@@ -60,7 +60,7 @@ async def post_message(
     """Send a message to the User Proxy of the given agency."""
     agency_id = request.agency_id
     user_id = current_user.id
-    user_message = request.message
+    user_message = request.content
     session_id = request.session_id
 
     # check if the current_user has permissions to send a message to the agency
@@ -87,7 +87,7 @@ async def post_message(
         response = await asyncio.to_thread(
             agency.get_completion, message=user_message, yield_messages=False, message_files=None
         )
-        return {"response": response}
+        return {"message": response}
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
         raise HTTPException(status_code=500, detail="Something went wrong") from e

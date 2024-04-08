@@ -25,7 +25,6 @@ const SessionsView = ({}: any) => {
   const serverUrl = getServerUrl();
   const listSessionUrl = `${serverUrl}/session/list`;
   const createSessionUrl = `${serverUrl}/session`;
-  const publishSessionUrl = `${serverUrl}/session/publish`;
   const deleteSessionUrl = `${serverUrl}/session`;
 
   const sessions = useConfigStore((state) => state.sessions);
@@ -97,40 +96,6 @@ const SessionsView = ({}: any) => {
     fetchJSON(listSessionUrl, payLoad, onSuccess, onError);
   };
 
-  const publishSession = () => {
-    setError(null);
-    setLoading(true);
-
-    const body = {
-      session: session,
-      tags: ["published"],
-    };
-    // const fetch;
-    const payLoad = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    };
-
-    const onSuccess = (data: any) => {
-      if (data && data.status) {
-        message.success(data.message);
-        // setSessions(data.data);
-      } else {
-        message.error(data.message);
-      }
-      setLoading(false);
-    };
-    const onError = (err: any) => {
-      setError(err);
-      message.error(err.message);
-      setLoading(false);
-    };
-    fetchJSON(publishSessionUrl, payLoad, onSuccess, onError);
-  };
-
   React.useEffect(() => {
     if (sessions && sessions.length > 0) {
       const firstSession = sessions[0];
@@ -145,22 +110,13 @@ const SessionsView = ({}: any) => {
     setError(null);
     setLoading(true);
 
-    const body = {
-      session: {
-        flow_config: workflowConfig,
-        session_id: null,
-      },
-    };
     // const fetch;
     const payLoad = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
     };
-
-    console.log("createSession", payLoad);
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
@@ -177,7 +133,7 @@ const SessionsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(createSessionUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${createSessionUrl}?agency_id=${workflowConfig.id}`, payLoad, onSuccess, onError);
   };
 
   React.useEffect(() => {
@@ -210,24 +166,6 @@ const SessionsView = ({}: any) => {
           </div>
         ),
         key: "delete",
-      },
-      {
-        label: (
-          <div
-            onClick={() => {
-              console.log("publishing session");
-              publishSession();
-            }}
-          >
-            <GlobeAltIcon
-              role={"button"}
-              title={"Publish"}
-              className="h-4 w-4 mr-1 inline-block"
-            />
-            Publish
-          </div>
-        ),
-        key: "publish",
       },
     ];
 

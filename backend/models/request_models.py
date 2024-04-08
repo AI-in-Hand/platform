@@ -1,14 +1,13 @@
 from pydantic import BaseModel, Field
 
 
-class SessionPostRequest(BaseModel):
-    agency_id: str = Field(..., description="The unique identifier for the agency.")
-
-
 class SessionMessagePostRequest(BaseModel):
+    """Request model for sending a message to the User Proxy of the given agency.
+    Corresponds to the IMessage interface in the frontend."""
+
     agency_id: str = Field(..., description="The unique identifier for the agency.")
     session_id: str = Field(..., description="The identifier for the conversational thread.")
-    message: str = Field(..., description="The message to be sent to the agency.")
+    content: str = Field(..., description="The message to be sent to the agency.")
 
 
 class SkillExecutePostRequest(BaseModel):
