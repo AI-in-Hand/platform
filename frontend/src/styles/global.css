@@ -56,7 +56,6 @@ body {
 }
 /* @import "antd/dist/antd.css"; */
 
-/* define H1 and H2 to be bold */
 h1 {
   @apply font-bold !important;
 }
