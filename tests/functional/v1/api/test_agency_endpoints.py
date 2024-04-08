@@ -206,8 +206,8 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_
     )
     mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_flow_spec.model_dump())
     # Simulate a PUT request to update the agency with agents belonging to a different user
-    expected_data = agency_adapter.to_api(AgencyConfig(**db_agency)).model_dump()
-    response = client.put("/v1/api/agency", json=expected_data)
+    new_data = agency_adapter.to_api(AgencyConfig(**db_agency)).model_dump()
+    response = client.put("/v1/api/agency", json=new_data)
     # Check if the server responds with a 403 Forbidden
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
