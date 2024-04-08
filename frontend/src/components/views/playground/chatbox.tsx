@@ -318,14 +318,14 @@ const ChatBox = ({
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}
-        <div className="text-xs"> {workflowConfig.config.name}</div>
+        <div className="text-xs"> {workflowConfig.name}</div>
       </div>
       <div
         style={{ zIndex: 100 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}
-        <div className="text-xs"> {workflowConfig.config.name}</div>
+        <div className="text-xs"> {workflowConfig.name}</div>
       </div>
       <div
         ref={messageBoxInputRef}
