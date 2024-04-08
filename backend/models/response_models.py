@@ -78,6 +78,26 @@ class CreateAgencyResponse(BaseResponse):
 
 
 # =================================================================================================
+# Session API
+
+
+class CreateSessionData(BaseModel):
+    id: str = Field(..., description="The unique identifier of the session.")
+
+
+class CreateSessionResponse(BaseResponse):
+    data: CreateSessionData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
+# User API
+
+
+class UserSecretsResponse(BaseResponse):
+    data: list[str] = Field(..., description="The list of secret names.")
+
+
+# =================================================================================================
 # Version API
 
 
@@ -87,11 +107,3 @@ class VersionData(BaseModel):
 
 class VersionResponse(BaseResponse):
     data: VersionData = Field(..., description="The data to be returned.")
-
-
-# =================================================================================================
-# User API
-
-
-class UserSecretsResponse(BaseResponse):
-    data: list[str] = Field(..., description="The list of secret names.")

@@ -110,3 +110,9 @@ def test_create_thread(mock_thread_class, session_manager, agent_mock, recipient
 
     assert new_thread == mock_thread_instance, "The created thread should be returned."
     mock_thread_class.assert_called_once_with(agent_mock, recipient_agent_mock)
+
+
+def test_delete_session(session_manager, session_storage_mock):
+    session_manager.delete_session("session_id")
+
+    assert session_storage_mock.delete.call_args_list == [call("session_id")]

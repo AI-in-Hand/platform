@@ -49,7 +49,7 @@ def test_create_session_success(client, mock_firestore_client):
         response = client.post("/v1/api/session", json=request_data.model_dump())
         # Assertions
         assert response.status_code == 200
-        assert response.json() == {"id": "new_session_id"}
+        assert response.json()["data"] == {"id": "new_session_id"}
         mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
         mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")
@@ -73,3 +73,11 @@ def test_create_session_agency_not_found(client):
         # Assertions
         assert response.status_code == 404
         assert response.json() == {"detail": "Agency not found"}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_session_success(client):
+    with patch.object(SessionManager, "delete_session", MagicMock()) as mock_delete_session:
+        response = client.delete("/v1/api/session?id=test_session_id")
+        assert response.status_code == 200
+        mock_delete_session.assert_called_once_with("test_session_id")

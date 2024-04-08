@@ -8,6 +8,8 @@ from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_session_manager
 from backend.models.auth import User
 from backend.models.request_models import SessionPostRequest
+from backend.models.response_models import BaseResponse, CreateSessionData, CreateSessionResponse
+from backend.models.session_config import SessionConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
@@ -25,7 +27,7 @@ session_router = APIRouter(
 async def get_session_list(
     current_user: Annotated[User, Depends(get_current_user)],
     storage: SessionConfigStorage = Depends(SessionConfigStorage),
-):
+) -> list[SessionConfig]:
     """Return a list of all sessions for the current user."""
     session_configs = storage.load_by_user_id(current_user.id)
     return session_configs
@@ -38,7 +40,7 @@ async def create_session(
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     session_manager: SessionManager = Depends(get_session_manager),
-) -> dict:
+) -> CreateSessionResponse:
     """Create a new session for the given agency and return its id."""
     agency_id = request.agency_id
     # check if the current_user has permissions to create a session for the agency
@@ -65,4 +67,16 @@ async def create_session(
     session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
 
     await agency_manager.cache_agency(agency, agency_id, session_id)
-    return {"id": session_id}
+    return CreateSessionResponse(data=CreateSessionData(id=session_id))
+
+
+@session_router.delete("/session")
+async def delete_session(
+    id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session_manager: SessionManager = Depends(get_session_manager),
+) -> BaseResponse:
+    """Delete the session with the given id."""
+    logger.info(f"Deleting session: {id}, user: {current_user.id}")
+    session_manager.delete_session(id)
+    return BaseResponse(message="Session deleted successfully")

@@ -26,6 +26,10 @@ class SessionManager:
         self.session_storage.save(session_config)
         return session_id
 
+    def delete_session(self, session_id: str) -> None:
+        """Delete the session with the given ID."""
+        self.session_storage.delete(session_id)
+
     def _create_threads(self, agency: Agency) -> str:
         """Create new threads for the given agency and return the thread ID of the main thread."""
         client = get_openai_client(self.user_secret_manager)
