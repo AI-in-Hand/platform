@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
-from backend.models.session_config import SessionConfig
+from backend.models.session_config import SessionConfigForAPI
 from backend.models.skill_config import SkillConfig
 
 
@@ -83,7 +83,7 @@ class CreateAgencyResponse(BaseResponse):
 
 
 class SessionListResponse(BaseResponse):
-    data: list[SessionConfig] = Field(..., description="The list of session configurations.")
+    data: list[SessionConfigForAPI] = Field(..., description="The list of session configurations.")
 
 
 # =================================================================================================

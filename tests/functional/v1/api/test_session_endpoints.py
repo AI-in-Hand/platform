@@ -22,10 +22,15 @@ def session_config_data():
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_session_list(session_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
+    mock_firestore_client.setup_mock_data(
+        "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "id": TEST_AGENCY_ID}
+    )
+    expected_session_data = session_config_data.copy()
+    expected_session_data["flow_config"] = mock.ANY
 
     response = client.get("/v1/api/session/list")
     assert response.status_code == 200
-    assert response.json()["data"] == [session_config_data]
+    assert response.json()["data"] == [expected_session_data]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -39,14 +44,20 @@ def test_create_session_success(client, mock_firestore_client):
     ):
         # mock Firestore to pass the security user_id check
         mock_firestore_client.setup_mock_data(
-            "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "user_id": TEST_USER_ID}
+            "agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID, "name": "Test agency", "user_id": TEST_USER_ID}
         )
 
         response = client.post(f"/v1/api/session?agency_id={TEST_AGENCY_ID}")
         # Assertions
         assert response.status_code == 200
         assert response.json()["data"] == [
-            {"agency_id": TEST_AGENCY_ID, "id": "new_session_id", "timestamp": mock.ANY, "user_id": TEST_USER_ID}
+            {
+                "agency_id": TEST_AGENCY_ID,
+                "id": "new_session_id",
+                "timestamp": mock.ANY,
+                "user_id": TEST_USER_ID,
+                "flow_config": mock.ANY,
+            }
         ]
         mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)

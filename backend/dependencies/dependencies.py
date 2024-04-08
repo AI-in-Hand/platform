@@ -6,8 +6,9 @@ from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.repositories.user_secret_storage import UserSecretStorage
-from backend.services.adapters.agency_adapter import AgencyConfigAdapter
+from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
+from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
@@ -62,8 +63,15 @@ def get_agent_adapter(
     return AgentAdapter(skill_config_storage)
 
 
-def get_agency_config_adapter(
+def get_agency_adapter(
     agent_flow_spec_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
     agent_adapter: AgentAdapter = Depends(get_agent_adapter),
-) -> AgencyConfigAdapter:
-    return AgencyConfigAdapter(agent_flow_spec_storage, agent_adapter)
+) -> AgencyAdapter:
+    return AgencyAdapter(agent_flow_spec_storage, agent_adapter)
+
+
+def get_session_adapter(
+    agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
+    agency_adapter: AgencyAdapter = Depends(get_agency_adapter),
+) -> SessionAdapter:
+    return SessionAdapter(agency_config_storage, agency_adapter)

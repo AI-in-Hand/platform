@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_config_adapter, get_agency_manager
+from backend.dependencies.dependencies import get_agency_adapter, get_agency_manager
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
@@ -20,7 +20,7 @@ from backend.models.response_models import (
 )
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from backend.services.adapters.agency_adapter import AgencyConfigAdapter
+from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
 
@@ -34,7 +34,7 @@ agency_router = APIRouter(
 @agency_router.get("/agency/list")
 async def get_agency_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
+    agency_adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyListResponse:
     agencies = storage.load_by_user_id(current_user.id) + storage.load_by_user_id(None)
@@ -45,7 +45,7 @@ async def get_agency_list(
 @agency_router.get("/agency")
 async def get_agency_config(
     current_user: Annotated[User, Depends(get_current_user)],
-    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
+    agency_adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
@@ -67,7 +67,7 @@ async def get_agency_config(
 async def update_or_create_agency(
     agency_config: AgencyConfigForAPI,
     current_user: Annotated[User, Depends(get_current_user)],
-    agency_adapter: Annotated[AgencyConfigAdapter, Depends(get_agency_config_adapter)],
+    agency_adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     agent_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),

@@ -3,7 +3,7 @@ import pytest
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentConfig, AgentFlowSpec, AgentFlowSpecForAPI
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from backend.services.adapters.agency_adapter import AgencyConfigAdapter
+from backend.services.adapters.agency_adapter import AgencyAdapter
 
 
 @pytest.fixture
@@ -12,8 +12,8 @@ def agent_flow_spec_storage() -> AgentFlowSpecStorage:
 
 
 @pytest.fixture
-def agency_adapter(agent_flow_spec_storage, agent_adapter) -> AgencyConfigAdapter:
-    return AgencyConfigAdapter(agent_flow_spec_storage, agent_adapter)
+def agency_adapter(agent_flow_spec_storage, agent_adapter) -> AgencyAdapter:
+    return AgencyAdapter(agent_flow_spec_storage, agent_adapter)
 
 
 def test_to_model(agency_adapter):
