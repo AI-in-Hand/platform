@@ -82,16 +82,8 @@ class CreateAgencyResponse(BaseResponse):
 # Session API
 
 
-class GetSessionListResponse(BaseResponse):
+class SessionListResponse(BaseResponse):
     data: list[SessionConfig] = Field(..., description="The list of session configurations.")
-
-
-class CreateSessionData(BaseModel):
-    id: str = Field(..., description="The unique identifier of the session.")
-
-
-class CreateSessionResponse(BaseResponse):
-    data: CreateSessionData = Field(..., description="The data to be returned.")
 
 
 # =================================================================================================

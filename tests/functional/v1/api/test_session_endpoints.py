@@ -45,7 +45,9 @@ def test_create_session_success(client, mock_firestore_client):
         response = client.post(f"/v1/api/session?agency_id={TEST_AGENCY_ID}")
         # Assertions
         assert response.status_code == 200
-        assert response.json()["data"] == {"id": "new_session_id"}
+        assert response.json()["data"] == [
+            {"agency_id": TEST_AGENCY_ID, "id": "new_session_id", "timestamp": mock.ANY, "user_id": TEST_USER_ID}
+        ]
         mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
         mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")

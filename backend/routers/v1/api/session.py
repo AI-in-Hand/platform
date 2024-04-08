@@ -8,12 +8,7 @@ from fastapi.params import Query
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_session_manager
 from backend.models.auth import User
-from backend.models.response_models import (
-    BaseResponse,
-    CreateSessionData,
-    CreateSessionResponse,
-    GetSessionListResponse,
-)
+from backend.models.response_models import BaseResponse, SessionListResponse
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
@@ -30,11 +25,11 @@ session_router = APIRouter(
 @session_router.get("/session/list")
 async def get_session_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    storage: SessionConfigStorage = Depends(SessionConfigStorage),
-) -> GetSessionListResponse:
+    session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
+) -> SessionListResponse:
     """Return a list of all sessions for the current user."""
-    session_configs = storage.load_by_user_id(current_user.id)
-    return GetSessionListResponse(data=session_configs)
+    session_configs = session_storage.load_by_user_id(current_user.id)
+    return SessionListResponse(data=session_configs)
 
 
 @session_router.post("/session")
@@ -43,9 +38,10 @@ async def create_session(
     agency_id: str = Query(..., description="The unique identifier of the agency"),
     agency_manager: AgencyManager = Depends(get_agency_manager),
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
+    session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     session_manager: SessionManager = Depends(get_session_manager),
-) -> CreateSessionResponse:
-    """Create a new session for the given agency and return its id."""
+) -> SessionListResponse:
+    """Create a new session for the given agency and return a list of all sessions for the current user."""
     # check if the current_user has permissions to create a session for the agency
     agency_config_db = agency_storage.load_by_id(agency_id)
     if not agency_config_db:
@@ -70,7 +66,9 @@ async def create_session(
     session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
 
     await agency_manager.cache_agency(agency, agency_id, session_id)
-    return CreateSessionResponse(data=CreateSessionData(id=session_id))
+
+    session_configs = session_storage.load_by_user_id(current_user.id)
+    return SessionListResponse(data=session_configs)
 
 
 @session_router.delete("/session")
