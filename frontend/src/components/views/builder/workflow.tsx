@@ -291,31 +291,8 @@ const WorkflowView = ({}: any) => {
     );
   };
 
-  const workflowTypes: MenuProps["items"] = [
-    {
-      key: "twoagents",
-      label: (
-        <div>
-          {" "}
-          <UsersIcon className="w-5 h-5 inline-block mr-2" />
-          Two Agents
-        </div>
-      ),
-    },
-    {
-      key: "groupchat",
-      label: (
-        <div>
-          <UserGroupIcon className="w-5 h-5 inline-block mr-2" />
-          Group Chat
-        </div>
-      ),
-    },
-  ];
-
-  const workflowTypesOnClick: MenuProps["onClick"] = () => {
+  const addWorkflowOnClick: MenuProps["onClick"] = () => {
     const newConfig = sampleWorkflowConfig();
-
     setNewWorkflow(newConfig);
     setShowNewWorkflowModal(true);
   };
@@ -358,7 +335,7 @@ const WorkflowView = ({}: any) => {
                   // add agent to flowSpec?.groupchat_config.agents
                 }}
               >
-                <LaunchButton className=" text-sm p-2 px-3" onClick={workflowTypesOnClick}>
+                <LaunchButton className=" text-sm p-2 px-3" onClick={addWorkflowOnClick}>
                   {" "}
                   <PlusIcon className="w-5 h-5 inline-block mr-1" />
                   New Workflow
