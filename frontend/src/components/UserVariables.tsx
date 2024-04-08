@@ -115,69 +115,82 @@ const UserVariables = () => {
 
   return (
     <div className=" text-primary ">
-      <h1>API Keys</h1>
-      <section aria-labelledby="secrets-introduction">
-        <h2 id="secrets-introduction">Introduction</h2>
+      <section aria-labelledby="note-important">
+        <h2 id="note-important">Important Note</h2>
         <p>
-          These secret variables can be used in your skills to securely access sensitive information, such as API keys.
-          They are encrypted at rest and only decrypted when used in a skill.
-        </p>
-        <p>
-          Note: Once you save a secret, you will not be able to view it again. Should you forget its value, you can replace it with a new one.
+          Set the <code>OPENAI_API_KEY</code> variable to use agencies (workflows).
         </p>
       </section>
 
-      <section aria-labelledby="usage-instructions">
-        <h2 id="usage-instructions">Using Secrets in Your Skills</h2>
-        <p>To incorporate secrets into your skills, follow the example below (may be simplified in the future):</p>
-        <pre>
-          <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
-          <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
-          <code>airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
-        </pre>
-        <p>This demonstrates how to retrieve the value of the secret named <code>AIRTABLE_TOKEN</code>.</p>
-      </section>
-      <Form form={form} onFinish={saveSecrets}>
-        <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
-        <Form.List name="newSecrets">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name, ...restField }) => (
-                <div key={key} style={{ display: 'flex', marginBottom: 8 }}>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'key']}
-                    style={{ marginRight: 8, width: '50%' }}
-                  >
-                    <Input placeholder="Name" />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, 'value']}
-                    style={{ width: '50%' }}
-                  >
-                    <Input.Password placeholder="Value" autoComplete="new-password" />
-                  </Form.Item>
+      <details>
+        <summary><strong>Understanding Secrets</strong> (click to expand or hide)</summary>
+        <section aria-labelledby="secrets-introduction">
+          <h2 id="secrets-introduction">Introduction</h2>
+          <p>
+            Use secret variables to securely access sensitive data like API keys in your skills. They're encrypted at rest and decrypted only during use.
+          </p>
+          <p>
+            Note: After saving a secret, you can't view its value again. To change a secret, simply update it with a new value.
+          </p>
+        </section>
 
-                  <Button onClick={() => remove(name)}>
-                  <MinusIcon className="w-5 h-5 inline-block mr-1" />
+        <section aria-labelledby="usage-instructions">
+          <h2 id="usage-instructions">Using Secrets in Skills</h2>
+          <p>Example usage for a secret named <code>AIRTABLE_TOKEN</code>:</p>
+          <pre>
+            <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
+            <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
+            <code>airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
+          </pre>
+        </section>
+      </details>
+
+      <section aria-labelledby="secrets-list">
+        <h2 id="secrets-list">Your Secrets</h2>
+        <p>Here's a list of your secrets. Add new or update existing ones as needed.</p>
+
+        <Form form={form} onFinish={saveSecrets}>
+          <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
+          <Form.List name="newSecrets">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div key={key} style={{ display: 'flex', marginBottom: 8 }}>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'key']}
+                      style={{ marginRight: 8, width: '50%' }}
+                    >
+                      <Input placeholder="Name" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'value']}
+                      style={{ width: '50%' }}
+                    >
+                      <Input.Password placeholder="Value" autoComplete="new-password" />
+                    </Form.Item>
+
+                    <Button onClick={() => remove(name)}>
+                    <MinusIcon className="w-5 h-5 inline-block mr-1" />
+                    </Button>
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block>
+                    <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Secret
                   </Button>
-                </div>
-              ))}
-              <Form.Item>
-                <Button type="dashed" onClick={() => add()} block>
-                  <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Secret
-                </Button>
-              </Form.Item>
-            </>
-          )}
-        </Form.List>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Save
-          </Button>
-        </Form.Item>
-      </Form>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Save
+            </Button>
+          </Form.Item>
+        </Form>
+      </section>
     </div>
   );
 };
