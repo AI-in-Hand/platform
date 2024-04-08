@@ -15,4 +15,4 @@ class SessionConfig(BaseModel):
 class SessionConfigForAPI(SessionConfig):
     """Session configuration model for the API. Corresponds to the IChatSession type in the frontend"""
 
-    flow_config: AgencyConfigForAPI = Field(..., description="The flow configuration for the session")
+    flow_config: AgencyConfigForAPI = Field(..., description="The flow (agency) configuration for the session")
