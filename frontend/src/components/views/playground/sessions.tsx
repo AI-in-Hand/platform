@@ -110,22 +110,13 @@ const SessionsView = ({}: any) => {
     setError(null);
     setLoading(true);
 
-    const body = {
-      session: {
-        flow_config: workflowConfig,
-        session_id: null,
-      },
-    };
     // const fetch;
     const payLoad = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
     };
-
-    console.log("createSession", payLoad);
 
     const onSuccess = (data: any) => {
       if (data && data.status) {
@@ -142,7 +133,7 @@ const SessionsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(createSessionUrl, payLoad, onSuccess, onError);
+    fetchJSON(`${createSessionUrl}?agency_id=${workflowConfig.id}`, payLoad, onSuccess, onError);
   };
 
   React.useEffect(() => {

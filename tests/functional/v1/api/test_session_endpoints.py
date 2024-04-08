@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.models.request_models import SessionPostRequest
 from backend.services.agency_manager import AgencyManager
 from backend.services.session_manager import SessionManager
 from tests.testing_utils import TEST_USER_ID
@@ -26,7 +25,7 @@ def test_get_session_list(session_config_data, client, mock_firestore_client):
 
     response = client.get("/v1/api/session/list")
     assert response.status_code == 200
-    assert response.json() == [session_config_data]
+    assert response.json()["data"] == [session_config_data]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -43,10 +42,7 @@ def test_create_session_success(client, mock_firestore_client):
             "agency_configs", TEST_AGENCY_ID, {"name": "Test agency", "user_id": TEST_USER_ID}
         )
 
-        # Create request data
-        request_data = SessionPostRequest(agency_id=TEST_AGENCY_ID)
-        # Create a test client
-        response = client.post("/v1/api/session", json=request_data.model_dump())
+        response = client.post(f"/v1/api/session?agency_id={TEST_AGENCY_ID}")
         # Assertions
         assert response.status_code == 200
         assert response.json()["data"] == {"id": "new_session_id"}
@@ -66,11 +62,7 @@ def test_create_session_success(client, mock_firestore_client):
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_agency_not_found(client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
-        # Create request data
-        request_data = SessionPostRequest(agency_id=TEST_AGENCY_ID)
-        # Create a test client
-        response = client.post("/v1/api/session", json=request_data.model_dump())
-        # Assertions
+        response = client.post("/v1/api/session?agency_id=test_session_id")
         assert response.status_code == 404
         assert response.json() == {"detail": "Agency not found"}
 
