@@ -1453,7 +1453,6 @@ const AgentModal = ({
       open={showAgentModal}
       onOk={() => {
         if (handler) {
-          handleAgentChange(selectedFlowSpec);
           handler(localAgent);
         }
         setShowAgentModal(false);
@@ -1535,6 +1534,7 @@ export const AgentSelector = ({
     </div>
   );
 };
+
 export const FlowConfigViewer = ({
   flowConfig,
   setFlowConfig,
