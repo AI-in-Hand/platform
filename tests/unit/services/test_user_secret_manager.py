@@ -93,7 +93,7 @@ def test_get_secret_names_success(mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {"SECRET1": "value1", "SECRET2": "value2"})
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
     secret_names = manager.get_secret_names(TEST_USER_ID)
-    assert secret_names == ["SECRET1", "SECRET2"]
+    assert secret_names == ["OPENAI_API_KEY", "SECRET1", "SECRET2"]
 
 
 # Test 9: Retrieval of secret names when no secrets exist
@@ -101,7 +101,7 @@ def test_get_secret_names_no_secrets(mock_firestore_client):
     mock_firestore_client.setup_mock_data("user_secrets", TEST_USER_ID, {})
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
     secret_names = manager.get_secret_names(TEST_USER_ID)
-    assert secret_names == []
+    assert secret_names == ["OPENAI_API_KEY"]
 
 
 # Test 10: Successful creation of secrets

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Table } from 'antd';
 import { fetchJSON, getServerUrl } from './utils';
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {
   const [form] = Form.useForm();
@@ -77,12 +78,12 @@ const UserVariables = () => {
 
   const columns = [
     {
-      title: 'Secret Name',
+      title: 'Name',
       dataIndex: 'key',
       key: 'key',
     },
     {
-      title: 'Secret Value',
+      title: 'Value',
       dataIndex: 'value',
       key: 'value',
       render: (_, record: any) => (
@@ -92,7 +93,7 @@ const UserVariables = () => {
       ),
     },
     {
-      title: 'Action',
+      title: '',
       key: 'action',
       render: (_, record: any) => (
         <Button onClick={() => {
@@ -101,7 +102,7 @@ const UserVariables = () => {
           setSecrets(newSecrets);
           form.setFieldsValue({ [record.key]: undefined });
         }}>
-          Remove
+          <MinusIcon className="w-5 h-5 inline-block mr-1" />
         </Button>
       ),
     },
@@ -113,7 +114,29 @@ const UserVariables = () => {
   }));
 
   return (
-    <div>
+    <div className=" text-primary ">
+      <h1>API Keys</h1>
+      <section aria-labelledby="secrets-introduction">
+        <h2 id="secrets-introduction">Introduction</h2>
+        <p>
+          These secret variables can be used in your skills to securely access sensitive information, such as API keys.
+          They are encrypted at rest and only decrypted when used in a skill.
+        </p>
+        <p>
+          Note: Once you save a secret, you will not be able to view it again. Should you forget its value, you can replace it with a new one.
+        </p>
+      </section>
+
+      <section aria-labelledby="usage-instructions">
+        <h2 id="usage-instructions">Using Secrets in Your Skills</h2>
+        <p>To incorporate secrets into your skills, follow the example below (may be simplified in the future):</p>
+        <pre>
+          <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
+          <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
+          <code>airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
+        </pre>
+        <p>This demonstrates how to retrieve the value of the secret named <code>AIRTABLE_TOKEN</code>.</p>
+      </section>
       <Form form={form} onFinish={saveSecrets}>
         <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
         <Form.List name="newSecrets">
@@ -126,21 +149,24 @@ const UserVariables = () => {
                     name={[name, 'key']}
                     style={{ marginRight: 8, width: '50%' }}
                   >
-                    <Input placeholder="Secret Name" />
+                    <Input placeholder="Name" />
                   </Form.Item>
                   <Form.Item
                     {...restField}
                     name={[name, 'value']}
                     style={{ width: '50%' }}
                   >
-                    <Input.Password placeholder="Secret Value" autoComplete="new-password" />
+                    <Input.Password placeholder="Value" autoComplete="new-password" />
                   </Form.Item>
-                  <Button onClick={() => remove(name)}>Remove</Button>
+
+                  <Button onClick={() => remove(name)}>
+                  <MinusIcon className="w-5 h-5 inline-block mr-1" />
+                  </Button>
                 </div>
               ))}
               <Form.Item>
                 <Button type="dashed" onClick={() => add()} block>
-                  Add Secret
+                  <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Secret
                 </Button>
               </Form.Item>
             </>

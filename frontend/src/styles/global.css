@@ -56,6 +56,18 @@ body {
 }
 /* @import "antd/dist/antd.css"; */
 
+h1 {
+  @apply font-bold !important;
+}
+h2 {
+  @apply font-bold !important;
+}
+
+/* Preserve newlines and wrap long lines */
+pre {
+  white-space: pre-wrap;
+}
+
 .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   @apply text-accent !important;
   font-weight: 500;
@@ -408,6 +420,7 @@ div#gatsby-focus-wrapper {
 
 .ant-table-tbody > tr > td {
   @apply bg-secondary text-secondary;
+  vertical-align: baseline;
 }
 
 .ant-table-wrapper .ant-table-tbody .ant-table-row:hover > td {
