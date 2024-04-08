@@ -102,7 +102,7 @@ const UserVariables = () => {
           setSecrets(newSecrets);
           form.setFieldsValue({ [record.key]: undefined });
         }}>
-          {MinusIcon}
+          <MinusIcon className="w-5 h-5 inline-block mr-1" />
         </Button>
       ),
     },
@@ -123,16 +123,18 @@ const UserVariables = () => {
           They are encrypted at rest and only decrypted when used in a skill.
         </p>
         <p>
-          Note: We do not reveal the value of a secret once it is saved. Should you forget its value, you can replace it with a new one.
+          Note: Once you save a secret, you will not be able to view it again. Should you forget its value, you can replace it with a new one.
         </p>
       </section>
 
       <section aria-labelledby="usage-instructions">
         <h2 id="usage-instructions">Using Secrets in Your Skills</h2>
         <p>To incorporate secrets into your skills, follow the example below (may be simplified in the future):</p>
-        <pre><code>from backend.services.user_secret_manager import UserSecretManager
-          user_secret_manager = UserSecretManager(UserSecretStorage())
-          airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code></pre>
+        <pre>
+          <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
+          <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
+          <code>airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
+        </pre>
         <p>This demonstrates how to retrieve the value of the secret named <code>AIRTABLE_TOKEN</code>.</p>
       </section>
       <Form form={form} onFinish={saveSecrets}>
@@ -157,12 +159,14 @@ const UserVariables = () => {
                     <Input.Password placeholder="Value" autoComplete="new-password" />
                   </Form.Item>
 
-                  <Button onClick={() => remove(name)}>{MinusIcon}</Button>
+                  <Button onClick={() => remove(name)}>
+                  <MinusIcon className="w-5 h-5 inline-block mr-1" />
+                  </Button>
                 </div>
               ))}
               <Form.Item>
                 <Button type="dashed" onClick={() => add()} block>
-                  {PlusIcon} Add Secret
+                  <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Secret
                 </Button>
               </Form.Item>
             </>
