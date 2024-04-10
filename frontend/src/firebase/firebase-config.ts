@@ -1,6 +1,7 @@
 import { FirebaseOptions, initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Replace the following with your app's Firebase project configuration
 const config: FirebaseOptions = {
   apiKey: "AIzaSyCWIQCLyRF5FD5uQdE4M9l-EDN-NnP09Yg",
   authDomain: "ai-in-hand.firebaseapp.com",

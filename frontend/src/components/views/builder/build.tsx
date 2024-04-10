@@ -9,7 +9,7 @@ import {
   UserGroupIcon,
   WrenchIcon,
 } from "@heroicons/react/24/outline";
-import UserVariables from '../../UserVariables';
+import UserVariables from '../../userVariables';
 
 const BuildView = () => {
   return (

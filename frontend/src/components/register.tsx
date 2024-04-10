@@ -13,7 +13,7 @@ const LogInVerify = () => {
     function handleLogin(email: string) {
         signInWithEmailLink(auth, email, location.href)
           .then((res) => {
-            const expiresIn = Date.now() + (60 * 60 - 1) * 1000; // 1 hour from now, minus 1 second
+            const expiresIn = Date.now() + (55 * 60) * 1000; // 55 minutes from now
             dispatch(
               SignIn({
                 token: res.user.accessToken,

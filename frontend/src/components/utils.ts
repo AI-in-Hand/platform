@@ -66,33 +66,37 @@ export function getLocalStorage(name: string, stringify: boolean = true): any {
 
 export function checkAndRefreshToken() {
   return new Promise((resolve) => {
-    const expiresIn = store.getState().user.expiresIn;
+    const userState = store.getState().user;
 
-    if (Date.now() >= expiresIn) {
-      // FIXME: auth is not defined; need to wait for it to become available?
-      const user = auth.currentUser;
-      if (user) {
-        user.getIdToken(true).then((newToken) => {
-          const newExpiresIn = Date.now() + (59 * 60) * 1000; // 1 hour from now, minus 1 minute
-          store.dispatch(
-            RefreshToken({
-              token: newToken,
-              expiresIn: newExpiresIn,
-            })
-          );
-          resolve(true);
-        }).catch(error => {
-          console.error("Error refreshing token:", error);
-          message.error("Error refreshing token. Please login again.");
+    if (userState && userState.expiresIn) {
+      if (Date.now() >= userState.expiresIn) {
+        // FIXME: sometimes auth is not defined
+        const user = auth.currentUser;
+        if (user) {
+          user.getIdToken(true).then((newToken) => {
+            const newExpiresIn = Date.now() + (55 * 60) * 1000; // 55 minutes from now
+            store.dispatch(
+              RefreshToken({
+                token: newToken,
+                expiresIn: newExpiresIn,
+              })
+            );
+            resolve(true);
+          }).catch(error => {
+            console.error("Error refreshing token:", error);
+            message.error("Error refreshing token. Please login again.");
+            resolve(false);
+          });
+        } else {
+          console.error("User not logged in.");
           resolve(false);
-        });
+        }
       } else {
-        console.error("No user found. Please login again.");
-        // console.log("Debug: Auth object:", auth);
-        resolve(false);
+        resolve(true); // Token is still valid
       }
     } else {
-      resolve(true); // Token is still valid
+      console.error("User state not populated yet.");
+      resolve(false);
     }
   });
 }
@@ -105,10 +109,9 @@ export function fetchJSON(
 ) {
   checkAndRefreshToken().then((canProceed) => {
     if (!canProceed) {
-      console.error("Cannot proceed, token invalid or not refreshed.");
       onError({
         status: false,
-        message: "Authentication error: please login again.",
+        message: "Refresh the page or login again.",
       });
       return;
     }
