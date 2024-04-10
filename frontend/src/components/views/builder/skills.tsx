@@ -129,7 +129,9 @@ const SkillsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(saveSkillsUrl, payLoad, onSuccess, onError);
+    // TODO: enable saving skills (currently disabled)
+    message.info("Saving skills is disabled for now. Coming soon!");
+    // fetchJSON(saveSkillsUrl, payLoad, onSuccess, onError);
   };
 
   React.useEffect(() => {
@@ -146,7 +148,7 @@ const SkillsView = ({}: any) => {
           {" "}
           <Card
             className="h-full p-2 cursor-pointer group"
-            title={truncateText(skill.title, 25)}
+            title={truncateText(skill.title + (!skill.user_id ? " (public)" : ""), 35)}
             onClick={() => {
               setSelectedSkill(skill);
               setShowSkillModal(true);
@@ -348,7 +350,8 @@ const SkillsView = ({}: any) => {
             <LaunchButton
               className="text-sm p-2 px-3"
               onClick={() => {
-                setShowNewSkillModal(true);
+                // setShowNewSkillModal(true);
+                message.info("Coming soon! In the meanwhile, try using existing skills.");
               }}
             >
               {" "}

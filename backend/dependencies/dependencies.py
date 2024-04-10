@@ -36,8 +36,9 @@ def get_user_secret_manager(
 def get_agent_manager(
     storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
+    skill_storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> AgentManager:
-    return AgentManager(storage, user_secret_manager)
+    return AgentManager(storage, user_secret_manager, skill_storage)
 
 
 def get_agency_manager(

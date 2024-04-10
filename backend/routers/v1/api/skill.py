@@ -68,7 +68,9 @@ async def create_skill_version(
     config: SkillConfig = Body(...),
     storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> CreateSkillVersionResponse:
-    """Create a new version of the skill configuration."""
+    """Create a new version of the skill configuration.
+    NOTE: currently this endpoint is not fully supported.
+    """
     skill_config_db = None
 
     # support template configs:
@@ -95,6 +97,7 @@ async def create_skill_version(
         config.description = generate_skill_description(config.content)
 
     skill_id, skill_version = storage.save(config)
+    # TODO: return the list of skills
     return CreateSkillVersionResponse(data=CreateSkillVersionData(id=skill_id, version=skill_version))
 
 
@@ -115,6 +118,7 @@ async def delete_skill(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     storage.delete(id)
+    # TODO: return the list of skills
     return BaseResponse(message="Skill configuration deleted")
 
 
@@ -124,7 +128,8 @@ async def approve_skill(
     id: str = Query(..., description="The unique identifier of the skill"),
     storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ):
-    """Approve a skill configuration."""
+    """Approve a skill configuration. This endpoint is only accessible to superusers (currently not accessible).
+    NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
     config = storage.load_by_id(id)
     if not config:
         logger.warning(f"Skill not found: {id}, user: {current_superuser.id}")

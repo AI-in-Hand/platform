@@ -10,6 +10,7 @@ from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.auth import User
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.oai_client import get_openai_client
 from backend.services.user_secret_manager import UserSecretManager
 from backend.settings import settings
@@ -18,9 +19,12 @@ logger = logging.getLogger(__name__)
 
 
 class AgentManager:
-    def __init__(self, storage: AgentFlowSpecStorage, user_secret_manager: UserSecretManager) -> None:
+    def __init__(
+        self, storage: AgentFlowSpecStorage, user_secret_manager: UserSecretManager, skill_storage: SkillConfigStorage
+    ) -> None:
         self.user_secret_manager = user_secret_manager
         self.storage = storage
+        self.skill_storage = skill_storage
 
     async def handle_agent_creation_or_update(self, config: AgentFlowSpec, current_user: User) -> str:
         # Support template configs
@@ -99,10 +103,18 @@ class AgentManager:
             logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user.id}")
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
-    @staticmethod
-    def _validate_skills(skills: list[str]) -> None:
+    def _validate_skills(self, skills: list[str]) -> None:
+        # check if all skills are supported
         if unsupported_skills := set(skills) - set(SKILL_MAPPING.keys()):
             logger.warning(f"Some skills are not supported: {unsupported_skills}")
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not supported: {unsupported_skills}"
+            )
+        # check if all skills are approved
+        skills_db = self.skill_storage.load_by_titles(skills)
+        unapproved_skills = set(skills) - {skill.title for skill in skills_db}
+        if unapproved_skills:
+            logger.warning(f"Some skills are not approved: {unapproved_skills}")
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not approved: {unapproved_skills}"
             )
