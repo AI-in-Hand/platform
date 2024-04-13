@@ -1,9 +1,9 @@
-import { IStatus } from "./types";
-import { fetchJSON, getServerUrl } from "./api_utils";
 import { message } from "antd";
+import { fetchJSON, getServerUrl } from "./api_utils";
 import { auth } from '../firebase/firebase-config';
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
+import { IChatSession, IMessage, IStatus } from "../types";
 
 export const getServerUrl = () => {
   return process.env.GATSBY_API_URL || "/v1/api";
@@ -101,9 +101,9 @@ export function fetchJSON(
   });
 }
 
-export const fetchMessages = async (sessionId: string, after: string | null = null) => {
+export const fetchMessages = async (session: IChatSession | null, after: string | null = null): Promise<IMessage[]> => {
   const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${sessionId}${after ? `&after=${after}` : ""}`;
+  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}${after ? `&after=${after}` : ""}`;
 
   const payload = {
     method: "GET",

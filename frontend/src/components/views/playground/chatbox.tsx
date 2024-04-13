@@ -15,7 +15,8 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { examplePrompts, fetchJSON, getServerUrl, guid } from "../../utils";
+import { fetchJSON, fetchMessages, getServerUrl } from "../../api_utils";
+import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
