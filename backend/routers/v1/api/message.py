@@ -48,7 +48,15 @@ async def get_message_list(
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client(user_secret_manager)
     messages = client.beta.threads.messages.list(thread_id=session_id, after=after)
-    return messages
+    messages_output = [
+        {
+            "id": message.id,
+            "content": message.content[0].text.value if message.content and message.content[0].text else "[No content]",
+            "role": message.role,
+        }
+        for message in messages
+    ]
+    return messages_output
 
 
 @message_router.post("/message")

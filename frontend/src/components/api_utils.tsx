@@ -102,12 +102,11 @@ export function fetchJSON(
 
 export const fetchMessages = (
   session: IChatSession | null,
-  after: string | null = null,
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) => {
   const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}${after ? `&after=${after}` : ""}`;
+  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
   const payload = {
     method: "GET",
     headers: {

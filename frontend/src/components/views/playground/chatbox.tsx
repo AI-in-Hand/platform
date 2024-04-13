@@ -43,7 +43,6 @@ const ChatBox = ({
     message: "All good",
   });
   const [lastMessageId, setLastMessageId] = React.useState<string | null>(null);
-  const [pollingInterval, setPollingInterval] = React.useState<NodeJS.Timeout | null>(null);
 
   const messages = useConfigStore((state) => state.messages);
   const setMessages = useConfigStore((state) => state.setMessages);
@@ -67,7 +66,7 @@ const ChatBox = ({
       }
       const msg: IChatMessage = {
         text: message.content,
-        sender: message.role === "user" ? "user" : "bot",
+        sender: message.sender === "user" ? "user" : "assistant",
         metadata: meta,
       };
       return msg;
@@ -258,8 +257,16 @@ const ChatBox = ({
     fetchJSON(postMsgUrl, postData, (data) => {
       setLoading(false);
       if (data && data.status) {
-        setLastMessageId(data.id);
-        startPolling();
+        fetchMessages(
+          session,
+          (data) => {
+            const newMessages = data;
+            if (newMessages.length > 0) {
+              setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+              setLastMessageId(newMessages[newMessages.length - 1].id);
+            }
+          },
+        );
       } else {
         console.log("error", data);
         message.error(data.error || "An unknown error occurred");
@@ -286,49 +293,6 @@ const ChatBox = ({
       }
     }
   };
-
-  const startPolling = () => {
-    if (!pollingInterval) {
-      const interval = setInterval(pollMessages, 1000);
-      setPollingInterval(interval);
-    }
-  };
-
-  const stopPolling = () => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
-    }
-  };
-
-  const pollMessages = () => {
-    fetchMessages(
-      session,
-      lastMessageId,
-      (data) => {
-        const newMessages = data;
-        if (newMessages.length > 0) {
-          setMessages((prevMessages) => [...prevMessages, ...newMessages]);
-          setLastMessageId(newMessages[newMessages.length - 1].id);
-          if (newMessages.some((message) => message.role === "bot")) {
-            stopPolling();
-          }
-        }
-      },
-      (error) => {
-        console.error("Error polling messages:", error);
-        stopPolling();
-      }
-    );
-  };
-
-  React.useEffect(() => {
-    const timeout = setTimeout(stopPolling, 5 * 60 * 1000); // 5 minutes
-    return () => {
-      clearTimeout(timeout);
-      stopPolling();
-    };
-  }, []);
 
   return (
     <div className="text-primary relative h-full rounded">

@@ -39,7 +39,6 @@ const RAView = () => {
       setMessages(null);
       fetchMessages(
         session,
-        null,
         (data) => {
           setMessages(data);
           setLoading(false);
