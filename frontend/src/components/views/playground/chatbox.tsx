@@ -235,7 +235,14 @@ const ChatBox = ({
 
   const getCompletion = (query: string) => {
     setError(null);
-    setLoading(true);
+    let messageHolder = Object.assign([], messages);
+
+    const userMessage: IChatMessage = {
+      text: query,
+      sender: "user",
+    };
+    messageHolder.push(userMessage);
+    setMessages(messageHolder);
 
     const messagePayload: IMessage = {
       agency_id: workflowConfig.id,
@@ -254,19 +261,18 @@ const ChatBox = ({
       body: JSON.stringify(messagePayload),
     };
 
+    setLoading(true);
+
     fetchJSON(postMsgUrl, postData, (data) => {
       setLoading(false);
       if (data && data.status) {
-        fetchMessages(
-          session,
-          (data) => {
-            const newMessages = data;
-            if (newMessages.length > 0) {
-              setMessages((prevMessages) => [...prevMessages, ...newMessages]);
-              setLastMessageId(newMessages[newMessages.length - 1].id);
-            }
-          },
-        );
+        const botMessage: IChatMessage = {
+            text: data.content,
+            sender: "assistant",
+            metadata: data.metadata || null,
+          };
+          messageHolder.push(botMessage);
+          setMessages(messageHolder);
       } else {
         console.log("error", data);
         message.error(data.error || "An unknown error occurred");
