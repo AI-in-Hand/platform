@@ -90,7 +90,10 @@ def mock_session_storage(mock_firestore_client):
 @pytest.fixture
 def mock_openai_client():
     with patch("backend.routers.v1.api.message.get_openai_client") as mock:
-        mock.return_value.beta.threads.messages.list.return_value = ["Message 1", "Message 2"]
+        mock.return_value.beta.threads.messages.list.return_value = [
+            MagicMock(id="1", role="user", content=[MagicMock(text=MagicMock(value="Hello"))]),
+            MagicMock(id="2", role="assistant", content=[MagicMock(text=MagicMock(value="Hi"))]),
+        ]
         yield mock
 
 
@@ -100,6 +103,8 @@ def test_get_message_list_success(client):
     response = client.get("/v1/api/message/list?session_id=test_session_id")
     assert response.status_code == 200
     assert len(response.json()) == 2
+    assert response.json()[0] == {"msg_id": "1", "text": "Hello", "sender": "user"}
+    assert response.json()[1] == {"msg_id": "2", "text": "Hi", "sender": "assistant"}
 
 
 # Session not found
