@@ -79,6 +79,18 @@ class SessionListResponse(BaseResponse):
 
 
 # =================================================================================================
+# Message API
+
+
+class MessagePostData(BaseModel):
+    content: str = Field(..., description="The content of the message.")
+
+
+class MessagePostResponse(BaseResponse):
+    data: MessagePostData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
 # User API
 
 

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class SessionMessagePostRequest(BaseModel):
+class MessagePostRequest(BaseModel):
     """Request model for sending a message to the User Proxy of the given agency.
     Corresponds to the IMessage interface in the frontend."""
 

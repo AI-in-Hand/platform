@@ -267,7 +267,7 @@ const ChatBox = ({
           res.json().then((data) => {
             if (data && data.status) {
               const botMesage: IChatMessage = {
-                text: data.message,
+                text: data.content,
                 sender: "bot",
                 metadata: data.metadata || null,
               };
