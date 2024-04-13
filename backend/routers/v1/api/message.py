@@ -50,9 +50,9 @@ async def get_message_list(
     messages = client.beta.threads.messages.list(thread_id=session_id, after=after)
     messages_output = [
         {
-            "id": message.id,
-            "content": message.content[0].text.value if message.content and message.content[0].text else "[No content]",
-            "role": message.role,
+            "msg_id": message.id,
+            "text": message.content[0].text.value if message.content and message.content[0].text else "[No content]",
+            "sender": message.role,
         }
         for message in messages
     ]
