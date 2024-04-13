@@ -114,19 +114,7 @@ export const fetchMessages = (
       "Content-Type": "application/json",
     },
   };
-
-  fetchJSON(fetchMessagesUrl, payload,
-    (data) => {
-      if (data && data.status) {
-        onSuccess(data.data);
-      } else {
-        onError({ status: false, message: data.message });
-      }
-    },
-    (error) => {
-      onError(error);
-    }
-  );
+  fetchJSON(fetchMessagesUrl, payload, onSuccess, onError);
 };
 
 export const fetchVersion = () => {

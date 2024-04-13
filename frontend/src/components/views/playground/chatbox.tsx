@@ -236,14 +236,7 @@ const ChatBox = ({
 
   const getCompletion = (query: string) => {
     setError(null);
-    let messageHolder = Object.assign([], messages);
-
-    const userMessage: IChatMessage = {
-      text: query,
-      sender: "user",
-    };
-    messageHolder.push(userMessage);
-    setMessages(messageHolder);
+    setLoading(true);
 
     const messagePayload: IMessage = {
       agency_id: workflowConfig.id,
@@ -257,35 +250,24 @@ const ChatBox = ({
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(messagePayload),
     };
 
-    setLoading(true);
-
-    fetchJSON(postMsgUrl, postData)
-      .then((data) => {
-        setLoading(false);
-        if (data && data.status) {
-          const botMessage: IChatMessage = {
-            text: data.content,
-            sender: "bot",
-            metadata: data.metadata || null,
-          };
-          messageHolder.push(botMessage);
-          setMessages(messageHolder);
-          setLastMessageId(data.id);
-          startPolling();
-        } else {
-          console.log("error", data);
-          message.error(data.error || "An unknown error occurred");
-        }
-      })
-      .catch(() => {
-        setLoading(false);
-        message.error("Connection error. Ensure server is up and running.");
-      });
+    fetchJSON(postMsgUrl, postData, (data) => {
+      setLoading(false);
+      if (data && data.status) {
+        setLastMessageId(data.id);
+        startPolling();
+      } else {
+        console.log("error", data);
+        message.error(data.error || "An unknown error occurred");
+      }
+    }, () => {
+      setLoading(false);
+      message.error("Connection error. Ensure server is up and running.");
+    });
   };
 
   const handleTextChange = (
