@@ -100,31 +100,6 @@ export function fetchJSON(
   });
 }
 
-export const fetchMessages = async (session: IChatSession | null, after: string | null = null): Promise<IMessage[]> => {
-  const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}${after ? `&after=${after}` : ""}`;
-
-  const payload = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  try {
-    const data = await fetchJSON(fetchMessagesUrl, payload);
-    if (data && data.status) {
-      return data.data;
-    } else {
-      throw new Error(data.message);
-    }
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    throw error;
-  }
-};
-
-
 export const fetchVersion = () => {
   const versionUrl = getServerUrl() + "/version";
   return fetch(versionUrl)
