@@ -20,7 +20,6 @@ import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
-import { store } from "../../../store";
 
 const ChatBox = ({
   initMessages,
@@ -42,7 +41,6 @@ const ChatBox = ({
     status: true,
     message: "All good",
   });
-  const [lastMessageId, setLastMessageId] = React.useState<string | null>(null);
 
   const messages = useConfigStore((state) => state.messages);
   const setMessages = useConfigStore((state) => state.setMessages);
@@ -250,13 +248,11 @@ const ChatBox = ({
       content: query,
     };
 
-    const accessToken = store.getState().user.accessToken;
     const postData = {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(messagePayload),
     };
