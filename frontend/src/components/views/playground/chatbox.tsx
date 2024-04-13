@@ -15,7 +15,7 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { fetchJSON, fetchMessages, getServerUrl } from "../../api_utils";
+import { fetchMessages, getServerUrl } from "../../api_utils";
 import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
@@ -319,20 +319,25 @@ const ChatBox = ({
     }
   };
 
-  const pollMessages = async () => {
-    try {
-      const newMessages = await fetchMessages(session, lastMessageId);
-      if (newMessages.length > 0) {
-        setMessages((prevMessages) => [...prevMessages, ...newMessages]);
-        setLastMessageId(newMessages[newMessages.length - 1].id);
-        if (newMessages.some((message) => message.role === "bot")) {
-          stopPolling();
+  const pollMessages = () => {
+    fetchMessages(
+      session,
+      lastMessageId,
+      (data) => {
+        const newMessages = data;
+        if (newMessages.length > 0) {
+          setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+          setLastMessageId(newMessages[newMessages.length - 1].id);
+          if (newMessages.some((message) => message.role === "bot")) {
+            stopPolling();
+          }
         }
+      },
+      (error) => {
+        console.error("Error polling messages:", error);
+        stopPolling();
       }
-    } catch (error) {
-      console.error("Error polling messages:", error);
-      stopPolling();
-    }
+    );
   };
 
   React.useEffect(() => {
@@ -344,7 +349,7 @@ const ChatBox = ({
   }, []);
 
   return (
-    <div className="text-primary     relative  h-full rounded  ">
+    <div className="text-primary relative h-full rounded">
       <div
         style={{ zIndex: 100 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
@@ -465,4 +470,5 @@ const ChatBox = ({
     </div>
   );
 };
+
 export default ChatBox;

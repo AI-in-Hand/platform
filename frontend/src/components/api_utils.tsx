@@ -100,35 +100,33 @@ export function fetchJSON(
   });
 }
 
-const fetchMessages = (session: IChatSession | null, after: string | null = null) => {
-  setError(null);
-  setLoading(true);
-  setMessages(null);
-
+export const fetchMessages = (
+  session: IChatSession | null,
+  after: string | null = null,
+  onSuccess: (data: any) => void,
+  onError: (error: IStatus) => void
+) => {
+  const serverUrl = getServerUrl();
   const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}${after ? `&after=${after}` : ""}`;
-  const payLoad = {
+  const payload = {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   };
 
-  const onSuccess = (data: any) => {
-    if (data && data.status) {
-      setMessages(data.data);
-    } else {
-      message.error(data.message);
+  fetchJSON(fetchMessagesUrl, payload,
+    (data) => {
+      if (data && data.status) {
+        onSuccess(data.data);
+      } else {
+        onError({ status: false, message: data.message });
+      }
+    },
+    (error) => {
+      onError(error);
     }
-    setLoading(false);
-  };
-
-  const onError = (err: any) => {
-    setError(err);
-    message.error(err.message);
-    setLoading(false);
-  };
-
-  fetchJSON(fetchMessagesUrl, payLoad, onSuccess, onError);
+  );
 };
 
 export const fetchVersion = () => {

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { IChatSession, IMessage, IStatus } from "../../types";
-import { fetchJSON, fetchMessages, getServerUrl } from "../../api_utils";
+import { fetchMessages, getServerUrl } from "../../api_utils";
 import { setLocalStorage } from "../../utils";
 import ChatBox from "./chatbox";
 import { useSelector } from "react-redux";
@@ -25,26 +25,31 @@ const RAView = () => {
   React.useEffect(() => {
     setLocalStorage("ara_config", config);
   }, [config]);
-
   const [error, setError] = React.useState<IStatus | null>({
     status: true,
     message: "All good",
   });
 
   const loggedIn = useSelector(state => state.user.loggedIn);
-  const serverUrl = getServerUrl();
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
 
   React.useEffect(() => {
     if (loggedIn && session) {
-      fetchMessages(session)
-        .then((data) => {
+      setLoading(true);
+      setMessages(null);
+      fetchMessages(
+        session,
+        null,
+        (data) => {
           setMessages(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching messages:", error);
+          setLoading(false);
+        },
+        (error) => {
+          setError(error);
           message.error(error.message);
-        });
+          setLoading(false);
+        }
+      );
     }
   }, [loggedIn, session]);
 
