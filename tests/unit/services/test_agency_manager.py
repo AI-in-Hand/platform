@@ -198,7 +198,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
         shared_instructions="manifesto",
         agents=["agent1_id", "agent2_id"],
         main_agent="agent1_name",
-        agency_chart=[["agent1_name", "agent2_name"]],
+        agency_chart={0: ["agent1_name", "agent2_name"]},
     )
 
     # Mock agents

@@ -94,7 +94,7 @@ class AgencyManager:
             main_agent = agents[agency_config.main_agent]
             agency_chart = [main_agent]
             if agency_config.agency_chart:
-                new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart]
+                new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart.values()]
                 agency_chart.extend(new_agency_chart)
 
         return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)

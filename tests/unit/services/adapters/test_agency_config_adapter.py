@@ -35,7 +35,7 @@ def test_to_model(agency_adapter):
     assert agency_config.shared_instructions == "Test Instructions"
     assert agency_config.agents == ["sender_id", "receiver_id"]
     assert agency_config.main_agent == "Sender"
-    assert agency_config.agency_chart == [["Sender", "Receiver"]]
+    assert agency_config.agency_chart == {0: ["Sender", "Receiver"]}
 
 
 def test_to_model_without_receiver(agency_adapter):
@@ -55,7 +55,7 @@ def test_to_model_without_receiver(agency_adapter):
     assert agency_config.shared_instructions == "Test Instructions"
     assert agency_config.agents == ["sender_id"]
     assert agency_config.main_agent == "Sender"
-    assert agency_config.agency_chart == []
+    assert agency_config.agency_chart == {}
 
 
 def test_to_api(agency_adapter, agent_adapter, mocker):
@@ -68,7 +68,7 @@ def test_to_api(agency_adapter, agent_adapter, mocker):
         shared_instructions="Test Instructions",
         agents=["sender_id", "receiver_id"],
         main_agent="Sender",
-        agency_chart=[["Sender", "Receiver"]],
+        agency_chart={0: ["Sender", "Receiver"]},
     )
 
     mocker.patch.object(
@@ -95,7 +95,7 @@ def test_to_api_without_receiver(agency_adapter, agent_adapter, mocker):
         shared_instructions="Test Instructions",
         agents=["sender_id"],
         main_agent="Sender",
-        agency_chart=[],
+        agency_chart={},
     )
 
     mocker.patch.object(

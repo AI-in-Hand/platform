@@ -13,10 +13,10 @@ class AgencyConfig(BaseModel):
     shared_instructions: str = Field("", description="Agency Manifesto")
     agents: list[str] = Field(default_factory=list, description="List of agent IDs used in the agency chart")
     main_agent: str | None = Field(None, description="The main agent name")
-    agency_chart: list[conlist(str, min_length=2, max_length=2)] = Field(  # type: ignore
-        default_factory=list,
-        description="List representing the agency chart with agent names. "
-        "Each item is a pair of names: [sender, receiver]",
+    agency_chart: dict[int, conlist(str, min_length=2, max_length=2)] = Field(  # type: ignore
+        default_factory=dict,
+        description="Dict representing the agency chart with agent names. "
+        "Each item value is a pair of names: [sender, receiver]",
     )
     timestamp: str | None = Field(None, description="Timestamp of the last update")
 
@@ -28,9 +28,9 @@ class AgencyConfig(BaseModel):
             return v
 
         # Check if all elements are lists of unique strings
-        for element in v:
-            if len(set(element)) != len(element):
-                raise ValueError("List must be unique")
+        for chart_row in v.values():
+            if len(set(chart_row)) != len(chart_row):
+                raise ValueError("Chart row must be unique")
 
         # Check if main_agent is set
         main_agent = values.data.get("main_agent")
@@ -38,7 +38,7 @@ class AgencyConfig(BaseModel):
             raise ValueError("Main agent must be set if agency chart is not empty")
 
         # Check if the main_agent is in the agency chart
-        if main_agent not in {agent for sublist in v for agent in sublist}:
+        if main_agent not in {agent for sublist in v.values() for agent in sublist}:
             raise ValueError("The main agent must be in the agency chart")
 
         return v
