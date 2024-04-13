@@ -1,6 +1,6 @@
 import * as React from "react";
 import { IChatSession, IMessage, IStatus } from "../../types";
-import { fetchJSON, getServerUrl } from "../../api_utils";
+import { fetchJSON, fetchMessages, getServerUrl } from "../../api_utils";
 import { setLocalStorage } from "../../utils";
 import ChatBox from "./chatbox";
 import { useSelector } from "react-redux";
@@ -34,37 +34,6 @@ const RAView = () => {
   const loggedIn = useSelector(state => state.user.loggedIn);
   const serverUrl = getServerUrl();
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
-
-  const fetchMessages = (session: IChatSession | null, after: string | null = null) => {
-    setError(null);
-    setLoading(true);
-    setMessages(null);
-
-    const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}${after ? `&after=${after}` : ""}`;
-    const payLoad = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    const onSuccess = (data: any) => {
-      if (data && data.status) {
-        setMessages(data.data);
-      } else {
-        message.error(data.message);
-      }
-      setLoading(false);
-    };
-
-    const onError = (err: any) => {
-      setError(err);
-      message.error(err.message);
-      setLoading(false);
-    };
-
-    fetchJSON(fetchMessagesUrl, payLoad, onSuccess, onError);
-  };
 
   React.useEffect(() => {
     if (loggedIn && session) {
