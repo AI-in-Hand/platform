@@ -1,6 +1,6 @@
 import * as React from "react";
 import { IChatSession, IMessage, IStatus } from "../../types";
-import { fetchJSON, getServerUrl, setLocalStorage } from "../../utils";
+import { fetchJSON, fetchMessages, getServerUrl, setLocalStorage } from "../../utils";
 import ChatBox from "./chatbox";
 import { useSelector } from "react-redux";
 import { message } from "antd";
@@ -67,10 +67,16 @@ const RAView = () => {
 
   React.useEffect(() => {
     if (loggedIn && session) {
-      // console.log("fetching messages", messages);
-      fetchMessages();
+      fetchMessages(session)
+        .then((data) => {
+          setMessages(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching messages:", error);
+          message.error(error.message);
+        });
     }
-  }, [session]);
+  }, [loggedIn, session]);
   return (
     <div className="h-full   ">
       <div className="flex h-full   ">

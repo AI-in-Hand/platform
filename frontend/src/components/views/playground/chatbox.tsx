@@ -42,6 +42,8 @@ const ChatBox = ({
     status: true,
     message: "All good",
   });
+  const [lastMessageId, setLastMessageId] = React.useState<string | null>(null);
+  const [pollingInterval, setPollingInterval] = React.useState<NodeJS.Timeout | null>(null);
 
   const messages = useConfigStore((state) => state.messages);
   const setMessages = useConfigStore((state) => state.setMessages);
@@ -261,36 +263,27 @@ const ChatBox = ({
     };
 
     setLoading(true);
-    fetch(postMsgUrl, postData)
-      .then((res) => {
+
+    fetchJSON(postMsgUrl, postData)
+      .then((data) => {
         setLoading(false);
-        if (res.status === 200) {
-          res.json().then((data) => {
-            if (data && data.status) {
-              const botMesage: IChatMessage = {
-                text: data.content,
-                sender: "bot",
-                metadata: data.metadata || null,
-              };
-              messageHolder.push(botMesage);
-              messageHolder = Object.assign([], messageHolder);
-              setMessages(messageHolder);
-            } else {
-              console.log("error", data);
-              message.error(data.error || "An unknown error occurred");
-            }
-          });
+        if (data && data.status) {
+          const botMessage: IChatMessage = {
+            text: data.content,
+            sender: "bot",
+            metadata: data.metadata || null,
+          };
+          messageHolder.push(botMessage);
+          setMessages(messageHolder);
+          setLastMessageId(data.id);
+          startPolling();
         } else {
-          res.json().then((data) => {
-            console.log("error", data);
-            message.error(data.error || "An unknown error occurred");
-          });
-          message.error("Connection error. Ensure server is up and running.");
+          console.log("error", data);
+          message.error(data.error || "An unknown error occurred");
         }
       })
       .catch(() => {
         setLoading(false);
-
         message.error("Connection error. Ensure server is up and running.");
       });
   };
@@ -311,6 +304,44 @@ const ChatBox = ({
       }
     }
   };
+
+  const startPolling = () => {
+    if (!pollingInterval) {
+      const interval = setInterval(pollMessages, 1000);
+      setPollingInterval(interval);
+    }
+  };
+
+  const stopPolling = () => {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+  };
+
+  const pollMessages = async () => {
+    try {
+      const newMessages = await fetchMessages(session, lastMessageId);
+      if (newMessages.length > 0) {
+        setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+        setLastMessageId(newMessages[newMessages.length - 1].id);
+        if (newMessages.some((message) => message.role === "bot")) {
+          stopPolling();
+        }
+      }
+    } catch (error) {
+      console.error("Error polling messages:", error);
+      stopPolling();
+    }
+  };
+
+  React.useEffect(() => {
+    const timeout = setTimeout(stopPolling, 5 * 60 * 1000); // 5 minutes
+    return () => {
+      clearTimeout(timeout);
+      stopPolling();
+    };
+  }, []);
 
   return (
     <div className="text-primary     relative  h-full rounded  ">
