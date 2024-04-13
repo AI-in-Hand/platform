@@ -3,7 +3,7 @@ import * as React from "react";
 import { LoadingOverlay } from "../../atoms";
 import { IFlowConfig, IStatus } from "../../types";
 import { useConfigStore } from "../../../hooks/store";
-import { fetchJSON, getServerUrl } from "../../utils";
+import { fetchJSON, getServerUrl } from "../../api_utils";
 import { useSelector } from "react-redux";
 import { Link } from "gatsby";
 import { Square2StackIcon } from "@heroicons/react/24/outline";

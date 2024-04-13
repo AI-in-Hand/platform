@@ -33,7 +33,8 @@ import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { fetchJSON, getServerUrl, obscureString, truncateText } from "./utils";
+import { fetchJSON, getServerUrl } from "./api_utils";
+import { obscureString, truncateText } from "./utils";
 import {
   IAgentFlowSpec,
   IFlowConfig,

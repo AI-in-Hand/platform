@@ -15,7 +15,8 @@ import {
   MarkdownView,
   PdfViewer,
 } from "../../atoms";
-import { formatDuration, getServerUrl } from "../../utils";
+import { getServerUrl } from "../../api_utils";
+import { formatDuration } from "../../utils";
 import { IMetadataFile } from "../../types";
 import Icon from "../../icons";
 

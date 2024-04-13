@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Table } from 'antd';
-import { fetchJSON, getServerUrl } from './utils';
+import { fetchJSON, getServerUrl } from './api_utils';
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {

@@ -7,10 +7,9 @@ import { Button, Input, Modal, message } from "antd";
 import * as React from "react";
 import { ISkill, IStatus } from "../../types";
 import { useSelector } from "react-redux";
+import { fetchJSON, getServerUrl } from "../../api_utils";
 import {
-  fetchJSON,
   getSampleSkill,
-  getServerUrl,
   timeAgo,
   truncateText,
 } from "../../utils";
