@@ -55,8 +55,6 @@ class TestRemoveClientObjects:
         # Test for shallow copy behavior (non-client attributes should remain identical)
         modified_agency = AgencyManager._remove_client_objects(agency)
 
-        # Assuming other attributes in Agency and Agent, test if they are unchanged
-        # For example, if there's a 'name' attribute:
         assert modified_agency.name == agency.name
         for m_agent, o_agent in zip(modified_agency.agents, agency.agents, strict=True):
             assert m_agent.name == o_agent.name

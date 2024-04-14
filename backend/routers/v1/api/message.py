@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
@@ -8,7 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_user_secret_manager
 from backend.models.auth import User
-from backend.models.request_models import SessionMessagePostRequest
+from backend.models.message import Message
+from backend.models.response_models import MessagePostData, MessagePostResponse
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
@@ -27,10 +29,10 @@ message_router = APIRouter(
 async def get_message_list(
     current_user: Annotated[User, Depends(get_current_user)],
     session_id: str,
-    before: str | None = None,
+    after: str | None = None,
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
-):
+) -> list[Message]:
     """Return a list of last 20 messages for the given session."""
     # check if the current_user has permissions to send a message to the agency
     session_config = session_storage.load_by_session_id(session_id)
@@ -46,17 +48,28 @@ async def get_message_list(
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client(user_secret_manager)
-    messages = client.beta.threads.messages.list(thread_id=session_id, limit=20, before=before)
-    return messages
+    messages = client.beta.threads.messages.list(thread_id=session_id, after=after, order="asc")
+    messages_output = [
+        Message(
+            id=message.id,
+            content=message.content[0].text.value if message.content and message.content[0].text else "[No content]",
+            role=message.role,
+            timestamp=datetime.fromtimestamp(message.created_at, tz=UTC).isoformat(),
+            session_id=session_id,
+            agency_id=session_config.agency_id,
+        )
+        for message in messages
+    ]
+    return messages_output
 
 
 @message_router.post("/message")
 async def post_message(
     current_user: Annotated[User, Depends(get_current_user)],
-    request: SessionMessagePostRequest,
+    request: Message,
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-) -> dict:
+) -> MessagePostResponse:
     """Send a message to the User Proxy of the given agency."""
     agency_id = request.agency_id
     user_id = current_user.id
@@ -87,7 +100,7 @@ async def post_message(
         response = await asyncio.to_thread(
             agency.get_completion, message=user_message, yield_messages=False, message_files=None
         )
-        return {"message": response}
+        return MessagePostResponse(data=MessagePostData(content=response))
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
         raise HTTPException(status_code=500, detail="Something went wrong") from e

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { IChatSession, IMessage, IStatus } from "../../types";
-import { fetchJSON, getServerUrl, setLocalStorage } from "../../utils";
+import { fetchMessages, getServerUrl } from "../../api_utils";
+import { setLocalStorage } from "../../utils";
 import ChatBox from "./chatbox";
 import { useSelector } from "react-redux";
 import { message } from "antd";
@@ -24,66 +25,45 @@ const RAView = () => {
   React.useEffect(() => {
     setLocalStorage("ara_config", config);
   }, [config]);
-
   const [error, setError] = React.useState<IStatus | null>({
     status: true,
     message: "All good",
   });
 
   const loggedIn = useSelector(state => state.user.loggedIn);
-  const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
-
-  const fetchMessages = () => {
-    setError(null);
-    setLoading(true);
-    setMessages(null);
-    // const fetch;
-    const payLoad = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    // console.log("payload", payLoad);
-    const onSuccess = (data: any) => {
-      // console.log(data);
-      if (data && data.status) {
-        setMessages(data.data);
-        // message.success(data.message);
-      } else {
-        message.error(data.message);
-      }
-      setLoading(false);
-    };
-    const onError = (err: any) => {
-      setError(err);
-      message.error(err.message);
-      setLoading(false);
-    };
-    fetchJSON(fetchMessagesUrl, payLoad, onSuccess, onError);
-  };
 
   React.useEffect(() => {
     if (loggedIn && session) {
-      // console.log("fetching messages", messages);
-      fetchMessages();
+      setLoading(true);
+      setMessages(null);
+      fetchMessages(
+        session,
+        (data) => {
+          setMessages(data);
+          setLoading(false);
+        },
+        (error) => {
+          console.log("error", error);
+          setError(error);
+          message.error(error.message);
+          setLoading(false);
+        }
+      );
     }
-  }, [session]);
+  }, [loggedIn, session]);
+
   return (
-    <div className="h-full   ">
-      <div className="flex h-full   ">
-        <div className="  mr-2  rounded">
+    <div className="h-full">
+      <div className="flex h-full">
+        <div className="mr-2 rounded">
           <SideBarView />
         </div>
-        <div className=" flex-1  ">
+        <div className="flex-1">
           {!session && (
-            <div className=" w-full  h-full flex items-center justify-center">
-              {/* {JSON.stringify(workflowConfig)} */}
+            <div className="w-full h-full flex items-center justify-center">
               <div className="w-2/3" id="middle">
-                <div className="w-full   text-center">
-                  {" "}
+                <div className="w-full text-center">
                   <img
                     src="/images/svgs/welcome.svg"
                     alt="welcome"
@@ -94,7 +74,6 @@ const RAView = () => {
               </div>
             </div>
           )}
-
           {workflowConfig !== null && session !== null && (
             <ChatBox initMessages={messages} />
           )}
@@ -103,4 +82,5 @@ const RAView = () => {
     </div>
   );
 };
+
 export default RAView;

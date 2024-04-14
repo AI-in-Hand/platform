@@ -15,11 +15,11 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { examplePrompts, fetchJSON, getServerUrl, guid } from "../../utils";
+import { fetchJSON, getServerUrl } from "../../api_utils";
+import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
 import { useConfigStore } from "../../../hooks/store";
-import { store } from "../../../store";
 
 const ChatBox = ({
   initMessages,
@@ -54,8 +54,8 @@ const ChatBox = ({
     chatMaxHeight = pageHeight - 300 + "px";
   }
 
-  const parseMessages = (messages: any) => {
-    return messages?.map((message: any) => {
+  const parseMessages = (messages: IMessage[] | null): IChatMessage[] | null => {
+    return messages?.map((message: IMessage) => {
       let meta;
       try {
         meta = JSON.parse(message.metadata);
@@ -64,7 +64,7 @@ const ChatBox = ({
       }
       const msg: IChatMessage = {
         text: message.content,
-        sender: message.role === "user" ? "user" : "bot",
+        sender: message.role === "user" ? "user" : "assistant",
         metadata: meta,
       };
       return msg;
@@ -96,7 +96,7 @@ const ChatBox = ({
   const messageListView = messages?.map((message: IChatMessage, i: number) => {
     const isUser = message.sender === "user";
     const css = isUser ? "bg-accent text-white  " : "bg-light";
-    // console.log("message", message);
+    console.log("Debug: message", message);
     let hasMeta = false;
     if (message.metadata) {
       hasMeta =
@@ -149,7 +149,7 @@ const ChatBox = ({
         <div className={`  ${isUser ? "" : " w-full"} inline-flex gap-2`}>
           <div className=""></div>
           <div className="font-semibold text-secondary text-sm w-16">{`${
-            isUser ? "USER" : "AGENTS"
+            isUser ? "USER" : "AGENT"
           }`}</div>
           <div
             className={`inline-block group relative ${
@@ -245,53 +245,39 @@ const ChatBox = ({
     const messagePayload: IMessage = {
       agency_id: workflowConfig.id,
       session_id: session?.id || "",
+      role: "user",
       content: query,
     };
 
-    const accessToken = store.getState().user.accessToken;
     const postData = {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`
       },
       body: JSON.stringify(messagePayload),
     };
 
     setLoading(true);
-    fetch(postMsgUrl, postData)
-      .then((res) => {
-        setLoading(false);
-        if (res.status === 200) {
-          res.json().then((data) => {
-            if (data && data.status) {
-              const botMesage: IChatMessage = {
-                text: data.message,
-                sender: "bot",
-                metadata: data.metadata || null,
-              };
-              messageHolder.push(botMesage);
-              messageHolder = Object.assign([], messageHolder);
-              setMessages(messageHolder);
-            } else {
-              console.log("error", data);
-              message.error(data.error || "An unknown error occurred");
-            }
-          });
-        } else {
-          res.json().then((data) => {
-            console.log("error", data);
-            message.error(data.error || "An unknown error occurred");
-          });
-          message.error("Connection error. Ensure server is up and running.");
-        }
-      })
-      .catch(() => {
-        setLoading(false);
 
-        message.error("Connection error. Ensure server is up and running.");
-      });
+    fetchJSON(postMsgUrl, postData, (data) => {
+      setLoading(false);
+      if (data && data.status) {
+        const botMessage: IChatMessage = {
+            text: data.content,
+            sender: "assistant",
+            metadata: data.metadata || null,
+          };
+          messageHolder.push(botMessage);
+          setMessages(messageHolder);
+      } else {
+        console.log("error", data);
+        message.error(data.error || "An unknown error occurred");
+      }
+    }, () => {
+      setLoading(false);
+      message.error("Connection error. Ensure server is up and running.");
+    });
   };
 
   const handleTextChange = (
@@ -312,7 +298,7 @@ const ChatBox = ({
   };
 
   return (
-    <div className="text-primary     relative  h-full rounded  ">
+    <div className="text-primary relative h-full rounded">
       <div
         style={{ zIndex: 100 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
@@ -433,4 +419,5 @@ const ChatBox = ({
     </div>
   );
 };
+
 export default ChatBox;

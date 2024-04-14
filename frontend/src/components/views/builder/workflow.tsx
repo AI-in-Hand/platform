@@ -12,9 +12,8 @@ import { Button, Dropdown, MenuProps, Modal, Tooltip, message } from "antd";
 import * as React from "react";
 import { IFlowConfig, IStatus } from "../../types";
 import { useSelector } from "react-redux";
+import { fetchJSON, getServerUrl } from "../../api_utils";
 import {
-  fetchJSON,
-  getServerUrl,
   sampleWorkflowConfig,
   sanitizeConfig,
   timeAgo,
