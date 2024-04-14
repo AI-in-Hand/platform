@@ -48,7 +48,7 @@ async def get_message_list(
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client(user_secret_manager)
-    messages = client.beta.threads.messages.list(thread_id=session_id, after=after)
+    messages = client.beta.threads.messages.list(thread_id=session_id, after=after, order="asc")
     messages_output = [
         Message(
             id=message.id,

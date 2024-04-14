@@ -96,7 +96,7 @@ const ChatBox = ({
   const messageListView = messages?.map((message: IChatMessage, i: number) => {
     const isUser = message.sender === "user";
     const css = isUser ? "bg-accent text-white  " : "bg-light";
-    // console.log("message", message);
+    console.log("Debug: message", message);
     let hasMeta = false;
     if (message.metadata) {
       hasMeta =
@@ -149,7 +149,7 @@ const ChatBox = ({
         <div className={`  ${isUser ? "" : " w-full"} inline-flex gap-2`}>
           <div className=""></div>
           <div className="font-semibold text-secondary text-sm w-16">{`${
-            isUser ? "USER" : "AGENTS"
+            isUser ? "USER" : "AGENT"
           }`}</div>
           <div
             className={`inline-block group relative ${

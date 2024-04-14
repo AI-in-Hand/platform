@@ -12,4 +12,4 @@ class Message(BaseModel):
     session_id: str = Field(..., description="The identifier for the conversational thread.")
     role: Literal["user", "assistant"] = Field(..., description="The role of the sender of the message.")
     content: str = Field(..., description="The message to be sent to the agency.")
-    timestamp: str = Field(..., description="The timestamp when the message was created.")
+    timestamp: str | None = Field(None, description="The timestamp when the message was created.")
