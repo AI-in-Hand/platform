@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
@@ -8,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_user_secret_manager
 from backend.models.auth import User
-from backend.models.request_models import MessagePostRequest
+from backend.models.message import Message
 from backend.models.response_models import MessagePostData, MessagePostResponse
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
@@ -31,7 +32,7 @@ async def get_message_list(
     after: str | None = None,
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
-) -> list:
+) -> list[Message]:
     """Return a list of last 20 messages for the given session."""
     # check if the current_user has permissions to send a message to the agency
     session_config = session_storage.load_by_session_id(session_id)
@@ -49,11 +50,14 @@ async def get_message_list(
     client = get_openai_client(user_secret_manager)
     messages = client.beta.threads.messages.list(thread_id=session_id, after=after)
     messages_output = [
-        {
-            "msg_id": message.id,
-            "text": message.content[0].text.value if message.content and message.content[0].text else "[No content]",
-            "sender": message.role,
-        }
+        Message(
+            id=message.id,
+            content=message.content[0].text.value if message.content and message.content[0].text else "[No content]",
+            role=message.role,
+            timestamp=datetime.fromtimestamp(message.created_at, tz=UTC).isoformat(),
+            session_id=session_id,
+            agency_id=session_config.agency_id,
+        )
         for message in messages
     ]
     return messages_output
@@ -62,7 +66,7 @@ async def get_message_list(
 @message_router.post("/message")
 async def post_message(
     current_user: Annotated[User, Depends(get_current_user)],
-    request: MessagePostRequest,
+    request: Message,
     agency_manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> MessagePostResponse:

@@ -44,6 +44,7 @@ const RAView = () => {
           setLoading(false);
         },
         (error) => {
+          console.log("error", error);
           setError(error);
           message.error(error.message);
           setLoading(false);

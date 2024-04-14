@@ -1,15 +1,15 @@
 export type NotificationType = "success" | "info" | "warning" | "error";
 
 export interface IMessage {
-  user_id: string;
-  root_msg_id?: string;
-  msg_id?: string;
-  role?: string;
+  id?: string;
+  role: "user" | "assistant";
   content: string;
+  user_id?: string;
   timestamp?: string;
   personalize?: boolean;
   ra?: string;
   session_id?: string;
+  agency_id?: string;
 }
 
 export interface IStatus {
@@ -22,7 +22,7 @@ export interface IChatMessage {
   text: string;
   sender: "user" | "assistant";
   metadata?: any;
-  msg_id?: string;
+  id?: string;
 }
 
 export interface IAgentConfig {

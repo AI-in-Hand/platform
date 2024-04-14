@@ -2,7 +2,7 @@ import { message } from "antd";
 import { auth } from '../firebase/firebase-config';
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
-import { IChatSession, IMessage, IStatus } from "../types";
+import { IChatSession, IStatus } from "../types";
 
 export const getServerUrl = () => {
   return process.env.GATSBY_API_URL || "/v1/api";

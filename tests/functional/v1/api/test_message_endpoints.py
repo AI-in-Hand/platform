@@ -103,8 +103,8 @@ def test_get_message_list_success(client):
     response = client.get("/v1/api/message/list?session_id=test_session_id")
     assert response.status_code == 200
     assert len(response.json()) == 2
-    assert response.json()[0] == {"msg_id": "1", "text": "Hello", "sender": "user"}
-    assert response.json()[1] == {"msg_id": "2", "text": "Hi", "sender": "assistant"}
+    assert response.json()[0] == {"id": "1", "text": "Hello", "sender": "user"}
+    assert response.json()[1] == {"id": "2", "text": "Hi", "sender": "assistant"}
 
 
 # Session not found

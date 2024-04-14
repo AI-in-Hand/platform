@@ -54,8 +54,8 @@ const ChatBox = ({
     chatMaxHeight = pageHeight - 300 + "px";
   }
 
-  const parseMessages = (messages: any) => {
-    return messages?.map((message: any) => {
+  const parseMessages = (messages: IMessage[] | null): IChatMessage[] | null => {
+    return messages?.map((message: IMessage) => {
       let meta;
       try {
         meta = JSON.parse(message.metadata);
@@ -64,7 +64,7 @@ const ChatBox = ({
       }
       const msg: IChatMessage = {
         text: message.content,
-        sender: message.sender === "user" ? "user" : "assistant",
+        sender: message.role === "user" ? "user" : "assistant",
         metadata: meta,
       };
       return msg;
@@ -245,6 +245,7 @@ const ChatBox = ({
     const messagePayload: IMessage = {
       agency_id: workflowConfig.id,
       session_id: session?.id || "",
+      role: "user",
       content: query,
     };
 
