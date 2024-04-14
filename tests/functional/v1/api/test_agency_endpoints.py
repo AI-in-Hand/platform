@@ -59,7 +59,7 @@ def test_get_agency_list_success(client, mock_firestore_client, agency_adapter):
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
-    response = client.get("/v1/api/agency/list")
+    response = client.get("/api/v1/agency/list")
 
     assert response.status_code == 200
     assert response.json()["data"] == [expected_agency.model_dump()]
@@ -82,7 +82,7 @@ def test_get_agency_config(client, mock_firestore_client, agency_adapter):
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
-    response = client.get("/v1/api/agency?id=test_agency_id")
+    response = client.get("/api/v1/agency?id=test_agency_id")
     assert response.status_code == 200
     assert response.json()["data"] == expected_agency.model_dump()
 
@@ -90,7 +90,7 @@ def test_get_agency_config(client, mock_firestore_client, agency_adapter):
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_agency_config_not_found(client):
     # Simulate non-existent agency by not setting up any data for it
-    response = client.get("/v1/api/agency?id=non_existent_agency")
+    response = client.get("/api/v1/agency?id=non_existent_agency")
     assert response.status_code == 404
     assert response.json() == {"detail": "Agency not found"}
 
@@ -100,7 +100,7 @@ def test_get_agency_config_user_id_mismatch(client, mock_firestore_client):
     expected_agency = AgencyConfig(id="agency1", user_id="different_user_id", name="Test agency")
     mock_firestore_client.setup_mock_data("agency_configs", "agency1", expected_agency.model_dump())
 
-    response = client.get("/v1/api/agency?id=agency1")
+    response = client.get("/api/v1/agency?id=agency1")
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
 
@@ -118,7 +118,7 @@ def test_create_agency_success(client, mock_agent, agency_adapter, mock_firestor
         "backend.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
     ) as mock_update_or_create_agency:
         mock_update_or_create_agency.return_value = TEST_AGENCY_ID
-        response = client.put("/v1/api/agency", json=template_config)
+        response = client.put("/api/v1/agency", json=template_config)
     assert response.status_code == 200
     assert isinstance(response.json()["data"], list)  # TODO: check the response data more thoroughly
     model_template_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
@@ -157,7 +157,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
     with patch(
         "backend.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate_cache:
-        response = client.put("/v1/api/agency", json=new_data_payload)
+        response = client.put("/api/v1/agency", json=new_data_payload)
 
     assert response.status_code == 200
     assert response.json()["data"] == [expected_data_from_api]
@@ -181,7 +181,7 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
     new_data = initial_data.copy()
     new_data.update({"shared_instructions": "Updated Manifesto"})
 
-    response = client.put("/v1/api/agency", json=new_data)
+    response = client.put("/api/v1/agency", json=new_data)
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
@@ -207,7 +207,7 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_
     mock_firestore_client.setup_mock_data("agent_configs", "foreign_agent_id", foreign_agent_flow_spec.model_dump())
     # Simulate a PUT request to update the agency with agents belonging to a different user
     new_data = agency_adapter.to_api(AgencyConfig(**db_agency)).model_dump()
-    response = client.put("/v1/api/agency", json=new_data)
+    response = client.put("/api/v1/agency", json=new_data)
     # Check if the server responds with a 403 Forbidden
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
@@ -227,7 +227,7 @@ def test_update_or_create_agency_missing_agent(client, mock_firestore_client, mo
     }
 
     mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent)
-    response = client.put("/v1/api/agency", json=agency_data_with_missing_agent)
+    response = client.put("/api/v1/agency", json=agency_data_with_missing_agent)
     assert response.status_code == 400
     assert response.json() == {"detail": "Agent not found: missing_agent_id"}
 
@@ -244,7 +244,7 @@ def test_delete_agency_success(client, mock_firestore_client):
     with patch(
         "backend.services.agency_manager.AgencyManager.delete_agency_from_cache", new_callable=AsyncMock
     ) as mock_delete_agency_from_cache:
-        response = client.delete(f"/v1/api/agency?id={TEST_AGENCY_ID}")
+        response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agency deleted", "data": []}
     assert mock_firestore_client.collection("agency_configs").to_dict() == {}
@@ -253,7 +253,7 @@ def test_delete_agency_success(client, mock_firestore_client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_delete_agency_not_found(client):
-    response = client.delete("/v1/api/agency?id=non_existent_agency")
+    response = client.delete("/api/v1/agency?id=non_existent_agency")
     assert response.status_code == 404
     assert response.json() == {"detail": "Agency not found"}
 
@@ -267,6 +267,6 @@ def test_delete_agency_user_id_mismatch(client, mock_firestore_client):
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
-    response = client.delete(f"/v1/api/agency?id={TEST_AGENCY_ID}")
+    response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}

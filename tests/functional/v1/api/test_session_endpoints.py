@@ -28,7 +28,7 @@ def test_get_session_list(session_config_data, client, mock_firestore_client):
     expected_session_data = session_config_data.copy()
     expected_session_data["flow_config"] = mock.ANY
 
-    response = client.get("/v1/api/session/list")
+    response = client.get("/api/v1/session/list")
     assert response.status_code == 200
     assert response.json()["data"] == [expected_session_data]
 
@@ -47,7 +47,7 @@ def test_create_session_success(client, mock_firestore_client):
             "agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID, "name": "Test agency", "user_id": TEST_USER_ID}
         )
 
-        response = client.post(f"/v1/api/session?agency_id={TEST_AGENCY_ID}")
+        response = client.post(f"/api/v1/session?agency_id={TEST_AGENCY_ID}")
         # Assertions
         assert response.status_code == 200
         assert response.json()["data"] == [
@@ -75,7 +75,7 @@ def test_create_session_success(client, mock_firestore_client):
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_agency_not_found(client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
-        response = client.post("/v1/api/session?agency_id=test_session_id")
+        response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
         assert response.json() == {"detail": "Agency not found"}
 
@@ -83,6 +83,6 @@ def test_create_session_agency_not_found(client):
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_delete_session_success(client):
     with patch.object(SessionManager, "delete_session", MagicMock()) as mock_delete_session:
-        response = client.delete("/v1/api/session?id=test_session_id")
+        response = client.delete("/api/v1/session?id=test_session_id")
         assert response.status_code == 200
         mock_delete_session.assert_called_once_with("test_session_id")

@@ -57,7 +57,7 @@ The provided Postman collection encompasses all the necessary routes and variabl
 
 ### WebSocket Communication
 
-Outlines the process for establishing WebSocket connections (`/v1/ws/{user_id}/{agency_id}/{session_id}`) for real-time interactions.
+Outlines the process for establishing WebSocket connections (`/ws/{user_id}/{agency_id}/{session_id}`) for real-time interactions.
 
 ## Contributing
 

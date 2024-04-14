@@ -5,7 +5,7 @@ import { RefreshToken } from "../store/actions/usersActions";
 import { IChatSession, IStatus } from "../types";
 
 export const getServerUrl = () => {
-  return process.env.GATSBY_API_URL || "/v1/api";
+  return process.env.GATSBY_API_URL || "/api/v1";
 };
 
 export function checkAndRefreshToken() {

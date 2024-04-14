@@ -10,7 +10,7 @@ setup_logging()
 
 from backend.constants import BASE_DIR  # noqa  # isort:skip
 from backend.exception_handlers import bad_request_exception_handler, unhandled_exception_handler  # noqa  # isort:skip
-from backend.routers.v1 import v1_router  # noqa  # isort:skip
+from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
 from backend.settings import settings  # noqa  # isort:skip
 from backend.utils import init_webserver_folders, init_firebase_app  # noqa  # isort:skip
 
@@ -37,13 +37,13 @@ app.add_middleware(
 # init folders skills, workdir, static, files etc
 folders = init_webserver_folders(root_file_path=BASE_DIR)
 
-v1_api_app = FastAPI(root_path="/v1")
+v1_api_app = FastAPI(root_path="/api")
 v1_api_app.include_router(v1_router)
 v1_api_app.add_exception_handler(ValidationError, bad_request_exception_handler)
 v1_api_app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # mount an api route such that the main route serves the ui and the /api
-app.mount("/v1", v1_api_app)
+app.mount("/api", v1_api_app)
 app.mount("/", StaticFiles(directory=folders["static_folder_root"], html=True), name="ui")
 
 # Initialize FireStore

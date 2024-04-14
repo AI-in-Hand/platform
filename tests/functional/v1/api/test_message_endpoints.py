@@ -26,7 +26,7 @@ def test_post_message_success(client, mock_get_agency, mock_firestore_client, me
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
     # Sending a message
-    response = client.post("/v1/api/message", json=message_data)
+    response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
@@ -38,7 +38,7 @@ def test_post_message_success(client, mock_get_agency, mock_firestore_client, me
 @pytest.mark.usefixtures("mock_get_current_user", "mock_firestore_client")
 def test_post_message_agency_config_not_found(client, mock_get_agency, message_data):
     # Sending a message
-    response = client.post("/v1/api/message", json=message_data)
+    response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Agency not found"
@@ -52,7 +52,7 @@ def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_clien
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
     # Sending a message
-    response = client.post("/v1/api/message", json=message_data)
+    response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Forbidden"
@@ -68,7 +68,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
     mock_get_agency.return_value.get_completion.side_effect = Exception("Test exception")
 
     # Sending a message
-    response = client.post("/v1/api/message", json=message_data)
+    response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 500
     assert response.json()["detail"] == "Something went wrong"
@@ -89,7 +89,7 @@ def mock_session_storage(mock_firestore_client):
 
 @pytest.fixture
 def mock_openai_client():
-    with patch("backend.routers.v1.api.message.get_openai_client") as mock:
+    with patch("backend.routers.api.v1.message.get_openai_client") as mock:
         mock.return_value.beta.threads.messages.list.return_value = [
             MagicMock(id="1", role="user", content=[MagicMock(text=MagicMock(value="Hello"))]),
             MagicMock(id="2", role="assistant", content=[MagicMock(text=MagicMock(value="Hi"))]),
@@ -100,7 +100,7 @@ def mock_openai_client():
 # Successful retrieval of messages
 @pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage", "mock_openai_client")
 def test_get_message_list_success(client):
-    response = client.get("/v1/api/message/list?session_id=test_session_id")
+    response = client.get("/api/v1/message/list?session_id=test_session_id")
     assert response.status_code == 200
     assert len(response.json()) == 2
     assert response.json()[0]["content"] == "Hello"
@@ -110,7 +110,7 @@ def test_get_message_list_success(client):
 # Session not found
 @pytest.mark.usefixtures("mock_get_current_user", "mock_openai_client")
 def test_get_message_list_session_not_found(client):
-    response = client.get("/v1/api/message/list?session_id=nonexistent_session_id")
+    response = client.get("/api/v1/message/list?session_id=nonexistent_session_id")
     assert response.status_code == 404
     assert response.json()["detail"] == "Session not found"
 
@@ -126,6 +126,6 @@ def test_get_message_list_unauthorized(client, mock_firestore_client):
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", test_session_config)
 
-    response = client.get("/v1/api/message/list?session_id=test_session_id")
+    response = client.get("/api/v1/message/list?session_id=test_session_id")
     assert response.status_code == 403
     assert response.json()["detail"] == "Forbidden"

@@ -52,7 +52,7 @@ def test_get_agent_list(mock_agent_data_api, mock_agent_data_db, client, mock_fi
     )
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
 
-    response = client.get("/v1/api/agent/list")
+    response = client.get("/api/v1/agent/list")
     assert response.status_code == 200
     assert response.json()["data"] == [mock_agent_data_api]
 
@@ -65,7 +65,7 @@ def test_get_agent_list_owned_by_user(mock_agent_data_api, mock_agent_data_db, c
     )
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
 
-    response = client.get("/v1/api/agent/list?owned_by_user=true")
+    response = client.get("/api/v1/agent/list?owned_by_user=true")
     assert response.status_code == 200
     assert response.json()["data"] == [mock_agent_data_api]
 
@@ -78,7 +78,7 @@ def test_get_agent_config(client, mock_agent_data_api, mock_agent_data_db, mock_
     )
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
 
-    response = client.get(f"/v1/api/agent?id={AGENT_ID}")
+    response = client.get(f"/api/v1/agent?id={AGENT_ID}")
     assert response.status_code == 200
     assert response.json()["data"] == mock_agent_data_api
 
@@ -95,7 +95,7 @@ def test_update_agent_success(client, mock_agent_data_api, mock_agent_data_db, m
         mock_agent_manager.return_value = AsyncMock()
         mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
 
-        response = client.put("/v1/api/agent", json=mock_agent_data_api)
+        response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 200
     assert response.json()["data"] == {"id": AGENT_ID}
@@ -107,7 +107,7 @@ def test_update_agent_user_id_mismatch(client, mock_agent_data_api, mock_agent_d
     agent_data_db["user_id"] = "other_user"
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data_db)
 
-    response = client.put("/v1/api/agent", json=mock_agent_data_api)
+    response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
@@ -125,7 +125,7 @@ def test_update_agent_invalid_skill(client, mock_agent_data_api, mock_agent_data
         mock_agent_manager.return_value = AsyncMock()
         mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
 
-        response = client.put("/v1/api/agent", json=mock_agent_data_api)
+        response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Some skills are not supported: {'NonExistentSkill'}"}
@@ -139,7 +139,7 @@ def test_delete_agent_success(client, mock_agent_data_db, mock_firestore_client)
         mock_agent_manager.return_value = AsyncMock()
         mock_agent_manager.return_value.delete_agent.return_value = AGENT_ID
 
-        response = client.delete(f"/v1/api/agent?id={AGENT_ID}")
+        response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agent configuration deleted"}
@@ -151,7 +151,7 @@ def test_delete_agent_user_id_mismatch(client, mock_agent_data_db, mock_firestor
     agent_data_db["user_id"] = "other_user"
     mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, agent_data_db)
 
-    response = client.delete(f"/v1/api/agent?id={AGENT_ID}")
+    response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
