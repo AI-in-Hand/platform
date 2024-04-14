@@ -64,7 +64,7 @@ const ChatBox = ({
       }
       const msg: IChatMessage = {
         text: message.content,
-        sender: message.role === "user" ? "user" : "assistant",
+        sender: message.role,
         metadata: meta,
       };
       return msg;
@@ -96,7 +96,6 @@ const ChatBox = ({
   const messageListView = messages?.map((message: IChatMessage, i: number) => {
     const isUser = message.sender === "user";
     const css = isUser ? "bg-accent text-white  " : "bg-light";
-    console.log("Debug: message", message);
     let hasMeta = false;
     if (message.metadata) {
       hasMeta =
@@ -142,7 +141,7 @@ const ChatBox = ({
 
     return (
       <div
-        className={`align-right ${isUser ? "text-righpt" : ""}  mb-2 border-b`}
+        className={`align-right ${isUser ? "text-right" : ""}  mb-2 border-b`}
         key={"message" + i}
       >
         {" "}
@@ -264,11 +263,12 @@ const ChatBox = ({
       setLoading(false);
       if (data && data.status) {
         const botMessage: IChatMessage = {
-            text: data.content,
+            text: data.data.content,
             sender: "assistant",
-            metadata: data.metadata || null,
+            metadata: data.data.metadata || null,
           };
           messageHolder.push(botMessage);
+          messageHolder = Object.assign([], messageHolder);
           setMessages(messageHolder);
       } else {
         console.log("error", data);
