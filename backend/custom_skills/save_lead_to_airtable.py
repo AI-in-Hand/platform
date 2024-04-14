@@ -19,7 +19,6 @@ class SaveLeadToAirtable(BaseTool):
 
     def run(self) -> str:
         """Save a new lead to Airtable."""
-        logger.info(f"Saving new lead to Airtable: {self.name}, {self.email}, {self.lead_details}")
         user_secret_manager = UserSecretManager(UserSecretStorage())
 
         try:
@@ -41,7 +40,5 @@ class SaveLeadToAirtable(BaseTool):
         except Exception as e:
             airtable_message = f"Error while saving lead to Airtable: {e}"
             logger.exception(airtable_message)
-
-        logger.info(airtable_message)
 
         return airtable_message

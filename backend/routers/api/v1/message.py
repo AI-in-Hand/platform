@@ -89,7 +89,7 @@ async def post_message(
     ContextEnvVarsManager.set("user_id", user_id)
     ContextEnvVarsManager.set("agency_id", agency_id)
 
-    logger.info(f"Received message: {user_message}, agency_id: {agency_id}, session_id: {session_id}")
+    logger.debug(f"Received a message: *** for agency_id: {agency_id}, session_id: {session_id}")
 
     agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:

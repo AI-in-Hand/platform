@@ -24,7 +24,7 @@ async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, 
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
         ) from None
-    logger.info(f"Authenticated user: {user['uid']} ({user['email']})")
+    logger.info(f"Authenticated user: {user['uid']}")
     return User(id=user["uid"], email=user["email"])
 
 
