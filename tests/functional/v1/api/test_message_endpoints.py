@@ -41,7 +41,7 @@ def test_post_message_agency_config_not_found(client, mock_get_agency, message_d
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 404
-    assert response.json()["detail"] == "Agency not found"
+    assert response.json()["data"]["message"] == "Agency not found"
     mock_get_agency.assert_not_called()
 
 
@@ -55,7 +55,7 @@ def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_clien
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "You don't have permissions to access this agency"
+    assert response.json()["data"]["message"] == "You don't have permissions to access this agency"
     mock_get_agency.assert_not_called()
 
 
@@ -71,7 +71,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 500
-    assert response.json()["detail"] == "Something went wrong"
+    assert response.json()["data"]["message"] == "Something went wrong"
 
     mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
 
@@ -112,7 +112,7 @@ def test_get_message_list_success(client):
 def test_get_message_list_session_not_found(client):
     response = client.get("/api/v1/message/list?session_id=nonexistent_session_id")
     assert response.status_code == 404
-    assert response.json()["detail"] == "Session not found"
+    assert response.json()["data"]["message"] == "Session not found"
 
 
 # Current user not authorized
@@ -128,4 +128,4 @@ def test_get_message_list_unauthorized(client, mock_firestore_client):
 
     response = client.get("/api/v1/message/list?session_id=test_session_id")
     assert response.status_code == 403
-    assert response.json()["detail"] == "You don't have permissions to access this session"
+    assert response.json()["data"]["message"] == "You don't have permissions to access this session"

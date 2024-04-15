@@ -13,6 +13,7 @@ from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.caching.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
+from backend.services.skill_manager import SkillManager
 from backend.services.user_secret_manager import UserSecretManager
 from backend.settings import settings
 
@@ -31,6 +32,12 @@ def get_user_secret_manager(
     user_secret_storage: UserSecretStorage = Depends(UserSecretStorage),
 ) -> UserSecretManager:
     return UserSecretManager(user_secret_storage)
+
+
+def get_skill_manager(
+    storage: SkillConfigStorage = Depends(SkillConfigStorage),
+) -> SkillManager:
+    return SkillManager(storage)
 
 
 def get_agent_manager(

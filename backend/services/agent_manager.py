@@ -8,7 +8,6 @@ from fastapi import HTTPException
 
 from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_flow_spec import AgentFlowSpec
-from backend.models.auth import User
 from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
@@ -43,10 +42,9 @@ class AgentManager:
         if config.id:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
-                logger.warning(f"Agent not found: {config.id}, user: {current_user_id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-            self._validate_agent_ownership(config, config_db, current_user_id)
-            self._validate_agent_name(config, config_db, current_user_id)
+            self._validate_agent_ownership(config_db, current_user_id)
+            self._validate_agent_name(config, config_db)
 
         # Ensure the agent is associated with the current user
         config.user_id = current_user_id
@@ -57,13 +55,11 @@ class AgentManager:
 
         return await self._create_or_update_agent(config)
 
-    async def delete_agent(self, agent_id: str, current_user: User) -> None:
+    async def delete_agent(self, agent_id: str, current_user_id: str) -> None:
         config = self.storage.load_by_id(agent_id)
         if not config:
-            logger.warning(f"Agent not found: {agent_id}, user: {current_user.id}")
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-        if config.user_id != current_user.id:
-            logger.warning(f"User {current_user.id} does not have permissions to access agent: {agent_id}")
+        if config.user_id != current_user_id:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent"
             )
@@ -106,31 +102,27 @@ class AgentManager:
         return agent
 
     @staticmethod
-    def _validate_agent_ownership(config: AgentFlowSpec, config_db: AgentFlowSpec, current_user_id: str) -> None:
+    def _validate_agent_ownership(config_db: AgentFlowSpec, current_user_id: str) -> None:
         if config_db.user_id != current_user_id:
-            logger.warning(f"User {current_user_id} does not have permissions to access agent: {config.id}")
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent"
             )
 
     @staticmethod
-    def _validate_agent_name(config: AgentFlowSpec, config_db: AgentFlowSpec, current_user_id: str) -> None:
+    def _validate_agent_name(config: AgentFlowSpec, config_db: AgentFlowSpec) -> None:
         if config.config.name != config_db.config.name:
-            logger.warning(f"Renaming agents is not supported yet: {config.id}, user: {current_user_id}")
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Renaming agents is not supported yet")
 
     @staticmethod
     def _validate_skills(skills: list[str], skills_db: list[SkillConfig]) -> None:
         # check if all skills are supported
         if unsupported_skills := set(skills) - set(SKILL_MAPPING.keys()):
-            logger.warning(f"Some skills are not supported: {unsupported_skills}")
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not supported: {unsupported_skills}"
             )
         # check if all skills are approved
         unapproved_skills = set(skills) - {skill.title for skill in skills_db}
         if unapproved_skills:
-            logger.warning(f"Some skills are not approved: {unapproved_skills}")
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not approved: {unapproved_skills}"
             )

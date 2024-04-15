@@ -48,11 +48,9 @@ async def get_agent_config(
 ) -> GetAgentResponse:
     config = storage.load_by_id(id)
     if not config:
-        logger.warning(f"Agent not found: {id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
     # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")
     config_for_api = adapter.to_api(config)
     return GetAgentResponse(data=config_for_api)
@@ -85,7 +83,7 @@ async def delete_agent(
     id: str = Query(..., description="The unique identifier of the agent"),
     manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
-    await manager.delete_agent(id, current_user)
+    await manager.delete_agent(id, current_user.id)
 
     configs = await manager.get_agent_list(current_user.id)
     configs_for_api = [adapter.to_api(config) for config in configs]

@@ -8,21 +8,21 @@ from tests.testing_utils import get_current_superuser_override, get_current_user
 @pytest.mark.usefixtures("mock_setup_logging")
 @pytest.fixture
 def mock_get_current_user():
-    from backend.main import v1_api_app
+    from backend.main import api_app
 
-    v1_api_app.dependency_overrides[get_current_user] = get_current_user_override
+    api_app.dependency_overrides[get_current_user] = get_current_user_override
     yield
-    v1_api_app.dependency_overrides[get_current_user] = get_current_user
+    api_app.dependency_overrides[get_current_user] = get_current_user
 
 
 @pytest.mark.usefixtures("mock_setup_logging")
 @pytest.fixture
 def mock_get_current_superuser():
-    from backend.main import v1_api_app
+    from backend.main import api_app
 
-    v1_api_app.dependency_overrides[get_current_user] = get_current_superuser_override
+    api_app.dependency_overrides[get_current_user] = get_current_superuser_override
     yield
-    v1_api_app.dependency_overrides[get_current_user] = get_current_user
+    api_app.dependency_overrides[get_current_user] = get_current_user
 
 
 @pytest.mark.usefixtures("mock_setup_logging")

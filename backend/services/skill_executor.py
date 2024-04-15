@@ -16,7 +16,7 @@ USER_PROMPT = "In one succinct sentence, describe the functionality of the skill
 logger = logging.getLogger(__name__)
 
 
-class SkillService:
+class SkillExecutor:
     SYSTEM_MESSAGE = """\
 You are an assistant that responds with JSON only. You are presented with a user prompt and a function specification, \
 and you MUST return the function call parameters in JSON format.

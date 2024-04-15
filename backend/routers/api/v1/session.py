@@ -49,12 +49,8 @@ async def create_session(
     # check if the current_user has permissions to create a session for the agency
     agency_config_db = agency_storage.load_by_id(agency_id)
     if not agency_config_db:
-        logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if agency_config_db.user_id != current_user.id:
-        logger.warning(
-            f"User {current_user.id} does not have permissions to create a session for the agency: {agency_id}"
-        )
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     # Set the user_id in the context variables
@@ -64,7 +60,6 @@ async def create_session(
 
     agency = await agency_manager.get_agency(agency_id, None)
     if not agency:
-        logger.warning(f"Agency not found: {agency_id}, user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)

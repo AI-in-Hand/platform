@@ -37,10 +37,8 @@ async def get_message_list(
     # check if the current_user has permissions to send a message to the agency
     session_config = session_storage.load_by_session_id(session_id)
     if not session_config:
-        logger.warning(f"Session not found: {session_id}, requested by user: {current_user.id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session"
         )
@@ -81,10 +79,8 @@ async def post_message(
     # check if the current_user has permissions to send a message to the agency
     agency_config = storage.load_by_id(agency_id)
     if not agency_config:
-        logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if agency_config.user_id != user_id:
-        logger.warning(f"User {user_id} does not have permissions to access agency {agency_id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     # Set the user_id and agency_id in the context variables
@@ -95,7 +91,6 @@ async def post_message(
 
     agency = await agency_manager.get_agency(agency_id, session_id)
     if not agency:
-        logger.warning(f"Agency not found: {agency_id}, requested by user: {user_id}")
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     try:

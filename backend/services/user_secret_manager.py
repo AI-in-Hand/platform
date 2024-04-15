@@ -26,7 +26,6 @@ class UserSecretManager:
         document = self._user_secret_storage.get_all_secrets(user_id) or {}
         value = document.get(key)
         if not value:
-            logger.warning(f"Secret {key} not set for the given user.")
             raise ValueError(f"Secret {key} not set for the given user. Please set it first.")
         return self._encryption_service.decrypt(value)
 

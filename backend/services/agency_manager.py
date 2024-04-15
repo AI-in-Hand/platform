@@ -63,7 +63,6 @@ class AgencyManager:
         if config.id:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
-                logger.warning(f"Agency not found: {config.id}, user: {current_user_id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
             self._validate_agency_ownership(config_db, current_user_id)
         await self._validate_agent_ownership(config.agents, current_user_id)
@@ -151,10 +150,8 @@ class AgencyManager:
         for agent_id in agents:
             agent_flow_spec = self.agent_manager.storage.load_by_id(agent_id)
             if not agent_flow_spec:
-                logger.error(f"Agent not found: {agent_id}, user: {current_user_id}")
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Agent not found: {agent_id}")
             if agent_flow_spec.user_id != current_user_id:
-                logger.warning(f"User {current_user_id} does not have permissions to use agent {agent_id}")
                 raise HTTPException(
                     status_code=HTTPStatus.FORBIDDEN, detail=f"You don't have permissions to use agent {agent_id}"
                 )
@@ -167,9 +164,8 @@ class AgencyManager:
         """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
         # check if the current_user has permissions
         if config_db.user_id != current_user_id:
-            logger.warning(f"User {current_user_id} does not have permissions to update agency {config_db.id}")
             raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to update this agency"
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
             )
 
     @staticmethod
