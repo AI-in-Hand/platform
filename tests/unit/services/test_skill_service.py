@@ -1,30 +1,8 @@
-from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.services.skill_service import SkillService, generate_skill_description
-
-
-def test_generate_skill_description():
-    with patch(
-        "backend.services.skill_service.get_chat_completion", return_value="Summary of the skill"
-    ) as mock_get_chat:
-        code = "def example(): pass"
-        result = generate_skill_description(code)
-        mock_get_chat.assert_called_once_with(
-            system_message="""\
-As a supportive assistant, ensure your responses are concise,
-confined to a single sentence, and rigorously comply with the specified instructions.\
-""",
-            user_prompt="In one succinct sentence, describe the functionality of the skill provided below:\n```\n"
-            + code
-            + "\n```",
-            temperature=0.0,
-            model="gpt-3.5-turbo",
-            api_key=mock.ANY,
-        )
-        assert result == "Summary of the skill", "The function did not return the expected summary"
+from backend.services.skill_service import SkillService
 
 
 def test_get_skill_class_found():

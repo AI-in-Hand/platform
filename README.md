@@ -1,84 +1,105 @@
 # AI in Hand Platform
 
-## Overview
+AI in Hand Platform is an open-source API and web application for managing AI-driven swarm agencies.
+It builds upon OpenAI's Assistants API, enhancing AI agents with specialized skills and a robust management system.
+The platform is built using FastAPI and takes inspiration from two open-source projects:
+[Agency-Swarm by VRSEN](https://github.com/VRSEN/agency-swarm) for useful backend abstractions,
+and [AutoGen Studio UI by Microsoft](https://github.com/microsoft/autogen/tree/main/samples/apps/autogen-studio/frontend)
+for UI layout and customizable components.
 
-AI in Hand Platform is an open-source web application designed for the orchestration and operational management of AI-driven swarm agencies. Leveraging [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview), it enriches the capabilities of the AI agents with specialized skills and a robust management system. Built on a FastAPI framework and employing Firebase Firestore along with OpenAI's GPT models, it enables dynamic agency and agent management at scale.
+## Key Features
 
-## Key Components
+- **Configuration Management**: Centrally manage configurations for agencies, agents, and skills.
+- **Custom Skills**: Extend AI agents with specialized skills.
+- **Persistence and Caching**: Use Firestore for configuration persistence, and Redis for caching agency states.
+- **API and WebSocket**: Interact with the platform through API endpoints and WebSocket for real-time communication.
+- **Security**: Authenticate users with Firebase Authentication and encrypt user secrets.
 
-- **Configuration Managers**: Centralized management of configurations for agencies, agents, and individual skills.
-- **WebSocket Connection Manager**: Ensures real-time interactive communication between agencies and clients through WebSocket connections.
-- **Custom Skills**: A suite of specialized skills including `SearchWeb`, `GenerateProposal`, `BuildDirectoryTree`, among others, designed to augment the functionalities of the AI agents.
-- **FastAPI Web Server**: Manages API routing, initializes CORS middleware, sets up Firebase, and facilitates WebSocket communication.
-- **Data Models**: Utilizes Pydantic models for defining and validating configurations of agencies, agents, skills, as well as the structure of request data.
-- **Repositories**: Utilizes Firestore for robust storage and querying capabilities for skill, agent, and agency configurations -- ensuring a seamless persistence layer.
-- **Caching**: Employs Redis for efficient and scalable caching of agency states (sessions) for optimized performance.
+## Deployed Version
 
-## Features
+A deployed version of the AI in Hand Platform is always available at [https://platform.ainhand.com](https://platform.ainhand.com).
+Feel free to explore and interact with the platform without setting it up locally.
 
-- **Skill Configuration**: Offers extensive flexibility in managing skills with specific codes and parameters for varied tasks.
-- **Agent Configuration**: Allows detailed setup of agents with specialized knowledge areas and skillsets.
-- **Agency Configuration**: Facilitates the creation and management of agencies composed of configured agents.
-- **Skill Execution**: Executes skills within an established framework for accomplishing a wide range of tasks.
-- **User Management**: User access management features for interaction with different agencies.
-- **API and WebSocket Routers**: Lays down a comprehensive set of API endpoints and WebSocket routes for external interactions and real-time communications.
-- **Security**: Basic implementation of Firebase Auth for user authentication with plans for further enhancements.
+## Getting Started
 
-## Installation
+To set up the AI in Hand Platform locally, follow these steps:
 
-Follow these steps for setting up the environment and running the AI in Hand Platform locally:
+1. Clone the repository:
+   ```
+   git clone https://github.com/AI-in-Hand/platform.git
+   ```
 
-1. Ensure Python 3.11+ and Node.js 20.10+ are installed.
-2. Install Python dependencies either from `requirements.txt` or using Poetry.
-3. Configure environment variables in ".env", taking ".env.testing" as a reference point (used only for local development).
-4. To set up the frontend:
-   - For local development: `npm install && npm run start`
-   - For production: `npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build` (builds to backend/ui/ directory to be served by FastAPI)
+2. Set up the backend:
+   - Go to the `backend` directory.
+   - Install the required dependencies:
+     ```bash
+     pip install -r requirements.txt
+     ```
+     or, for development purposes:
+     ```bash
+     poetry install
+     ```
+   - Set up the necessary environment variables (see `.env.testing`, rename it to `.env`).
+   - Run the application:
+     ```bash
+     uvicorn main:app --reload
+     ```
+   - The backend API will be accessible at `http://localhost:8000`.
 
-### Running the Application
+3. Set up the frontend:
+   - Go to the `frontend` directory.
+   - Install the necessary dependencies:
+     ```bash
+     npm install
+     ```
+   - Set up the environment variables (see `.env.default`, rename it to `.env.development`).
+   - Start the development server:
+     ```bash
+     yarn start
+     ```
+   - The frontend application will be accessible at `http://localhost:3000`.
 
-Start the FastAPI server with: `uvicorn backend.main:app --reload`
+For more details on running and developing the backend and frontend, refer to their respective README files:
+- [Backend README](backend/README.md)
+- [Frontend README](frontend/README.md)
 
-## Deployment to Heroku
+## Backend
 
-1. Update `requirements.txt` with `poetry export --without dev --without-hashes > requirements.txt`.
-All further steps are unnecessary if you are using GitHub Actions for deployment.
-2. Log in to Heroku with `heroku login`.
-3. Set up Heroku remote: `heroku git:remote -a ainhand`.
-4. Deploy: `git push heroku main`.
-5. Scale up: `heroku ps:scale web=1`.
-6. View logs: `heroku logs --tail`.
+The backend of the AI in Hand Platform is built using FastAPI and provides various functionalities,
+including managing agencies, agents, skills, sessions, and user secrets.
+It integrates with Google Firestore database for persistence of agency configurations, and Redis for caching agency states.
 
-## Usage
+For detailed information on the backend, including project structure, API documentation, custom skills,
+and contributing guidelines, please refer to the [Backend README](backend/README.md).
 
-### API Endpoints
+## Frontend
 
-The provided Postman collection encompasses all the necessary routes and variables, facilitating extensive testing and interaction with the platform.
+The frontend of the AI in Hand Platform is built using React and provides a user-friendly interface for interacting
+with the platform. It leverages Gatsby for fast setup and rich configurations, TailwindCSS for styling,
+and Ant Design for UI components.
 
-### WebSocket Communication
-
-Outlines the process for establishing WebSocket connections (`/ws/{user_id}/{agency_id}/{session_id}`) for real-time interactions.
+For detailed information on the frontend, including running the UI in dev mode, codebase overview, design elements,
+modifying the UI, adding pages, and connecting to the backend, please refer to the [Frontend README](frontend/README.md).
 
 ## Contributing
 
-We welcome contributions from the open-source community! If you'd like to contribute to the AI in Hand Platform, please follow these steps:
+We welcome contributions from the community to improve the AI in Hand Platform. To contribute:
 
-1. Fork the repository
-2. Create a new branch for your feature or bug fix
-3. Make your changes and commit them with descriptive commit messages
-4. Push your changes to your forked repository
-5. Submit a pull request to the main repository
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them with descriptive messages.
+4. Push your changes to your forked repository.
+5. Submit a pull request to the main repository.
 
-Please ensure that your code adheres to the project's coding standards and includes appropriate tests.
-
-## Areas for Improvement
-
-Enhance exception handling, security measures, documentation quality (e.g. docstrings), testing robustness.
+Please ensure your code follows the project's coding standards and includes appropriate tests.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+The AI in Hand Platform is licensed under the [MIT License](LICENSE).
 
 ## Disclaimer
 
-Please note that this is an open-source project and is currently in active development. While we strive to maintain a high level of quality, there may be bugs or issues present. Use at your own risk.
+This is an open-source project under active development.
+While we strive for quality, there may be bugs or issues. Use at your own risk.
+
+If you have any questions or need assistance, feel free to reach out to our team. Happy coding!

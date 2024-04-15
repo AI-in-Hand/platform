@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     redis_tls_url: RedisDsn | None = Field(default=None)
     redis_url: RedisDsn = Field(default="redis://localhost:6379/1")
     secret_key: str = Field(default="")
-    system_openai_api_key: str | None = Field(default=None)
     encryption_key: bytes = Field(default=b"")
 
     model_config = SettingsConfigDict(env_file=".env")

@@ -16,17 +16,6 @@ USER_PROMPT = "In one succinct sentence, describe the functionality of the skill
 logger = logging.getLogger(__name__)
 
 
-def generate_skill_description(code: str):
-    summary = get_chat_completion(
-        system_message=SKILL_SUMMARY_SYSTEM_MESSAGE,
-        user_prompt=f"{USER_PROMPT}```\n{code}\n```",
-        temperature=0.0,
-        model=settings.gpt_small_model,
-        api_key=settings.system_openai_api_key,
-    )
-    return summary
-
-
 class SkillService:
     SYSTEM_MESSAGE = """\
 You are an assistant that responds with JSON only. You are presented with a user prompt and a function specification, \

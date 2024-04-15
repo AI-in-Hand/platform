@@ -99,7 +99,6 @@ def test_approve_skill(skill_config_data, client, mock_firestore_client):
     assert updated_config["approved"] is True
 
 
-@patch("backend.routers.api.v1.skill.generate_skill_description", MagicMock(return_value="Test description"))
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_update_skill_config_success(skill_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)

@@ -18,7 +18,7 @@ from backend.models.response_models import (
 )
 from backend.models.skill_config import SkillConfig
 from backend.repositories.skill_config_storage import SkillConfigStorage
-from backend.services.skill_service import SkillService, generate_skill_description
+from backend.services.skill_service import SkillService
 
 logger = logging.getLogger(__name__)
 skill_router = APIRouter(tags=["skill"])
@@ -92,9 +92,6 @@ async def create_skill_version(
     config.version = skill_config_db.version + 1 if skill_config_db else 1
     config.approved = False
     config.timestamp = datetime.now(UTC).isoformat()
-
-    if not config.description and config.content:
-        config.description = generate_skill_description(config.content)
 
     skill_id, skill_version = storage.save(config)
     # TODO: return the list of skills
