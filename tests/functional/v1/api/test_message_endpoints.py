@@ -55,7 +55,7 @@ def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_clien
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 403
-    assert response.json()["detail"] == "Forbidden"
+    assert response.json()["detail"] == "You don't have permissions to access this agency"
     mock_get_agency.assert_not_called()
 
 
@@ -128,4 +128,4 @@ def test_get_message_list_unauthorized(client, mock_firestore_client):
 
     response = client.get("/api/v1/message/list?session_id=test_session_id")
     assert response.status_code == 403
-    assert response.json()["detail"] == "Forbidden"
+    assert response.json()["detail"] == "You don't have permissions to access this session"

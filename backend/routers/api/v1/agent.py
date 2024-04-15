@@ -53,7 +53,7 @@ async def get_agent_config(
     # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")
     config_for_api = adapter.to_api(config)
     return GetAgentResponse(data=config_for_api)
 

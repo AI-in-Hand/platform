@@ -155,7 +155,9 @@ class AgencyManager:
                 raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Agent not found: {agent_id}")
             if agent_flow_spec.user_id != current_user_id:
                 logger.warning(f"User {current_user_id} does not have permissions to use agent {agent_id}")
-                raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+                raise HTTPException(
+                    status_code=HTTPStatus.FORBIDDEN, detail=f"You don't have permissions to use agent {agent_id}"
+                )
         # FIXME: current limitation: all agents must belong to the current user.
         # to fix: If the agent is a template (agent_flow_spec.user_id is None), it should be copied for the current user
         # (reuse the code from api/agent.py)
@@ -166,7 +168,9 @@ class AgencyManager:
         # check if the current_user has permissions
         if config_db.user_id != current_user_id:
             logger.warning(f"User {current_user_id} does not have permissions to update agency {config_db.id}")
-            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to update this agency"
+            )
 
     @staticmethod
     def _remove_client_objects(agency: Agency) -> Agency:

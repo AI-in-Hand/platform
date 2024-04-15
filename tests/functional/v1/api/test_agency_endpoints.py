@@ -102,7 +102,7 @@ def test_get_agency_config_user_id_mismatch(client, mock_firestore_client):
 
     response = client.get("/api/v1/agency?id=agency1")
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to access this agency"}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -181,7 +181,7 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
     response = client.put("/api/v1/agency", json=new_data)
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to update this agency"}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -207,7 +207,7 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_
     response = client.put("/api/v1/agency", json=new_data)
     # Check if the server responds with a 403 Forbidden
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to use agent sender_agent_id"}
     # Check if the agency config was not updated
     assert mock_firestore_client.collection("agency_configs").to_dict() == db_agency
 
@@ -266,4 +266,4 @@ def test_delete_agency_user_id_mismatch(client, mock_firestore_client):
 
     response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to delete this agency"}

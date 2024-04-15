@@ -50,7 +50,7 @@ async def get_agency_config(
     # check if the current_user has permissions to get the agency config
     if agency_config.user_id and agency_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to get agency {id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)
@@ -93,7 +93,7 @@ async def delete_agency(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if db_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to delete agency {id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to delete this agency")
 
     await manager.delete_agency(id)
 

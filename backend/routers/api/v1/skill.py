@@ -58,7 +58,7 @@ async def get_skill_config(
     # check if the current_user has permissions to get the skill config
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to get the skill: {config.id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill")
     return GetSkillResponse(data=config)
 
 
@@ -84,7 +84,9 @@ async def create_skill_version(
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
         if skill_config_db.user_id != current_user.id:
             logger.warning(f"User {current_user.id} does not have permissions to update the skill: {config.id}")
-            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill"
+            )
 
     # Ensure the skill is associated with the current user
     config.user_id = current_user.id
@@ -112,7 +114,7 @@ async def delete_skill(
 
     if db_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to delete the skill: {id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill")
 
     storage.delete(id)
     # TODO: return the list of skills
@@ -154,7 +156,7 @@ async def execute_skill(
     # check if the current_user has permissions to execute the skill
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to execute the skill: {config.id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill")
 
     # check if the skill is approved
     if not config.approved:

@@ -41,7 +41,9 @@ async def get_message_list(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access session {session_id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session"
+        )
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
@@ -83,7 +85,7 @@ async def post_message(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
     if agency_config.user_id != user_id:
         logger.warning(f"User {user_id} does not have permissions to access agency {agency_id}")
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     # Set the user_id and agency_id in the context variables
     ContextEnvVarsManager.set("user_id", user_id)

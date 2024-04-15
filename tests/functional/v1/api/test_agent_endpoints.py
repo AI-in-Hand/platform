@@ -114,7 +114,7 @@ def test_update_agent_user_id_mismatch(client, mock_agent_data_api, mock_agent_d
     response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to access this agent"}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -159,4 +159,4 @@ def test_delete_agent_user_id_mismatch(client, mock_agent_data_db, mock_firestor
     response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"detail": "You don't have permissions to access this agent"}

@@ -64,7 +64,9 @@ class AgentManager:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
         if config.user_id != current_user.id:
             logger.warning(f"User {current_user.id} does not have permissions to access agent: {agent_id}")
-            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent"
+            )
         self.storage.delete(agent_id)
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
@@ -107,7 +109,9 @@ class AgentManager:
     def _validate_agent_ownership(config: AgentFlowSpec, config_db: AgentFlowSpec, current_user_id: str) -> None:
         if config_db.user_id != current_user_id:
             logger.warning(f"User {current_user_id} does not have permissions to access agent: {config.id}")
-            raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent"
+            )
 
     @staticmethod
     def _validate_agent_name(config: AgentFlowSpec, config_db: AgentFlowSpec, current_user_id: str) -> None:

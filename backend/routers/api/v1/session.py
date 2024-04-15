@@ -55,7 +55,7 @@ async def create_session(
         logger.warning(
             f"User {current_user.id} does not have permissions to create a session for the agency: {agency_id}"
         )
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
