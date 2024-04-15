@@ -60,10 +60,7 @@ class AgentManager:
         config = self.storage.load_by_id(agent_id)
         if not config:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-        if config.user_id != current_user_id:
-            raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent"
-            )
+        self._validate_agent_ownership(config, current_user_id)
         self.storage.delete(agent_id)
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
@@ -71,13 +68,11 @@ class AgentManager:
         if not config:
             logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
             return None
-
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
 
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""
-
         # FIXME: a workaround explained at the top of the file api/agent.py
         if not config.config.name.endswith(f" ({config.user_id})"):
             config.config.name = f"{config.config.name} ({config.user_id})"
@@ -116,12 +111,14 @@ class AgentManager:
 
     @staticmethod
     def _validate_skills(skills: list[str], skills_db: list[SkillConfig]) -> None:
-        # check if all skills are supported
-        if unsupported_skills := set(skills) - set(SKILL_MAPPING.keys()):
+        # Check if all skills are supported
+        unsupported_skills = set(skills) - set(SKILL_MAPPING.keys())
+        if unsupported_skills:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not supported: {unsupported_skills}"
             )
-        # check if all skills are approved
+
+        # Check if all skills are approved
         unapproved_skills = set(skills) - {skill.title for skill in skills_db if skill.approved}
         if unapproved_skills:
             raise HTTPException(
