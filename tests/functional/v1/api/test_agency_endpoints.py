@@ -115,17 +115,14 @@ def test_create_agency_success(client, mock_agent, agency_adapter, mock_firestor
     }
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
     with patch(
-        "backend.services.agency_manager.AgencyManager.update_or_create_agency", new_callable=AsyncMock
+        "backend.services.agency_manager.AgencyManager.handle_agency_creation_or_update", new_callable=AsyncMock
     ) as mock_update_or_create_agency:
         mock_update_or_create_agency.return_value = TEST_AGENCY_ID
         response = client.put("/api/v1/agency", json=template_config)
     assert response.status_code == 200
     assert isinstance(response.json()["data"], list)  # TODO: check the response data more thoroughly
     model_template_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
-    model_template_config.user_id = TEST_USER_ID
-    model_template_config.id = None
-    model_template_config.timestamp = mock.ANY
-    mock_update_or_create_agency.assert_called_once_with(model_template_config)
+    mock_update_or_create_agency.assert_called_once_with(model_template_config, TEST_USER_ID)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

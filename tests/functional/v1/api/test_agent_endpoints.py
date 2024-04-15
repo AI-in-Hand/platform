@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -90,6 +91,9 @@ def test_update_agent_success(client, mock_agent_data_api, mock_agent_data_db, m
         "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
     )
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    expected_data = mock_agent_data_api.copy()
+    expected_data["config"]["name"] = "ExampleRole (test_user_id)"
+    expected_data["timestamp"] = mock.ANY
 
     with patch("backend.services.agent_manager.AgentManager") as mock_agent_manager:
         mock_agent_manager.return_value = AsyncMock()
@@ -98,7 +102,7 @@ def test_update_agent_success(client, mock_agent_data_api, mock_agent_data_db, m
         response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 200
-    assert response.json()["data"] == {"id": AGENT_ID}
+    assert response.json()["data"] == [expected_data]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -142,7 +146,8 @@ def test_delete_agent_success(client, mock_agent_data_db, mock_firestore_client)
         response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 200
-    assert response.json() == {"status": True, "message": "Agent configuration deleted"}
+    assert response.json()["data"] == []
+    assert response.json()["message"] == "Agent configuration deleted"
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

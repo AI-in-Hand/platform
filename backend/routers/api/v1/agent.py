@@ -10,10 +10,7 @@ from backend.dependencies.dependencies import get_agent_adapter, get_agent_manag
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
-    BaseResponse,
-    CreateAgentData,
-    CreateAgentResponse,
-    GetAgentListResponse,
+    AgentListResponse,
     GetAgentResponse,
 )
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
@@ -33,19 +30,19 @@ agent_router = APIRouter(tags=["agent"])
 @agent_router.get("/agent/list")
 async def get_agent_list(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
+    adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
+    manager: AgentManager = Depends(get_agent_manager),
     owned_by_user: bool = Query(False, description="Filter agents owned by the current user"),
-    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
-) -> GetAgentListResponse:
-    configs = storage.load_by_user_id(current_user.id) + (storage.load_by_user_id(None) if not owned_by_user else [])
-    configs_for_api = [agent_adapter.to_api(config) for config in configs]
-    return GetAgentListResponse(data=configs_for_api)
+) -> AgentListResponse:
+    configs = await manager.get_agent_list(current_user.id, owned_by_user=owned_by_user)
+    configs_for_api = [adapter.to_api(config) for config in configs]
+    return AgentListResponse(data=configs_for_api)
 
 
 @agent_router.get("/agent")
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
+    adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
     storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
 ) -> GetAgentResponse:
@@ -57,33 +54,37 @@ async def get_agent_config(
     if config.user_id and config.user_id != current_user.id:
         logger.warning(f"User {current_user.id} does not have permissions to access agent: {id}")
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-    config_for_api = agent_adapter.to_api(config)
+    config_for_api = adapter.to_api(config)
     return GetAgentResponse(data=config_for_api)
 
 
 @agent_router.put("/agent")
 async def create_or_update_agent(
     current_user: Annotated[User, Depends(get_current_user)],
-    agent_adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
+    adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     config: AgentFlowSpecForAPI = Body(...),
-    agent_manager: AgentManager = Depends(get_agent_manager),
-) -> CreateAgentResponse:
+    manager: AgentManager = Depends(get_agent_manager),
+) -> AgentListResponse:
     # Transform the API model to the internal model
-    internal_config = agent_adapter.to_model(config)
+    internal_config = adapter.to_model(config)
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    agent_id = await agent_manager.handle_agent_creation_or_update(internal_config, current_user)
+    agent_id = await manager.handle_agent_creation_or_update(internal_config, current_user.id)
 
-    return CreateAgentResponse(data=CreateAgentData(id=agent_id))
+    configs = await manager.get_agent_list(current_user.id)
+    configs_for_api = [adapter.to_api(config) for config in configs]
+    return AgentListResponse(message=f"Agent configuration {agent_id} created/updated", data=configs_for_api)
 
 
 @agent_router.delete("/agent")
 async def delete_agent(
     current_user: Annotated[User, Depends(get_current_user)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    agent_manager: AgentManager = Depends(get_agent_manager),
-) -> BaseResponse:
-    await agent_manager.delete_agent(id, current_user)
-    return BaseResponse(message="Agent configuration deleted")
+    manager: AgentManager = Depends(get_agent_manager),
+) -> AgentListResponse:
+    await manager.delete_agent(id, current_user)
+
+    configs_for_api = await manager.get_agent_list(current_user.id)
+    return AgentListResponse(message="Agent configuration deleted", data=configs_for_api)

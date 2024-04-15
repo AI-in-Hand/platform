@@ -87,7 +87,7 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     with patch.object(
         agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
     ) as mock_repopulate:
-        id_ = await agency_manager.update_or_create_agency(agency_config)
+        id_ = await agency_manager._update_or_create_agency(agency_config)
 
     mock_repopulate.assert_called_once_with(TEST_AGENCY_ID)
     assert id_ == TEST_AGENCY_ID
@@ -97,13 +97,9 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
 @pytest.mark.asyncio
 async def test_repopulate_cache_no_config(agency_manager, caplog):
     caplog.set_level("ERROR")
-    with patch("asyncio.to_thread", new_callable=AsyncMock) as mock_async_to_thread:
-        mock_async_to_thread.return_value = None
-
-        result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id", None)
-        assert result is None
-        mock_async_to_thread.assert_called_once()
-        assert "Agency with id nonexistent_agency_id not found." in caplog.text
+    result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id", None)
+    assert result is None
+    assert "Agency with id nonexistent_agency_id not found." in caplog.text
 
 
 @pytest.mark.asyncio

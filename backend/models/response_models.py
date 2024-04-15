@@ -42,20 +42,12 @@ class ExecuteSkillResponse(BaseResponse):
 # Agents API
 
 
-class GetAgentListResponse(BaseResponse):
+class AgentListResponse(BaseResponse):
     data: list[AgentFlowSpecForAPI] = Field(..., description="The list of agent configurations.")
 
 
 class GetAgentResponse(BaseResponse):
     data: AgentFlowSpecForAPI = Field(..., description="The agent configuration.")
-
-
-class CreateAgentData(BaseModel):
-    id: str = Field(..., description="The unique identifier of the agent.")
-
-
-class CreateAgentResponse(BaseResponse):
-    data: CreateAgentData = Field(..., description="The data to be returned.")
 
 
 # =================================================================================================
