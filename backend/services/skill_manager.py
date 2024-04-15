@@ -15,7 +15,7 @@ class SkillManager:
         self.storage = storage
 
     def get_skill_list(self, current_user_id: str) -> list[SkillConfig]:
-        """Get a list of configs for all skills."""
+        """Get a list of configs for the skills owned by the current user and template (public) skills."""
         return self.storage.load_by_user_id(current_user_id) + self.storage.load_by_user_id(None)
 
     def get_skill_config(self, id_: str) -> SkillConfig:
@@ -26,8 +26,11 @@ class SkillManager:
         return config_db
 
     def create_skill_version(self, config: SkillConfig, current_user_id: str) -> tuple[str, int]:
-        """Create a new version of the skill configuration.
-        NOTE: currently this endpoint is not fully supported.
+        """Create a new version of a skill configuration.
+
+        :param config: The new skill configuration.
+        :param current_user_id: The ID of the current user.
+        :return: A tuple containing the ID and version of the new skill configuration.
         """
         config_db = None
 

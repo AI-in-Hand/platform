@@ -50,7 +50,12 @@ class AgentManager:
         config.user_id = current_user_id
         config.timestamp = datetime.now(UTC).isoformat()
 
-        skills_db = self.skill_storage.load_by_titles(config.skills)
+        # Validate skills
+        skills_db = []
+        for i in range(0, len(config.skills), 10):
+            skills_db_batch = self.skill_storage.load_by_titles(config.skills[i : i + 10])
+            skills_db.extend(skills_db_batch)
+
         self._validate_skills(config.skills, skills_db)
 
         return await self._create_or_update_agent(config)
@@ -121,7 +126,7 @@ class AgentManager:
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not supported: {unsupported_skills}"
             )
         # check if all skills are approved
-        unapproved_skills = set(skills) - {skill.title for skill in skills_db}
+        unapproved_skills = set(skills) - {skill.title for skill in skills_db if skill.approved}
         if unapproved_skills:
             raise HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST, detail=f"Some skills are not approved: {unapproved_skills}"

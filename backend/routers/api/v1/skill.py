@@ -35,7 +35,7 @@ async def get_skill_list(
     current_user: Annotated[User, Depends(get_current_user)],
     manager: SkillManager = Depends(get_skill_manager),
 ) -> SkillListResponse:
-    """Get a list of configs for all skills."""
+    """Get a list of configs for the skills the current user has access to."""
     skills = manager.get_skill_list(current_user.id)
     return SkillListResponse(data=skills)
 
@@ -54,7 +54,7 @@ async def get_skill_config(
     return GetSkillResponse(data=config)
 
 
-@skill_router.post("/skill")
+@skill_router.put("/skill")
 async def create_skill_version(
     current_user: Annotated[User, Depends(get_current_user)],
     config: SkillConfig = Body(...),

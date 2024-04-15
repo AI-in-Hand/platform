@@ -106,7 +106,7 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
     skill_config_data = skill_config_data.copy()
     skill_config_data["title"] = "Skill 1 Updated"
     skill_config_data["content"] = 'print("Hello World Updated")'
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 200
     assert len(response.json()["data"]) == 1
     assert response.json()["data"][0]["id"] == "skill1"
@@ -125,7 +125,7 @@ def test_update_skill_config_user_id_mismatch(skill_config_data, client, mock_fi
 
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
 
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 403
     assert response.json() == {"data": {"message": "You don't have permissions to access this skill"}}
 
@@ -136,7 +136,7 @@ def test_update_skill_config_not_found(skill_config_data, client, mock_firestore
 
     skill_config_data = skill_config_data.copy()
     skill_config_data["id"] = "nonexistent_skill"
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 404
     assert response.json() == {"data": {"message": "Skill not found"}}
 

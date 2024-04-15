@@ -105,7 +105,7 @@ const SkillsView = ({}: any) => {
     setLoading(true);
     // const fetch;
     const payLoad = {
-      method: "POST",
+      method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
