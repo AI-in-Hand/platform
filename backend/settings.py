@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     gpt_small_model: str = Field(default=SMALL_GPT_MODEL)
     redis_tls_url: RedisDsn | None = Field(default=None)
     redis_url: RedisDsn = Field(default="redis://localhost:6379/1")
-    secret_key: str = Field(default="")
     encryption_key: bytes = Field(default=b"")
 
     model_config = SettingsConfigDict(env_file=".env")

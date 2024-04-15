@@ -1,6 +1,6 @@
 {
   "name": "ai-in-hand",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "description": "Root package.json for Heroku deployment",
   "private": true,
   "scripts": {

@@ -58,7 +58,6 @@ poetry install
 
 - `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line).
 - `REDIS_TLS_URL` (recommended) or `REDIS_URL`: URL for your Redis instance.
-- `SECRET_KEY`: A secret key for JWT token generation.
 - `ENCRYPTION_KEY`: A key for encrypting and decrypting sensitive data. See `test_encryption_service.py` for key generation.
 
 5. Run the application:
