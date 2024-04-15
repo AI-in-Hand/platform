@@ -129,8 +129,9 @@ const SkillsView = ({}: any) => {
       setLoading(false);
     };
     // TODO: enable saving skills (currently disabled)
-    message.info("Saving skills is disabled for now. Coming soon!");
     // fetchJSON(saveSkillsUrl, payLoad, onSuccess, onError);
+    message.info("Saving skills is disabled for now. Coming soon!");
+    setLoading(false);  // remove this line when saving is enabled
   };
 
   React.useEffect(() => {
