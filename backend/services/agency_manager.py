@@ -65,11 +65,11 @@ class AgencyManager:
             if not config_db:
                 logger.warning(f"Agency not found: {config.id}, user: {current_user_id}")
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-            self._validate_agency_ownership(config, config_db, current_user_id)
-        await self._validate_agents_ownership(config, current_user_id)
+            self._validate_agency_ownership(config_db, current_user_id)
+        await self._validate_agent_ownership(config.agents, current_user_id)
 
         # Ensure the agency is associated with the current user
-        config.user_id = config.user_id
+        config.user_id = current_user_id
         config.timestamp = datetime.now(UTC).isoformat()
 
         return await self._update_or_create_agency(config)
@@ -145,9 +145,10 @@ class AgencyManager:
         await self.repopulate_cache_and_update_assistants(id_)
         return id_
 
-    async def _validate_agents_ownership(self, config: AgencyConfig, current_user_id: str) -> None:
+    async def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
+        """Validate the agent ownership. It will check if the current user has permissions to use the agents."""
         # check that all used agents belong to the current user
-        for agent_id in config.agents:
+        for agent_id in agents:
             agent_flow_spec = self.agent_manager.storage.load_by_id(agent_id)
             if not agent_flow_spec:
                 logger.error(f"Agent not found: {agent_id}, user: {current_user_id}")
@@ -160,12 +161,11 @@ class AgencyManager:
         # (reuse the code from api/agent.py)
 
     @staticmethod
-    def _validate_agency_ownership(config: AgencyConfig, config_db: AgencyConfig, current_user_id: str) -> None:
-        """Validate the agency ownership. It will check if the current user has permissions to update the agency.
-        It will also check if all agents belong to the current user."""
+    def _validate_agency_ownership(config_db: AgencyConfig, current_user_id: str) -> None:
+        """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
         # check if the current_user has permissions
         if config_db.user_id != current_user_id:
-            logger.warning(f"User {current_user_id} does not have permissions to update agency {config.id}")
+            logger.warning(f"User {current_user_id} does not have permissions to update agency {config_db.id}")
             raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
 
     @staticmethod

@@ -81,10 +81,12 @@ async def create_or_update_agent(
 @agent_router.delete("/agent")
 async def delete_agent(
     current_user: Annotated[User, Depends(get_current_user)],
+    adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
     manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
     await manager.delete_agent(id, current_user)
 
-    configs_for_api = await manager.get_agent_list(current_user.id)
+    configs = await manager.get_agent_list(current_user.id)
+    configs_for_api = [adapter.to_api(config) for config in configs]
     return AgentListResponse(message="Agent configuration deleted", data=configs_for_api)
