@@ -27,8 +27,8 @@ These instructions will help you set up the project on your local machine for de
 - Google Cloud Platform account
 - Firestore database
 - Google service account JSON file
-- OpenAI API key
-- Redis (for caching)
+- OpenAI API key (set up in the UI)
+- Redis instance
 
 ### Installation
 
