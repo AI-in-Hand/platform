@@ -20,6 +20,13 @@ class AgentFlowSpecStorage:
         return AgentFlowSpec.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def load_by_ids(self, ids: list[str]) -> list[AgentFlowSpec]:
+        agent_configs = []
+        for i in range(0, len(ids), 10):
+            agent_configs_batch = self._load_by_ids(ids[i : i + 10])
+            agent_configs.extend(agent_configs_batch)
+        return agent_configs
+
+    def _load_by_ids(self, ids: list[str]) -> list[AgentFlowSpec]:
         collection = self.db.collection(self.collection_name)
         # Firestore `in` query supports up to 10 items in the array.
         if len(ids) > 10:

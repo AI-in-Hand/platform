@@ -51,11 +51,7 @@ class AgentManager:
         config.timestamp = datetime.now(UTC).isoformat()
 
         # Validate skills
-        skills_db = []
-        for i in range(0, len(config.skills), 10):
-            skills_db_batch = self.skill_storage.load_by_titles(config.skills[i : i + 10])
-            skills_db.extend(skills_db_batch)
-
+        skills_db = self.skill_storage.load_by_titles(config.skills)
         self._validate_skills(config.skills, skills_db)
 
         return await self._create_or_update_agent(config)

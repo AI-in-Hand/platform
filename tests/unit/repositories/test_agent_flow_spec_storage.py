@@ -95,7 +95,7 @@ def test_load_agent_flow_spec_by_ids_exceeds_max_size(mock_storage):
     ids = ["agent1"] * 11
 
     with pytest.raises(ValueError) as excinfo:
-        mock_storage.load_by_ids(ids)
+        mock_storage._load_by_ids(ids)
 
     assert "IDs list exceeds the maximum size of 10 for an 'in' query in Firestore." in str(excinfo.value)
 

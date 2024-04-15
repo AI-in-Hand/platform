@@ -20,6 +20,13 @@ class SkillConfigStorage:
         return SkillConfig.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None
 
     def load_by_titles(self, titles: list[str]) -> list[SkillConfig]:
+        skills_db = []
+        for i in range(0, len(titles), 10):
+            skills_db_batch = self._load_by_titles(titles[i : i + 10])
+            skills_db.extend(skills_db_batch)
+        return skills_db
+
+    def _load_by_titles(self, titles: list[str]) -> list[SkillConfig]:
         collection = self.db.collection(self.collection_name)
         # Firestore `in` query supports up to 10 items in the array.
         if len(titles) > 10:
