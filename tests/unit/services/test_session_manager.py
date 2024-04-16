@@ -83,7 +83,7 @@ def test_create_threads(mock_get_openai_client, session_manager, agency_mock):
 def test_init_threads(session_manager, agency_mock, agent_mock, recipient_agent_mock):
     client_mock = MagicMock()
     agency_mock.agents_and_threads = {
-        agent_mock: {recipient_agent_mock: None},
+        agent_mock: {"agent": recipient_agent_mock, "recipient_agent": agent_mock},
     }
     agency_mock.agents = {agent_mock: agent_mock, recipient_agent_mock: recipient_agent_mock}
     agency_mock.user = agent_mock
@@ -93,11 +93,17 @@ def test_init_threads(session_manager, agency_mock, agent_mock, recipient_agent_
         session_manager._init_threads(agency_mock, client_mock)
 
     # Verify _create_thread is called for each agent pair and for the user-ceo main thread
-    expected_calls = [
-        call(agent_mock, recipient_agent_mock, client_mock),
-        call(agent_mock, recipient_agent_mock, client_mock),  # Main thread
-    ]
-    mock_create_thread.assert_has_calls(expected_calls, any_order=True)
+    mock_create_thread.assert_has_calls(
+        [
+            call(agent_mock, recipient_agent_mock, client_mock),
+            call(
+                agency_mock._get_agent_by_name(agent_mock),
+                agency_mock._get_agent_by_name(recipient_agent_mock),
+                client_mock,
+            ),
+        ],
+        any_order=True,
+    )
 
 
 @patch("backend.services.session_manager.Thread")

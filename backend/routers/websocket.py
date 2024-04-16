@@ -35,7 +35,7 @@ async def websocket_session_endpoint(
     await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
-    agency = await agency_manager.get_agency(agency_id, session_id)
+    agency = await agency_manager.get_agency(agency_id)
     if not agency:
         await connection_manager.send_message("Agency not found", websocket)
         await connection_manager.disconnect(websocket)

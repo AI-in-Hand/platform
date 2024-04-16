@@ -58,13 +58,11 @@ async def create_session(
 
     logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
 
-    agency = await agency_manager.get_agency(agency_id, None)
+    agency = await agency_manager.get_agency(agency_id)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
-
-    await agency_manager.cache_agency(agency, agency_id, session_id)
 
     sessions = session_storage.load_by_user_id(current_user.id)
     sessions_for_api = [session_adapter.to_api(session) for session in sessions]

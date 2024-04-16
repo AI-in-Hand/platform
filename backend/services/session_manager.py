@@ -44,14 +44,15 @@ class SessionManager:
         :param agency: The agency for which threads are to be initialized.
         :param client: The OpenAI client object.
         """
-        for sender, recipients in agency.agents_and_threads.items():
-            for recipient in recipients:
-                agency.agents_and_threads[sender][recipient] = self._create_thread(
-                    agency.agents[sender],
-                    agency.agents[recipient],
+        agency.main_thread = self._create_thread(agency.user, agency.ceo, client)
+
+        for agent_name, threads in agency.agents_and_threads.items():
+            for other_agent, items in threads.items():
+                agency.agents_and_threads[agent_name][other_agent] = self._create_thread(
+                    agency._get_agent_by_name(items["agent"]),
+                    agency._get_agent_by_name(items["recipient_agent"]),
                     client,
                 )
-        agency.main_thread = self._create_thread(agency.user, agency.ceo, client)
 
     def _create_thread(self, agent: Agent, recipient_agent: Agent, client) -> Thread:
         """

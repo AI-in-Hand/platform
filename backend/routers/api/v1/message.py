@@ -89,7 +89,7 @@ async def post_message(
 
     logger.debug(f"Received a message: *** for agency_id: {agency_id}, session_id: {session_id}")
 
-    agency = await agency_manager.get_agency(agency_id, session_id)
+    agency = await agency_manager.get_agency(agency_id)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 

@@ -49,12 +49,11 @@ def get_agent_manager(
 
 
 def get_agency_manager(
-    cache_manager: RedisCacheManager = Depends(get_redis_cache_manager),
     agent_manager: AgentManager = Depends(get_agent_manager),
     agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
 ) -> AgencyManager:
-    return AgencyManager(cache_manager, agent_manager, agency_config_storage, user_secret_manager)
+    return AgencyManager(agent_manager, agency_config_storage, user_secret_manager)
 
 
 def get_session_manager(

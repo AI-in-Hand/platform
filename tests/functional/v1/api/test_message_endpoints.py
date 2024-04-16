@@ -31,7 +31,7 @@ def test_post_message_success(client, mock_get_agency, mock_firestore_client, me
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
     assert response.json()["data"] == {"content": "Hello, world!"}
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
+    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID)
 
 
 # Agency configuration not found
@@ -73,7 +73,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
     assert response.status_code == 500
     assert response.json()["data"]["message"] == "Something went wrong"
 
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
+    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID)
 
 
 @pytest.fixture

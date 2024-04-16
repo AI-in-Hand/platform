@@ -40,7 +40,6 @@ def test_create_session_success(client, mock_firestore_client):
         patch.object(
             SessionManager, "_create_threads", MagicMock(return_value="new_session_id")
         ) as mock_create_threads,
-        patch.object(AgencyManager, "cache_agency", AsyncMock()) as mock_cache_agency,
     ):
         # mock Firestore to pass the security user_id check
         mock_firestore_client.setup_mock_data(
@@ -59,9 +58,8 @@ def test_create_session_success(client, mock_firestore_client):
                 "flow_config": mock.ANY,
             }
         ]
-        mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
+        mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID)
         mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
-        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")
 
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {

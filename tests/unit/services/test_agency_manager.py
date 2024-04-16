@@ -16,7 +16,6 @@ from tests.testing_utils.constants import TEST_AGENCY_ID
 @pytest.mark.usefixtures("mock_firestore_client")
 def agency_manager():
     yield AgencyManager(
-        cache_manager=MagicMock(),
         agent_manager=MagicMock(),
         agency_config_storage=AgencyConfigStorage(),
         user_secret_manager=get_user_secret_manager(user_secret_storage=UserSecretStorage()),
@@ -42,33 +41,13 @@ async def test_get_agency_list(agency_manager, mock_firestore_client):
 
 
 @pytest.mark.asyncio
-async def test_get_agency_from_cache(agency_manager):
-    with (
-        patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get,
-        patch.object(agency_manager, "_set_client_objects", new_callable=Mock),
-    ):
-        mock_get.return_value = MagicMock(spec=Agency)
-
+async def test_get_agency_construct_agency(agency_manager):
+    with patch.object(
+        agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
+    ) as mock_construct:
         agency = await agency_manager.get_agency(TEST_AGENCY_ID)
         assert agency is not None
-        mock_get.assert_called_once_with(TEST_AGENCY_ID)
-
-
-@pytest.mark.asyncio
-async def test_get_agency_repopulate_cache(agency_manager):
-    with (
-        patch.object(agency_manager.cache_manager, "get", new_callable=AsyncMock) as mock_get,
-        patch.object(
-            agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
-        ) as mock_repopulate,
-        patch.object(agency_manager, "_set_client_objects", new_callable=Mock),
-    ):
-        mock_get.side_effect = [None, MagicMock(spec=Agency)]
-
-        agency = await agency_manager.get_agency(TEST_AGENCY_ID)
-        assert agency is not None
-        mock_get.assert_called_with(TEST_AGENCY_ID)
-        mock_repopulate.assert_called_once_with(TEST_AGENCY_ID, None)
+        mock_construct.assert_called_once_with(TEST_AGENCY_ID)
 
 
 @pytest.mark.asyncio
@@ -85,25 +64,25 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     agency_config.shared_instructions = "New manifesto"
 
     with patch.object(
-        agency_manager, "repopulate_cache_and_update_assistants", new_callable=AsyncMock
-    ) as mock_repopulate:
+        agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
+    ) as mock_construct:
         id_ = await agency_manager._update_or_create_agency(agency_config)
 
-    mock_repopulate.assert_called_once_with(TEST_AGENCY_ID)
+    mock_construct.assert_called_once_with(TEST_AGENCY_ID)
     assert id_ == TEST_AGENCY_ID
     assert mock_firestore_client.to_dict()["shared_instructions"] == "New manifesto"
 
 
 @pytest.mark.asyncio
-async def test_repopulate_cache_no_config(agency_manager, caplog):
+async def test_construct_agency_no_config(agency_manager, caplog):
     caplog.set_level("ERROR")
-    result = await agency_manager.repopulate_cache_and_update_assistants("nonexistent_agency_id", None)
+    result = await agency_manager._construct_agency_and_update_assistants("nonexistent_agency_id")
     assert result is None
     assert "Agency with id nonexistent_agency_id not found." in caplog.text
 
 
 @pytest.mark.asyncio
-async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
+async def test_construct_agency_success(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
@@ -119,18 +98,14 @@ async def test_repopulate_cache_success(agency_manager, mock_firestore_client):
             "backend.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
         ) as mock_load_agents,
         patch("backend.services.agency_manager.AgencyManager.construct_agency") as mock_construct_agency,
-        patch(
-            "backend.services.agency_manager.AgencyManager.cache_agency", new_callable=AsyncMock
-        ) as mock_cache_agency,
     ):
         mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
         mock_construct_agency.return_value = MagicMock(spec=Agency)
 
-        await agency_manager.repopulate_cache_and_update_assistants(TEST_AGENCY_ID, None)
+        await agency_manager._construct_agency_and_update_assistants(TEST_AGENCY_ID)
         mock_load_agents.assert_called_once_with(agency_config)
         mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})
-        mock_cache_agency.assert_called_once_with(mock_construct_agency.return_value, TEST_AGENCY_ID, None)
 
 
 # Test successful agent construction
@@ -218,20 +193,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
 
 
 @pytest.mark.asyncio
-async def test_set_client_objects(agency_manager):
-    mock_agency = MagicMock()
-    mock_client = MagicMock()
-    with patch("backend.services.agency_manager.get_openai_client", return_value=mock_client) as mock_get_client:
-        agency_manager._set_client_objects(mock_agency)
-        mock_get_client.assert_called_once()
-        assert mock_agency.main_thread.client == mock_client
-
-
-@pytest.mark.asyncio
 async def test_delete_agency(agency_manager, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID})
-    with patch.object(agency_manager, "delete_agency_from_cache", new_callable=AsyncMock) as mock_delete_cache:
-        await agency_manager.delete_agency(TEST_AGENCY_ID)
-
-    mock_delete_cache.assert_called_once_with(TEST_AGENCY_ID, None)
+    await agency_manager.delete_agency(TEST_AGENCY_ID)
     assert mock_firestore_client.to_dict() == {}
