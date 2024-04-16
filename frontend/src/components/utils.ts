@@ -236,8 +236,8 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
   };
 
   const workFlowConfig: IFlowConfig = {
-    name: "Default Agent Workflow",
-    description: "Default Agent Workflow",
+    name: "Default Agent Team",
+    description: "Default Agent Team",
     sender: null,
     receiver: null,
     type: "twoagents",

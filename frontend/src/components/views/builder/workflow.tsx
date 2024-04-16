@@ -324,7 +324,7 @@ const WorkflowView = ({}: any) => {
           <div className="flex mt-2 pb-2 mb-2 border-b">
             <div className="flex-1 font-semibold  mb-2 ">
               {" "}
-              Workflows ({workflowRows.length}){" "}
+              Teams ({workflowRows.length}){" "}
             </div>
             <div className=" ">
               <div
@@ -337,14 +337,14 @@ const WorkflowView = ({}: any) => {
                 <LaunchButton className=" text-sm p-2 px-3" onClick={addWorkflowOnClick}>
                   {" "}
                   <PlusIcon className="w-5 h-5 inline-block mr-1" />
-                  New Workflow
+                  New Team
                 </LaunchButton>
               </div>
             </div>
           </div>
           <div className="text-xs mb-2 pb-1  ">
             {" "}
-            Configure an agent workflow that can be used to handle tasks.
+            Configure an agent team that can be used to handle tasks.
           </div>
           {workflows && workflows.length > 0 && (
             <div

@@ -1581,9 +1581,9 @@ export const FlowConfigViewer = ({
     <>
       {/* <div className="mb-2">{flowConfig.name}</div> */}
       <ControlRowView
-        title="Workflow Name"
+        title="Team Name"
         className="mt-4 mb-2"
-        description="Name of the workflow"
+        description="Name of the team"
         value={localFlowConfig.name}
         control={
           <Input
@@ -1595,9 +1595,9 @@ export const FlowConfigViewer = ({
       />
 
       <ControlRowView
-        title="Workflow Description"
+        title="Team Description"
         className="mt-4 mb-2"
-        description="Description of the workflow"
+        description="Description of the team"
         value={localFlowConfig.description}
         control={
           <Input

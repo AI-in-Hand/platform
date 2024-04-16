@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "ai-in-hand"
 version = "0.1.0"
-description = "A FastAPI app to manage swarm agency configurations."
+description = "A FastAPI app to manage AI teams."
 authors = [
     "AI in Hand <hello@ainhand.com>"
 ]
@@ -27,7 +27,7 @@ redis = ">=5.0.1"
 tiktoken = ">=0.6.0"
 uvicorn = {extras = ["standard"], version = ">=0.29.0"}
 # a dependency from a GitHub repository
-agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", branch = "main" }
+agency-swarm = { git = "https://github.com/VRSEN/agency-swarm.git", rev = "v0.1.7" }
 
 [tool.poetry.group.dev.dependencies]
 poetry-plugin-export = ">=1.6.0"

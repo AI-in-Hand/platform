@@ -118,7 +118,7 @@ const UserVariables = () => {
       <section aria-labelledby="note-important">
         <h2 id="note-important">Important Note</h2>
         <p>
-          Set the <code>OPENAI_API_KEY</code> variable to use agencies (workflows).
+          Set the <code>OPENAI_API_KEY</code> variable to use teams.
         </p>
       </section>
 

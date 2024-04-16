@@ -98,7 +98,7 @@ const AgentsWorkflowView = () => {
         )}
         <div className="mt-2 text-xs">
           {" "}
-          View all workflows{" "}
+          View all teams{" "}
           <span className="text-accent">
             {" "}
             <Link to="/build">here</Link>
@@ -109,7 +109,7 @@ const AgentsWorkflowView = () => {
         (workflowConfigs && workflowConfigs.length === 0 && (
           <div className="p-1 border rounded text-xs px-2 text-secondary">
             {" "}
-            No agent workflows found.
+            No agent teams found.
           </div>
         ))}
     </div>
