@@ -8,7 +8,7 @@ from fastapi.params import Query
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_session_adapter, get_session_manager
 from backend.models.auth import User
-from backend.models.response_models import SessionListResponse
+from backend.models.response_models import CreateSessionResponse, SessionListResponse
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.adapters.session_adapter import SessionAdapter
@@ -44,7 +44,7 @@ async def create_session(
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     session_manager: SessionManager = Depends(get_session_manager),
-) -> SessionListResponse:
+) -> CreateSessionResponse:
     """Create a new session for the given agency and return a list of all sessions for the current user."""
     # check if the current_user has permissions to create a session for the agency
     agency_config_db = agency_storage.load_by_id(agency_id)
@@ -68,7 +68,7 @@ async def create_session(
 
     sessions = session_storage.load_by_user_id(current_user.id)
     sessions_for_api = [session_adapter.to_api(session) for session in sessions]
-    return SessionListResponse(data=sessions_for_api)
+    return CreateSessionResponse(data=sessions_for_api, session_id=session_id, message="Session created successfully")
 
 
 @session_router.delete("/session")

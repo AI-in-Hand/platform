@@ -61,6 +61,11 @@ class SessionListResponse(BaseResponse):
     data: list[SessionConfigForAPI] = Field(..., description="The list of session configurations.")
 
 
+class CreateSessionResponse(BaseResponse):
+    data: list[SessionConfigForAPI] = Field(..., description="The list of session configurations.")
+    session_id: str = Field(..., description="The unique identifier of the session.")
+
+
 # =================================================================================================
 # Message API
 
