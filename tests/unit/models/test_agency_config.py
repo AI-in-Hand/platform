@@ -17,7 +17,7 @@ def test_invalid_list_size_in_agency_chart():
             name="Test agency",
             agents=["Agent1", "Agent2", "Agent3"],
             main_agent="CEO",
-            agency_chart={0: ["CEO"]},
+            agency_chart={"0": ["CEO"]},
         )
     assert "List should have at least 2 items after validation" in str(excinfo.value)
 
@@ -30,7 +30,7 @@ def test_main_agent_not_in_agency_chart():
             name="Test agency",
             agents=["Agent1", "Agent2"],
             main_agent="CEO",
-            agency_chart={0: ["Agent1", "Agent2"]},
+            agency_chart={"0": ["Agent1", "Agent2"]},
         )
     assert "The main agent must be in the agency chart" in str(excinfo.value)
 
@@ -43,7 +43,7 @@ def test_duplicate_agents_in_agency_chart():
             name="Test agency",
             agents=["Agent1", "Agent2"],
             main_agent="CEO",
-            agency_chart={0: ["CEO", "CEO"]},
+            agency_chart={"0": ["CEO", "CEO"]},
         )
     assert "Chart row must be unique" in str(excinfo.value)
 
@@ -54,7 +54,7 @@ def test_main_agent_not_set():
             id="123",
             name="Test agency",
             agents=["Agent1", "Agent2"],
-            agency_chart={0: ["Agent1", "Agent2"]},
+            agency_chart={"0": ["Agent1", "Agent2"]},
             main_agent=None,
         )
     assert "Main agent must be set if agency chart is not empty" in str(excinfo.value)

@@ -48,7 +48,7 @@ def test_get_agency_list_success(client, mock_firestore_client, agency_adapter):
         name="Test agency",
         main_agent="Sender Agent",
         agents=["sender_agent_id", "receiver_agent_id"],
-        agency_chart={0: ["Sender Agent", "Receiver Agent"]},
+        agency_chart={"0": ["Sender Agent", "Receiver Agent"]},
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency.model_dump())
     mock_firestore_client.setup_mock_data(

@@ -23,14 +23,14 @@ class AgencyAdapter:
         Converts the `sender` and `receiver` fields from AgencyConfigForAPI objects into fields:
         - `agents` with a list of IDs
         - `main_agent` and `agency_chart` with names of the agents.
-        agency_chart has a form: {0: [sender_name, receiver_name]}.
+        agency_chart has a form: {"0": [sender_name, receiver_name]}.
         """
         sender = [agency_config.sender.id] if agency_config.sender else []
         receiver = [agency_config.receiver.id] if agency_config.receiver else []
         agents = sender + receiver
         # TODO: support multiple rows in the agency_chart (not implemented in the frontend)
         agency_chart = (
-            {0: [agency_config.sender.config.name, agency_config.receiver.config.name]}
+            {"0": [agency_config.sender.config.name, agency_config.receiver.config.name]}
             if agency_config.sender and agency_config.receiver
             else {}
         )
@@ -55,7 +55,7 @@ class AgencyAdapter:
         agent_list = self.agent_flow_spec_storage.load_by_ids(agency_config.agents)
         agents = {agent.config.name: agent for agent in agent_list}
         sender = agents[agency_config.main_agent] if agency_config.main_agent else None
-        receiver = agents[agency_config.agency_chart[0][1]] if agency_config.agency_chart else None
+        receiver = agents[agency_config.agency_chart["0"][1]] if agency_config.agency_chart else None
 
         agency_config_dict = agency_config.model_dump()
         agency_config_dict["sender"] = self.agent_adapter.to_api(sender) if sender else None
