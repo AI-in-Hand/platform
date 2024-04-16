@@ -45,7 +45,7 @@ def test_get_skill_config_forbidden(skill_config_data, client, mock_firestore_cl
 
     response = client.get(f"/api/v1/skill?id={skill_config_data['id']}")
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"data": {"message": "You don't have permissions to access this skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -53,7 +53,7 @@ def test_get_skill_config_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.get(f"/api/v1/skill?id={skill_id}")
     assert response.status_code == 404
-    assert response.json() == {"detail": "Skill not found"}
+    assert response.json() == {"data": {"message": "Skill not found"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -62,7 +62,7 @@ def test_delete_skill_success(skill_config_data, client, mock_firestore_client):
 
     response = client.delete("/api/v1/skill?id=skill1")
     assert response.status_code == 200
-    assert response.json() == {"status": True, "message": "Skill configuration deleted"}
+    assert response.json() == {"status": True, "message": "Skill configuration deleted", "data": []}
 
     # Verify if the skill configuration is deleted in the mock Firestore client
     assert mock_firestore_client.to_dict() == {}
@@ -75,7 +75,7 @@ def test_delete_skill_forbidden(skill_config_data, client, mock_firestore_client
 
     response = client.delete("/api/v1/skill?id=skill1")
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"data": {"message": "You don't have permissions to access this skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -83,7 +83,7 @@ def test_delete_skill_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.delete(f"/api/v1/skill?id={skill_id}")
     assert response.status_code == 404
-    assert response.json() == {"detail": "Skill not found"}
+    assert response.json() == {"data": {"message": "Skill not found"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_superuser")
@@ -106,9 +106,11 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
     skill_config_data = skill_config_data.copy()
     skill_config_data["title"] = "Skill 1 Updated"
     skill_config_data["content"] = 'print("Hello World Updated")'
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 200
-    assert response.json()["data"] == {"id": "skill1", "version": 2}
+    assert len(response.json()["data"]) == 1
+    assert response.json()["data"][0]["id"] == "skill1"
+    assert response.json()["message"] == "Version 2 of the skill skill1 created"
 
     # Verify if the skill configuration is updated in the mock Firestore client
     updated_config = SkillConfigStorage().load_by_id("skill1")
@@ -123,9 +125,9 @@ def test_update_skill_config_user_id_mismatch(skill_config_data, client, mock_fi
 
     mock_firestore_client.setup_mock_data("skill_configs", "skill1", skill_config_data)
 
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"data": {"message": "You don't have permissions to access this skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -134,13 +136,13 @@ def test_update_skill_config_not_found(skill_config_data, client, mock_firestore
 
     skill_config_data = skill_config_data.copy()
     skill_config_data["id"] = "nonexistent_skill"
-    response = client.post("/api/v1/skill", json=skill_config_data)
+    response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 404
-    assert response.json() == {"detail": "Skill not found"}
+    assert response.json() == {"data": {"message": "Skill not found"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-@patch("backend.services.skill_service.SkillService.execute_skill", MagicMock(return_value="Execution result"))
+@patch("backend.services.skill_executor.SkillExecutor.execute_skill", MagicMock(return_value="Execution result"))
 def test_execute_skill_success(skill_config_data, client, mock_firestore_client):
     skill_config_data["approved"] = True
     mock_firestore_client.setup_mock_data("skill_configs", skill_config_data["id"], skill_config_data)
@@ -155,7 +157,7 @@ def test_execute_skill_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.post("/api/v1/skill/execute", json={"id": skill_id, "user_prompt": "test prompt"})
     assert response.status_code == 404
-    assert response.json() == {"detail": "Skill not found"}
+    assert response.json() == {"data": {"message": "Skill not found"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -164,4 +166,4 @@ def test_execute_skill_not_approved(skill_config_data, client, mock_firestore_cl
 
     response = client.post("/api/v1/skill/execute", json={"id": "skill1", "user_prompt": "test prompt"})
     assert response.status_code == 403
-    assert response.json() == {"detail": "Skill not approved"}
+    assert response.json() == {"data": {"message": "Skill not approved"}}

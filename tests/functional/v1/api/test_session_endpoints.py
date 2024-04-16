@@ -77,7 +77,7 @@ def test_create_session_agency_not_found(client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
         response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
-        assert response.json() == {"detail": "Agency not found"}
+        assert response.json() == {"data": {"message": "Agency not found"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

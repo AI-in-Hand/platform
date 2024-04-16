@@ -1,4 +1,5 @@
-from unittest.mock import AsyncMock, patch
+from unittest import mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -90,15 +91,14 @@ def test_update_agent_success(client, mock_agent_data_api, mock_agent_data_db, m
         "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
     )
     mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    expected_data = mock_agent_data_api.copy()
+    expected_data["config"]["name"] = "ExampleRole (test_user_id)"
+    expected_data["timestamp"] = mock.ANY
 
-    with patch("backend.services.agent_manager.AgentManager") as mock_agent_manager:
-        mock_agent_manager.return_value = AsyncMock()
-        mock_agent_manager.return_value.create_or_update_agent.return_value = AGENT_ID
-
-        response = client.put("/api/v1/agent", json=mock_agent_data_api)
+    response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 200
-    assert response.json()["data"] == {"id": AGENT_ID}
+    assert response.json()["data"] == [expected_data]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -110,7 +110,27 @@ def test_update_agent_user_id_mismatch(client, mock_agent_data_api, mock_agent_d
     response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"data": {"message": "You don't have permissions to access this agent"}}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_create_agent_from_template(client, mock_agent_data_api, mock_firestore_client, caplog):
+    caplog.set_level("INFO")
+    mock_firestore_client.setup_mock_data(
+        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+    )
+    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_agent_data_api["user_id"] = None
+
+    with patch("backend.services.agent_manager.AgentManager._construct_agent") as mock_construct_agent:
+        mock_construct_agent.return_value = Mock(id=AGENT_ID)
+
+        response = client.put("/api/v1/agent", json=mock_agent_data_api)
+
+    assert response.status_code == 200
+    assert response.json()["data"][0]["id"] == AGENT_ID
+    assert response.json()["data"][0]["config"]["name"] == "ExampleRole (test_user_id)"
+    assert "Creating agent for user: test_user_id, agent: ExampleRole" in caplog.text
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -128,7 +148,20 @@ def test_update_agent_invalid_skill(client, mock_agent_data_api, mock_agent_data
         response = client.put("/api/v1/agent", json=mock_agent_data_api)
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "Some skills are not supported: {'NonExistentSkill'}"}
+    assert response.json() == {"data": {"message": "Some skills are not supported: {'NonExistentSkill'}"}}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_update_agent_unapproved_skill(client, mock_agent_data_api, mock_agent_data_db, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("agent_configs", AGENT_ID, mock_agent_data_db)
+    mock_agent_data_api["skills"] = [
+        SkillConfig(title="SearchWeb", approved=False).model_dump(),
+    ]
+
+    response = client.put("/api/v1/agent", json=mock_agent_data_api)
+
+    assert response.status_code == 400
+    assert response.json() == {"data": {"message": "Some skills are not approved: {'SearchWeb'}"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -142,7 +175,8 @@ def test_delete_agent_success(client, mock_agent_data_db, mock_firestore_client)
         response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 200
-    assert response.json() == {"status": True, "message": "Agent configuration deleted"}
+    assert response.json()["data"] == []
+    assert response.json()["message"] == "Agent configuration deleted"
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -154,4 +188,4 @@ def test_delete_agent_user_id_mismatch(client, mock_agent_data_db, mock_firestor
     response = client.delete(f"/api/v1/agent?id={AGENT_ID}")
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+    assert response.json() == {"data": {"message": "You don't have permissions to access this agent"}}

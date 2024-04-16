@@ -57,7 +57,7 @@ const SkillsView = ({}: any) => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        fetchSkills();
+        setSkills(data.data);
       } else {
         message.error(data.message);
       }
@@ -105,7 +105,7 @@ const SkillsView = ({}: any) => {
     setLoading(true);
     // const fetch;
     const payLoad = {
-      method: "POST",
+      method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -117,7 +117,7 @@ const SkillsView = ({}: any) => {
       if (data && data.status) {
         message.success(data.message);
         // console.log("skills", data.data);
-        fetchSkills();
+        setSkills(data.data);
       } else {
         message.error(data.message);
       }

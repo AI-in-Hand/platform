@@ -95,7 +95,7 @@ def test_load_skill_config_by_titles_exceeds_max_size(mock_storage):
     titles = ["Example Skill"] * 11
 
     with pytest.raises(ValueError) as excinfo:
-        mock_storage.load_by_titles(titles)
+        mock_storage._load_by_titles(titles)
 
     assert "Titles list exceeds the maximum size of 10 for an 'in' query in Firestore." in str(excinfo.value)
 
