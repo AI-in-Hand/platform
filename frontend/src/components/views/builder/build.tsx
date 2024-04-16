@@ -52,7 +52,7 @@ const BuildView = () => {
               label: (
                 <>
                   <UserGroupIcon className="h-4 w-4 inline-block mr-1" />
-                  Workflows
+                  Teams
                 </>
               ),
               key: "4",
