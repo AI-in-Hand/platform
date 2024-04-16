@@ -1,5 +1,6 @@
 import openai
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
@@ -13,6 +14,7 @@ from backend.exception_handlers import (  # noqa  # isort:skip
     pydantic_validation_error_handler,
     http_exception_handler,
     unhandled_exception_handler,
+    request_validation_error_handler,
 )
 
 from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
@@ -45,6 +47,7 @@ folders = init_webserver_folders(root_file_path=BASE_DIR)
 api_app = FastAPI(root_path="/api")
 api_app.include_router(v1_router)
 api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler)
+api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)
 

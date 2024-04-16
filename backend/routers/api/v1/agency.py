@@ -73,7 +73,7 @@ async def update_or_create_agency(
 
     agencies = await manager.get_agency_list(current_user.id)
     agencies_for_api = [adapter.to_api(agency) for agency in agencies]
-    return AgencyListResponse(message="Agency updated", data=agencies_for_api)
+    return AgencyListResponse(message="Saved", data=agencies_for_api)
 
 
 @agency_router.delete("/agency")

@@ -69,11 +69,11 @@ async def create_or_update_agent(
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    agent_id = await manager.handle_agent_creation_or_update(internal_config, current_user.id)
+    await manager.handle_agent_creation_or_update(internal_config, current_user.id)
 
     configs = await manager.get_agent_list(current_user.id)
     configs_for_api = [adapter.to_api(config) for config in configs]
-    return AgentListResponse(message=f"Agent configuration {agent_id} created/updated", data=configs_for_api)
+    return AgentListResponse(message="Saved", data=configs_for_api)
 
 
 @agent_router.delete("/agent")

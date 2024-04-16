@@ -2,6 +2,7 @@ import logging
 from http import HTTPStatus
 
 from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
@@ -11,9 +12,20 @@ logger = logging.getLogger(__name__)
 def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
     logger.exception(f"request: {request} exc: {exc}")
+    error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
-        content={"data": {"message": exc.errors()}},
+        content={"data": {"message": f"Validation error: {error_message}"}},
+    )
+
+
+def request_validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    # Log the exception for debugging purposes
+    logger.exception(f"request: {request} exc: {exc}")
+    error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
+    return JSONResponse(
+        status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+        content={"data": {"message": f"Validation error: {error_message}"}},
     )
 
 

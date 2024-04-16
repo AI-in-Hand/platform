@@ -79,10 +79,13 @@ export function fetchJSON(
         );
         response.json().then(function (data) {
           console.log("Error data", data);
-        });
-        onError({
-          status: false,
-          message: "Connection error " + response.status + " " + response.statusText,
+          const errorMessage = data?.data?.message
+            ? data?.data?.message
+            : "Error: " + response.status + " " + response.statusText;
+          onError({
+            status: false,
+            message: errorMessage,
+          });
         });
         return;
       }
