@@ -16,7 +16,7 @@ def mock_get_agency():
 
 @pytest.fixture
 def message_data():
-    return {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "content": "Hello, world!", "role": "user"}
+    return {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "content": "Hello, world!"}
 
 
 # Successful message sending

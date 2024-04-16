@@ -244,7 +244,6 @@ const ChatBox = ({
     const messagePayload: IMessage = {
       agency_id: workflowConfig.id,
       session_id: session?.id || "",
-      role: "user",
       content: query,
     };
 
