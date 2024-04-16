@@ -42,8 +42,7 @@ class AgencyManager:
 
         if not agency:
             # If agency is not found in the cache, re-populate the cache
-            await self.repopulate_cache_and_update_assistants(id_, session_id)
-            agency = await self.cache_manager.get(cache_key)
+            agency = await self.repopulate_cache_and_update_assistants(id_, session_id)
             if not agency:
                 logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
                 return None
@@ -73,10 +72,13 @@ class AgencyManager:
 
         return await self._update_or_create_agency(config)
 
-    async def repopulate_cache_and_update_assistants(self, agency_id: str, session_id: str | None = None) -> None:
+    async def repopulate_cache_and_update_assistants(
+        self, agency_id: str, session_id: str | None = None
+    ) -> Agency | None:
         """Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants), and saves the Agency instance to Redis
         (with expiration period, see constants.DEFAULT_CACHE_EXPIRATION).
+        Returns the cached Agency instance if successful, otherwise None.
         """
         agency_config = self.storage.load_by_id(agency_id)
         if not agency_config:
@@ -86,7 +88,8 @@ class AgencyManager:
         agents = await self.load_and_construct_agents(agency_config)
         agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
 
-        await self.cache_agency(agency, agency_id, session_id)
+        cached_agency = await self.cache_agency(agency, agency_id, session_id)
+        return cached_agency
 
     async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
         agents = {}
@@ -115,11 +118,12 @@ class AgencyManager:
 
         return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)
 
-    async def cache_agency(self, agency: Agency, agency_id: str, session_id: str | None) -> None:
+    async def cache_agency(self, agency: Agency, agency_id: str, session_id: str | None) -> Agency:
         """Cache the agency."""
         cache_key = self.get_cache_key(agency_id, session_id)
         agency_clean = self._remove_client_objects(agency)
         await self.cache_manager.set(cache_key, agency_clean)
+        return agency_clean
 
     async def delete_agency(self, agency_id: str) -> None:
         """Delete the agency from the Firestore and the cache."""
