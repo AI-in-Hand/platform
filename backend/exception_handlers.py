@@ -4,6 +4,7 @@ from http import HTTPStatus
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,15 @@ def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse
     return JSONResponse(
         status_code=exc.status_code,
         content={"data": {"message": exc.detail}},
+    )
+
+
+def openai_authentication_error_handler(request: Request, exc: OpenAIAuthenticationError) -> JSONResponse:
+    # Log the exception for debugging purposes
+    logger.exception(f"request: {request} exc: {exc}")
+    return JSONResponse(
+        status_code=HTTPStatus.UNAUTHORIZED,
+        content={"data": {"message": exc.message}},
     )
 
 

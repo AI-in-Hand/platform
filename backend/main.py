@@ -2,6 +2,7 @@ import openai
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
@@ -15,6 +16,7 @@ from backend.exception_handlers import (  # noqa  # isort:skip
     http_exception_handler,
     unhandled_exception_handler,
     request_validation_error_handler,
+    openai_authentication_error_handler,
 )
 
 from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
@@ -49,6 +51,7 @@ api_app.include_router(v1_router)
 api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler)
 api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
+api_app.add_exception_handler(OpenAIAuthenticationError, openai_authentication_error_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # mount an api route such that the main route serves the ui and the /api
