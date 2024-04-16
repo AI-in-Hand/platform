@@ -261,7 +261,7 @@ const WorkflowView = ({}: any) => {
       <Modal
         title={
           <>
-            Workflow Specification{" "}
+            Team Specification{" "}
             <span className="text-accent font-normal">
               {localWorkflow?.name}
             </span>{" "}
@@ -358,7 +358,7 @@ const WorkflowView = ({}: any) => {
           {workflows && workflows.length === 0 && !loading && (
             <div className="text-sm border mt-4 rounded text-secondary p-2">
               <InformationCircleIcon className="h-4 w-4 inline mr-1" />
-              No workflows found. Please create a new workflow.
+              No teams found. Please create a new team.
             </div>
           )}
           {loading && (

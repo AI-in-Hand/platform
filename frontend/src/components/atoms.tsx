@@ -1597,7 +1597,7 @@ export const FlowConfigViewer = ({
       <ControlRowView
         title="Team Description"
         className="mt-4 mb-2"
-        description="Description of the team"
+        description="Description of the team (optional)"
         value={localFlowConfig.description}
         control={
           <Input
@@ -1617,7 +1617,7 @@ export const FlowConfigViewer = ({
           />
         </div>
         <div className="w-1/2">
-          <div className="mb-2">Receiver</div>
+          <div className="mb-2">Receiver (optional)</div>
           <AgentSelector
             flowSpec={receiverFlowSpec}
             setFlowSpec={updateReceiverFlowSpec}

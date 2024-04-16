@@ -10,7 +10,7 @@ class AgencyConfig(BaseModel):
     name: str = Field(..., description="Name of the agency")
     description: str = Field("", description="Description of the agency")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
-    shared_instructions: str = Field("", description="Agency Manifesto")
+    shared_instructions: str = Field("", description="Agency Manifesto")  # TODO: support in the frontend
     agents: list[str] = Field(default_factory=list, description="List of agent IDs used in the agency chart")
     main_agent: str | None = Field(None, description="The main agent name")  # TODO: change to just str
     agency_chart: dict[int, conlist(str, min_length=2, max_length=2)] = Field(  # type: ignore
