@@ -1,8 +1,6 @@
 import * as React from "react";
 import { Tabs } from "antd";
-import {
-  RocketIcon,
-} from "@heroicons/react/24/outline";
+import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 
 const DeployView = () => {
   return (
@@ -15,7 +13,7 @@ const DeployView = () => {
           {
             label: (
               <div className="w-full">
-                <RocketIcon className="h-4 w-4 inline-block mr-1" />
+                <RocketLaunchIcon className="h-4 w-4 inline-block mr-1" />
                 Deploy
               </div>
             ),
