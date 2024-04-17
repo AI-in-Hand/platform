@@ -6,7 +6,7 @@ import DeployView from "../components/views/deploy/deploy";
 // markup
 const IndexPage = ({ data }: any) => {
   return (
-    <Layout meta={data.site.siteMetadata} title="Home" link={"/deploy"}>
+    <Layout meta={data.site.siteMetadata} title="Deploy" link={"/deploy"}>
       <main style={{ height: "100%" }} className=" h-full ">
         <DeployView />
       </main>
