@@ -11,7 +11,7 @@ for UI layout and customizable components.
 
 - **Configuration Management**: Centrally manage configurations for agencies, agents, and skills.
 - **Custom Skills**: Extend AI agents with specialized skills.
-- **Persistence and Caching**: Use Firestore for configuration persistence, and Redis for caching agency states.
+- **Persistence and Caching**: Use Firestore for configuration persistence.
 - **API and WebSocket**: Interact with the platform through API endpoints and WebSocket for real-time communication.
 - **Security**: Authenticate users with Firebase Authentication and encrypt user secrets.
 
@@ -67,7 +67,7 @@ For more details on running and developing the backend and frontend, refer to th
 
 The backend of the AI in Hand Platform is built using FastAPI and provides various functionalities,
 including managing agencies, agents, skills, sessions, and user secrets.
-It integrates with Google Firestore database for persistence of agency configurations, and Redis for caching agency states.
+It integrates with Google Firestore database for persistence of agency configurations.
 
 For detailed information on the backend, including project structure, API documentation, custom skills,
 and contributing guidelines, please refer to the [Backend README](backend/README.md).

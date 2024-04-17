@@ -28,7 +28,6 @@ These instructions will help you set up the project on your local machine for de
 - Firestore database
 - Google service account JSON file
 - OpenAI API key (set up in the UI)
-- Redis instance
 
 ### Installation
 
@@ -57,7 +56,6 @@ poetry install
 4. Set up the necessary environment variables (see .env.testing, rename it to .env):
 
 - `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line).
-- `REDIS_TLS_URL` (recommended) or `REDIS_URL`: URL for your Redis instance.
 - `ENCRYPTION_KEY`: A key for encrypting and decrypting sensitive data. See `test_encryption_service.py` for key generation.
 
 5. Run the application:
