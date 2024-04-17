@@ -6,7 +6,7 @@ import BuildView from "../components/views/builder/build";
 // markup
 const IndexPage = ({ data }: any) => {
   return (
-    <Layout meta={data.site.siteMetadata} title="Home" link={"/build"}>
+    <Layout meta={data.site.siteMetadata} title="Build" link={"/build"}>
       <main style={{ height: "100%" }} className=" h-full ">
         <BuildView />
       </main>

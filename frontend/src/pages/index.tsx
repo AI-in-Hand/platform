@@ -6,7 +6,7 @@ import RAView from "../components/views/test/ra";
 // markup
 const IndexPage = ({ data }: any) => {
   return (
-    <Layout meta={data.site.siteMetadata} title="Home" link={"/"}>
+    <Layout meta={data.site.siteMetadata} title="Test" link={"/"}>
       <main style={{ height: "100%" }} className=" h-full ">
         <RAView />
       </main>
