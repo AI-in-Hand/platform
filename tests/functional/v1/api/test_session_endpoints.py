@@ -15,6 +15,7 @@ def session_config_data():
         "id": "test_session_id",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
+        "thread_ids": {},
         "timestamp": "2021-10-01T00:00:00Z",
     }
 
@@ -35,13 +36,8 @@ def test_get_session_list(session_config_data, client, mock_firestore_client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_success(client, mock_firestore_client):
-    with (
-        patch.object(AgencyManager, "get_agency", AsyncMock(return_value=MagicMock())) as mock_get_agency,
-        patch.object(
-            SessionManager, "_create_threads", MagicMock(return_value="new_session_id")
-        ) as mock_create_threads,
-        patch.object(AgencyManager, "cache_agency", AsyncMock()) as mock_cache_agency,
-    ):
+    with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=MagicMock())) as mock_get_agency:
+        mock_get_agency.return_value.main_thread.id = "new_session_id"
         # mock Firestore to pass the security user_id check
         mock_firestore_client.setup_mock_data(
             "agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID, "name": "Test agency", "user_id": TEST_USER_ID}
@@ -54,20 +50,20 @@ def test_create_session_success(client, mock_firestore_client):
             {
                 "agency_id": TEST_AGENCY_ID,
                 "id": "new_session_id",
+                "thread_ids": mock.ANY,
                 "timestamp": mock.ANY,
                 "user_id": TEST_USER_ID,
                 "flow_config": mock.ANY,
             }
         ]
-        mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, None)
-        mock_create_threads.assert_called_once_with(mock_get_agency.return_value)
-        mock_cache_agency.assert_awaited_once_with(mock_get_agency.return_value, TEST_AGENCY_ID, "new_session_id")
+        mock_get_agency.assert_awaited_once_with(TEST_AGENCY_ID, thread_ids={})
 
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {
             "id": "new_session_id",
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
+            "thread_ids": {},
             "timestamp": mock.ANY,
         }
 

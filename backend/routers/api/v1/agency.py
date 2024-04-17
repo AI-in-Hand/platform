@@ -56,7 +56,7 @@ async def get_agency_config(
 
 
 @agency_router.put("/agency", status_code=HTTPStatus.OK)
-async def update_or_create_agency(
+async def create_or_update_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     config: AgencyConfigForAPI = Body(...),

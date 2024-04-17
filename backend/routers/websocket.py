@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Any
 
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
@@ -30,12 +31,13 @@ async def websocket_session_endpoint(
     """WebSocket endpoint for maintaining conversation with a specific session.
     Send messages to and from CEO of the given agency."""
 
-    # TODO: Add authentication: check if agency_id is valid for the given user_id
+    # TODO: Add authentication: check if the user can access the agency
 
     await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
-    agency = await agency_manager.get_agency(agency_id, session_id)
+    thread_ids: dict[str, Any] = {}  # for chat persistence, need to save/load these thread_ids
+    agency = await agency_manager.get_agency(agency_id, thread_ids)
     if not agency:
         await connection_manager.send_message("Agency not found", websocket)
         await connection_manager.disconnect(websocket)

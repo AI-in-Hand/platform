@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_manager, get_user_secret_manager
+from backend.dependencies.dependencies import get_agency_manager, get_session_manager, get_user_secret_manager
 from backend.models.auth import User
 from backend.models.message import Message
 from backend.models.response_models import MessagePostData, MessagePostResponse
@@ -16,6 +16,7 @@ from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.oai_client import get_openai_client
+from backend.services.session_manager import SessionManager
 from backend.services.user_secret_manager import UserSecretManager
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ async def get_message_list(
 ) -> list[Message]:
     """Return a list of last 20 messages for the given session."""
     # check if the current_user has permissions to send a message to the agency
-    session_config = session_storage.load_by_session_id(session_id)
+    session_config = session_storage.load_by_id(session_id)
     if not session_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.user_id != current_user.id:
@@ -68,6 +69,7 @@ async def post_message(
     current_user: Annotated[User, Depends(get_current_user)],
     request: Message,
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    session_manager: SessionManager = Depends(get_session_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> MessagePostResponse:
     """Send a message to the User Proxy of the given agency."""
@@ -89,7 +91,10 @@ async def post_message(
 
     logger.debug(f"Received a message: *** for agency_id: {agency_id}, session_id: {session_id}")
 
-    agency = await agency_manager.get_agency(agency_id, session_id)
+    session_config = session_manager.get_session(session_id)
+    if not session_config:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
+    agency = await agency_manager.get_agency(agency_id, thread_ids=session_config.thread_ids)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 

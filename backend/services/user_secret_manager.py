@@ -49,7 +49,7 @@ class UserSecretManager:
         all_secrets = secret_names.union(self.DEFAULT_SECRET_NAMES)
         return sorted(all_secrets)
 
-    def update_or_create_secrets(self, user_id: str, secrets: dict[str, str]) -> None:
+    def create_or_update_secrets(self, user_id: str, secrets: dict[str, str]) -> None:
         """Update or create secrets for a user.
         :param user_id: The ID of the user whose secrets are being updated.
         :param secrets: A dictionary containing the secrets to be updated or created.

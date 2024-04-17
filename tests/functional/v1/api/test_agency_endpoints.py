@@ -48,7 +48,7 @@ def test_get_agency_list_success(client, mock_firestore_client, agency_adapter):
         name="Test agency",
         main_agent="Sender Agent",
         agents=["sender_agent_id", "receiver_agent_id"],
-        agency_chart={0: ["Sender Agent", "Receiver Agent"]},
+        agency_chart={"0": ["Sender Agent", "Receiver Agent"]},
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency.model_dump())
     mock_firestore_client.setup_mock_data(
@@ -116,13 +116,13 @@ def test_create_agency_success(client, mock_agent, agency_adapter, mock_firestor
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
     with patch(
         "backend.services.agency_manager.AgencyManager.handle_agency_creation_or_update", new_callable=AsyncMock
-    ) as mock_update_or_create_agency:
-        mock_update_or_create_agency.return_value = TEST_AGENCY_ID
+    ) as mock_create_or_update_agency:
+        mock_create_or_update_agency.return_value = TEST_AGENCY_ID
         response = client.put("/api/v1/agency", json=template_config)
     assert response.status_code == 200
     assert isinstance(response.json()["data"], list)  # TODO: check the response data more thoroughly
     model_template_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
-    mock_update_or_create_agency.assert_called_once_with(model_template_config, TEST_USER_ID)
+    mock_create_or_update_agency.assert_called_once_with(model_template_config, TEST_USER_ID)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -151,14 +151,11 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
     }
     expected_data_from_api = new_data_payload.copy()
     expected_data_from_api["timestamp"] = mock.ANY
-    with patch(
-        "backend.services.agency_manager.AgencyManager.repopulate_cache_and_update_assistants", new_callable=AsyncMock
-    ) as mock_repopulate_cache:
-        response = client.put("/api/v1/agency", json=new_data_payload)
+
+    response = client.put("/api/v1/agency", json=new_data_payload)
 
     assert response.status_code == 200
     assert response.json()["data"] == [expected_data_from_api]
-    mock_repopulate_cache.assert_called_once_with(TEST_AGENCY_ID)
     expected_data = agency_adapter.to_model(AgencyConfigForAPI(**new_data_payload)).model_dump()
     expected_data["timestamp"] = mock.ANY
     assert mock_firestore_client.collection("agency_configs").to_dict() == expected_data
@@ -213,7 +210,7 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_or_create_agency_missing_agent(client, mock_firestore_client, mock_agent):
+def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mock_agent):
     missing_agent = mock_agent.copy()
     missing_agent["id"] = "missing_agent_id"
     agency_data_with_missing_agent = {
@@ -238,14 +235,10 @@ def test_delete_agency_success(client, mock_firestore_client):
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
-    with patch(
-        "backend.services.agency_manager.AgencyManager.delete_agency_from_cache", new_callable=AsyncMock
-    ) as mock_delete_agency_from_cache:
-        response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
+    response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agency deleted", "data": []}
     assert mock_firestore_client.collection("agency_configs").to_dict() == {}
-    mock_delete_agency_from_cache.assert_called_once_with(TEST_AGENCY_ID, None)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

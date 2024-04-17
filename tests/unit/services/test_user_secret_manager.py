@@ -108,7 +108,7 @@ def test_get_secret_names_no_secrets(mock_firestore_client):
 def test_create_secrets_success(mock_firestore_client):
     secrets = {"SECRET1": "value1", "SECRET2": "value2"}
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
-    manager.update_or_create_secrets(TEST_USER_ID, secrets)
+    manager.create_or_update_secrets(TEST_USER_ID, secrets)
     updated_secrets = mock_firestore_client.to_dict()
     assert len(updated_secrets) == 2
     for key, value in secrets.items():
@@ -122,7 +122,7 @@ def test_update_secrets_success(mock_firestore_client):
     secrets = {"SECRET1": "new_value", "SECRET2": "", "SECRET3": "value3"}
 
     manager = UserSecretManager(user_secret_storage=UserSecretStorage())
-    manager.update_or_create_secrets(TEST_USER_ID, secrets)
+    manager.create_or_update_secrets(TEST_USER_ID, secrets)
 
     updated_secrets = mock_firestore_client.to_dict()
     assert len(updated_secrets) == 3

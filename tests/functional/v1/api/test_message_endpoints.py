@@ -24,6 +24,17 @@ def message_data():
 def test_post_message_success(client, mock_get_agency, mock_firestore_client, message_data):
     agency_data = {"user_id": TEST_USER_ID, "id": TEST_AGENCY_ID, "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
+    mock_firestore_client.setup_mock_data(
+        "session_configs",
+        "test_session_id",
+        {
+            "id": "test_session_id",
+            "user_id": TEST_USER_ID,
+            "agency_id": TEST_AGENCY_ID,
+            "thread_ids": {},
+            "timestamp": "2021-01-01T00:00:00Z",
+        },
+    )
 
     # Sending a message
     response = client.post("/api/v1/message", json=message_data)
@@ -31,7 +42,7 @@ def test_post_message_success(client, mock_get_agency, mock_firestore_client, me
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
     assert response.json()["data"] == {"content": "Hello, world!"}
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
+    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, thread_ids={})
 
 
 # Agency configuration not found
@@ -64,6 +75,17 @@ def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_clien
 def test_post_message_processing_failure(client, mock_get_agency, mock_firestore_client, message_data):
     agency_data = {"user_id": TEST_USER_ID, "id": TEST_AGENCY_ID, "name": "Test Agency"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
+    mock_firestore_client.setup_mock_data(
+        "session_configs",
+        "test_session_id",
+        {
+            "id": "test_session_id",
+            "user_id": TEST_USER_ID,
+            "agency_id": TEST_AGENCY_ID,
+            "thread_ids": {},
+            "timestamp": "2021-01-01T00:00:00Z",
+        },
+    )
 
     mock_get_agency.return_value.get_completion.side_effect = Exception("Test exception")
 
@@ -73,7 +95,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
     assert response.status_code == 500
     assert response.json()["data"]["message"] == "Something went wrong"
 
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, "test_session_id")
+    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, thread_ids={})
 
 
 @pytest.fixture

@@ -14,7 +14,7 @@ class SessionConfigStorage:
         query = collection.where(filter=FieldFilter("user_id", "==", user_id))
         return [SessionConfig.model_validate(document_snapshot.to_dict()) for document_snapshot in query.stream()]
 
-    def load_by_session_id(self, session_id: str) -> SessionConfig | None:
+    def load_by_id(self, session_id: str) -> SessionConfig | None:
         collection = self.db.collection(self.collection_name)
         document_snapshot = collection.document(session_id).get()
         return SessionConfig.model_validate(document_snapshot.to_dict()) if document_snapshot.exists else None

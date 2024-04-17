@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from pathlib import Path
 
 import firebase_admin
@@ -20,6 +21,20 @@ def init_firebase_app():
         cred_json = json.loads(settings.google_credentials)
         cred = credentials.Certificate(cred_json)
         firebase_admin.initialize_app(cred)
+
+
+def init_openai_client():
+    """Initialize the OpenAI client."""
+    user_secret_manager = UserSecretManager(UserSecretStorage())
+    return get_openai_client(user_secret_manager=user_secret_manager)
+
+
+def patch_openai_client():
+    """Patch the agency_swarm's openai client to use the user secret manager."""
+    sys.modules["agency_swarm.util.oai"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm.threads.thread"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm.agents.agent"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm"].get_openai_client = init_openai_client
 
 
 def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:

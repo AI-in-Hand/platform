@@ -1,6 +1,6 @@
 import logging
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
@@ -53,18 +53,19 @@ async def create_session(
     if agency_config_db.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
+    logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
+
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
-
-    agency = await agency_manager.get_agency(agency_id, None)
+    new_thread_ids: dict[str, Any] = {}
+    agency = await agency_manager.get_agency(agency_id, thread_ids=new_thread_ids)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
-    session_id = session_manager.create_session(agency, agency_id=agency_id, user_id=current_user.id)
-
-    await agency_manager.cache_agency(agency, agency_id, session_id)
+    session_id = session_manager.create_session(
+        agency, agency_id=agency_id, user_id=current_user.id, thread_ids=new_thread_ids
+    )
 
     sessions = session_storage.load_by_user_id(current_user.id)
     sessions_for_api = [session_adapter.to_api(session) for session in sessions]

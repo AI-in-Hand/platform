@@ -11,7 +11,6 @@ from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
-from backend.services.oai_client import get_openai_client
 from backend.services.user_secret_manager import UserSecretManager
 from backend.settings import settings
 
@@ -93,8 +92,6 @@ class AgentManager:
             tools=[SKILL_MAPPING[skill] for skill in agent_flow_spec.skills],
             model=settings.gpt_model,
         )
-        # a workaround: agent.client must be replaced with a proper implementation
-        agent.client = get_openai_client(user_secret_manager=self.user_secret_manager)
         return agent
 
     @staticmethod
