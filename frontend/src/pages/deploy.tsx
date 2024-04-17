@@ -1,14 +1,14 @@
 import * as React from "react";
 import Layout from "../components/layout";
 import { graphql } from "gatsby";
-import RAView from "../components/views/test/ra";
+import DeployView from "../components/views/deploy/deploy";
 
 // markup
 const IndexPage = ({ data }: any) => {
   return (
-    <Layout meta={data.site.siteMetadata} title="Test" link={"/"}>
+    <Layout meta={data.site.siteMetadata} title="Deploy" link={"/deploy"}>
       <main style={{ height: "100%" }} className=" h-full ">
-        <RAView />
+        <DeployView />
       </main>
     </Layout>
   );
