@@ -27,7 +27,8 @@ const Header = ({ meta, link }: any) => {
   };
   const links: any[] = [
     { name: "Build", href: "/build" },
-    { name: "Playground", href: "/" },
+    { name: "Test", href: "/" },
+    { name: "Deploy", href: "/deploy" },
   ];
 
   const DarkModeToggle = () => {

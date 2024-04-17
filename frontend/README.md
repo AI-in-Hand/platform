@@ -12,7 +12,7 @@ Our frontend codebase is structured around React components and utilities design
 
 ### Core Components
 - **Components**: Located in `frontend/src/components`, includes everything from layout wrappers to small atomic components.
-- **Views**: Components specific to application views are in `frontend/src/components/views`, categorized under directories like `playground` and `builder`.
+- **Views**: Components specific to application views are in `frontend/src/components/views`, categorized under directories like `build`, `test` and `deploy`.
 - **Utilities**: Helper functions and utilities are in `frontend/src/components/utils`.
 
 ### Pages and Routing
