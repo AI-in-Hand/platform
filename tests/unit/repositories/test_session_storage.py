@@ -23,7 +23,7 @@ def storage():
 def test_load_session_config_by_session_id(mock_firestore_client, session_data, storage):
     mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
 
-    loaded_session_config = storage.load_by_session_id("session1")
+    loaded_session_config = storage.load_by_id("session1")
 
     assert loaded_session_config is not None
     assert loaded_session_config.id == "session1"

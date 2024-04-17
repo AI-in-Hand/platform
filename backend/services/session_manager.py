@@ -1,11 +1,9 @@
 from datetime import UTC, datetime
 
-from agency_swarm import Agency, Agent
-from agency_swarm.threads import Thread
+from agency_swarm import Agency
 
 from backend.models.session_config import SessionConfig
 from backend.repositories.session_storage import SessionConfigStorage
-from backend.services.oai_client import get_openai_client
 from backend.services.user_secret_manager import UserSecretManager
 
 
@@ -14,13 +12,18 @@ class SessionManager:
         self.user_secret_manager = user_secret_manager
         self.session_storage = session_storage
 
-    def create_session(self, agency: Agency, agency_id: str, user_id: str) -> str:
+    def get_session(self, session_id: str) -> SessionConfig | None:
+        """Return the session with the given ID."""
+        return self.session_storage.load_by_id(session_id)
+
+    def create_session(self, agency: Agency, agency_id: str, user_id: str, thread_ids: dict[str, str]) -> str:
         """Create a new session for the given agency and return its id."""
-        session_id = self._create_threads(agency)
+        session_id = agency.main_thread.id
         session_config = SessionConfig(
             id=session_id,
             user_id=user_id,
             agency_id=agency_id,
+            thread_ids=thread_ids,
             timestamp=datetime.now(UTC).isoformat(),
         )
         self.session_storage.save(session_config)
@@ -29,42 +32,3 @@ class SessionManager:
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         self.session_storage.delete(session_id)
-
-    def _create_threads(self, agency: Agency) -> str:
-        """Create new threads for the given agency and return the thread ID of the main thread."""
-        client = get_openai_client(self.user_secret_manager)
-        self._init_threads(agency, client)
-        return agency.main_thread.id
-
-    def _init_threads(self, agency: Agency, client) -> None:
-        """
-        Initializes threads for communication between agents within the agency.
-        See agency_swarm.agency.Agency._init_threads for more details.
-
-        :param agency: The agency for which threads are to be initialized.
-        :param client: The OpenAI client object.
-        """
-        agency.main_thread = self._create_thread(agency.user, agency.ceo, client)
-
-        for agent_name, threads in agency.agents_and_threads.items():
-            for other_agent, items in threads.items():
-                agency.agents_and_threads[agent_name][other_agent] = self._create_thread(
-                    agency._get_agent_by_name(items["agent"]),
-                    agency._get_agent_by_name(items["recipient_agent"]),
-                    client,
-                )
-
-    def _create_thread(self, agent: Agent, recipient_agent: Agent, client) -> Thread:
-        """
-        Creates a new thread for communication between the agent and the recipient_agent.
-
-        :param agent: The agent that is to be the sender of messages in the thread.
-        :param recipient_agent: The agent that is to be the recipient of messages in the thread.
-
-        :return: The newly created Thread object.
-        """
-        new_thread = client.beta.threads.create()
-        thread = Thread(agent, recipient_agent)
-        thread.thread = new_thread
-        thread.id = new_thread.id
-        return thread

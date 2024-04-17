@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from unittest import mock
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -55,7 +55,7 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     # Mock _create_thread to return a mock object with an id attribute
     session_manager._create_thread = MagicMock(return_value=MagicMock(id="main_thread_id"))
 
-    session_id = session_manager.create_session(agency_mock, "agency_id", "user_id")
+    session_id = session_manager.create_session(agency_mock, "agency_id", "user_id", thread_ids={})
 
     assert session_id == "main_thread_id", "The session ID should be the ID of the main thread."
     expected_session_config = SessionConfig(
@@ -66,56 +66,6 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     )
     expected_session_config.timestamp = mock.ANY
     assert session_storage_mock.save.call_args_list == [call(expected_session_config)]
-
-
-@patch("backend.services.session_manager.get_openai_client")
-def test_create_threads(mock_get_openai_client, session_manager, agency_mock):
-    mock_client = MagicMock()
-    mock_get_openai_client.return_value = mock_client
-
-    with patch.object(session_manager, "_init_threads") as mock_init_threads:
-        session_id = session_manager._create_threads(agency_mock)
-
-    mock_init_threads.assert_called_once_with(agency_mock, mock_client)
-    assert session_id == agency_mock.main_thread.id, "Session ID should match the main thread ID."
-
-
-def test_init_threads(session_manager, agency_mock, agent_mock, recipient_agent_mock):
-    client_mock = MagicMock()
-    agency_mock.agents_and_threads = {
-        agent_mock: {"agent": recipient_agent_mock, "recipient_agent": agent_mock},
-    }
-    agency_mock.agents = {agent_mock: agent_mock, recipient_agent_mock: recipient_agent_mock}
-    agency_mock.user = agent_mock
-    agency_mock.ceo = recipient_agent_mock
-
-    with patch.object(session_manager, "_create_thread") as mock_create_thread:
-        session_manager._init_threads(agency_mock, client_mock)
-
-    # Verify _create_thread is called for each agent pair and for the user-ceo main thread
-    mock_create_thread.assert_has_calls(
-        [
-            call(agent_mock, recipient_agent_mock, client_mock),
-            call(
-                agency_mock._get_agent_by_name(agent_mock),
-                agency_mock._get_agent_by_name(recipient_agent_mock),
-                client_mock,
-            ),
-        ],
-        any_order=True,
-    )
-
-
-@patch("backend.services.session_manager.Thread")
-def test_create_thread(mock_thread_class, session_manager, agent_mock, recipient_agent_mock):
-    client_mock = MagicMock()
-    mock_thread_instance = create_mock_thread(agent_mock, recipient_agent_mock)
-    mock_thread_class.return_value = mock_thread_instance
-
-    new_thread = session_manager._create_thread(agent_mock, recipient_agent_mock, client_mock)
-
-    assert new_thread == mock_thread_instance, "The created thread should be returned."
-    mock_thread_class.assert_called_once_with(agent_mock, recipient_agent_mock)
 
 
 def test_delete_session(session_manager, session_storage_mock):

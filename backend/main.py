@@ -1,4 +1,3 @@
-import openai
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,10 +20,9 @@ from backend.exception_handlers import (  # noqa  # isort:skip
 
 from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
 from backend.settings import settings  # noqa  # isort:skip
-from backend.utils import init_webserver_folders, init_firebase_app  # noqa  # isort:skip
+from backend.utils import init_webserver_folders, init_firebase_app, patch_openai_client  # noqa  # isort:skip
 
-# just a placeholder for compatibility with agency-swarm
-openai.api_key = "sk-1234567890"
+patch_openai_client()
 
 # FastAPI app initialization
 app = FastAPI()

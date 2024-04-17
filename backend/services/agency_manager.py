@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from datetime import UTC, datetime
 from http import HTTPStatus
@@ -31,8 +30,12 @@ class AgencyManager:
         template_agencies = self.storage.load_by_user_id(None)
         return user_agencies + template_agencies
 
-    async def get_agency(self, id_: str) -> Agency | None:
-        agency = await self._construct_agency_and_update_assistants(id_)
+    async def get_agency(self, id_: str, thread_ids: dict[str, str]) -> Agency | None:
+        agency_config = self.storage.load_by_id(id_)
+        if not agency_config:
+            logger.error(f"Agency with id {id_} not found.")
+            return None
+        agency = await self._construct_agency_and_update_assistants(agency_config, thread_ids)
         if not agency:
             logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
             return None
@@ -40,7 +43,8 @@ class AgencyManager:
 
     async def handle_agency_creation_or_update(self, config: AgencyConfig, current_user_id: str) -> str:
         """Handle the agency creation or update. It will check the permissions and update the agency in the Firestore
-        and the cache. It will also update the assistants."""
+        and the cache. It will also update the assistants. TODO: invalidate all the sessions?
+        """
         # support template configs:
         if not config.user_id:
             logger.info(f"Creating agency for user: {current_user_id}, agency: {config.name}")
@@ -58,9 +62,9 @@ class AgencyManager:
         config.user_id = current_user_id
         config.timestamp = datetime.now(UTC).isoformat()
 
-        return await self._update_or_create_agency(config)
+        return await self._create_or_update_agency(config)
 
-    async def load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
+    async def _load_and_construct_agents(self, agency_config: AgencyConfig) -> dict[str, Agent]:
         agents = {}
         for agent_id in agency_config.agents:
             get_result = await self.agent_manager.get_agent(agent_id)
@@ -72,11 +76,25 @@ class AgencyManager:
                 # TODO: Handle this error (raise exception?)
         return agents
 
-    @staticmethod
-    def construct_agency(agency_config: AgencyConfig, agents: dict[str, Agent]) -> Agency:
+    async def delete_agency(self, agency_id: str) -> None:
+        """Delete the agency from the Firestore."""
+        self.storage.delete(agency_id)
+
+    async def _create_or_update_agency(self, agency_config: AgencyConfig) -> str:
+        """Update or create the agency. It will update the agency in the Firestore."""
+        AgencyConfig.model_validate(agency_config.model_dump())
+        return self.storage.save(agency_config)
+
+    async def _construct_agency_and_update_assistants(
+        self, agency_config: AgencyConfig, thread_ids: dict[str, str]
+    ) -> Agency:
         """Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
         It saves all the settings in the settings.json file (in the root folder, not thread safe)
+        Gets the agency config from the Firestore, constructs agents and agency
+        (agency-swarm also updates assistants). Returns the Agency instance if successful, otherwise None.
         """
+        agents = await self._load_and_construct_agents(agency_config)
+
         agency_chart = []
         if agents and agency_config.main_agent:
             main_agent = agents[agency_config.main_agent]
@@ -85,33 +103,16 @@ class AgencyManager:
                 new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart.values()]
                 agency_chart.extend(new_agency_chart)
 
-        return Agency(agency_chart, shared_instructions=agency_config.shared_instructions)
-
-    async def delete_agency(self, agency_id: str) -> None:
-        """Delete the agency from the Firestore."""
-        self.storage.delete(agency_id)
-
-    async def _update_or_create_agency(self, agency_config: AgencyConfig) -> str:
-        """Update or create the agency. It will update the agency in the Firestore.
-        _construct_agency_and_update_assistants method call ensures that the assistants are up-to-date.
-        """
-        AgencyConfig.model_validate(agency_config.model_dump())
-        id_ = self.storage.save(agency_config)
-        await self._construct_agency_and_update_assistants(id_)
-        return id_
-
-    async def _construct_agency_and_update_assistants(self, agency_id: str) -> Agency | None:
-        """Gets the agency config from the Firestore, constructs agents and agency
-        (agency-swarm also updates assistants). Returns the Agency instance if successful, otherwise None.
-        """
-        agency_config = self.storage.load_by_id(agency_id)
-        if not agency_config:
-            logger.error(f"Agency with id {agency_id} not found.")
-            return None
-
-        agents = await self.load_and_construct_agents(agency_config)
-        agency = await asyncio.to_thread(self.construct_agency, agency_config, agents)
-        return agency
+        # call Agency.__init__ to create or update the agency
+        return Agency(
+            agency_chart,
+            shared_instructions=agency_config.shared_instructions,
+            threads_callbacks=(
+                {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)}
+                if agency_config.thread_ids
+                else None
+            ),
+        )
 
     async def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
         """Validate the agent ownership. It will check if the current user has permissions to use the agents."""

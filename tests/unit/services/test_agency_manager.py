@@ -51,7 +51,7 @@ async def test_get_agency_construct_agency(agency_manager):
 
 
 @pytest.mark.asyncio
-async def test_update_or_create_agency(agency_manager, mock_firestore_client):
+async def test_create_or_update_agency(agency_manager, mock_firestore_client):
     agency_config = AgencyConfig(
         id=TEST_AGENCY_ID,
         user_id=TEST_USER_ID,
@@ -66,7 +66,7 @@ async def test_update_or_create_agency(agency_manager, mock_firestore_client):
     with patch.object(
         agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
     ) as mock_construct:
-        id_ = await agency_manager._update_or_create_agency(agency_config)
+        id_ = await agency_manager._create_or_update_agency(agency_config)
 
     mock_construct.assert_called_once_with(TEST_AGENCY_ID)
     assert id_ == TEST_AGENCY_ID
@@ -95,9 +95,9 @@ async def test_construct_agency_success(agency_manager, mock_firestore_client):
 
     with (
         patch(
-            "backend.services.agency_manager.AgencyManager.load_and_construct_agents", new_callable=AsyncMock
+            "backend.services.agency_manager.AgencyManager._load_and_construct_agents", new_callable=AsyncMock
         ) as mock_load_agents,
-        patch("backend.services.agency_manager.AgencyManager.construct_agency") as mock_construct_agency,
+        patch("backend.services.agency_manager.AgencyManager._construct_agency") as mock_construct_agency,
     ):
         mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config)
         mock_load_agents.return_value = {"agent1": agent}
@@ -129,7 +129,7 @@ async def test_load_and_construct_agents_success(agency_manager):
 
     agency_manager.agent_manager = agent_manager_mock
 
-    agents = await agency_manager.load_and_construct_agents(agency_config)
+    agents = await agency_manager._load_and_construct_agents(agency_config)
 
     assert "agent1_name" in agents
     assert isinstance(agents["agent1_name"], Agent)
@@ -153,7 +153,7 @@ async def test_load_and_construct_agents_agent_not_found(agency_manager):
     agency_manager.agent_manager = agent_manager_mock
 
     with patch("logging.Logger.error") as mock_logger_error:
-        agents = await agency_manager.load_and_construct_agents(agency_config)
+        agents = await agency_manager._load_and_construct_agents(agency_config)
 
         assert agents == {}
         mock_logger_error.assert_called_with("Agent with id agent1_id not found.")
@@ -183,7 +183,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     mock_agent_2.description = "agent2_description"
 
     # Construct the agency
-    agency = agency_manager.construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})
+    agency = agency_manager._construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})
 
     # Assertions
     assert isinstance(agency, Agency)
