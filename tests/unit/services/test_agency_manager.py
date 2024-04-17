@@ -41,13 +41,16 @@ async def test_get_agency_list(agency_manager, mock_firestore_client):
 
 
 @pytest.mark.asyncio
-async def test_get_agency_construct_agency(agency_manager):
+async def test_get_agency_construct_agency(agency_manager, mock_firestore_client):
+    agency_config_dict = {"name": "Test agency", "id": TEST_AGENCY_ID}
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_dict)
     with patch.object(
         agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
     ) as mock_construct:
-        agency = await agency_manager.get_agency(TEST_AGENCY_ID)
+        mock_construct.return_value = MagicMock(spec=Agency)
+        agency = await agency_manager.get_agency(TEST_AGENCY_ID, {})
         assert agency is not None
-        mock_construct.assert_called_once_with(TEST_AGENCY_ID)
+        mock_construct.assert_called_once_with(AgencyConfig(**agency_config_dict), {})
 
 
 @pytest.mark.asyncio
@@ -63,49 +66,10 @@ async def test_create_or_update_agency(agency_manager, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
     agency_config.shared_instructions = "New manifesto"
 
-    with patch.object(
-        agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
-    ) as mock_construct:
-        id_ = await agency_manager._create_or_update_agency(agency_config)
+    id_ = await agency_manager._create_or_update_agency(agency_config)
 
-    mock_construct.assert_called_once_with(TEST_AGENCY_ID)
     assert id_ == TEST_AGENCY_ID
     assert mock_firestore_client.to_dict()["shared_instructions"] == "New manifesto"
-
-
-@pytest.mark.asyncio
-async def test_construct_agency_no_config(agency_manager, caplog):
-    caplog.set_level("ERROR")
-    result = await agency_manager._construct_agency_and_update_assistants("nonexistent_agency_id")
-    assert result is None
-    assert "Agency with id nonexistent_agency_id not found." in caplog.text
-
-
-@pytest.mark.asyncio
-async def test_construct_agency_success(agency_manager, mock_firestore_client):
-    agency_config = AgencyConfig(
-        id=TEST_AGENCY_ID,
-        user_id=TEST_USER_ID,
-        name="Test agency",
-        shared_instructions="manifesto",
-        main_agent="agent1_name",
-        agents=["agent1_id"],
-    )
-    agent = MagicMock(spec=Agent)
-
-    with (
-        patch(
-            "backend.services.agency_manager.AgencyManager._load_and_construct_agents", new_callable=AsyncMock
-        ) as mock_load_agents,
-        patch("backend.services.agency_manager.AgencyManager._construct_agency") as mock_construct_agency,
-    ):
-        mock_firestore_client.setup_mock_data("agency_configs", agency_config.id, agency_config)
-        mock_load_agents.return_value = {"agent1": agent}
-        mock_construct_agency.return_value = MagicMock(spec=Agency)
-
-        await agency_manager._construct_agency_and_update_assistants(TEST_AGENCY_ID)
-        mock_load_agents.assert_called_once_with(agency_config)
-        mock_construct_agency.assert_called_once_with(agency_config, {"agent1": agent})
 
 
 # Test successful agent construction
@@ -183,7 +147,9 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     mock_agent_2.description = "agent2_description"
 
     # Construct the agency
-    agency = agency_manager._construct_agency(agency_config, {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2})
+    with patch.object(agency_manager, "_load_and_construct_agents", new_callable=AsyncMock) as mock_load_agents:
+        mock_load_agents.return_value = {"agent1_name": mock_agent_1, "agent2_name": mock_agent_2}
+        agency = await agency_manager._construct_agency_and_update_assistants(agency_config, {})
 
     # Assertions
     assert isinstance(agency, Agency)

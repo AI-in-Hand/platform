@@ -1,8 +1,8 @@
 import json
 import logging
+import sys
 from pathlib import Path
 
-import agency_swarm
 import firebase_admin
 import tiktoken
 from firebase_admin import credentials
@@ -23,9 +23,18 @@ def init_firebase_app():
         firebase_admin.initialize_app(cred)
 
 
+def init_openai_client():
+    """Initialize the OpenAI client."""
+    user_secret_manager = UserSecretManager(UserSecretStorage())
+    return get_openai_client(user_secret_manager=user_secret_manager)
+
+
 def patch_openai_client():
-    """Patch the openai client to use the user secret manager."""
-    agency_swarm.get_openai_client = get_openai_client(user_secret_manager=UserSecretManager(UserSecretStorage()))
+    """Patch the agency_swarm's openai client to use the user secret manager."""
+    sys.modules["agency_swarm.util.oai"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm.threads.thread"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm.agents.agent"].get_openai_client = init_openai_client
+    sys.modules["agency_swarm"].get_openai_client = init_openai_client
 
 
 def init_webserver_folders(root_file_path: Path) -> dict[str, Path]:

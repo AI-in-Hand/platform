@@ -151,14 +151,11 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
     }
     expected_data_from_api = new_data_payload.copy()
     expected_data_from_api["timestamp"] = mock.ANY
-    with patch(
-        "backend.services.agency_manager.AgencyManager._construct_agency_and_update_assistants", new_callable=AsyncMock
-    ) as mock_construct:
-        response = client.put("/api/v1/agency", json=new_data_payload)
+
+    response = client.put("/api/v1/agency", json=new_data_payload)
 
     assert response.status_code == 200
     assert response.json()["data"] == [expected_data_from_api]
-    mock_construct.assert_called_once_with(TEST_AGENCY_ID)
     expected_data = agency_adapter.to_model(AgencyConfigForAPI(**new_data_payload)).model_dump()
     expected_data["timestamp"] = mock.ANY
     assert mock_firestore_client.collection("agency_configs").to_dict() == expected_data

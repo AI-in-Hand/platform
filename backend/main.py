@@ -22,6 +22,9 @@ from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
 from backend.settings import settings  # noqa  # isort:skip
 from backend.utils import init_webserver_folders, init_firebase_app, patch_openai_client  # noqa  # isort:skip
 
+
+init_firebase_app()
+
 patch_openai_client()
 
 # FastAPI app initialization
@@ -55,9 +58,6 @@ api_app.add_exception_handler(Exception, unhandled_exception_handler)
 # mount an api route such that the main route serves the ui and the /api
 app.mount("/api", api_app)
 app.mount("/", StaticFiles(directory=folders["static_folder_root"], html=True), name="ui")
-
-# Initialize FireStore
-init_firebase_app()
 
 
 if __name__ == "__main__":

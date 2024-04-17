@@ -11,6 +11,7 @@ def session_data():
         "id": "session1",
         "user_id": TEST_USER_ID,
         "agency_id": "agency1",
+        "thread_ids": {},
         "timestamp": "2021-01-01T00:00:00Z",
     }
 

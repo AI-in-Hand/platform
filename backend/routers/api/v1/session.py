@@ -1,6 +1,6 @@
 import logging
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.params import Query
@@ -58,7 +58,7 @@ async def create_session(
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
-    new_thread_ids: dict[str, str] = {}
+    new_thread_ids: dict[str, Any] = {}
     agency = await agency_manager.get_agency(agency_id, thread_ids=new_thread_ids)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")

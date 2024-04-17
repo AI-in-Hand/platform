@@ -9,7 +9,9 @@ class SessionConfig(BaseModel):
     id: str = Field(..., description="Unique identifier for the session")
     user_id: str = Field(..., description="The user ID associated with the session")
     agency_id: str = Field(..., description="Unique identifier for the agency")
-    thread_ids: dict[str, str] = Field(default_factory=dict, description="Dict of thread IDs for each agent")
+    thread_ids: dict[str, str | dict[str, str]] = Field(
+        default_factory=dict, description="Dict of thread IDs for each agent"
+    )
     timestamp: str = Field(..., description="The timestamp at which the session was created")
 
 

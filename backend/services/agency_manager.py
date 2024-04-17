@@ -1,6 +1,7 @@
 import logging
 from datetime import UTC, datetime
 from http import HTTPStatus
+from typing import Any
 
 from agency_swarm import Agency, Agent
 from fastapi import HTTPException
@@ -30,7 +31,7 @@ class AgencyManager:
         template_agencies = self.storage.load_by_user_id(None)
         return user_agencies + template_agencies
 
-    async def get_agency(self, id_: str, thread_ids: dict[str, str]) -> Agency | None:
+    async def get_agency(self, id_: str, thread_ids: dict[str, Any]) -> Agency | None:
         agency_config = self.storage.load_by_id(id_)
         if not agency_config:
             logger.error(f"Agency with id {id_} not found.")
@@ -86,7 +87,7 @@ class AgencyManager:
         return self.storage.save(agency_config)
 
     async def _construct_agency_and_update_assistants(
-        self, agency_config: AgencyConfig, thread_ids: dict[str, str]
+        self, agency_config: AgencyConfig, thread_ids: dict[str, Any]
     ) -> Agency:
         """Create the agency using external library agency-swarm. It is a wrapper around OpenAI API.
         It saves all the settings in the settings.json file (in the root folder, not thread safe)
@@ -108,9 +109,7 @@ class AgencyManager:
             agency_chart,
             shared_instructions=agency_config.shared_instructions,
             threads_callbacks=(
-                {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)}
-                if agency_config.thread_ids
-                else None
+                {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)} if thread_ids is not None else None
             ),
         )
 
