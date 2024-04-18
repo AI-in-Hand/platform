@@ -40,7 +40,7 @@ const SideBarView = () => {
           <div className="mt-4  ">
             {" "}
             <ChevronLeftIcon className="w-6 h-6  inline-block    rounded" />{" "}
-            <span className="text-xs "> close sidebar</span>
+            <span className="text-xs "> hide sidebar</span>
           </div>
         ) : (
           <ChevronRightIcon className="w-6 h-6   inline-block   font-bold rounded " />

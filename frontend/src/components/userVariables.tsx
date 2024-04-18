@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Table } from 'antd';
 import { fetchJSON, getServerUrl } from './api_utils';
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {
   const [form] = Form.useForm();
@@ -102,7 +102,7 @@ const UserVariables = () => {
           setSecrets(newSecrets);
           form.setFieldsValue({ [record.key]: undefined });
         }}>
-          <MinusIcon className="w-5 h-5 inline-block mr-1" />
+          <XMarkIcon className="w-5 h-5 inline-block mr-1" />
         </Button>
       ),
     },
@@ -172,7 +172,7 @@ const UserVariables = () => {
                     </Form.Item>
 
                     <Button onClick={() => remove(name)}>
-                    <MinusIcon className="w-5 h-5 inline-block mr-1" />
+                    <XMarkIcon className="w-5 h-5 inline-block mr-1" />
                     </Button>
                   </div>
                 ))}
