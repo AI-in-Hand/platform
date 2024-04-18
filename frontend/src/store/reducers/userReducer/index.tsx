@@ -6,6 +6,7 @@ const initialState = {
   expiresIn: null,
   email: null,
   uid: null,
+  activeTab:null
 };
 
 export default (state = initialState, action: any) => {
@@ -36,6 +37,11 @@ export default (state = initialState, action: any) => {
       return {
         ...initialState,
         email: state.email
+      };
+    case usersActions.SET_ACTIVE_TAB:
+      return {
+        ...state,
+        activeTab: action.payload
       };
     default:
       return state;

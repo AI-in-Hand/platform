@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
 import { appContext } from "../hooks/provider";
-import { Link } from "gatsby";
+import { Link, navigate } from "gatsby";
 import React from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {ResetState} from "../store/actions/usersActions";
@@ -24,6 +24,7 @@ const Header = ({ meta, link }: any) => {
   const dispatch = useDispatch();
   const logout = () => {
     dispatch(ResetState());
+    navigate("/sign-in")
   };
   const links: any[] = [
     { name: "Build", href: "/build" },
@@ -182,7 +183,6 @@ const Header = ({ meta, link }: any) => {
                             <Menu.Item>
                               {({ active }) => (
                                 <a
-                                  href="#"
                                   onClick={logout}
                                   className={classNames(
                                     active ? "bg-secondary" : "",
@@ -255,7 +255,6 @@ const Header = ({ meta, link }: any) => {
                 <div className="mt-3 space-y-1">
                   <Disclosure.Button
                     as="a"
-                    href="#"
                     onClick={logout}
                     className="block px-4 py-2 text-base font-medium text-secondary hover:text-primary "
                   >

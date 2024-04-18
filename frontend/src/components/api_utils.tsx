@@ -1,5 +1,5 @@
 import { message } from "antd";
-import { auth } from '../firebase/firebase-config';
+import { auth } from "../firebase/firebase-config";
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
 import { IChatSession, IStatus } from "../types";
@@ -15,26 +15,30 @@ export function checkAndRefreshToken() {
     if (userState && userState.expiresIn) {
       if (Date.now() >= userState.expiresIn) {
         // FIXME: sometimes auth is not defined
-        const user = auth.currentUser;
-        if (user) {
-          user.getIdToken(true).then((newToken) => {
-            const newExpiresIn = Date.now() + (55 * 60) * 1000; // 55 minutes from now
-            store.dispatch(
-              RefreshToken({
-                token: newToken,
-                expiresIn: newExpiresIn,
+        auth.onAuthStateChanged(function (user) {
+          if (user) {
+            user
+              .getIdToken(true)
+              .then((newToken) => {
+                const newExpiresIn = Date.now() + 55 * 60 * 1000; // 55 minutes from now
+                store.dispatch(
+                  RefreshToken({
+                    token: newToken,
+                    expiresIn: newExpiresIn,
+                  })
+                );
+                resolve(true);
               })
-            );
-            resolve(true);
-          }).catch(error => {
-            console.error("Error refreshing token:", error);
-            message.error("Error refreshing token. Please login again.");
+              .catch((error) => {
+                console.error("Error refreshing token:", error);
+                message.error("Error refreshing token. Please login again.");
+                resolve(false);
+              });
+          } else {
+            console.error("User not logged in.");
             resolve(false);
-          });
-        } else {
-          console.error("User not logged in.");
-          resolve(false);
-        }
+          }
+        });
       } else {
         resolve(true); // Token is still valid
       }
@@ -61,6 +65,7 @@ export function fetchJSON(
     }
 
     const accessToken = store.getState().user.accessToken;
+    console.warn(store.getState().user?.expiresIn);
 
     const fetchOptions = {
       method: payload.method,
@@ -71,35 +76,35 @@ export function fetchJSON(
     }
 
     fetch(url, fetchOptions)
-    .then(function (response) {
-      if (response.status !== 200) {
-        console.log(
-          "Looks like there was a problem. Status Code: " + response.status,
-          response
-        );
-        response.json().then(function (data) {
-          console.log("Error data", data);
-          const errorMessage = data?.data?.message
-            ? data?.data?.message
-            : "Error: " + response.status + " " + response.statusText;
-          onError({
-            status: false,
-            message: errorMessage,
+      .then(function (response) {
+        if (response.status !== 200) {
+          console.log(
+            "Looks like there was a problem. Status Code: " + response.status,
+            response
+          );
+          response.json().then(function (data) {
+            console.log("Error data", data);
+            const errorMessage = data?.data?.message
+              ? data?.data?.message
+              : "Error: " + response.status + " " + response.statusText;
+            onError({
+              status: false,
+              message: errorMessage,
+            });
           });
+          return;
+        }
+        response.json().then(function (data) {
+          onSuccess(data);
         });
-        return;
-      }
-      response.json().then(function (data) {
-        onSuccess(data);
+      })
+      .catch(function (err) {
+        console.log("Fetch Error :-S", err);
+        onError({
+          status: false,
+          message: `There was an error connecting to server. (${err}) `,
+        });
       });
-    })
-    .catch(function (err) {
-      console.log("Fetch Error :-S", err);
-      onError({
-        status: false,
-        message: `There was an error connecting to server. (${err}) `,
-      });
-    });
   });
 }
 
