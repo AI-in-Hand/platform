@@ -2,11 +2,94 @@ import * as React from "react";
 import { Tabs } from "antd";
 import { ArrowTopRightOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
 
+const WhatsAppIntegration = () => (
+  <div className="mb-2   relative">
+    <div className="     rounded  ">
+      <div className="flex mt-2 pb-2 mb-2 border-b">
+        <div className="flex-1 font-semibold  mb-2 ">
+          WhatsApp Integration
+        </div>
+      </div>
+      <div className="text-xs mb-2 pb-1  ">
+        Integrate with WhatsApp easily.
+      </div>
+      {(
+        <div className="text-sm border mt-4 rounded text-secondary p-2">
+          <RocketLaunchIcon className="h-4 w-4 inline mr-1" />
+          Coming soon!
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const WebsiteWidget = () => (
+  <div className="mb-2   relative">
+    <div className="     rounded  ">
+      <div className="flex mt-2 pb-2 mb-2 border-b">
+        <div className="flex-1 font-semibold  mb-2 ">
+          Website Widget
+        </div>
+      </div>
+      <div className="text-xs mb-2 pb-1  ">
+        Embed directly into your website.
+      </div>
+      {(
+        <div className="text-sm border mt-4 rounded text-secondary p-2">
+          <RocketLaunchIcon className="h-4 w-4 inline mr-1" />
+          Coming soon!
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const APIIntegration = () => (
+  <div className="mb-2   relative">
+    <div className="     rounded  ">
+      <div className="flex mt-2 pb-2 mb-2 border-b">
+        <div className="flex-1 font-semibold  mb-2 ">
+          API Integration
+        </div>
+      </div>
+      <div className="text-xs mb-2 pb-1  ">
+        Connect through our robust API.
+      </div>
+      {(
+        <div className="text-sm border mt-4 rounded text-secondary p-2">
+          <RocketLaunchIcon className="h-4 w-4 inline mr-1" />
+          Coming soon!
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const CustomDeployment = () => (
+  <div className="mb-2   relative">
+    <div className="     rounded  ">
+      <div className="flex mt-2 pb-2 mb-2 border-b">
+        <div className="flex-1 font-semibold  mb-2 ">
+          Custom Deployment
+        </div>
+      </div>
+      <div className="text-xs mb-2 pb-1  ">
+        Deploy on your own infrastructure.
+      </div>
+      {(
+        <div className="text-sm border mt-4 rounded text-secondary p-2">
+          <RocketLaunchIcon className="h-4 w-4 inline mr-1" />
+          <a href="mailto:hello@ainhand.com" className="text-primary">Contact us</a> to learn more.
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const DeployView = () => {
   return (
-    <div className=" ">
+    <div>
       <div className="mb-4 text-primary">
-        {" "}
         <Tabs
           tabBarStyle={{ paddingLeft: 0, marginLeft: 0 }}
           defaultActiveKey="1"
@@ -14,14 +97,13 @@ const DeployView = () => {
           items={[
             {
               label: (
-                <div className="w-full  ">
-                  {" "}
+                <div className="w-full">
                   <ChatBubbleOvalLeftEllipsisIcon className="h-4 w-4 inline-block mr-1" />
                   WhatsApp
                 </div>
               ),
               key: "1",
-              children: <div className="text-center p-4">Integrate with WhatsApp easily. Coming soon! <RocketLaunchIcon className="h-5 w-5 inline-block" /></div>,
+              children: <WhatsAppIntegration />,
             },
             {
               label: (
@@ -31,7 +113,7 @@ const DeployView = () => {
                 </>
               ),
               key: "2",
-              children: <div className="text-center p-4">Embed directly into your website. Coming soon! <RocketLaunchIcon className="h-5 w-5 inline-block" /></div>,
+              children: <WebsiteWidget />,
             },
             {
               label: (
@@ -41,7 +123,7 @@ const DeployView = () => {
                 </>
               ),
               key: "3",
-              children: <div className="text-center p-4">Connect through our robust API. Coming soon! <RocketLaunchIcon className="h-5 w-5 inline-block" /></div>,
+              children: <APIIntegration />,
             },
             {
               label: (
@@ -51,13 +133,11 @@ const DeployView = () => {
                 </>
               ),
               key: "4",
-              children: <div className="text-center p-4">Deploy on your own infrastructure. Contact us for more information.</div>,
+              children: <CustomDeployment />,
             },
           ]}
         />
       </div>
-
-      <div></div>
     </div>
   );
 };
