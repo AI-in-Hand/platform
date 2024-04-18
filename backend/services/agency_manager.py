@@ -44,7 +44,7 @@ class AgencyManager:
 
     async def handle_agency_creation_or_update(self, config: AgencyConfig, current_user_id: str) -> str:
         """Handle the agency creation or update. It will check the permissions and update the agency in the Firestore
-        and the cache. It will also update the assistants. TODO: invalidate all the sessions?
+        and the cache. It will also update the assistants.
         """
         # support template configs:
         if not config.user_id:

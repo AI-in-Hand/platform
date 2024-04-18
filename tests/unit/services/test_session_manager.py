@@ -72,3 +72,9 @@ def test_delete_session(session_manager, session_storage_mock):
     session_manager.delete_session("session_id")
 
     assert session_storage_mock.delete.call_args_list == [call("session_id")]
+
+
+def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
+    session_manager.delete_sessions_by_agency_id("agency_id")
+
+    assert session_storage_mock.delete_by_agency_id.call_args_list == [call("agency_id")]

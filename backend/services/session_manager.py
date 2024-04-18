@@ -33,3 +33,7 @@ class SessionManager:
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         self.session_storage.delete(session_id)
+
+    def delete_sessions_by_agency_id(self, agency_id: str) -> None:
+        """Delete all sessions for the given agency."""
+        self.session_storage.delete_by_agency_id(agency_id)

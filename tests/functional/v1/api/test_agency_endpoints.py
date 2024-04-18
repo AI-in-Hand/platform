@@ -226,7 +226,7 @@ def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mo
     assert response.json() == {"data": {"message": "Agent not found: missing_agent_id"}}
 
 
-@pytest.mark.usefixtures("mock_get_current_user")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage")
 def test_delete_agency_success(client, mock_firestore_client):
     db_agency = {
         "id": TEST_AGENCY_ID,
@@ -239,6 +239,7 @@ def test_delete_agency_success(client, mock_firestore_client):
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agency deleted", "data": []}
     assert mock_firestore_client.collection("agency_configs").to_dict() == {}
+    assert mock_firestore_client.collection("session_configs").to_dict() == {}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

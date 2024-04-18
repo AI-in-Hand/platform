@@ -43,6 +43,18 @@ def test_load_session_config_by_user_id(mock_firestore_client, session_data, sto
     assert all(session.user_id == session_data["user_id"] for session in loaded_sessions)
 
 
+def test_load_session_config_by_agency_id(mock_firestore_client, session_data, storage):
+    # Setup mock data
+    mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
+
+    # Simulate loading session configs by agency_id, reflecting the correct usage of `where()` before `stream()`
+    loaded_sessions = storage.load_by_agency_id(session_data["agency_id"])
+
+    assert loaded_sessions is not None
+    # Verify that all loaded sessions have the correct agency_id
+    assert all(session.agency_id == session_data["agency_id"] for session in loaded_sessions)
+
+
 def test_save_session_config(mock_firestore_client, session_data, storage):
     session_to_save = SessionConfig(**session_data)
     storage.save(session_to_save)
@@ -54,5 +66,13 @@ def test_delete_session_config(mock_firestore_client, session_data, storage):
     mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
 
     storage.delete("session1")
+
+    assert mock_firestore_client.to_dict() == {}
+
+
+def test_delete_sessions_by_agency_id(mock_firestore_client, session_data, storage):
+    mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
+
+    storage.delete_by_agency_id("agency1")
 
     assert mock_firestore_client.to_dict() == {}
