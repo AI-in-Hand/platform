@@ -30,3 +30,9 @@ export function RefreshToken(data: {token: string, expiresIn: number}) {
     payload: data,
   };
 }
+export function SetActiveTab(activeTab: string) {
+  return {
+    type: usersActions.SET_ACTIVE_TAB,
+    payload: activeTab,
+  };
+}
