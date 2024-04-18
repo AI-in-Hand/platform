@@ -6,7 +6,7 @@ const initialState = {
   expiresIn: null,
   email: null,
   uid: null,
-  activeTab: null,
+  activeTab: "2",
 };
 
 export default (state = initialState, action: any) => {
