@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_adapter, get_agency_manager
+from backend.dependencies.dependencies import get_agency_adapter, get_agency_manager, get_session_manager
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
@@ -17,6 +17,7 @@ from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
+from backend.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
 agency_router = APIRouter(
@@ -82,6 +83,7 @@ async def delete_agency(
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     manager: AgencyManager = Depends(get_agency_manager),
+    session_manager: SessionManager = Depends(get_session_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> AgencyListResponse:
     """Delete an agency"""
@@ -92,6 +94,7 @@ async def delete_agency(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 
     await manager.delete_agency(id)
+    session_manager.delete_sessions_by_agency_id(id)
 
     agencies = await manager.get_agency_list(current_user.id)
     agencies_for_api = [adapter.to_api(agency) for agency in agencies]

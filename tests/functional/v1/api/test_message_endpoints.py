@@ -99,17 +99,6 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
 
 
 @pytest.fixture
-def mock_session_storage(mock_firestore_client):
-    session_data = {
-        "id": "test_session_id",
-        "user_id": TEST_USER_ID,
-        "agency_id": TEST_AGENCY_ID,
-        "timestamp": "2021-01-01T00:00:00Z",
-    }
-    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
-
-
-@pytest.fixture
 def mock_openai_client():
     with patch("backend.routers.api.v1.message.get_openai_client") as mock:
         mock.return_value.beta.threads.messages.list.return_value = [
