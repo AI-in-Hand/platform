@@ -65,7 +65,6 @@ export function fetchJSON(
     }
 
     const accessToken = store.getState().user.accessToken;
-    console.warn(store.getState().user?.expiresIn);
 
     const fetchOptions = {
       method: payload.method,
