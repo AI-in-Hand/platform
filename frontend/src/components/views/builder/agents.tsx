@@ -287,7 +287,7 @@ const AgentsView = ({}: any) => {
 
           <div className="text-xs mb-2 pb-1  ">
             {" "}
-            Configure an agent that can reused in your agent team{" "}
+            Configure an agent that can reused in your teams{" "}
             {selectedAgent?.config.name}
           </div>
           {agents && agents.length > 0 && (

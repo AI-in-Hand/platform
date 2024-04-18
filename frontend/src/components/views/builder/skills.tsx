@@ -361,7 +361,7 @@ const SkillsView = ({}: any) => {
           </div>
           <div className="text-xs mb-2 pb-1  ">
             {" "}
-            Skills are python functions that agents can use to solve tasks.{" "}
+            Skills are Python functions that agents can use to perform tasks.
           </div>
           {skills && skills.length > 0 && (
             <div

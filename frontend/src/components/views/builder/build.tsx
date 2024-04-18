@@ -4,7 +4,7 @@ import AgentsView from "./agents";
 import WorkflowView from "./workflow";
 import { Tabs } from "antd";
 import {
-  KeyIcon,
+  VariableIcon,
   UserIcon,
   UserGroupIcon,
   WrenchIcon,
@@ -14,12 +14,27 @@ import UserVariables from '../../userVariables';
 const BuildView = () => {
   return (
     <div className=" ">
-      {/* <div className="mb-4 text-2xl">Build </div> */}
-      <div className="mb-6 text-sm hidden text-secondary">
-        {" "}
-        Create and manage your skills, agents, and teams.{" "}
-        First, create a skill, then assign it to an agent, and finally, assemble a team.{" "}
-        Before you can start building, you need to set up your API keys.{" "}
+      <div className="mb-6 text-sm text-primary">
+        <details>
+          <summary className="text-primary mb-2">Getting Started</summary>
+          <div>
+            <p className="mb-4">
+              Welcome to the <strong>Build</strong> section! This is where you set up and manage the components that make your AI solutions work.
+            </p>
+            <p className="mb-4">
+              <strong>Variables</strong> are used to store API keys, credentials, or any other data your skills need. They keep sensitive information safe while still letting your skills access it.
+            </p>
+            <p className="mb-4">
+              <strong>Skills</strong> are what give your agents their special abilities. They let your agents make API calls, perform calculations, and do other tasks.
+            </p>
+            <p className="mb-4">
+              <strong>Agents</strong> are like your digital workers. You give each one instructions and skills to do specific tasks.
+            </p>
+            <p>
+              <strong>Teams</strong> are how you organize your agents to automate workflows. You can define communication flows to coordinate the work of multiple agents.
+            </p>
+          </div>
+        </details>
       </div>
 
       <div className="mb-4 text-primary">
@@ -32,8 +47,8 @@ const BuildView = () => {
             {
               label: (
                 <>
-                  <KeyIcon className="h-4 w-4 inline-block mr-1" />
-                  API Keys
+                  <VariableIcon className="h-4 w-4 inline-block mr-1" />
+                  Variables
                 </>
               ),
               key: "1",

@@ -118,25 +118,26 @@ const UserVariables = () => {
       <section aria-labelledby="note-important">
         <h2 id="note-important">Important Note</h2>
         <p>
-          Set the <code>OPENAI_API_KEY</code> variable to use teams.
+          Set the <code>OPENAI_API_KEY</code> variable to use OpenAI's API.
+          You can find your API key in the <u><a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">OpenAI dashboard</a></u>.
         </p>
       </section>
 
       <details>
-        <summary><strong>Understanding Secrets</strong> (click to expand or hide)</summary>
+        <summary><strong>Understanding Variables</strong> (click to expand or hide)</summary>
         <section aria-labelledby="secrets-introduction">
           <h2 id="secrets-introduction">Introduction</h2>
           <p>
-            Use secret variables to securely access sensitive data like API keys in your skills. They're encrypted at rest and decrypted only during use.
+            Use variables to securely access sensitive data like API keys in your skills. They're encrypted at rest and decrypted only during use.
           </p>
           <p>
-            Note: After saving a secret, you can't view its value again. To change a secret, simply update it with a new value.
+            Note: After saving a variable, you can't view its value again. To change it, simply update it with a new value.
           </p>
         </section>
 
         <section aria-labelledby="usage-instructions">
-          <h2 id="usage-instructions">Using Secrets in Skills</h2>
-          <p>Example usage for a secret named <code>AIRTABLE_TOKEN</code>:</p>
+          <h2 id="usage-instructions">Using Variables in Skills</h2>
+          <p>Example usage for a variable named <code>AIRTABLE_TOKEN</code>:</p>
           <pre>
             <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
             <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
@@ -146,8 +147,8 @@ const UserVariables = () => {
       </details>
 
       <section aria-labelledby="secrets-list">
-        <h2 id="secrets-list">Your Secrets</h2>
-        <p>Here's a list of your secrets. Add new or update existing ones as needed.</p>
+        <h2 id="secrets-list">Your Variables</h2>
+        <p>Here's a list of your variables. Add new or update existing ones as needed.</p>
 
         <Form form={form} onFinish={saveSecrets}>
           <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
