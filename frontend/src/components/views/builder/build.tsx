@@ -17,7 +17,9 @@ const BuildView = () => {
       {/* <div className="mb-4 text-2xl">Build </div> */}
       <div className="mb-6 text-sm hidden text-secondary">
         {" "}
-        Create skills, agents and teams for building multi-agent capabilities{" "}
+        Create and manage your skills, agents, and teams.{" "}
+        First, create a skill, then assign it to an agent, and finally, assemble a team.{" "}
+        Before you can start building, you need to set up your API keys.{" "}
       </div>
 
       <div className="mb-4 text-primary">
@@ -29,13 +31,23 @@ const BuildView = () => {
           items={[
             {
               label: (
+                <>
+                  <KeyIcon className="h-4 w-4 inline-block mr-1" />
+                  API Keys
+                </>
+              ),
+              key: "1",
+              children: <UserVariables />,
+            },
+            {
+              label: (
                 <div className="w-full  ">
                   {" "}
                   <WrenchIcon className="h-4 w-4 inline-block mr-1" />
                   Skills
                 </div>
               ),
-              key: "1",
+              key: "2",
               children: <SkillsView />,
             },
             {
@@ -57,16 +69,6 @@ const BuildView = () => {
               ),
               key: "4",
               children: <WorkflowView />,
-            },
-            {
-              label: (
-                <>
-                  <KeyIcon className="h-4 w-4 inline-block mr-1" />
-                  API Keys
-                </>
-              ),
-              key: "5",
-              children: <UserVariables />,
             },
           ]}
         />
