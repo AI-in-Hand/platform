@@ -5,12 +5,12 @@ import { ArrowTopRightOnSquareIcon, ChatBubbleOvalLeftEllipsisIcon, GlobeAltIcon
 const WhatsAppIntegration = () => (
   <div className="mb-2   relative">
     <div className="     rounded  ">
-      <div className="flex mt-2 pb-2 mb-2 border-b">
+      <div className="flex mt-2 pb-2 mb-2 border-b text-primary">
         <div className="flex-1 font-semibold  mb-2 ">
           WhatsApp Integration
         </div>
       </div>
-      <div className="text-xs mb-2 pb-1  ">
+      <div className="text-xs mb-2 pb-1 text-secondary">
         Integrate with WhatsApp easily.
       </div>
       {(
@@ -26,12 +26,12 @@ const WhatsAppIntegration = () => (
 const WebsiteWidget = () => (
   <div className="mb-2   relative">
     <div className="     rounded  ">
-      <div className="flex mt-2 pb-2 mb-2 border-b">
+      <div className="flex mt-2 pb-2 mb-2 border-b text-primary">
         <div className="flex-1 font-semibold  mb-2 ">
           Website Widget
         </div>
       </div>
-      <div className="text-xs mb-2 pb-1  ">
+      <div className="text-xs mb-2 pb-1 text-secondary">
         Embed directly into your website.
       </div>
       {(
@@ -47,12 +47,12 @@ const WebsiteWidget = () => (
 const APIIntegration = () => (
   <div className="mb-2   relative">
     <div className="     rounded  ">
-      <div className="flex mt-2 pb-2 mb-2 border-b">
+      <div className="flex mt-2 pb-2 mb-2 border-b text-primary">
         <div className="flex-1 font-semibold  mb-2 ">
           API Integration
         </div>
       </div>
-      <div className="text-xs mb-2 pb-1  ">
+      <div className="text-xs mb-2 pb-1 text-secondary">
         Connect through our robust API.
       </div>
       {(
@@ -68,18 +68,18 @@ const APIIntegration = () => (
 const CustomDeployment = () => (
   <div className="mb-2   relative">
     <div className="     rounded  ">
-      <div className="flex mt-2 pb-2 mb-2 border-b">
+      <div className="flex mt-2 pb-2 mb-2 border-b text-primary">
         <div className="flex-1 font-semibold  mb-2 ">
           Custom Deployment
         </div>
       </div>
-      <div className="text-xs mb-2 pb-1  ">
+      <div className="text-xs mb-2 pb-1 text-secondary">
         Deploy on your own infrastructure.
       </div>
       {(
         <div className="text-sm border mt-4 rounded text-secondary p-2">
           <RocketLaunchIcon className="h-4 w-4 inline mr-1" />
-          <a href="mailto:hello@ainhand.com" className="text-primary">Contact us</a> to learn more.
+          <u><a href="mailto:hello@ainhand.com" className="text-primary">Contact us</a></u> to learn more.
         </div>
       )}
     </div>

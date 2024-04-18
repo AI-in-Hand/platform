@@ -26,8 +26,8 @@ const Login = () => {
     return (
         <Spin spinning={loading}>
             <div className={"mt-20 max-w-[350px] m-auto w-full"}>
-                <Typography.Title level={3} className={"text-center"}>
-                    Sign In / Register
+                <Typography.Title level={3} className={"text-center text-primary"}>
+                    Sign In / Join Beta
                 </Typography.Title>
                 <Form name="login-form" onFinish={handleRegister} initialValues={{email: userEmail}}>
                     <Form.Item

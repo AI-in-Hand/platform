@@ -9,9 +9,16 @@ import {
   UserGroupIcon,
   WrenchIcon,
 } from "@heroicons/react/24/outline";
-import UserVariables from '../../userVariables';
+import UserVariables from "../../userVariables";
+import { useDispatch, useSelector } from "react-redux";
+import { SetActiveTab } from "../../../store/actions/usersActions";
 
 const BuildView = () => {
+  const dispatch = useDispatch();
+  const activeTab = useSelector((state) => state.user.activeTab);
+  const onTabChange = (tab: string) => {
+    dispatch(SetActiveTab(tab));
+  };
   return (
     <div className=" ">
       <div className="mb-6 text-sm text-primary">
@@ -41,8 +48,10 @@ const BuildView = () => {
         {" "}
         <Tabs
           tabBarStyle={{ paddingLeft: 0, marginLeft: 0 }}
-          defaultActiveKey="4"
+          defaultActiveKey={activeTab}
+          onChange={onTabChange}
           tabPosition="left"
+          destroyInactiveTabPane={true}
           items={[
             {
               label: (
