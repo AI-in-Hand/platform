@@ -19,6 +19,7 @@ from backend.services.agent_manager import AgentManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
+
 agent_router = APIRouter(tags=["agent"])
 
 

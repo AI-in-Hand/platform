@@ -20,6 +20,7 @@ from backend.services.skill_executor import SkillExecutor
 from backend.services.skill_manager import SkillManager
 
 logger = logging.getLogger(__name__)
+
 skill_router = APIRouter(tags=["skill"])
 
 
