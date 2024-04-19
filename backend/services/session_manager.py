@@ -5,9 +5,10 @@ from typing import Any
 from agency_swarm import Agency
 from fastapi import HTTPException
 
-from backend.models.session_config import SessionConfig
+from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
+from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.user_secret_manager import UserSecretManager
 
 
@@ -17,10 +18,12 @@ class SessionManager:
         session_storage: SessionConfigStorage,
         agency_storage: AgencyConfigStorage,
         user_secret_manager: UserSecretManager,
+        session_adapter: SessionAdapter,
     ):
         self.session_storage = session_storage
         self.agency_storage = agency_storage
         self.user_secret_manager = user_secret_manager
+        self.session_adapter = session_adapter
 
     def get_session(self, session_id: str) -> SessionConfig | None:
         """Return the session with the given ID."""
@@ -47,9 +50,10 @@ class SessionManager:
         """Delete all sessions for the given agency."""
         self.session_storage.delete_by_agency_id(agency_id)
 
-    def get_sessions_for_user(self, user_id: str) -> list[SessionConfig]:
+    def get_sessions_for_user(self, user_id: str) -> list[SessionConfigForAPI]:
         """Return a list of all sessions for the given user."""
-        return self.session_storage.load_by_user_id(user_id)
+        sessions = self.session_storage.load_by_user_id(user_id)
+        return [self.session_adapter.to_api(session) for session in sessions]
 
     def validate_agency_permissions(self, agency_id: str, user_id: str) -> None:
         """Validate if the user has permissions to access the agency."""

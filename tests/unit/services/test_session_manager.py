@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from http import HTTPStatus
 from unittest import mock
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -31,7 +31,10 @@ def agency_storage_mock():
 @pytest.fixture
 def session_manager(session_storage_mock, agency_storage_mock):
     return SessionManager(
-        session_storage=session_storage_mock, agency_storage=agency_storage_mock, user_secret_manager=MagicMock()
+        session_storage=session_storage_mock,
+        agency_storage=agency_storage_mock,
+        user_secret_manager=MagicMock(),
+        session_adapter=MagicMock(),
     )
 
 
@@ -46,28 +49,28 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
         timestamp=datetime.now(UTC).isoformat(),
     )
     expected_session_config.timestamp = mock.ANY
-    assert session_storage_mock.save.call_args_list == [call(expected_session_config)]
+    session_storage_mock.save.assert_called_once_with(expected_session_config)
 
 
 def test_delete_session(session_manager, session_storage_mock):
     session_manager.delete_session("session_id")
-    assert session_storage_mock.delete.call_args_list == [call("session_id")]
+    session_storage_mock.delete.assert_called_once_with("session_id")
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
     session_manager.delete_sessions_by_agency_id("agency_id")
-    assert session_storage_mock.delete_by_agency_id.call_args_list == [call("agency_id")]
+    session_storage_mock.delete_by_agency_id.assert_called_once_with("agency_id")
 
 
 def test_get_sessions_for_user(session_manager, session_storage_mock):
     session_manager.get_sessions_for_user("user_id")
-    assert session_storage_mock.load_by_user_id.call_args_list == [call("user_id")]
+    session_storage_mock.load_by_user_id.assert_called_once_with("user_id")
 
 
 def test_validate_agency_permissions(session_manager, agency_storage_mock):
     agency_storage_mock.load_by_id.return_value = MagicMock(user_id="user_id")
     session_manager.validate_agency_permissions("agency_id", "user_id")
-    assert agency_storage_mock.load_by_id.call_args_list == [call("agency_id")]
+    agency_storage_mock.load_by_id.assert_called_once_with("agency_id")
 
 
 def test_validate_agency_permissions_raises_404(session_manager, agency_storage_mock):

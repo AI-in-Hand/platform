@@ -24,6 +24,26 @@ def get_redis() -> aioredis.Redis:
     return redis
 
 
+def get_agent_adapter(
+    skill_config_storage: SkillConfigStorage = Depends(SkillConfigStorage),
+) -> AgentAdapter:
+    return AgentAdapter(skill_config_storage)
+
+
+def get_agency_adapter(
+    agent_flow_spec_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
+    agent_adapter: AgentAdapter = Depends(get_agent_adapter),
+) -> AgencyAdapter:
+    return AgencyAdapter(agent_flow_spec_storage, agent_adapter)
+
+
+def get_session_adapter(
+    agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
+    agency_adapter: AgencyAdapter = Depends(get_agency_adapter),
+) -> SessionAdapter:
+    return SessionAdapter(agency_config_storage, agency_adapter)
+
+
 def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> RedisCacheManager:
     return RedisCacheManager(redis)
 
@@ -60,28 +80,12 @@ def get_session_manager(
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
     agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
+    session_adapter: SessionAdapter = Depends(get_session_adapter),
 ) -> SessionManager:
     """Returns a SessionManager object"""
     return SessionManager(
-        session_storage=session_storage, user_secret_manager=user_secret_manager, agency_storage=agency_storage
+        session_storage=session_storage,
+        user_secret_manager=user_secret_manager,
+        agency_storage=agency_storage,
+        session_adapter=session_adapter,
     )
-
-
-def get_agent_adapter(
-    skill_config_storage: SkillConfigStorage = Depends(SkillConfigStorage),
-) -> AgentAdapter:
-    return AgentAdapter(skill_config_storage)
-
-
-def get_agency_adapter(
-    agent_flow_spec_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
-    agent_adapter: AgentAdapter = Depends(get_agent_adapter),
-) -> AgencyAdapter:
-    return AgencyAdapter(agent_flow_spec_storage, agent_adapter)
-
-
-def get_session_adapter(
-    agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-    agency_adapter: AgencyAdapter = Depends(get_agency_adapter),
-) -> SessionAdapter:
-    return SessionAdapter(agency_config_storage, agency_adapter)
