@@ -1,17 +1,26 @@
 from datetime import UTC, datetime
+from http import HTTPStatus
 from typing import Any
 
 from agency_swarm import Agency
+from fastapi import HTTPException
 
 from backend.models.session_config import SessionConfig
+from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.user_secret_manager import UserSecretManager
 
 
 class SessionManager:
-    def __init__(self, session_storage: SessionConfigStorage, user_secret_manager: UserSecretManager):
-        self.user_secret_manager = user_secret_manager
+    def __init__(
+        self,
+        session_storage: SessionConfigStorage,
+        agency_storage: AgencyConfigStorage,
+        user_secret_manager: UserSecretManager,
+    ):
         self.session_storage = session_storage
+        self.agency_storage = agency_storage
+        self.user_secret_manager = user_secret_manager
 
     def get_session(self, session_id: str) -> SessionConfig | None:
         """Return the session with the given ID."""
@@ -41,3 +50,13 @@ class SessionManager:
     def get_sessions_for_user(self, user_id: str) -> list[SessionConfig]:
         """Return a list of all sessions for the given user."""
         return self.session_storage.load_by_user_id(user_id)
+
+    def validate_agency_permissions(self, agency_id: str, user_id: str) -> None:
+        """Validate if the user has permissions to access the agency."""
+        agency_config_db = self.agency_storage.load_by_id(agency_id)
+        if not agency_config_db:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        if agency_config_db.user_id != user_id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
+            )
