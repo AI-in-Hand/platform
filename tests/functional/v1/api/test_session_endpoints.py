@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.services.agency_manager import AgencyManager
-from backend.services.session_manager import SessionManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
 
@@ -69,16 +68,20 @@ def test_create_session_success(client, mock_firestore_client):
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_create_session_agency_not_found(client):
+def test_create_session_agency_not_found(client, mock_firestore_client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
         response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
         assert response.json() == {"data": {"message": "Agency not found"}}
+        assert mock_firestore_client.collection("session_configs").to_dict() == {}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_delete_session_success(client):
-    with patch.object(SessionManager, "delete_session", MagicMock()) as mock_delete_session:
-        response = client.delete("/api/v1/session?id=test_session_id")
-        assert response.status_code == 200
-        mock_delete_session.assert_called_once_with("test_session_id")
+def test_delete_session_success(client, mock_firestore_client):
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", {"id": "test_session_id"})
+
+    response = client.delete("/api/v1/session?id=test_session_id")
+    assert response.status_code == 200
+    assert response.json()["data"] == []
+    # Check if the session config was deleted
+    assert mock_firestore_client.collection("session_configs").to_dict() == {}

@@ -37,3 +37,7 @@ class SessionManager:
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""
         self.session_storage.delete_by_agency_id(agency_id)
+
+    def get_sessions_for_user(self, user_id: str) -> list[SessionConfig]:
+        """Return a list of all sessions for the given user."""
+        return self.session_storage.load_by_user_id(user_id)
