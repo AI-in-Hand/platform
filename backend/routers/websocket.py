@@ -13,6 +13,7 @@ from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
+
 connection_manager = WebSocketConnectionManager()
 ws_router = APIRouter(
     tags=["websocket"],

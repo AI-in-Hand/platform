@@ -20,6 +20,7 @@ from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
+
 agency_router = APIRouter(
     responses={404: {"description": "Not found"}},
     tags=["agency"],

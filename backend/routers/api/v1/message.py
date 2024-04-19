@@ -20,6 +20,7 @@ from backend.services.session_manager import SessionManager
 from backend.services.user_secret_manager import UserSecretManager
 
 logger = logging.getLogger(__name__)
+
 message_router = APIRouter(
     responses={404: {"description": "Not found"}},
     tags=["message"],

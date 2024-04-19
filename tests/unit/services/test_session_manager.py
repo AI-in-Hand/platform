@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
+from http import HTTPStatus
 from unittest import mock
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 import pytest
+from fastapi import HTTPException
 
 from backend.models.session_config import SessionConfig
 from backend.services.session_manager import SessionManager
@@ -22,41 +24,23 @@ def session_storage_mock():
 
 
 @pytest.fixture
-def session_manager(session_storage_mock):
-    return SessionManager(user_secret_manager=MagicMock(), session_storage=session_storage_mock)
-
-
-@pytest.fixture
-def agent_mock():
+def agency_storage_mock():
     return MagicMock()
 
 
 @pytest.fixture
-def recipient_agent_mock():
-    return MagicMock()
-
-
-@pytest.fixture
-def thread_mock():
-    return MagicMock()
-
-
-# Helper function for creating a mock thread
-def create_mock_thread(agent, recipient_agent, id="thread_id"):
-    thread = MagicMock()
-    thread.agent = agent
-    thread.recipient_agent = recipient_agent
-    thread.id = id
-    return thread
+def session_manager(session_storage_mock, agency_storage_mock):
+    return SessionManager(
+        session_storage=session_storage_mock,
+        agency_storage=agency_storage_mock,
+        user_secret_manager=MagicMock(),
+        session_adapter=MagicMock(),
+    )
 
 
 # Tests
 def test_create_session(agency_mock, session_manager, session_storage_mock):
-    # Mock _create_thread to return a mock object with an id attribute
-    session_manager._create_thread = MagicMock(return_value=MagicMock(id="main_thread_id"))
-
     session_id = session_manager.create_session(agency_mock, "agency_id", "user_id", thread_ids={})
-
     assert session_id == "main_thread_id", "The session ID should be the ID of the main thread."
     expected_session_config = SessionConfig(
         id="main_thread_id",
@@ -65,16 +49,39 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
         timestamp=datetime.now(UTC).isoformat(),
     )
     expected_session_config.timestamp = mock.ANY
-    assert session_storage_mock.save.call_args_list == [call(expected_session_config)]
+    session_storage_mock.save.assert_called_once_with(expected_session_config)
 
 
 def test_delete_session(session_manager, session_storage_mock):
     session_manager.delete_session("session_id")
-
-    assert session_storage_mock.delete.call_args_list == [call("session_id")]
+    session_storage_mock.delete.assert_called_once_with("session_id")
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
     session_manager.delete_sessions_by_agency_id("agency_id")
+    session_storage_mock.delete_by_agency_id.assert_called_once_with("agency_id")
 
-    assert session_storage_mock.delete_by_agency_id.call_args_list == [call("agency_id")]
+
+def test_get_sessions_for_user(session_manager, session_storage_mock):
+    session_manager.get_sessions_for_user("user_id")
+    session_storage_mock.load_by_user_id.assert_called_once_with("user_id")
+
+
+def test_validate_agency_permissions(session_manager, agency_storage_mock):
+    agency_storage_mock.load_by_id.return_value = MagicMock(user_id="user_id")
+    session_manager.validate_agency_permissions("agency_id", "user_id")
+    agency_storage_mock.load_by_id.assert_called_once_with("agency_id")
+
+
+def test_validate_agency_permissions_raises_404(session_manager, agency_storage_mock):
+    agency_storage_mock.load_by_id.return_value = None
+    with pytest.raises(HTTPException) as exc_info:
+        session_manager.validate_agency_permissions("agency_id", "user_id")
+    assert exc_info.value.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_validate_agency_permissions_raises_403(session_manager, agency_storage_mock):
+    agency_storage_mock.load_by_id.return_value = MagicMock(user_id="another_user_id")
+    with pytest.raises(HTTPException) as exc_info:
+        session_manager.validate_agency_permissions("agency_id", "user_id")
+    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN
