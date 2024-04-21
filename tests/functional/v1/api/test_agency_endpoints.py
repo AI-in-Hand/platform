@@ -222,7 +222,7 @@ def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mo
         "id": "existing_agency",
         "name": "Existing Agency with Missing Agent",
         "shared_instructions": "Existing",
-        "sender": missing_agent,
+        "flows": [{"sender": missing_agent, "receiver": None}],
     }
 
     mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent)
