@@ -117,7 +117,7 @@ def test_create_agency_success(client, mock_agent, agency_adapter, mock_firestor
         "id": "template_agency_id",
         "name": "Test agency",
         "shared_instructions": "Manifesto",
-        "sender": mock_agent,
+        "flows": [{"sender": mock_agent, "receiver": None}],
     }
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
     with patch(
@@ -150,8 +150,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
         "name": "Test agency",
         "description": "Test Description",
         "shared_instructions": "Updated Manifesto",
-        "sender": mock_agent,
-        "receiver": None,
+        "flows": [{"sender": mock_agent, "receiver": None}],
         "user_id": TEST_USER_ID,
         "timestamp": "2024-04-04T09:39:13.048457+00:00",
     }
@@ -178,7 +177,7 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data)
     new_data = initial_data.copy()
-    new_data.update({"shared_instructions": "Updated Manifesto", "sender": mock_agent})
+    new_data.update({"shared_instructions": "Updated Manifesto", "flows": [{"sender": mock_agent, "receiver": None}]})
 
     response = client.put("/api/v1/agency", json=new_data)
 
@@ -222,7 +221,7 @@ def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mo
         "id": "existing_agency",
         "name": "Existing Agency with Missing Agent",
         "shared_instructions": "Existing",
-        "sender": missing_agent,
+        "flows": [{"sender": missing_agent, "receiver": None}],
     }
 
     mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent)

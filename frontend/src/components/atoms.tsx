@@ -1260,42 +1260,52 @@ export const FlowConfigViewer = ({
   flowConfig: IFlowConfig;
   setFlowConfig: (newFlowConfig: IFlowConfig) => void;
 }) => {
-  // Local state for sender and receiver FlowSpecs
-  const [senderFlowSpec, setSenderFlowSpec] =
-    React.useState<IAgentFlowSpec | null>(flowConfig.sender);
-
   const [localFlowConfig, setLocalFlowConfig] =
     React.useState<IFlowConfig>(flowConfig);
 
-  const [receiverFlowSpec, setReceiverFlowSpec] =
-    React.useState<IAgentFlowSpec | null>(flowConfig.receiver);
-
-  // Update the local state and propagate changes to the parent component
-  const updateSenderFlowSpec = (newFlowSpec: IAgentFlowSpec | null) => {
-    setSenderFlowSpec(newFlowSpec);
-    if (newFlowSpec) {
-      setFlowConfig({ ...flowConfig, sender: newFlowSpec });
-    }
-  };
-
-  const updateReceiverFlowSpec = (newFlowSpec: IAgentFlowSpec | null) => {
-    setReceiverFlowSpec(newFlowSpec);
-    if (newFlowSpec) {
-      setFlowConfig({ ...flowConfig, receiver: newFlowSpec });
-    }
-  };
-
   const updateFlowConfig = (key: string, value: string) => {
-    // When an updatedFlowConfig is created using localFlowConfig, if the contents of FlowConfigViewer Modal are changed after the Agent Specification Modal is updated, the updated contents of the Agent Specification Modal are not saved. Fixed to localFlowConfig->flowConfig. Fixed a bug.
     const updatedFlowConfig = { ...flowConfig, [key]: value };
-    // console.log("updatedFlowConfig: ", updatedFlowConfig);
     setLocalFlowConfig(updatedFlowConfig);
     setFlowConfig(updatedFlowConfig);
   };
 
+  const updateSenderFlowSpec = (index: number, newFlowSpec: IAgentFlowSpec) => {
+    const updatedFlows = [...localFlowConfig.flows];
+    updatedFlows[index] = {
+      ...updatedFlows[index],
+      sender: newFlowSpec,
+    };
+    setLocalFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+    setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+  };
+
+  const updateReceiverFlowSpec = (index: number, newFlowSpec: IAgentFlowSpec) => {
+    const updatedFlows = [...localFlowConfig.flows];
+    updatedFlows[index] = {
+      ...updatedFlows[index],
+      receiver: newFlowSpec,
+    };
+    setLocalFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+    setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+  };
+
+  const addFlow = () => {
+    const updatedFlows = [
+      ...localFlowConfig.flows,
+      { sender: null, receiver: null },
+    ];
+    setLocalFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+    setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+  };
+
+  const removeFlow = (index: number) => {
+    const updatedFlows = localFlowConfig.flows.filter((_, i) => i !== index);
+    setLocalFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+    setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
+  };
+
   return (
     <>
-      {/* <div className="mb-2">{flowConfig.name}</div> */}
       <ControlRowView
         title="Team Name"
         className="mt-4 mb-2"
@@ -1323,23 +1333,35 @@ export const FlowConfigViewer = ({
           />
         }
       />
-
-      <div className="flex gap-3 mt-4">
-        <div className="w-1/2 ">
-          <div className="mb-2  ">Sender</div>
-          <AgentSelector
-            flowSpec={senderFlowSpec}
-            setFlowSpec={updateSenderFlowSpec}
-          />
+      <div className="mt-4 mb-2">Communication Flows</div>
+      {localFlowConfig.flows.map((flow, index) => (
+        <div key={index} className="flex gap-3 mt-4">
+          <div className="w-1/2">
+            <div className="mb-2">Sender</div>
+            <AgentSelector
+              flowSpec={flow.sender}
+              setFlowSpec={(newFlowSpec) =>
+                updateSenderFlowSpec(index, newFlowSpec)
+              }
+            />
+          </div>
+          <div className="w-1/2">
+            <div className="mb-2">
+              {localFlowConfig.flows.length <= 1 && index === 0
+                ? "Receiver (optional)"
+                : "Receiver"}
+            </div>
+            <AgentSelector
+              flowSpec={flow.receiver}
+              setFlowSpec={(newFlowSpec) =>
+                updateReceiverFlowSpec(index, newFlowSpec)
+              }
+            />
+          </div>
+          <button onClick={() => removeFlow(index)}>Remove</button>
         </div>
-        <div className="w-1/2">
-          <div className="mb-2">Receiver (optional)</div>
-          <AgentSelector
-            flowSpec={receiverFlowSpec}
-            setFlowSpec={updateReceiverFlowSpec}
-          />
-        </div>
-      </div>
+      ))}
+      <button onClick={addFlow}>Add Flow</button>
     </>
   );
 };

@@ -48,15 +48,48 @@ class AgencyConfig(BaseModel):
         return v
 
 
+class CommunicationFlow(BaseModel):
+    """Communication flow model"""
+
+    sender: AgentFlowSpecForAPI = Field(..., description="Sender agent flow")
+    receiver: AgentFlowSpecForAPI | None = Field(None, description="Receiver agent flow")
+
+    @field_validator("sender", mode="before", check_fields=True)
+    @classmethod
+    def validate_sender(cls, v, values):  # noqa: ARG003
+        """Validate the sender agent is not None"""
+        if not v:
+            raise ValueError("Sender agent is required")
+        return v
+
+
 class AgencyConfigForAPI(BaseModel):
     """Agency configuration model for the API, corresponds to the IFlowConfig type in the frontend"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
-    sender: AgentFlowSpecForAPI | None = None
-    receiver: AgentFlowSpecForAPI | None = None
+    flows: list[CommunicationFlow] = Field(default_factory=list, description="List of communication flows")
 
     name: str = Field(..., description="Name of the agency")
     description: str = Field("", description="Description of the agency")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
     shared_instructions: str = Field("", description="Agency Manifesto")
     timestamp: str | None = Field(None, description="Timestamp of the last update")
+
+    @field_validator("flows", mode="after")
+    @classmethod
+    def validate_flows(cls, v, values):  # noqa: ARG003
+        """Validate the communication flows:
+        - The list is not empty
+        - Each flow has a sender
+        - If the number of flows is greater than 1, each flow has a receiver
+        """
+        if len(v) == 0:
+            raise ValueError("Please add at least one agent")
+
+        for flow in v:
+            if not flow.sender:
+                raise ValueError("Sender agent is required")
+            if len(v) > 1 and not flow.receiver:
+                raise ValueError("Receiver agent is required")
+
+        return v
