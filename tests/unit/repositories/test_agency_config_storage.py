@@ -7,7 +7,13 @@ from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
 
 @pytest.fixture
 def agency_config_data():
-    return {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency"}
+    return {
+        "id": TEST_AGENCY_ID,
+        "user_id": TEST_USER_ID,
+        "name": "Test Agency",
+        "main_agent": "agent1_name",
+        "agents": ["agent1_id"],
+    }
 
 
 def test_load_agency_config_by_user_id(mock_firestore_client, agency_config_data):
@@ -32,7 +38,12 @@ def test_load_agency_config_by_id(mock_firestore_client, agency_config_data):
 
 
 def test_save_new_agency_config(mock_firestore_client):
-    new_agency_data = {"user_id": TEST_USER_ID, "name": "New Test Agency"}
+    new_agency_data = {
+        "user_id": TEST_USER_ID,
+        "name": "New Test Agency",
+        "main_agent": "agent1_name",
+        "agents": ["agent1_id"],
+    }
     new_agency_config = AgencyConfig.model_validate(new_agency_data)
     mock_firestore_client.setup_mock_data("agency_configs", "new_test_agency_id", new_agency_data)
 

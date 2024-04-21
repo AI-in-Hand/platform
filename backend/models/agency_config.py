@@ -12,7 +12,7 @@ class AgencyConfig(BaseModel):
     user_id: str | None = Field(None, description="The user ID owning this configuration")
     shared_instructions: str = Field("", description="Agency Manifesto")  # TODO: support in the frontend
     agents: list[str] = Field(default_factory=list, description="List of agent IDs used in the agency chart")
-    main_agent: str | None = Field(None, description="The main agent name")  # TODO: change to just str
+    main_agent: str = Field(..., description="The main agent name")
     agency_chart: dict[str, conlist(str, min_length=2, max_length=2)] = Field(  # type: ignore
         default_factory=dict,
         description="Dict representing the agency chart with agent names. "
@@ -34,8 +34,6 @@ class AgencyConfig(BaseModel):
 
         # Check if main_agent is set
         main_agent = values.data.get("main_agent")
-        if not main_agent:
-            raise ValueError("Main agent must be set if agency chart is not empty")
 
         # Check if the main_agent is in the agency chart
         if main_agent not in {agent for sublist in v.values() for agent in sublist}:

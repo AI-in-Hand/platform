@@ -97,7 +97,13 @@ def test_get_agency_config_not_found(client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_agency_config_user_id_mismatch(client, mock_firestore_client):
-    expected_agency = AgencyConfig(id="agency1", user_id="different_user_id", name="Test agency")
+    expected_agency = AgencyConfig(
+        id="agency1",
+        user_id="different_user_id",
+        name="Test agency",
+        agents=["sender_agent_id"],
+        main_agent="Sender Agent",
+    )
     mock_firestore_client.setup_mock_data("agency_configs", "agency1", expected_agency.model_dump())
 
     response = client.get("/api/v1/agency?id=agency1")

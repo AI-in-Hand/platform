@@ -42,7 +42,12 @@ async def test_get_agency_list(agency_manager, mock_firestore_client):
 
 @pytest.mark.asyncio
 async def test_get_agency_construct_agency(agency_manager, mock_firestore_client):
-    agency_config_dict = {"name": "Test agency", "id": TEST_AGENCY_ID}
+    agency_config_dict = {
+        "name": "Test agency",
+        "id": TEST_AGENCY_ID,
+        "main_agent": "agent1_name",
+        "agents": ["agent1_id"],
+    }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_dict)
     with patch.object(
         agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
