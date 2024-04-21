@@ -230,8 +230,8 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     description: "Default Agent Team",
     flows: [
       {
-        sender: userProxyFlowSpec,
-        receiver: assistantFlowSpec,
+        sender: null,
+        receiver: null,
       },
     ],
     type: "twoagents",
