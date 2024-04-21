@@ -42,7 +42,7 @@ def setup_logging():
 
     file_handler = logging.handlers.RotatingFileHandler("app.log.jsonl", maxBytes=10485760, backupCount=5)
     file_handler.setFormatter(json_formatter)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
 
     # Create QueueHandler and QueueListener
     handlers = [stdout_handler, file_handler]
