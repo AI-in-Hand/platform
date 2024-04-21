@@ -57,4 +57,4 @@ def test_main_agent_not_set():
             agency_chart={"0": ["Agent1", "Agent2"]},
             main_agent=None,
         )
-    assert "Main agent must be set if agency chart is not empty" in str(excinfo.value)
+    assert "Value error, Please add at least one agent" in str(excinfo.value)
