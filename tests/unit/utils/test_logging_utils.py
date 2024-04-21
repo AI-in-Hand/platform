@@ -1,11 +1,11 @@
 import atexit
 import logging
 import queue
-from unittest.mock import MagicMock, call
+from unittest.mock import call
 
 import pytest
 
-from backend.utils.logging_utils import JSONFormatter, create_gcloud_logging_handler, setup_logging
+from backend.utils.logging_utils import JSONFormatter, setup_logging
 
 
 @pytest.fixture
@@ -21,7 +21,9 @@ def mock_logging(mocker):
     mocker.patch("atexit.register")
     mocker.patch("queue.Queue")
     # Mock Google Cloud Logging components
-    mocker.patch("backend.utils.logging_utils.gcloud_logging_handler.create_gcloud_logging_handler")
+    mocker.patch("backend.utils.logging_utils.create_gcloud_logging_handler")
+
+    from backend.utils.logging_utils import create_gcloud_logging_handler
 
     # Return all mocked components for assertions
     return {
@@ -93,7 +95,6 @@ def test_silence_specific_logger(mock_logging):
 
 
 def test_google_cloud_logging_handler_setup(mock_logging):
-    mock_logging["create_gcloud_logging_handler"].return_value = MagicMock()
     setup_logging()
     # Assert the Google Cloud Logging handler was setup correctly
     mock_logging["create_gcloud_logging_handler"].assert_called_once()
