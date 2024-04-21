@@ -75,8 +75,13 @@ class AgencyConfigForAPI(BaseModel):
         - Each flow has a sender
         - If the number of flows is greater than 1, each flow has a receiver
         """
-        if len(v) > 1:
-            for flow in v:
-                if flow.receiver is None:
-                    raise ValueError("Receiver must be specified for each flow")
+        if len(v) == 0:
+            raise ValueError("Please add at least one agent")
+
+        for flow in v:
+            if not flow.sender:
+                raise ValueError("Sender agent is required")
+            if len(v) > 1 and not flow.receiver:
+                raise ValueError("Receiver agent is required")
+
         return v
