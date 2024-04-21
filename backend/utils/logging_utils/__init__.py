@@ -56,7 +56,7 @@ def setup_logging():
             def emit(self, record):
                 log_entry = json.loads(json_formatter.format(record))
                 cloud_logger.log_struct(
-                    log_entry, severity=record.levelname, labels={"backend": settings.google_cloud_log_name}
+                    log_entry, severity=record.levelname, labels={"service_name": settings.google_cloud_log_name}
                 )
 
         gcloud_handler = GCloudLoggingHandler()
