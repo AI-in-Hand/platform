@@ -11,10 +11,10 @@ from backend.utils.logging_utils.json_formatter import JSONFormatter
 
 def setup_logging():
     """
-    Setup the logging configuration for the application. This function will configure the root logger to use a
+    Set up the logging configuration for the application. This function will configure the root logger to use a
     QueueHandler and QueueListener to handle log records. The QueueListener will handle the log records and send them to
-    a StreamHandler and a RotatingFileHandler. The log records will be formatted using a simple formatter
-    for the StreamHandler and a JSONFormatter for the RotatingFileHandler.
+    the appropriate handlers. The handlers will be configured to log to the console and to a file. If the application is
+    running in a production environment, the handler will also log to Google Cloud Logging.
     """
     # Configure formatters
     simple_formatter = logging.Formatter(
@@ -45,9 +45,8 @@ def setup_logging():
     file_handler.setFormatter(json_formatter)
     file_handler.setLevel(logging.INFO)
 
-    # Create Google Cloud Logging Handler
     gcloud_handler = create_gcloud_logging_handler(settings, json_formatter)
-    
+
     # Create QueueHandler and QueueListener
     handlers = [stdout_handler, file_handler]
     if gcloud_handler:
@@ -69,4 +68,4 @@ def setup_logging():
     logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
     logging.getLogger("openai").setLevel(logging.WARNING)
 
-    root_logger.info("Logging setup complete with Google Cloud integration.")
+    root_logger.info("Logging setup complete")
