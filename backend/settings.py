@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30)
 
     google_credentials: str | None = Field(default=None)
+    google_cloud_log_name: str = Field(default="backend")
+    google_cloud_project: str = Field(default="AI in Hand")
+
     gpt_model: str = Field(default=LARGE_GPT_MODEL)
     gpt_small_model: str = Field(default=SMALL_GPT_MODEL)
     # redis_tls_url: RedisDsn | None = Field(default=None)
