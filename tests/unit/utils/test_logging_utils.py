@@ -44,7 +44,7 @@ def test_setup_logging_handlers_and_levels(mock_logging):
     # Assert handlers were created with the correct levels
     mock_logging["RotatingFileHandler"].assert_called_once_with("app.log.jsonl", maxBytes=10485760, backupCount=5)
     file_handler = mock_logging["RotatingFileHandler"].return_value
-    file_handler.setLevel.assert_called_once_with(logging.DEBUG)
+    file_handler.setLevel.assert_called_once_with(logging.INFO)
 
     mock_logging["StreamHandler"].assert_called_once()
     stderr_handler = mock_logging["StreamHandler"].return_value
