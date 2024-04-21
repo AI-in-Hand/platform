@@ -11,7 +11,10 @@ from backend.utils.logging_utils.json_formatter import JSONFormatter
 
 def setup_logging():
     """
-    Set up the logging configuration for the application to include Google Cloud Logging.
+    Setup the logging configuration for the application. This function will configure the root logger to use a
+    QueueHandler and QueueListener to handle log records. The QueueListener will handle the log records and send them to
+    a StreamHandler and a RotatingFileHandler. The log records will be formatted using a simple formatter
+    for the StreamHandler and a JSONFormatter for the RotatingFileHandler.
     """
     # Configure formatters
     simple_formatter = logging.Formatter(
@@ -29,8 +32,6 @@ def setup_logging():
             "thread_name": "threadName",
         }
     )
-    # Create Google Cloud Logging Handler
-    gcloud_handler = create_gcloud_logging_handler(settings, json_formatter)
 
     # Initialize the log queue
     log_queue = queue.Queue()
@@ -44,6 +45,9 @@ def setup_logging():
     file_handler.setFormatter(json_formatter)
     file_handler.setLevel(logging.INFO)
 
+    # Create Google Cloud Logging Handler
+    gcloud_handler = create_gcloud_logging_handler(settings, json_formatter)
+    
     # Create QueueHandler and QueueListener
     handlers = [stdout_handler, file_handler]
     if gcloud_handler:
