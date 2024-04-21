@@ -54,6 +54,14 @@ class CommunicationFlow(BaseModel):
     sender: AgentFlowSpecForAPI = Field(..., description="Sender agent flow")
     receiver: AgentFlowSpecForAPI | None = Field(None, description="Receiver agent flow")
 
+    @field_validator("sender", mode="before", check_fields=True)
+    @classmethod
+    def validate_sender(cls, v, values):  # noqa: ARG003
+        """Validate the sender agent is not None"""
+        if not v:
+            raise ValueError("Sender agent is required")
+        return v
+
 
 class AgencyConfigForAPI(BaseModel):
     """Agency configuration model for the API, corresponds to the IFlowConfig type in the frontend"""
