@@ -27,9 +27,11 @@ class AgencyAdapter:
         agency_chart = {}
         for i, flow in enumerate(agency_config.flows):
             sender_id = flow.sender.id
-            receiver_id = flow.receiver.id if flow.receiver else None
-            agents.extend([sender_id, receiver_id] if receiver_id else [sender_id])
-            agency_chart[str(i)] = [flow.sender.config.name, flow.receiver.config.name if flow.receiver else None]
+            agents.append(sender_id)
+            if flow.receiver:
+                receiver_id = flow.receiver.id
+                agents.append(receiver_id)
+                agency_chart[str(i)] = [flow.sender.config.name, flow.receiver.config.name]
 
         main_agent = agency_config.flows[0].sender.config.name if agency_config.flows else None
 
