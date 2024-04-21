@@ -11,7 +11,6 @@ class Settings(BaseSettings):
 
     google_credentials: str | None = Field(default=None)
     google_cloud_log_name: str = Field(default="backend")
-    google_cloud_project: str = Field(default="ai-in-hand")
 
     gpt_model: str = Field(default=LARGE_GPT_MODEL)
     gpt_small_model: str = Field(default=SMALL_GPT_MODEL)
