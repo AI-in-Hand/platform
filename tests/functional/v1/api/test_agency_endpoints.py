@@ -174,12 +174,11 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
         "id": TEST_AGENCY_ID,
         "user_id": "some_other_user",
         "name": "Test agency",
-        "shared_instructions": "Original Manifesto",
-        "sender": mock_agent,
+        "main_agent": "Sender Agent",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data)
     new_data = initial_data.copy()
-    new_data.update({"shared_instructions": "Updated Manifesto"})
+    new_data.update({"shared_instructions": "Updated Manifesto", "sender": mock_agent})
 
     response = client.put("/api/v1/agency", json=new_data)
 
@@ -234,11 +233,7 @@ def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mo
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage")
 def test_delete_agency_success(client, mock_firestore_client):
-    db_agency = {
-        "id": TEST_AGENCY_ID,
-        "user_id": TEST_USER_ID,
-        "name": "Test Agency",
-    }
+    db_agency = {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency", "main_agent": "test_agent_id"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
     response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
@@ -261,6 +256,7 @@ def test_delete_agency_user_id_mismatch(client, mock_firestore_client):
         "id": TEST_AGENCY_ID,
         "user_id": "some_other_user",
         "name": "Test Agency",
+        "main_agent": "test_agent_id",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
