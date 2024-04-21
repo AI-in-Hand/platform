@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
     logger.exception(f"request: {request} exc: {exc}")
-    error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
+    error_message = ", ".join([error["msg"] for error in exc.errors()])
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
-        content={"data": {"message": f"Validation error: {error_message}"}},
+        content={"data": {"message": error_message}},
     )
 
 

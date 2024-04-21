@@ -20,6 +20,14 @@ class AgencyConfig(BaseModel):
     )
     timestamp: str | None = Field(None, description="Timestamp of the last update")
 
+    @field_validator("main_agent", mode="before", check_fields=True)
+    @classmethod
+    def validate_main_agent(cls, v, values):  # noqa: ARG003
+        """Validate the main agent is not None"""
+        if not v:
+            raise ValueError("Please add at least one agent")
+        return v
+
     @field_validator("agency_chart", mode="after")
     @classmethod
     def validate_agency_chart(cls, v, values):
@@ -32,10 +40,8 @@ class AgencyConfig(BaseModel):
             if len(set(chart_row)) != len(chart_row):
                 raise ValueError("Chart row must be unique")
 
-        # Check if main_agent is set
-        main_agent = values.data.get("main_agent")
-
         # Check if the main_agent is in the agency chart
+        main_agent = values.data.get("main_agent")
         if main_agent not in {agent for sublist in v.values() for agent in sublist}:
             raise ValueError("The main agent must be in the agency chart")
 

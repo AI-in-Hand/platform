@@ -57,4 +57,4 @@ def test_main_agent_not_set():
             agency_chart={"0": ["Agent1", "Agent2"]},
             main_agent=None,
         )
-    assert "main_agent\n  Input should be a valid string" in str(excinfo.value)
+    assert "Value error, Please add at least one agent" in str(excinfo.value)
