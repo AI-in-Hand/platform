@@ -26,7 +26,7 @@ def test_to_model(agency_adapter):
         shared_instructions="Test Instructions",
         flows=[
             CommunicationFlow(sender=sender, receiver=receiver),
-            CommunicationFlow(sender=sender),
+            CommunicationFlow(sender=sender, receiver=receiver),
         ],
     )
     agency_config = agency_adapter.to_model(agency_config_api)
@@ -37,7 +37,7 @@ def test_to_model(agency_adapter):
     assert agency_config.main_agent == "Sender"
     assert agency_config.agency_chart == {
         "0": ["Sender", "Receiver"],
-        "1": ["Sender", None],
+        "1": ["Sender", "Receiver"],
     }
 
 
@@ -53,7 +53,7 @@ def test_to_api(agency_adapter, agent_adapter, mocker):
         main_agent="Sender",
         agency_chart={
             "0": ["Sender", "Receiver"],
-            "1": ["Sender", None],
+            "1": ["Sender", "Receiver"],
         },
     )
     mocker.patch.object(
@@ -69,7 +69,7 @@ def test_to_api(agency_adapter, agent_adapter, mocker):
     assert agency_config_api.flows[0].sender == agent_adapter.to_api(sender)
     assert agency_config_api.flows[0].receiver == agent_adapter.to_api(receiver)
     assert agency_config_api.flows[1].sender == agent_adapter.to_api(sender)
-    assert agency_config_api.flows[1].receiver is None
+    assert agency_config_api.flows[1].receiver == agent_adapter.to_api(receiver)
 
 
 def test_to_api_without_agents(agency_adapter):
@@ -79,7 +79,7 @@ def test_to_api_without_agents(agency_adapter):
         description="Test Description",
         shared_instructions="Test Instructions",
         agents=[],
-        main_agent=None,
+        main_agent="Sender",
         agency_chart={},
     )
     agency_config_api = agency_adapter.to_api(agency_config)
