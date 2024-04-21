@@ -37,9 +37,9 @@ def setup_logging():
     log_queue = queue.Queue()
 
     # Create and configure handlers
-    stderr_handler = logging.StreamHandler()
-    stderr_handler.setFormatter(simple_formatter)
-    stderr_handler.setLevel(logging.WARNING)
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setFormatter(simple_formatter)
+    stdout_handler.setLevel(logging.INFO)
 
     file_handler = logging.handlers.RotatingFileHandler("app.log.jsonl", maxBytes=10485760, backupCount=5)
     file_handler.setFormatter(json_formatter)
@@ -65,7 +65,7 @@ def setup_logging():
         gcloud_handler = None
 
     # Create QueueHandler and QueueListener
-    handlers = [stderr_handler, file_handler]
+    handlers = [stdout_handler, file_handler]
     if gcloud_handler:
         handlers.append(gcloud_handler)
     queue_handler = logging.handlers.QueueHandler(log_queue)
