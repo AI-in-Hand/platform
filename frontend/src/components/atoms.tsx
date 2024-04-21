@@ -1346,7 +1346,11 @@ export const FlowConfigViewer = ({
             />
           </div>
           <div className="w-1/2">
-            <div className="mb-2">Receiver</div>
+            <div className="mb-2">
+              {localFlowConfig.flows.length <= 1 && index === 0
+                ? "Receiver (optional)"
+                : "Receiver"}
+            </div>
             <AgentSelector
               flowSpec={flow.receiver}
               setFlowSpec={(newFlowSpec) =>
