@@ -26,11 +26,11 @@ class TestLoggingSetup:
         setup_logging()
         assert logging.root.level == logging.DEBUG, "Root logger level should be DEBUG."
 
-    def test_info_logged_to_stderr(self, caplog):
+    def test_info_logged_to_stdout(self, caplog):
         setup_logging()
         with caplog.at_level(logging.INFO):
             logging.info("Test info message.")
-        assert "Test info message." in caplog.text, "INFO level message should be logged to stderr."
+        assert "Test info message." in caplog.text, "INFO level message should be logged to stdout."
 
     def test_passlib_bcrypt_error_level(self):
         setup_logging()

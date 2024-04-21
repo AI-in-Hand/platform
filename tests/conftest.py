@@ -10,6 +10,7 @@ from tests.testing_utils.mock_firestore_client import MockFirestoreClient
 oai_mock = MagicMock(get_openai_client=MagicMock(return_value=MagicMock(timeout=10)))
 sys.modules["agency_swarm.util.oai"] = oai_mock
 settings.encryption_key = TEST_ENCRYPTION_KEY
+settings.google_credentials = None
 
 
 @pytest.fixture(autouse=True)

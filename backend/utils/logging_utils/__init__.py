@@ -4,16 +4,17 @@ import logging.config
 import logging.handlers
 import queue
 
+from backend.settings import settings
+from backend.utils.logging_utils.gcloud_logging_handler import create_gcloud_logging_handler
 from backend.utils.logging_utils.json_formatter import JSONFormatter
 
 
 def setup_logging():
     """
-    Setup the logging configuration for the application. This function will configure the root logger to use a
+    Set up the logging configuration for the application. This function will configure the root logger to use a
     QueueHandler and QueueListener to handle log records. The QueueListener will handle the log records and send them to
-    a StreamHandler and a RotatingFileHandler. The StreamHandler will log WARNING and above to stderr, and the
-    RotatingFileHandler will log DEBUG and above to a file. The log records will be formatted using a simple formatter
-    for the StreamHandler and a JSONFormatter for the RotatingFileHandler.
+    the appropriate handlers. The handlers will be configured to log to the console and to a file. If the application is
+    running in a production environment, the handler will also log to Google Cloud Logging.
     """
     # Configure formatters
     simple_formatter = logging.Formatter(
@@ -36,17 +37,22 @@ def setup_logging():
     log_queue = queue.Queue()
 
     # Create and configure handlers
-    stderr_handler = logging.StreamHandler()
-    stderr_handler.setFormatter(simple_formatter)
-    stderr_handler.setLevel(logging.INFO)
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setFormatter(simple_formatter)
+    stdout_handler.setLevel(logging.INFO)
 
     file_handler = logging.handlers.RotatingFileHandler("app.log.jsonl", maxBytes=10485760, backupCount=5)
     file_handler.setFormatter(json_formatter)
     file_handler.setLevel(logging.INFO)
 
+    gcloud_handler = create_gcloud_logging_handler(settings, json_formatter)
+
     # Create QueueHandler and QueueListener
+    handlers = [stdout_handler, file_handler]
+    if gcloud_handler:
+        handlers.append(gcloud_handler)
     queue_handler = logging.handlers.QueueHandler(log_queue)
-    listener = logging.handlers.QueueListener(log_queue, stderr_handler, file_handler, respect_handler_level=True)
+    listener = logging.handlers.QueueListener(log_queue, *handlers, respect_handler_level=True)
 
     # Start the listener
     listener.start()
@@ -57,7 +63,9 @@ def setup_logging():
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(queue_handler)
 
-    # Silence passlib warning messages
+    # Silence passlib and other library warning messages
     logging.getLogger("passlib.handlers.bcrypt").setLevel(logging.ERROR)
+    logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
+    logging.getLogger("openai").setLevel(logging.WARNING)
 
-    root_logger.info("Logging setup complete.")
+    root_logger.info("Logging setup complete")
