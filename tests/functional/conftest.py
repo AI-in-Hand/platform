@@ -46,6 +46,7 @@ def mock_session_storage(mock_firestore_client):
         "id": "test_session_id",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
+        "thread_ids": {},
         "timestamp": "2021-01-01T00:00:00Z",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)

@@ -80,7 +80,7 @@ async def post_message(
     ContextEnvVarsManager.set("user_id", current_user.id)
     ContextEnvVarsManager.set("agency_id", agency_id)
 
-    logger.debug(f"Received a message: *** for agency_id: {agency_id}, session_id: {session_id}")
+    logger.info(f"Received a message for agency_id: {agency_id}, session_id: {session_id}")
 
     session_config = session_manager.get_session(session_id)
     if not session_config:
