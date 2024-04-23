@@ -53,7 +53,9 @@ class SessionManager:
     def get_sessions_for_user(self, user_id: str) -> list[SessionConfigForAPI]:
         """Return a list of all sessions for the given user."""
         sessions = self.session_storage.load_by_user_id(user_id)
-        return [self.session_adapter.to_api(session) for session in sessions]
+        sessions_for_api = [self.session_adapter.to_api(session) for session in sessions]
+        sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
+        return sorted_sessions
 
     def validate_agency_permissions(self, agency_id: str, user_id: str) -> None:
         """Validate if the user has permissions to access the agency."""
