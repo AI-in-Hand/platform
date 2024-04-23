@@ -79,13 +79,11 @@ def get_agency_manager(
 def get_session_manager(
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
-    agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     session_adapter: SessionAdapter = Depends(get_session_adapter),
 ) -> SessionManager:
     """Returns a SessionManager object"""
     return SessionManager(
         session_storage=session_storage,
         user_secret_manager=user_secret_manager,
-        agency_storage=agency_storage,
         session_adapter=session_adapter,
     )

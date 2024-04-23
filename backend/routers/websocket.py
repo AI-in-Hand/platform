@@ -32,13 +32,15 @@ async def websocket_session_endpoint(
     """WebSocket endpoint for maintaining conversation with a specific session.
     Send messages to and from CEO of the given agency."""
 
-    # TODO: Add authentication: check if the user can access the agency
+    # TODO: Add authentication: validate user_id using the token
 
     await connection_manager.connect(websocket)
     logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
+    ContextEnvVarsManager.set("user_id", user_id)
+
     thread_ids: dict[str, Any] = {}  # for chat persistence, need to save/load these thread_ids
-    agency = await agency_manager.get_agency(agency_id, thread_ids)
+    agency = await agency_manager.get_agency(agency_id, thread_ids, user_id)
     if not agency:
         await connection_manager.send_message("Agency not found", websocket)
         await connection_manager.disconnect(websocket)

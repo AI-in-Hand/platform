@@ -1,17 +1,33 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from agency_swarm import Agency
 
+from backend.dependencies.dependencies import get_user_secret_manager
+from backend.repositories.agency_config_storage import AgencyConfigStorage
+from backend.repositories.user_secret_storage import UserSecretStorage
 from backend.services.agency_manager import AgencyManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
 
 
 @pytest.fixture
-def mock_get_agency():
-    get_agency_mock = AsyncMock(return_value=MagicMock(get_completion=MagicMock(return_value="Hello, world!")))
-    with patch.object(AgencyManager, "get_agency", get_agency_mock) as mock_get_agency:
-        yield mock_get_agency
+@pytest.mark.usefixtures("mock_firestore_client")
+def agency_manager():
+    yield AgencyManager(
+        agent_manager=MagicMock(),
+        agency_config_storage=AgencyConfigStorage(),
+        user_secret_manager=get_user_secret_manager(user_secret_storage=UserSecretStorage()),
+    )
+
+
+@pytest.fixture
+def mock_construct_agency(agency_manager):
+    with patch.object(
+        agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
+    ) as mock_construct:
+        mock_construct.return_value = MagicMock(spec=Agency)
+        yield mock_construct
 
 
 @pytest.fixture
@@ -21,7 +37,7 @@ def message_data():
 
 # Successful message sending
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_post_message_success(client, mock_get_agency, mock_firestore_client, message_data):
+def test_post_message_success(client, mock_construct_agency, mock_firestore_client, message_data):
     agency_data = {
         "user_id": TEST_USER_ID,
         "id": TEST_AGENCY_ID,
@@ -47,23 +63,25 @@ def test_post_message_success(client, mock_get_agency, mock_firestore_client, me
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
     assert response.json()["data"] == {"content": "Hello, world!"}
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, thread_ids={})
+    mock_construct_agency.assert_called_once_with(agency_data, thread_ids={})
 
 
 # Agency configuration not found
 @pytest.mark.usefixtures("mock_get_current_user", "mock_firestore_client")
-def test_post_message_agency_config_not_found(client, mock_get_agency, message_data):
+def test_post_message_agency_config_not_found(client, mock_construct_agency, message_data):
     # Sending a message
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 404
     assert response.json()["data"]["message"] == "Agency not found"
-    mock_get_agency.assert_not_called()
+    mock_construct_agency.assert_not_called()
 
 
 # Current user not the owner of the agency
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_client, message_data):
+def test_post_message_unauthorized(
+    client, mock_construct_agency, mock_firestore_client, message_data, session_config_data
+):
     agency_data = {
         "user_id": "other_user_id",
         "id": TEST_AGENCY_ID,
@@ -71,18 +89,19 @@ def test_post_message_unauthorized(client, mock_get_agency, mock_firestore_clien
         "main_agent": "sender_agent_id",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
     # Sending a message
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 403
     assert response.json()["data"]["message"] == "You don't have permissions to access this agency"
-    mock_get_agency.assert_not_called()
+    mock_construct_agency.assert_not_called()
 
 
 # Failure in message processing
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_post_message_processing_failure(client, mock_get_agency, mock_firestore_client, message_data):
+def test_post_message_processing_failure(client, mock_construct_agency, mock_firestore_client, message_data):
     agency_data = {
         "user_id": TEST_USER_ID,
         "id": TEST_AGENCY_ID,
@@ -102,7 +121,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
         },
     )
 
-    mock_get_agency.return_value.get_completion.side_effect = Exception("Test exception")
+    mock_construct_agency.return_value.side_effect = Exception("Test exception")
 
     # Sending a message
     response = client.post("/api/v1/message", json=message_data)
@@ -110,7 +129,7 @@ def test_post_message_processing_failure(client, mock_get_agency, mock_firestore
     assert response.status_code == 500
     assert response.json()["data"]["message"] == "Something went wrong"
 
-    mock_get_agency.assert_called_once_with(TEST_AGENCY_ID, thread_ids={})
+    mock_construct_agency.assert_called_once_with(agency_data, thread_ids={})
 
 
 @pytest.fixture
