@@ -3,6 +3,10 @@ from fastapi.testclient import TestClient
 
 from backend.dependencies.auth import get_current_user
 from backend.models.skill_config import SkillConfig
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
+from backend.repositories.skill_config_storage import SkillConfigStorage
+from backend.services.adapters.agency_adapter import AgencyAdapter
+from backend.services.adapters.agent_adapter import AgentAdapter
 from tests.testing_utils import TEST_USER_ID, get_current_superuser_override, get_current_user_override
 from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID
 
@@ -45,6 +49,12 @@ def mock_session_storage(mock_firestore_client):
         "timestamp": "2021-01-01T00:00:00Z",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
+
+
+@pytest.fixture
+@pytest.mark.usefixtures("mock_firestore_client")
+def agency_adapter():
+    return AgencyAdapter(AgentFlowSpecStorage(), AgentAdapter(SkillConfigStorage()))
 
 
 @pytest.fixture

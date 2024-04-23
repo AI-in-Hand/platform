@@ -10,9 +10,9 @@ from pydantic import ValidationError
 logger = logging.getLogger(__name__)
 
 
-def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
+async def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.exception(f"request: {request} exc: {exc}")
+    logger.warning(f"request: {await request.json()} exc: {exc}")
     error_message = ", ".join([error["msg"] for error in exc.errors()])
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
@@ -20,9 +20,9 @@ def pydantic_validation_error_handler(request: Request, exc: ValidationError) ->
     )
 
 
-def request_validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def request_validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.exception(f"request: {request} exc: {exc}")
+    logger.warning(f"request: {await request.json()} exc: {exc}")
     error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
@@ -30,27 +30,27 @@ def request_validation_error_handler(request: Request, exc: RequestValidationErr
     )
 
 
-def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.warning(f"request: {request} exc: {exc}")
+    logger.warning(f"request: {await request.json()} exc: {exc}")
     return JSONResponse(
         status_code=exc.status_code,
         content={"data": {"message": exc.detail}},
     )
 
 
-def openai_authentication_error_handler(request: Request, exc: OpenAIAuthenticationError) -> JSONResponse:
+async def openai_authentication_error_handler(request: Request, exc: OpenAIAuthenticationError) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.exception(f"request: {request} exc: {exc}")
+    logger.exception(f"request: {await request.json()} exc: {exc}")
     return JSONResponse(
         status_code=HTTPStatus.UNAUTHORIZED,
         content={"data": {"message": exc.message}},
     )
 
 
-def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.exception(f"request: {request} exc: {exc}")
+    logger.exception(f"request: {await request.json()} exc: {exc}")
     return JSONResponse(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         content={"data": {"message": "Internal server error"}},

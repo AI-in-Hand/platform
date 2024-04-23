@@ -6,18 +6,8 @@ import pytest
 
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpec
-from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from backend.repositories.skill_config_storage import SkillConfigStorage
-from backend.services.adapters.agency_adapter import AgencyAdapter
-from backend.services.adapters.agent_adapter import AgentAdapter
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
-
-
-@pytest.fixture
-@pytest.mark.usefixtures("mock_firestore_client")
-def agency_adapter():
-    return AgencyAdapter(AgentFlowSpecStorage(), AgentAdapter(SkillConfigStorage()))
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
