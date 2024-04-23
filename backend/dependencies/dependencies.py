@@ -11,7 +11,7 @@ from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
-from backend.services.caching.redis_cache_manager import RedisCacheManager
+from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
 from backend.services.user_secret_manager import UserSecretManager

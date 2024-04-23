@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
@@ -5,38 +6,8 @@ import pytest
 
 from backend.models.agency_config import AgencyConfig, AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpec
-from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
-from backend.repositories.skill_config_storage import SkillConfigStorage
-from backend.services.adapters.agency_adapter import AgencyAdapter
-from backend.services.adapters.agent_adapter import AgentAdapter
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
-
-
-@pytest.fixture
-def mock_agent():
-    return {
-        "id": "sender_agent_id",
-        "type": "userproxy",
-        "config": {
-            "name": "Sender Agent",
-            "system_message": "Do something important.",
-            "code_execution_config": {
-                "work_dir": None,
-                "use_docker": False,
-            },
-        },
-        "timestamp": "2024-04-04T09:39:13.048457+00:00",
-        "skills": [],
-        "description": "An example agent.",
-        "user_id": TEST_USER_ID,
-    }
-
-
-@pytest.fixture
-@pytest.mark.usefixtures("mock_firestore_client")
-def agency_adapter():
-    return AgencyAdapter(AgentFlowSpecStorage(), AgentAdapter(SkillConfigStorage()))
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -112,27 +83,27 @@ def test_get_agency_config_user_id_mismatch(client, mock_firestore_client):
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_create_agency_success(client, mock_agent, agency_adapter, mock_firestore_client):
+def test_create_agency_success(client, mock_agent_data_api, mock_agent_data_db, agency_adapter, mock_firestore_client):
     template_config = {
         "id": "template_agency_id",
         "name": "Test agency",
         "shared_instructions": "Manifesto",
-        "flows": [{"sender": mock_agent, "receiver": None}],
+        "flows": [{"sender": mock_agent_data_api, "receiver": None}],
     }
-    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
     with patch(
         "backend.services.agency_manager.AgencyManager.handle_agency_creation_or_update", new_callable=AsyncMock
     ) as mock_create_or_update_agency:
         mock_create_or_update_agency.return_value = TEST_AGENCY_ID
         response = client.put("/api/v1/agency", json=template_config)
     assert response.status_code == 200
-    assert isinstance(response.json()["data"], list)  # TODO: check the response data more thoroughly
+    assert isinstance(response.json()["data"], list)
     model_template_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
     mock_create_or_update_agency.assert_called_once_with(model_template_config, TEST_USER_ID)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_agency_success(client, mock_firestore_client, mock_agent, agency_adapter):
+def test_update_agency_success(client, mock_firestore_client, mock_agent_data_api, mock_agent_data_db, agency_adapter):
     # Setup initial data in mock Firestore client
     initial_db_data = {
         "id": TEST_AGENCY_ID,
@@ -144,13 +115,17 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
         "main_agent": "Sender Agent",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_db_data)
-    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
+    mock_firestore_client.setup_mock_data(
+        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+    )
+    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
     new_data_payload = {
         "id": TEST_AGENCY_ID,
         "name": "Test agency",
         "description": "Test Description",
         "shared_instructions": "Updated Manifesto",
-        "flows": [{"sender": mock_agent, "receiver": None}],
+        "flows": [{"sender": mock_agent_data_api, "receiver": None}],
         "user_id": TEST_USER_ID,
         "timestamp": "2024-04-04T09:39:13.048457+00:00",
     }
@@ -167,7 +142,7 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent, agency
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agent):
+def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agent_data_api):
     # Setup initial data in mock Firestore client
     initial_data = {
         "id": TEST_AGENCY_ID,
@@ -177,7 +152,9 @@ def test_update_agency_user_id_mismatch(client, mock_firestore_client, mock_agen
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_data)
     new_data = initial_data.copy()
-    new_data.update({"shared_instructions": "Updated Manifesto", "flows": [{"sender": mock_agent, "receiver": None}]})
+    new_data.update(
+        {"shared_instructions": "Updated Manifesto", "flows": [{"sender": mock_agent_data_api, "receiver": None}]}
+    )
 
     response = client.put("/api/v1/agency", json=new_data)
 
@@ -214,25 +191,35 @@ def test_update_agency_with_foreign_agent(client, mock_firestore_client, agency_
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_create_or_update_agency_missing_agent(client, mock_firestore_client, mock_agent):
-    missing_agent = mock_agent.copy()
-    missing_agent["id"] = "missing_agent_id"
-    agency_data_with_missing_agent = {
+def test_create_or_update_agency_missing_agent(client, agency_adapter, mock_firestore_client, mock_agent_data_db):
+    missing_agent_db = deepcopy(mock_agent_data_db)
+    missing_agent_db["id"] = "missing_agent_id"
+    missing_agent_db["config"]["name"] = "Missing Agent"
+    agency_data_with_missing_agent_db = {
         "id": "existing_agency",
         "name": "Existing Agency with Missing Agent",
         "shared_instructions": "Existing",
-        "flows": [{"sender": missing_agent, "receiver": None}],
+        "main_agent": "Sender Agent",
+        "agents": ["sender_agent_id", "missing_agent_id"],
+        "agency_chart": {"0": ["Sender Agent", "Missing Agent"]},
+        "flows": [{"sender": missing_agent_db, "receiver": None}],
     }
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("agent_configs", "missing_agent_id", missing_agent_db)  # only for adapter
+    agency_data_with_missing_agent_api = agency_adapter.to_api(
+        AgencyConfig(**agency_data_with_missing_agent_db)
+    ).model_dump()
+    mock_firestore_client.collection("agent_configs").document("missing_agent_id").delete()  # remove it
 
-    mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent)
-    response = client.put("/api/v1/agency", json=agency_data_with_missing_agent)
+    mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_with_missing_agent_db)
+    response = client.put("/api/v1/agency", json=agency_data_with_missing_agent_api)
     assert response.status_code == 400
     assert response.json() == {"data": {"message": "Agent not found: missing_agent_id"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage")
 def test_delete_agency_success(client, mock_firestore_client):
-    db_agency = {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency", "main_agent": "test_agent_id"}
+    db_agency = {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency", "main_agent": "sender_agent_id"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
     response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
@@ -255,7 +242,7 @@ def test_delete_agency_user_id_mismatch(client, mock_firestore_client):
         "id": TEST_AGENCY_ID,
         "user_id": "some_other_user",
         "name": "Test Agency",
-        "main_agent": "test_agent_id",
+        "main_agent": "sender_agent_id",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
 
