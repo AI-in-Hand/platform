@@ -2,8 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.dependencies.auth import get_current_user
+from backend.models.skill_config import SkillConfig
 from tests.testing_utils import TEST_USER_ID, get_current_superuser_override, get_current_user_override
-from tests.testing_utils.constants import TEST_AGENCY_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID
 
 
 @pytest.mark.usefixtures("mock_setup_logging")
@@ -44,3 +45,33 @@ def mock_session_storage(mock_firestore_client):
         "timestamp": "2021-01-01T00:00:00Z",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
+
+
+@pytest.fixture
+def mock_agent_data_api():
+    return {
+        "id": TEST_AGENT_ID,
+        "type": "userproxy",
+        "config": {
+            "name": "Sender Agent",
+            "system_message": "Do something important.",
+            "code_execution_config": {
+                "work_dir": None,
+                "use_docker": False,
+            },
+        },
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
+        "skills": [
+            SkillConfig(title="GenerateProposal", approved=True).model_dump(),
+            SkillConfig(title="SearchWeb", approved=True).model_dump(),
+        ],
+        "description": "An example agent.",
+        "user_id": TEST_USER_ID,
+    }
+
+
+@pytest.fixture
+def mock_agent_data_db(mock_agent_data_api):
+    db_config = mock_agent_data_api.copy()
+    db_config["skills"] = ["GenerateProposal", "SearchWeb"]
+    return db_config

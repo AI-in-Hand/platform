@@ -22,7 +22,7 @@ def session_config_data():
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_get_session_list(session_config_data, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
-    agency_config = {"name": "Test agency", "id": TEST_AGENCY_ID, "main_agent": "test_agent_id"}
+    agency_config = {"name": "Test agency", "id": TEST_AGENCY_ID, "main_agent": "sender_agent_id"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config)
     expected_session_data = session_config_data.copy()
     expected_session_data["flow_config"] = mock.ANY
@@ -41,7 +41,7 @@ def test_create_session_success(client, mock_firestore_client):
             "id": TEST_AGENCY_ID,
             "name": "Test agency",
             "user_id": TEST_USER_ID,
-            "main_agent": "test_agent_id",
+            "main_agent": "sender_agent_id",
         }
         mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config)
 
