@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Any
+from collections.abc import Callable
 
 from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
@@ -26,70 +26,32 @@ class WebSocketHandler:
     def __init__(self, connection_manager: WebSocketConnectionManager):
         self.connection_manager = connection_manager
 
-    async def connect(self, websocket: WebSocket) -> None:
-        await self.connection_manager.connect(websocket)
-
-    async def disconnect(self, websocket: WebSocket) -> None:
-        await self.connection_manager.disconnect(websocket)
-
-    async def get_agency(
-        self, agency_manager: AgencyManager, agency_id: str, thread_ids: dict[str, Any], user_id: str
-    ) -> Agency | None:
-        return await agency_manager.get_agency(agency_id, thread_ids, user_id)
-
-    async def process_single_message(
-        self, user_message: str, agency: Agency, websocket: WebSocket, user_id: str, agency_id: str
-    ) -> None:
-        """Process a single user message and send the response to the websocket."""
-        loop = asyncio.get_running_loop()
-
-        gen = agency.get_completion(message=user_message, yield_messages=True)
-
-        def get_next_response() -> MessageOutput | None:
-            try:
-                # Set the user_id and agency_id in the context variables
-                ContextEnvVarsManager.set("user_id", user_id)
-                ContextEnvVarsManager.set("agency_id", agency_id)
-                return next(gen)
-            except StopIteration:
-                return None
-
-        while True:
-            response = await loop.run_in_executor(None, get_next_response)
-            if response is None:
-                break
-
-            response_text = response.get_formatted_content()
-            await self.connection_manager.send_message(response_text, websocket)
-
-    async def process_messages(
+    async def handle_websocket_connection(
         self,
         websocket: WebSocket,
-        agency_id: str,
-        agency: Agency,
-        session_id: str,
         user_id: str,
+        agency_id: str,
+        session_id: str,
+        agency_manager: AgencyManager,
+        session_manager: SessionManager,
     ) -> None:
-        """Receive messages from the websocket and process them."""
-        while True:
-            try:
-                user_message = await websocket.receive_text()
+        """Handle the WebSocket connection for a specific session."""
+        await self.connection_manager.connect(websocket)
+        logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
 
-                if not user_message.strip():
-                    await self.connection_manager.send_message("Message not provided", websocket)
-                    continue
+        ContextEnvVarsManager.set("user_id", user_id)
 
-                await self.process_single_message(user_message, agency, websocket, user_id, agency_id)
+        session, agency = await self.setup_agency(agency_id, user_id, session_id, agency_manager, session_manager)
+        if not session or not agency:
+            await self.connection_manager.send_message(
+                "Session not found" if not session else "Agency not found", websocket
+            )
+            await self.connection_manager.disconnect(websocket)
+            return
 
-            except (WebSocketDisconnect, ConnectionClosedOK) as e:
-                raise e
-            except Exception as e:
-                logger.exception(
-                    "Exception while processing message: "
-                    f"agency_id: {agency_id}, session_id: {session_id}, error: {str(e)}"
-                )
-                await self.connection_manager.send_message("Something went wrong. Please try again.", websocket)
-                continue
+        await self.handle_websocket_messages(websocket, agency_id, agency, session_id, user_id)
+        await self.connection_manager.disconnect(websocket)
+        logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
     async def setup_agency(
         self,
@@ -103,48 +65,79 @@ class WebSocketHandler:
         session = session_manager.get_session(session_id)
         if not session:
             return session, None
-        agency = await self.get_agency(agency_manager, agency_id, session.thread_ids, user_id)
+        agency = await agency_manager.get_agency(agency_id, session.thread_ids, user_id)
         return session, agency
 
     async def handle_websocket_messages(
         self,
         websocket: WebSocket,
         agency_id: str,
+        agency: Agency,
         session_id: str,
         user_id: str,
-        agency: Agency,
     ) -> None:
         """Handle the WebSocket messages for a specific session."""
-        try:
-            await self.process_messages(websocket, agency_id, agency, session_id, user_id)
-        except (WebSocketDisconnect, ConnectionClosedOK):
-            await self.disconnect(websocket)
-            logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
+        while await self.process_messages(websocket, agency_id, agency, session_id, user_id):
+            pass
 
-    async def handle_websocket_connection(
+    async def process_messages(
         self,
         websocket: WebSocket,
-        user_id: str,
         agency_id: str,
+        agency: Agency,
         session_id: str,
-        agency_manager: AgencyManager,
-        session_manager: SessionManager,
-    ) -> None:
-        """Handle the WebSocket connection for a specific session."""
-        await self.connect(websocket)
-        logger.info(f"WebSocket connected for agency_id: {agency_id}, session_id: {session_id}")
-
-        ContextEnvVarsManager.set("user_id", user_id)
-
-        session, agency = await self.setup_agency(agency_id, user_id, session_id, agency_manager, session_manager)
-        if not session or not agency:
-            await self.connection_manager.send_message(
-                "Session not found" if not session else "Agency not found", websocket
+        user_id: str,
+    ) -> bool:
+        """Receive messages from the websocket and process them."""
+        try:
+            user_message = await websocket.receive_text()
+            await self.process_single_message(user_message, websocket, agency_id, agency, user_id)
+        except (WebSocketDisconnect, ConnectionClosedOK):
+            return False
+        except Exception as exception:
+            logger.exception(
+                "Exception while processing message: "
+                f"agency_id: {agency_id}, session_id: {session_id}, error: {str(exception)}"
             )
-            await self.disconnect(websocket)
+            await self.connection_manager.send_message("Something went wrong. Please try again.", websocket)
+        return True
+
+    async def process_single_message(
+        self, user_message: str, websocket: WebSocket, agency_id: str, agency: Agency, user_id: str
+    ) -> None:
+        """Process a single user message and send the response to the websocket."""
+        if not user_message.strip():
+            await self.connection_manager.send_message("Message not provided", websocket)
             return
 
-        await self.handle_websocket_messages(websocket, agency_id, session_id, user_id, agency)
+        loop = asyncio.get_running_loop()
+
+        response_generator = agency.get_completion(message=user_message, yield_messages=True)
+
+        def get_next_response() -> MessageOutput | None:
+            try:
+                # Set the user_id and agency_id in the context variables
+                ContextEnvVarsManager.set("user_id", user_id)
+                ContextEnvVarsManager.set("agency_id", agency_id)
+                return next(response_generator)
+            except StopIteration:
+                return None
+
+        while await self._process_single_message_response(get_next_response, websocket, loop):
+            pass
+
+    async def _process_single_message_response(
+        self, get_next_response: Callable, websocket: WebSocket, loop: asyncio.AbstractEventLoop
+    ) -> bool:
+        """Process a single message response and send it to the websocket.
+        Return False if there are no more responses to send."""
+        response = await loop.run_in_executor(None, get_next_response)
+        if response is None:
+            return False
+
+        response_text = response.get_formatted_content()
+        await self.connection_manager.send_message(response_text, websocket)
+        return True
 
 
 @websocket_router.websocket("/ws/{user_id}/{agency_id}/{session_id}")
