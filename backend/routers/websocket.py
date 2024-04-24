@@ -7,9 +7,11 @@ from agency_swarm.messages import MessageOutput
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 
-from backend.dependencies.dependencies import get_agency_manager
+from backend.dependencies.dependencies import get_agency_manager, get_session_manager
+from backend.models.session_config import SessionConfig
 from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
+from backend.services.session_manager import SessionManager
 from backend.services.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
@@ -90,12 +92,18 @@ async def process_messages(
 
 
 async def setup_agency(
-    agency_manager: AgencyManager, agency_id: str, user_id: str
-) -> tuple[Agency | None, dict[str, Any]]:
+    agency_id: str,
+    user_id: str,
+    session_id: str,
+    agency_manager: AgencyManager,
+    session_manager: SessionManager,
+) -> tuple[SessionConfig | None, Agency | None]:
     """Set up the agency and thread IDs for the WebSocket connection."""
-    thread_ids: dict[str, Any] = {}  # for chat persistence, need to save/load these thread_ids
-    agency = await get_agency(agency_manager, agency_id, thread_ids, user_id)
-    return agency, thread_ids
+    session = session_manager.get_session(session_id)
+    if not session:
+        return session, None
+    agency = await get_agency(agency_manager, agency_id, session.thread_ids, user_id)
+    return session, agency
 
 
 async def handle_websocket_messages(
@@ -119,6 +127,7 @@ async def handle_websocket_connection(
     agency_id: str,
     session_id: str,
     agency_manager: AgencyManager,
+    session_manager: SessionManager,
 ) -> None:
     """Handle the WebSocket connection for a specific session."""
     await connect_websocket(websocket)
@@ -126,9 +135,9 @@ async def handle_websocket_connection(
 
     ContextEnvVarsManager.set("user_id", user_id)
 
-    agency, _ = await setup_agency(agency_manager, agency_id, user_id)
-    if not agency:
-        await connection_manager.send_message("Agency not found", websocket)
+    session, agency = await setup_agency(agency_id, user_id, session_id, agency_manager, session_manager)
+    if not session or not agency:
+        await connection_manager.send_message("Session not found" if not session else "Agency not found", websocket)
         await disconnect_websocket(websocket)
         return
 
@@ -142,9 +151,10 @@ async def websocket_session_endpoint(
     agency_id: str,
     session_id: str,
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    session_manager: SessionManager = Depends(get_session_manager),
 ) -> None:
     """WebSocket endpoint for maintaining conversation with a specific session.
     Send messages to and from CEO of the given agency."""
     # TODO: Add authentication: validate user_id using the token
 
-    await handle_websocket_connection(websocket, user_id, agency_id, session_id, agency_manager)
+    await handle_websocket_connection(websocket, user_id, agency_id, session_id, agency_manager, session_manager)
