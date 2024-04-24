@@ -84,6 +84,13 @@ async def delete_agent(
     id: str = Query(..., description="The unique identifier of the agent"),
     manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
+    # Check if the agent is part of any team configurations
+    if await manager.is_agent_used_in_agency(id):
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Agent cannot be deleted as it is currently used in a team configuration",
+        )
+
     await manager.delete_agent(id, current_user.id)
 
     configs = await manager.get_agent_list(current_user.id)

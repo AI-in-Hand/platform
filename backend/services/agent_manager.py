@@ -70,6 +70,10 @@ class AgentManager:
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
 
+    async def is_agent_used_in_agency(self, agent_id: str) -> bool:
+        """Check if the agent is part of any agency configurations."""
+        return len(self.storage.load_by_agent_id(agent_id)) > 0
+
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""
         # FIXME: a workaround explained at the top of the file api/agent.py
