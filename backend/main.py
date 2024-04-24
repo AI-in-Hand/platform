@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
 from backend.routers.api import api_router
-from backend.routers.websocket import ws_router
+from backend.routers.websocket import websocket_router
 from backend.utils.logging_utils import setup_logging
 
 setup_logging()
@@ -51,7 +51,7 @@ folders = init_webserver_folders(root_file_path=BASE_DIR)
 
 api_app = FastAPI(root_path="/api")
 api_app.include_router(api_router)
-api_app.include_router(ws_router)
+api_app.include_router(websocket_router)
 api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler)
 api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
