@@ -181,3 +181,17 @@ def test_validate_agency_ownership_raises_403(agency_manager):
     with pytest.raises(HTTPException) as exc_info:
         agency_manager.validate_agency_ownership("another_user_id", "user_id")
     assert exc_info.value.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_is_agent_used_in_agencies(agency_manager, mock_firestore_client):
+    agency_config = AgencyConfig(
+        id=TEST_AGENCY_ID,
+        user_id=TEST_USER_ID,
+        name="Test agency",
+        shared_instructions="manifesto",
+        main_agent="agent1_name",
+        agents=["agent1_id"],
+    )
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config.model_dump())
+    assert agency_manager.is_agent_used_in_agencies("agent1_id")
+    assert not agency_manager.is_agent_used_in_agencies("another_agent_id")
