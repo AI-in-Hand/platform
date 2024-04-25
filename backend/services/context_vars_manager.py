@@ -42,9 +42,9 @@ class ContextEnvVarsManager:
             return None
 
     @classmethod
-    def get_all(cls) -> dict | None:
+    def get_all(cls) -> dict:
         """Get all context variables."""
         try:
             return cls.context_vars.get()
         except LookupError:
-            return None
+            return {}

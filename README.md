@@ -1,4 +1,6 @@
 # AI in Hand Platform
+[![Actions Status](https://github.com/AI-in-Hand/platform/workflows/Test/badge.svg)](https://github.com/AI-in-Hand/platform/actions)
+[![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
 
 AI in Hand Platform is an open-source API and web application for managing AI-driven swarm agencies.
 It builds upon OpenAI's Assistants API, enhancing AI agents with specialized skills and a robust management system.

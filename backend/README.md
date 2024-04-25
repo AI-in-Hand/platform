@@ -1,4 +1,6 @@
 # Backend
+[![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
+
 
 This repository contains the backend implementation of a web application built using FastAPI, a modern,
 fast (high-performance), web framework for building APIs with Python. The application provides various functionalities,
