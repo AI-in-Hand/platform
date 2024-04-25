@@ -59,7 +59,7 @@ class WebSocketHandler:
             await self.connection_manager.disconnect(websocket)
             return
 
-        await self.handle_websocket_messages(websocket, agency_id, agency, session_id, user_id)
+        await self._handle_websocket_messages(websocket, agency_id, agency, session_id, user_id)
         await self.connection_manager.disconnect(websocket)
         logger.info(f"WebSocket disconnected for agency_id: {agency_id}")
 
@@ -95,7 +95,7 @@ class WebSocketHandler:
         agency = await self.agency_manager.get_agency(agency_id, session_config.thread_ids, user_id)
         return session_config, agency
 
-    async def handle_websocket_messages(
+    async def _handle_websocket_messages(
         self,
         websocket: WebSocket,
         agency_id: str,
@@ -112,10 +112,10 @@ class WebSocketHandler:
         :param session_id: The session ID.
         :param user_id: The user ID.
         """
-        while await self.process_messages(websocket, agency_id, agency, session_id, user_id):
+        while await self._process_messages(websocket, agency_id, agency, session_id, user_id):
             pass
 
-    async def process_messages(
+    async def _process_messages(
         self,
         websocket: WebSocket,
         agency_id: str,
@@ -135,7 +135,7 @@ class WebSocketHandler:
         :return: True if the processing should continue, False otherwise.
         """
         try:
-            await self.process_single_message(websocket, agency_id, agency, user_id)
+            await self._process_single_message(websocket, agency_id, agency, user_id)
         except (WebSocketDisconnect, ConnectionClosedOK):
             return False
         except Exception as exception:
@@ -146,7 +146,7 @@ class WebSocketHandler:
             await self.connection_manager.send_message("Something went wrong. Please try again.", websocket)
         return True
 
-    async def process_single_message(self, websocket: WebSocket, agency_id: str, agency: Agency, user_id: str) -> None:
+    async def _process_single_message(self, websocket: WebSocket, agency_id: str, agency: Agency, user_id: str) -> None:
         """
         Process a single user message and send the response to the websocket.
 
