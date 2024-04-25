@@ -161,9 +161,10 @@ class WebSocketHandler:
             return
 
         loop = asyncio.get_running_loop()
+        response_generator = agency.get_completion(message=user_message, yield_messages=True)
 
         while await self._process_single_message_response(
-            lambda: get_next_response(agency, user_message, user_id, agency_id), websocket, loop
+            lambda: get_next_response(response_generator, user_id, agency_id), websocket, loop
         ):
             pass
 
