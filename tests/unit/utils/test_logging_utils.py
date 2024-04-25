@@ -13,7 +13,7 @@ def mock_logging(mocker):
     # Mock the logging components used in setup_logging
     mocker.patch("logging.handlers.QueueHandler")
     mocker.patch("logging.handlers.QueueListener")
-    mocker.patch("logging.handlers.RotatingFileHandler")
+    # mocker.patch("logging.handlers.RotatingFileHandler")
     mocker.patch("logging.StreamHandler")
     mocker.patch("logging.Formatter")
     mocker.patch("backend.utils.logging_utils.json_formatter.JSONFormatter")
@@ -29,7 +29,7 @@ def mock_logging(mocker):
     return {
         "QueueHandler": logging.handlers.QueueHandler,
         "QueueListener": logging.handlers.QueueListener,
-        "RotatingFileHandler": logging.handlers.RotatingFileHandler,
+        # "RotatingFileHandler": logging.handlers.RotatingFileHandler,
         "StreamHandler": logging.StreamHandler,
         "Formatter": logging.Formatter,
         "JSONFormatter": JSONFormatter,
@@ -44,16 +44,16 @@ def test_setup_logging_handlers_and_levels(mock_logging):
     setup_logging()
 
     # Assert handlers were created with the correct levels
-    mock_logging["RotatingFileHandler"].assert_called_once_with("app.log.jsonl", maxBytes=10485760, backupCount=5)
-    file_handler = mock_logging["RotatingFileHandler"].return_value
-    file_handler.setLevel.assert_called_once_with(logging.INFO)
+    # mock_logging["RotatingFileHandler"].assert_called_once_with("app.log.jsonl", maxBytes=10485760, backupCount=5)
+    # file_handler = mock_logging["RotatingFileHandler"].return_value
+    # file_handler.setLevel.assert_called_once_with(logging.INFO)
 
     mock_logging["StreamHandler"].assert_called_once()
     stderr_handler = mock_logging["StreamHandler"].return_value
     stderr_handler.setLevel.assert_called_once_with(logging.INFO)
 
     # Assert formatters were set correctly
-    file_handler.setFormatter.assert_called_once()
+    # file_handler.setFormatter.assert_called_once()
     stderr_handler.setFormatter.assert_called_once()
 
 

@@ -5,6 +5,8 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
+from backend.routers.api import api_router
+from backend.routers.websocket import websocket_router
 from backend.utils.logging_utils import setup_logging
 
 setup_logging()
@@ -34,10 +36,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8000",
         "http://127.0.0.1:8000",
-        "http://localhost:8001",
-        "http://localhost:8081",
+        "http://localhost:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -48,15 +48,19 @@ app.add_middleware(
 folders = init_webserver_folders(root_file_path=BASE_DIR)
 
 api_app = FastAPI(root_path="/api")
-api_app.include_router(v1_router)
+api_app.include_router(api_router)
 api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler)
 api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
 api_app.add_exception_handler(OpenAIAuthenticationError, openai_authentication_error_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)
 
+ws_app = FastAPI(root_path="/ws")
+ws_app.include_router(websocket_router)
+
 # mount an api route such that the main route serves the ui and the /api
 app.mount("/api", api_app)
+app.mount("/ws", ws_app)
 app.mount("/", StaticFiles(directory=folders["static_folder_root"], html=True), name="ui")
 
 
