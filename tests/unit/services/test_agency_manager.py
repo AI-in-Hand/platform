@@ -1,7 +1,9 @@
+from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from agency_swarm import Agency, Agent
+from fastapi import HTTPException
 
 from backend.dependencies.dependencies import get_user_secret_manager
 from backend.models.agency_config import AgencyConfig
@@ -45,6 +47,7 @@ async def test_get_agency_construct_agency(agency_manager, mock_firestore_client
     agency_config_dict = {
         "name": "Test agency",
         "id": TEST_AGENCY_ID,
+        "user_id": TEST_USER_ID,
         "main_agent": "agent1_name",
         "agents": ["agent1_id"],
     }
@@ -53,7 +56,7 @@ async def test_get_agency_construct_agency(agency_manager, mock_firestore_client
         agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
     ) as mock_construct:
         mock_construct.return_value = MagicMock(spec=Agency)
-        agency = await agency_manager.get_agency(TEST_AGENCY_ID, {})
+        agency = await agency_manager.get_agency(TEST_AGENCY_ID, {}, TEST_USER_ID)
         assert agency is not None
         mock_construct.assert_called_once_with(AgencyConfig(**agency_config_dict), {})
 
@@ -168,3 +171,13 @@ async def test_delete_agency(agency_manager, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID})
     await agency_manager.delete_agency(TEST_AGENCY_ID)
     assert mock_firestore_client.to_dict() == {}
+
+
+def test_validate_agency_ownership_success(agency_manager):
+    agency_manager.validate_agency_ownership("user_id", "user_id")
+
+
+def test_validate_agency_ownership_raises_403(agency_manager):
+    with pytest.raises(HTTPException) as exc_info:
+        agency_manager.validate_agency_ownership("another_user_id", "user_id")
+    assert exc_info.value.status_code == HTTPStatus.FORBIDDEN

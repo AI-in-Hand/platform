@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backend.settings import settings
+from tests.testing_utils import reset_context_vars
 from tests.testing_utils.constants import TEST_ENCRYPTION_KEY
 from tests.testing_utils.mock_firestore_client import MockFirestoreClient
 
@@ -11,6 +12,13 @@ oai_mock = MagicMock(get_openai_client=MagicMock(return_value=MagicMock(timeout=
 sys.modules["agency_swarm.util.oai"] = oai_mock
 settings.encryption_key = TEST_ENCRYPTION_KEY
 settings.google_credentials = None
+
+
+@pytest.fixture(autouse=True)
+def reset_context_variables():
+    reset_context_vars()
+    yield
+    reset_context_vars()
 
 
 @pytest.fixture(autouse=True)
