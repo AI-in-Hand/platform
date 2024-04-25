@@ -107,19 +107,3 @@ To run the tests, execute the following command:
 ```bash
 poetry run pytest
 ```
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute to the project:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Make your changes and commit them with descriptive messages.
-4. Push your changes to your forked repository.
-5. Submit a pull request to the main repository.
-
-Please ensure that your code follows the existing style and conventions, and include tests for any new functionality.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
