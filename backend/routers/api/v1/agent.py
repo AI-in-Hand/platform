@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agent_adapter, get_agent_manager
+from backend.dependencies.dependencies import get_agency_manager, get_agent_adapter, get_agent_manager
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
@@ -15,6 +15,7 @@ from backend.models.response_models import (
 )
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
+from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
 
@@ -82,10 +83,11 @@ async def delete_agent(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
+    agency_manager: AgencyManager = Depends(get_agency_manager),
     manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
     # Check if the agent is part of any team configurations
-    if await manager.is_agent_used_in_agency(id):
+    if await agency_manager.is_agent_used_in_agencies(id):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Agent cannot be deleted as it is currently used in a team configuration",

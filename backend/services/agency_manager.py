@@ -48,6 +48,10 @@ class AgencyManager:
             return None
         return agency
 
+    async def is_agent_used_in_agencies(self, agent_id: str) -> bool:
+        """Check if the agent is part of any agency configurations."""
+        return len(self.storage.load_by_agent_id(agent_id)) > 0
+
     async def handle_agency_creation_or_update(self, config: AgencyConfig, current_user_id: str) -> str:
         """Handle the agency creation or update. It will check the permissions and update the agency in the Firestore
         and the cache. It will also update the assistants.
