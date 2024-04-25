@@ -13,7 +13,7 @@ websocket_router = APIRouter(
 )
 
 
-@websocket_router.websocket("/ws/{user_id}/{agency_id}/{session_id}")
+@websocket_router.websocket("/{user_id}/{agency_id}/{session_id}")
 async def websocket_session_endpoint(
     websocket: WebSocket,
     user_id: str,
