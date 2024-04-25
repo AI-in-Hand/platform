@@ -48,7 +48,7 @@ class AgencyManager:
             return None
         return agency
 
-    async def is_agent_used_in_agencies(self, agent_id: str) -> bool:
+    def is_agent_used_in_agencies(self, agent_id: str) -> bool:
         """Check if the agent is part of any agency configurations."""
         return len(self.storage.load_by_agent_id(agent_id)) > 0
 
@@ -67,7 +67,7 @@ class AgencyManager:
             if not config_db:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
             self.validate_agency_ownership(config_db.user_id, current_user_id)
-        await self._validate_agent_ownership(config.agents, current_user_id)
+        self._validate_agent_ownership(config.agents, current_user_id)
 
         # Ensure the agency is associated with the current user
         config.user_id = current_user_id
@@ -135,7 +135,7 @@ class AgencyManager:
             ),
         )
 
-    async def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
+    def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
         """Validate the agent ownership. It will check if the current user has permissions to use the agents."""
         # check that all used agents belong to the current user
         for agent_id in agents:
