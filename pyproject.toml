@@ -19,7 +19,7 @@ instructor = "^0.6.7"
 openai = "^1.14.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 pyairtable = "^2.3.3"
-pydantic = "^2.5.2"
+pydantic = "^2.7.1"
 pydantic-settings = "^2.1.0"
 redis = "^5.0.1"
 tiktoken = "^0.6.0"
