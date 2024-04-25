@@ -14,7 +14,7 @@ duckduckgo-search = "^3.9.11"
 fastapi = "^0.109.0"
 firebase-admin = "^6.3.0"
 google-cloud-logging = "^3.10.0"
-gunicorn = "^21.2.0"
+gunicorn = "^22.0.0"
 instructor = "^0.6.7"
 openai = "^1.14.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
