@@ -3,7 +3,6 @@ import logging
 from collections.abc import Callable
 
 from agency_swarm import Agency
-from agency_swarm.messages import MessageOutput
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 
@@ -12,7 +11,8 @@ from backend.services.agency_manager import AgencyManager
 from backend.services.auth_service import AuthService
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
-from backend.services.websocket_connection_manager import WebSocketConnectionManager
+from backend.services.websocket.utils import get_next_response
+from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
 
@@ -162,18 +162,9 @@ class WebSocketHandler:
 
         loop = asyncio.get_running_loop()
 
-        response_generator = agency.get_completion(message=user_message, yield_messages=True)
-
-        def get_next_response() -> MessageOutput | None:
-            try:
-                # Set the user_id and agency_id in the context variables
-                ContextEnvVarsManager.set("user_id", user_id)
-                ContextEnvVarsManager.set("agency_id", agency_id)
-                return next(response_generator)
-            except StopIteration:
-                return None
-
-        while await self._process_single_message_response(get_next_response, websocket, loop):
+        while await self._process_single_message_response(
+            lambda: get_next_response(agency, user_message, user_id, agency_id), websocket, loop
+        ):
             pass
 
     async def _process_single_message_response(

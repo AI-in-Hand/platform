@@ -16,8 +16,8 @@ from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
 from backend.services.user_secret_manager import UserSecretManager
-from backend.services.websocket_connection_manager import WebSocketConnectionManager
-from backend.services.websocket_handler import WebSocketHandler
+from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
+from backend.services.websocket.websocket_handler import WebSocketHandler
 from backend.settings import settings
 
 

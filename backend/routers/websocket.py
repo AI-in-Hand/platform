@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, WebSocket
 
 from backend.dependencies.dependencies import get_websocket_handler
-from backend.services.websocket_handler import WebSocketHandler
+from backend.services.websocket.websocket_handler import WebSocketHandler
 
 logger = logging.getLogger(__name__)
 

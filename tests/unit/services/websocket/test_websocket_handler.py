@@ -7,7 +7,7 @@ from fastapi import HTTPException, WebSocket
 from starlette.websockets import WebSocketDisconnect
 from websockets import ConnectionClosedOK
 
-from backend.services.websocket_handler import WebSocketHandler
+from backend.services.websocket.websocket_handler import WebSocketHandler
 
 
 @pytest.fixture
@@ -183,7 +183,7 @@ async def test_process_messages_exception(websocket_handler):
 
 
 @pytest.mark.asyncio
-async def test_process_single_message(websocket_handler):
+async def test_process_single_message_non_empty_message(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     agency_id = "agency_id"
     agency = AsyncMock()
@@ -199,8 +199,24 @@ async def test_process_single_message(websocket_handler):
         await websocket_handler._process_single_message(websocket, agency_id, agency, user_id)
 
     websocket.receive_text.assert_awaited_once()
-    agency.get_completion.assert_called_once_with(message=user_message, yield_messages=True)
     assert process_single_message_response_mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_process_single_message_empty_message(websocket_handler):
+    websocket = AsyncMock(spec=WebSocket)
+    agency_id = "agency_id"
+    agency = AsyncMock()
+    user_id = "user_id"
+    user_message = "   "
+
+    websocket.receive_text.return_value = user_message
+
+    await websocket_handler._process_single_message(websocket, agency_id, agency, user_id)
+
+    websocket.receive_text.assert_awaited_once()
+    agency.get_completion.assert_not_called()
+    websocket_handler.connection_manager.send_message.assert_awaited_once_with("Message not provided", websocket)
 
 
 @pytest.mark.asyncio
