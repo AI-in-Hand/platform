@@ -883,6 +883,7 @@ export const AgentFlowSpecView = ({
                 className="mt-2 w-full"
                 defaultValue={flowSpec.config.model}
                 value={flowSpec.config.model}
+                disabled={flowSpec.id}
                 onChange={(value: any) => {
                   onControlChange(value, "model");
                 }}
