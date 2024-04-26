@@ -4,28 +4,20 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from firebase_admin import auth
-from firebase_admin.exceptions import InvalidArgumentError, UnknownError
 
 from backend.models.auth import User
+from backend.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
 
 security = HTTPBearer()
 
 
-async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> User:
-    try:
-        user = auth.verify_id_token(credentials.credentials, check_revoked=True)
-    except (ValueError, InvalidArgumentError, UnknownError) as err:
-        logger.error(f"Invalid authentication credentials: {err}")
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
-        ) from None
-    logger.info(f"Authenticated user: {user['uid']}")
-    return User(id=user["uid"], email=user["email"])
+async def get_current_user(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    authentication_manager: Annotated[AuthService, Depends(AuthService)],
+) -> User:
+    return authentication_manager.get_user(credentials.credentials)
 
 
 async def get_current_superuser(

@@ -37,8 +37,11 @@ const BuildView = () => {
             <p className="mb-4">
               <strong>Agents</strong> are like your digital workers. You give each one instructions and skills to do specific tasks.
             </p>
-            <p>
+            <p className="mb-4">
               <strong>Teams</strong> are how you organize your agents to automate workflows. You can define communication flows to coordinate the work of multiple agents.
+            </p>
+            <p className="mb-4">
+              <strong>Templates</strong> provide a quick start by offering pre-built agents that you can tailor to your needs. To use a template, simply open it, adjust the settings, and save. A new agent will appear in your list of agents.
             </p>
           </div>
         </details>
