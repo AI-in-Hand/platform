@@ -66,6 +66,7 @@ def mock_agent_data_api():
         "config": {
             "name": "Sender Agent",
             "system_message": "Do something important.",
+            "model": "gpt-3.5-turbo",
             "code_execution_config": {
                 "work_dir": None,
                 "use_docker": False,
