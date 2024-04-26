@@ -155,19 +155,19 @@ export const connectWebSocket = (
 };
 
 export const fetchMessages = (
-  sessionID: str,
-  workflowID: str,
+  sessionID: string,
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) => {
-  const ws = connectWebSocket(
-    sessionID,
-    workflowID,
-    (data) => {
-      onSuccess(data);
+  const serverUrl = getServerUrl();
+  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${sessionID}`;
+  const payload = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
     },
-    onError
-  );
+  };
+  fetchJSON(fetchMessagesUrl, payload, onSuccess, onError);
 };
 
 export const fetchVersion = () => {

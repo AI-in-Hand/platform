@@ -34,12 +34,11 @@ const RAView = () => {
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
 
   React.useEffect(() => {
-    if (loggedIn && session && workflowConfig) {
+    if (loggedIn && session) {
       setLoading(true);
       setMessages(null);
       fetchMessages(
         session.id,
-        workflowConfig.id,
         (data) => {
           setMessages(data);
           setLoading(false);
@@ -52,7 +51,7 @@ const RAView = () => {
         }
       );
     }
-  }, [loggedIn, session, workflowConfig]);
+  }, [loggedIn, session]);
 
   return (
     <div className="h-full">
