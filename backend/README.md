@@ -57,7 +57,7 @@ poetry install
 
 4. Set up the necessary environment variables (see .env.testing, rename it to .env):
 
-- `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line).
+- `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line, the command to get it is `cat service-account.json | jq -c .`)
 - `ENCRYPTION_KEY`: A key for encrypting and decrypting sensitive data. See `test_encryption_service.py` for key generation.
 
 5. Run the application:

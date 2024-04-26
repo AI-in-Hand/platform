@@ -55,6 +55,7 @@ To set up the AI in Hand Platform locally, follow these steps:
      npm install
      ```
    - Set up the environment variables (see `.env.default`, rename it to `.env.development`).
+   - Set up Firebase Authentication and Firestore and update the frontend/src/firebase/firebaseConfig.json file with your Firebase project configuration.
    - Start the development server:
      ```bash
      yarn start
