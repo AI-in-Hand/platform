@@ -12,7 +12,6 @@ from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.user_secret_manager import UserSecretManager
-from backend.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +89,7 @@ class AgentManager:
             instructions=agent_flow_spec.config.system_message,
             files_folder=agent_flow_spec.config.code_execution_config.work_dir,
             tools=[SKILL_MAPPING[skill] for skill in agent_flow_spec.skills],
-            model=settings.gpt_model,
+            model=agent_flow_spec.config.model,
         )
         return agent
 
