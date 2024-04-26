@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, conlist
 
 from backend.models.skill_config import SkillConfig
+from backend.settings import settings
 
 
 class CodeExecutionConfig(BaseModel):
@@ -15,6 +16,7 @@ class AgentConfig(BaseModel):
 
     name: str = Field(..., description="Name of the agent")
     system_message: str = Field("", description="System message")
+    model: str = Field(settings.gpt_small_model, description="Model for the agent to use")
     code_execution_config: CodeExecutionConfig = Field(
         CodeExecutionConfig(), description="Configuration for code execution"
     )

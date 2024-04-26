@@ -43,14 +43,13 @@ async def get_agency_config(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
+    manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
     agency_config = storage.load_by_id(id)
     if not agency_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    # check if the current_user has permissions to get the agency config
-    if agency_config.user_id and agency_config.user_id != current_user.id:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
+    manager.validate_agency_ownership(agency_config.user_id, current_user.id, allow_template=True)
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)

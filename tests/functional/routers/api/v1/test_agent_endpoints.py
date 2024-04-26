@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from backend.models.skill_config import SkillConfig
-from tests.testing_utils.constants import TEST_AGENT_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID, TEST_USER_ID
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -157,3 +157,23 @@ def test_delete_agent_user_id_mismatch(client, mock_agent_data_db, mock_firestor
 
     assert response.status_code == 403
     assert response.json() == {"data": {"message": "You don't have permissions to access this agent"}}
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_delete_agent_used_in_agencies(client, mock_agent_data_db, mock_firestore_client):
+    agency_data = {
+        "user_id": TEST_USER_ID,
+        "id": TEST_AGENCY_ID,
+        "name": "Test Agency",
+        "main_agent": "sender_agent_id",
+        "agents": [TEST_AGENT_ID],
+    }
+    mock_firestore_client.setup_mock_data("agent_configs", TEST_AGENT_ID, mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("agency_configs", "test_agency_id", agency_data)
+
+    response = client.delete(f"/api/v1/agent?id={TEST_AGENT_ID}")
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "data": {"message": "Agent cannot be deleted as it is currently used in a team configuration"}
+    }

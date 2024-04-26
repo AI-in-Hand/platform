@@ -1,4 +1,6 @@
 # Backend
+[![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
+
 
 This repository contains the backend implementation of a web application built using FastAPI, a modern,
 fast (high-performance), web framework for building APIs with Python. The application provides various functionalities,
@@ -55,7 +57,7 @@ poetry install
 
 4. Set up the necessary environment variables (see .env.testing, rename it to .env):
 
-- `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line).
+- `GOOGLE_CREDENTIALS`: Contents of the Google service account JSON file (in one line, the command to get it is `cat service-account.json | jq -c .`)
 - `ENCRYPTION_KEY`: A key for encrypting and decrypting sensitive data. See `test_encryption_service.py` for key generation.
 
 5. Run the application:
@@ -105,19 +107,3 @@ To run the tests, execute the following command:
 ```bash
 poetry run pytest
 ```
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute to the project:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Make your changes and commit them with descriptive messages.
-4. Push your changes to your forked repository.
-5. Submit a pull request to the main repository.
-
-Please ensure that your code follows the existing style and conventions, and include tests for any new functionality.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).

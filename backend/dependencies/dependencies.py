@@ -11,10 +11,13 @@ from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
+from backend.services.auth_service import AuthService
 from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
 from backend.services.user_secret_manager import UserSecretManager
+from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
+from backend.services.websocket.websocket_handler import WebSocketHandler
 from backend.settings import settings
 
 
@@ -79,13 +82,20 @@ def get_agency_manager(
 def get_session_manager(
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
     user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
-    agency_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
     session_adapter: SessionAdapter = Depends(get_session_adapter),
 ) -> SessionManager:
     """Returns a SessionManager object"""
     return SessionManager(
         session_storage=session_storage,
         user_secret_manager=user_secret_manager,
-        agency_storage=agency_storage,
         session_adapter=session_adapter,
     )
+
+
+def get_websocket_handler(
+    connection_manager: WebSocketConnectionManager = Depends(WebSocketConnectionManager),
+    auth_service: AuthService = Depends(AuthService),
+    session_manager: SessionManager = Depends(get_session_manager),
+    agency_manager: AgencyManager = Depends(get_agency_manager),
+) -> WebSocketHandler:
+    return WebSocketHandler(connection_manager, auth_service, session_manager, agency_manager)

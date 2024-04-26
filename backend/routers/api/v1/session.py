@@ -39,14 +39,13 @@ async def create_session(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> CreateSessionResponse:
     """Create a new session for the given agency and return a list of all sessions for the current user."""
-    session_manager.validate_agency_permissions(agency_id, current_user.id)
     logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
 
     # Set the user_id in the context variables
     ContextEnvVarsManager.set("user_id", current_user.id)
 
     new_thread_ids: dict[str, Any] = {}
-    agency = await agency_manager.get_agency(agency_id, thread_ids=new_thread_ids)
+    agency = await agency_manager.get_agency(agency_id, thread_ids=new_thread_ids, user_id=current_user.id)
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 

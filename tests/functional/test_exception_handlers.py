@@ -67,7 +67,7 @@ def test_request_validation_error(client):
     response = client.put("/api/v1/agent", json={})
     assert response.status_code == 422
     assert "message" in response.json()["data"]
-    assert "Validation error" in response.json()["data"]["message"]
+    assert "body, config: Field required" in response.json()["data"]["message"]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
