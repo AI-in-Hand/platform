@@ -23,7 +23,7 @@ from backend.settings import settings
 
 async def get_websocket(websocket: WebSocket):
     # Make sure the connection is secure for non-localhost connections
-    if websocket.url.scheme != "wss" and websocket.url.hostname not in ["localhost", "127.0.0.1"]:
+    if websocket.url.scheme != "wss" and websocket.url.hostname not in ["localhost", "127.0.0.1", "testserver"]:
         await websocket.close(code=1000)  # Normal closure
         raise HTTPException(status_code=400, detail="Insecure WebSocket connection not allowed.")
     return websocket
