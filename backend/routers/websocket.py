@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, WebSocket
+from fastapi import APIRouter, Depends
 
 from backend.dependencies.dependencies import get_websocket, get_websocket_handler
 from backend.services.websocket.websocket_handler import WebSocketHandler
@@ -18,7 +18,7 @@ async def websocket_session_endpoint(
     user_id: str,
     agency_id: str,
     session_id: str,
-    websocket: WebSocket = Depends(get_websocket),
+    websocket=Depends(get_websocket),
     websocket_handler: WebSocketHandler = Depends(get_websocket_handler),
 ) -> None:
     """

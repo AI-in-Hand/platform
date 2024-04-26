@@ -113,8 +113,8 @@ export const connectWebSocket = (
   onMessage: (data: any) => void,
   onError: (error: IStatus) => void
 ) => {
-  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
   const serverUrl = window.location.host;
+  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
   const user_id = store.getState().user.uid;
   const wsUrl = `${schema}${serverUrl}/ws/${user_id}/${workflowID}/${sessionID}`;
 
