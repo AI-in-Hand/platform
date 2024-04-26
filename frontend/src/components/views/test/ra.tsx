@@ -52,7 +52,7 @@ const RAView = () => {
         }
       );
     }
-  }, [loggedIn, session]);
+  }, [loggedIn, session, workflowConfig]);
 
   return (
     <div className="h-full">

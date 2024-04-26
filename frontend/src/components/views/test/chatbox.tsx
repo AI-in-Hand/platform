@@ -247,21 +247,15 @@ const ChatBox = ({
       content: query,
     };
 
-    const postData = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(messagePayload),
-    };
-
     setLoading(true);
 
-    fetchJSON(postMsgUrl, postData, (data) => {
-      setLoading(false);
-      if (data && data.status) {
-        const botMessage: IChatMessage = {
+    // Send the message via WebSocket
+    const ws = connectWebSocket(
+      session,
+      (data) => {
+        setLoading(false);
+        if (data && data.status) {
+          const botMessage: IChatMessage = {
             text: data.data.content,
             sender: "assistant",
             metadata: data.data.metadata || null,
@@ -269,14 +263,18 @@ const ChatBox = ({
           messageHolder.push(botMessage);
           messageHolder = Object.assign([], messageHolder);
           setMessages(messageHolder);
-      } else {
-        console.log("error", data);
-        message.error(data.error || "An unknown error occurred");
+        } else {
+          console.log("error", data);
+          message.error(data.error || "An unknown error occurred");
+        }
+      },
+      () => {
+        setLoading(false);
+        message.error("Connection error. Ensure server is up and running.");
       }
-    }, () => {
-      setLoading(false);
-      message.error("Connection error. Ensure server is up and running.");
-    });
+    );
+
+    ws.send(JSON.stringify(messagePayload));
   };
 
   const handleTextChange = (
