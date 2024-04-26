@@ -45,6 +45,7 @@ const AgentsView = ({}: any) => {
     config: {
       name: "sample_assistant",
       system_message: assistantConfigSystemMessage,
+      model: "gpt-3.5-turbo",
     },
   };
   const [newAgent, setNewAgent] = React.useState<IAgentFlowSpec | null>(

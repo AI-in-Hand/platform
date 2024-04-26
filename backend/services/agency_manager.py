@@ -31,16 +31,26 @@ class AgencyManager:
         template_agencies = self.storage.load_by_user_id(None)
         return user_agencies + template_agencies
 
-    async def get_agency(self, id_: str, thread_ids: dict[str, Any]) -> Agency | None:
+    async def get_agency(
+        self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False
+    ) -> Agency | None:
+        """Get the agency from the Firestore. It will construct the agency and update the assistants."""
         agency_config = self.storage.load_by_id(id_)
         if not agency_config:
             logger.error(f"Agency with id {id_} not found.")
             return None
+
+        self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
+
         agency = await self._construct_agency_and_update_assistants(agency_config, thread_ids)
         if not agency:
             logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
             return None
         return agency
+
+    def is_agent_used_in_agencies(self, agent_id: str) -> bool:
+        """Check if the agent is part of any agency configurations."""
+        return len(self.storage.load_by_agent_id(agent_id)) > 0
 
     async def handle_agency_creation_or_update(self, config: AgencyConfig, current_user_id: str) -> str:
         """Handle the agency creation or update. It will check the permissions and update the agency in the Firestore
@@ -56,8 +66,8 @@ class AgencyManager:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
                 raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-            self._validate_agency_ownership(config_db, current_user_id)
-        await self._validate_agent_ownership(config.agents, current_user_id)
+            self.validate_agency_ownership(config_db.user_id, current_user_id)
+        self._validate_agent_ownership(config.agents, current_user_id)
 
         # Ensure the agency is associated with the current user
         config.user_id = current_user_id
@@ -80,6 +90,18 @@ class AgencyManager:
     async def delete_agency(self, agency_id: str) -> None:
         """Delete the agency from the Firestore."""
         self.storage.delete(agency_id)
+
+    @staticmethod
+    def validate_agency_ownership(
+        claiming_user_id: str | None, current_user_id: str, allow_template: bool = False
+    ) -> None:
+        """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
+        if not claiming_user_id and allow_template:
+            return
+        if claiming_user_id != current_user_id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
+            )
 
     async def _create_or_update_agency(self, agency_config: AgencyConfig) -> str:
         """Update or create the agency. It will update the agency in the Firestore."""
@@ -113,7 +135,7 @@ class AgencyManager:
             ),
         )
 
-    async def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
+    def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
         """Validate the agent ownership. It will check if the current user has permissions to use the agents."""
         # check that all used agents belong to the current user
         for agent_id in agents:
@@ -127,12 +149,3 @@ class AgencyManager:
         # FIXME: current limitation: all agents must belong to the current user.
         # to fix: If the agent is a template (agent_flow_spec.user_id is None), it should be copied for the current user
         # (reuse the code from api/agent.py)
-
-    @staticmethod
-    def _validate_agency_ownership(config_db: AgencyConfig, current_user_id: str) -> None:
-        """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
-        # check if the current_user has permissions
-        if config_db.user_id != current_user_id:
-            raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
-            )

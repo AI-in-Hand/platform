@@ -4,7 +4,7 @@
   "description": "Root package.json for Heroku deployment",
   "private": true,
   "scripts": {
-    "heroku-postbuild": "cd frontend && npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build"
+    "heroku-postbuild": "cd frontend && [ -z \"$FIREBASE_CONFIG\" ] || echo $FIREBASE_CONFIG > src/firebase/firebaseConfig.json && npm install -g gatsby-cli && npm install --global yarn && yarn install && yarn build"
   },
   "engines": {
     "node": "20.10.0"

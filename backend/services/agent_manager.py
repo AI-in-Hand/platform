@@ -12,7 +12,6 @@ from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.user_secret_manager import UserSecretManager
-from backend.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +28,14 @@ class AgentManager:
         user_configs = self.storage.load_by_user_id(user_id)
         template_configs = self.storage.load_by_user_id(None) if not owned_by_user else []
         return user_configs + template_configs
+
+    async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
+        config = self.storage.load_by_id(agent_id)
+        if not config:
+            logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
+            return None
+        agent = await asyncio.to_thread(self._construct_agent, config)
+        return agent, config
 
     async def handle_agent_creation_or_update(self, config: AgentFlowSpec, current_user_id: str) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""
@@ -62,14 +69,6 @@ class AgentManager:
         self._validate_agent_ownership(config, current_user_id)
         self.storage.delete(agent_id)
 
-    async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
-        config = self.storage.load_by_id(agent_id)
-        if not config:
-            logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
-            return None
-        agent = await asyncio.to_thread(self._construct_agent, config)
-        return agent, config
-
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""
         # FIXME: a workaround explained at the top of the file api/agent.py
@@ -90,7 +89,7 @@ class AgentManager:
             instructions=agent_flow_spec.config.system_message,
             files_folder=agent_flow_spec.config.code_execution_config.work_dir,
             tools=[SKILL_MAPPING[skill] for skill in agent_flow_spec.skills],
-            model=settings.gpt_model,
+            model=agent_flow_spec.config.model,
         )
         return agent
 

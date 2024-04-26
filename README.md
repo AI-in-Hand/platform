@@ -1,8 +1,10 @@
 # AI in Hand Platform
+[![Actions Status](https://github.com/AI-in-Hand/platform/workflows/Test/badge.svg)](https://github.com/AI-in-Hand/platform/actions)
+[![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
 
-AI in Hand Platform is an open-source API and web application for managing AI-driven swarm agencies.
-It builds upon OpenAI's Assistants API, enhancing AI agents with specialized skills and a robust management system.
-The platform is built using FastAPI and takes inspiration from two open-source projects:
+AI in Hand Platform is an open-source API and web application for managing LLM-driven multi-agent workflows.
+Building on OpenAI's Assistants API, it offers a collaborative environment for developing, testing, and deploying AI teams.
+The platform is built using FastAPI and draws inspiration from two open-source projects:
 [Agency-Swarm by VRSEN](https://github.com/VRSEN/agency-swarm) for useful backend abstractions,
 and [AutoGen Studio UI by Microsoft](https://github.com/microsoft/autogen/tree/main/samples/apps/autogen-studio/frontend)
 for UI layout and customizable components.
@@ -53,6 +55,7 @@ To set up the AI in Hand Platform locally, follow these steps:
      npm install
      ```
    - Set up the environment variables (see `.env.default`, rename it to `.env.development`).
+   - Set up Firebase Authentication and Firestore and update the frontend/src/firebase/firebaseConfig.json file with your Firebase project configuration.
    - Start the development server:
      ```bash
      yarn start
@@ -91,15 +94,20 @@ We welcome contributions from the community to improve the AI in Hand Platform. 
 4. Push your changes to your forked repository.
 5. Submit a pull request to the main repository.
 
-Please ensure your code follows the project's coding standards and includes appropriate tests.
+Please ensure your code follows the project's coding standards and includes tests for any new functionality.
 
 ## License
+The core AI in Hand Platform is licensed under the [Affero General Public License (AGPL)](LICENSE), promoting community-driven improvements under the same license for an open and collaborative development atmosphere.
 
-The AI in Hand Platform is licensed under the [MIT License](LICENSE).
+**User-Generated Content (UGC):**
+- **Python Skills**: Python code for AI agent skills will be contributed to the source code repository under the AGPL after a security review, as these skills are executed server-side.
+- **AI Assistant and Team Configurations and Other User Data**: Configurations and user data remain the property of the users, unless voluntarily made public. This preserves users' proprietary rights while utilizing the platform's open-source features.
 
 ## Disclaimer
 
 This is an open-source project under active development.
 While we strive for quality, there may be bugs or issues. Use at your own risk.
 
-If you have any questions or need assistance, feel free to reach out to our team. Happy coding!
+If you have any questions or need assistance, feel free to reach out to our team through our website widget
+or by creating an issue or discussion in this repository.
+Happy coding!

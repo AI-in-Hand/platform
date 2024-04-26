@@ -36,7 +36,7 @@ def test_get_all_method_success():
 
 
 def test_get_all_method_empty():
-    assert ContextEnvVarsManager.get_all() is None
+    assert ContextEnvVarsManager.get_all() == {}
 
 
 def test_set_method_edge_cases():
