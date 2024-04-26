@@ -34,11 +34,12 @@ const RAView = () => {
   const workflowConfig = useConfigStore((state) => state.workflowConfig);
 
   React.useEffect(() => {
-    if (loggedIn && session) {
+    if (loggedIn && session && workflowConfig) {
       setLoading(true);
       setMessages(null);
       fetchMessages(
-        session,
+        session.id,
+        workflowConfig.id,
         (data) => {
           setMessages(data);
           setLoading(false);

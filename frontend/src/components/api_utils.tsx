@@ -107,20 +107,67 @@ export function fetchJSON(
   });
 }
 
+export const connectWebSocket = (
+  sessionID: str,
+  workflowID: str,
+  onMessage: (data: any) => void,
+  onError: (error: IStatus) => void
+) => {
+  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
+  const serverUrl = window.location.host;
+  const user_id = store.getState().user.uid;
+  const wsUrl = `${schema}${serverUrl}/ws/${user_id}/${workflowID}/${sessionID}`;
+
+  const ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    // Send the access token as the first message
+    const accessToken = store.getState().user.accessToken;
+    ws.send(JSON.stringify({ type: 'auth', token: accessToken }));
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    onMessage(data);
+  };
+
+  ws.onerror = (error) => {
+    onError({
+      status: false,
+      message: `WebSocket error: ${error}`,
+    });
+  };
+
+  // Token refresh logic
+  setInterval(() => {
+    checkAndRefreshToken().then((canProceed) => {
+      if (!canProceed) {
+        onError({
+          status: false,
+          message: "Refresh the page or login again.",
+        });
+        ws.close();
+      }
+    });
+  }, 60 * 1000); // check every minute
+
+  return ws;
+};
+
 export const fetchMessages = (
-  session: IChatSession | null,
+  sessionID: str,
+  workflowID: str,
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) => {
-  const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
-  const payload = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
+  const ws = connectWebSocket(
+    sessionID,
+    workflowID,
+    (data) => {
+      onSuccess(data);
     },
-  };
-  fetchJSON(fetchMessagesUrl, payload, onSuccess, onError);
+    onError
+  );
 };
 
 export const fetchVersion = () => {
