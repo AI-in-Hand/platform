@@ -14,7 +14,6 @@ export function checkAndRefreshToken() {
 
     if (userState && userState.expiresIn) {
       if (Date.now() >= userState.expiresIn) {
-        // FIXME: sometimes auth is not defined
         auth.onAuthStateChanged(function (user) {
           if (user) {
             user
