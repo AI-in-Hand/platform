@@ -34,7 +34,7 @@ import ReactMarkdown from "react-markdown";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { fetchJSON, getServerUrl } from "./api_utils";
-import { obscureString, truncateText } from "./utils";
+import { getModels, obscureString, truncateText } from "./utils";
 import {
   IAgentFlowSpec,
   IFlowConfig,
@@ -867,6 +867,30 @@ export const AgentFlowSpecView = ({
                   // onDebouncedControlChange(e.target.value, "system_message");
                   onControlChange(e.target.value, "system_message");
                 }}
+              />
+            }
+          />
+        )}
+
+        {(
+          <ControlRowView
+            title="Model"
+            className="mt-4"
+            description="Defines which models are used for the agent."
+            value={flowSpec.config.model}
+            control={
+              <Select
+                className="mt-2 w-full"
+                defaultValue={flowSpec.config.model}
+                value={flowSpec.config.model}
+                disabled={flowSpec.id}
+                onChange={(value: any) => {
+                  onControlChange(value, "model");
+                }}
+                options={getModels().map((model) => ({
+                  label: model.label,
+                  value: model.value,
+                }))}
               />
             }
           />

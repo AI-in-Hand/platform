@@ -24,9 +24,10 @@ def request_validation_error_handler(request: Request, exc: RequestValidationErr
     # Log the exception for debugging purposes
     logger.warning(f"request: {request.url} exc: {exc}")
     error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
+    error_message = error_message.replace("(", "").replace(")", "").replace("'", "")
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-        content={"data": {"message": f"Validation error: {error_message}"}},
+        content={"data": {"message": error_message}},
     )
 
 

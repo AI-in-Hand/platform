@@ -28,6 +28,7 @@ export interface IChatMessage {
 export interface IAgentConfig {
   name: string;
   system_message: string | "";
+  model: string;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
 }
 
