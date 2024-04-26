@@ -242,10 +242,12 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
 export const getModels = () => {
   const models = [
     {
-      model: "gpt-4-turbo-preview",
+      label: "GPT-4-Turbo",
+      value: "gpt-4-turbo",
     },
     {
-      model: "gpt-3.5-turbo",
+      label: "GPT-3.5-Turbo",
+      value: "gpt-3.5-turbo",
     },
   ];
   return models;
