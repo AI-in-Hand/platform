@@ -149,10 +149,16 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     mock_agent_1.id = "agent1_id"
     mock_agent_1.name = "agent1_name"
     mock_agent_1.description = "agent1_description"
+    mock_agent_1.temperature = 0.5
+    mock_agent_1.top_p = 1.0
+    mock_agent_1.examples = []
     mock_agent_2 = MagicMock(spec=Agent)
     mock_agent_2.id = "agent2_id"
     mock_agent_2.name = "agent2_name"
     mock_agent_2.description = "agent2_description"
+    mock_agent_2.temperature = 0.5
+    mock_agent_2.top_p = 1.0
+    mock_agent_2.examples = []
 
     # Construct the agency
     with patch.object(agency_manager, "_load_and_construct_agents", new_callable=AsyncMock) as mock_load_agents:
