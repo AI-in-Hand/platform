@@ -29,11 +29,11 @@ const ChatBox = ({
   editable?: boolean;
 }) => {
   const session: IChatSession | null = useConfigStore((state) => state.session);
-  const textAreaInputRef = React.useRef<HTMLTextAreaElement>(null);
-  const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
   const workflowConfig: IFlowConfig | null = useConfigStore(
     (state) => state.workflowConfig
   );
+  const textAreaInputRef = React.useRef<HTMLTextAreaElement>(null);
+  const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
 
   const serverUrl = getServerUrl();
   const postMsgUrl = `${serverUrl}/message`;
@@ -80,10 +80,11 @@ const ChatBox = ({
 
   React.useEffect(() => {
     if (session && workflowConfig) {
+      let messageHolder = Object.assign([], messages);
       const ws = connectWebSocket(
         session.id,
         workflowConfig.id,
-        (response) => {
+        (response: string) => {
           setLoading(false);
           if (response) {
             const botMessage: IChatMessage = {
@@ -92,7 +93,6 @@ const ChatBox = ({
               metadata: null,
             };
             messageHolder.push(botMessage);
-            messageHolder = Object.assign([], messageHolder);
             setMessages(messageHolder);
           } else {
             console.log("error", response);
@@ -263,18 +263,20 @@ const ChatBox = ({
 
   const getCompletion = (query: string) => {
     setError(null);
-    let messageHolder = Object.assign([], messages);
-
-    const userMessage: IChatMessage = {
-      text: query,
-      sender: "user",
-    };
-    messageHolder.push(userMessage);
-    setMessages(messageHolder);
-
-    setLoading(true);
-
-    ws.send(query);
+    if (ws) {
+      setLoading(true);
+      ws.send(query);
+      const userMessage: IChatMessage = {
+        text: query,
+        sender: "user",
+        metadata: null,
+      };
+      let messageHolder = Object.assign([], messages);
+      messageHolder.push(userMessage);
+      setMessages(messageHolder);
+    } else {
+      console.log("ws not initialized");
+    }
   };
 
   const handleTextChange = (
