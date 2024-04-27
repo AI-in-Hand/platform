@@ -95,13 +95,12 @@ const ChatBox = ({
               sender: "assistant",
               metadata: null,
             };
-            messageHolder.push(botMessage);
-            setMessages(messageHolder);
+            setMessages((prevMessages) => [...prevMessages, botMessage]);
           }
         },
-        () => {
+        (error: IStatus) => {
           setLoading(false);
-          message.error("Connection error. Ensure server is up and running.");
+          setError(error);
         }
       );
       setWs(ws);
