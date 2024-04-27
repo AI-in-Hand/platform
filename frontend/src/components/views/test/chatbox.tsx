@@ -15,7 +15,7 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { fetchJSON, getServerUrl } from "../../api_utils";
+import { connectWebSocket, fetchJSON, getServerUrl } from "../../api_utils";
 import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
@@ -29,6 +29,9 @@ const ChatBox = ({
   editable?: boolean;
 }) => {
   const session: IChatSession | null = useConfigStore((state) => state.session);
+  const workflowConfig: IFlowConfig | null = useConfigStore(
+    (state) => state.workflowConfig
+  );
   const textAreaInputRef = React.useRef<HTMLTextAreaElement>(null);
   const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
 
@@ -41,12 +44,9 @@ const ChatBox = ({
     status: true,
     message: "All good",
   });
+  const [ws, setWs] = React.useState(null);
 
-  const messages = useConfigStore((state) => state.messages);
-  const setMessages = useConfigStore((state) => state.setMessages);
-  const workflowConfig: IFlowConfig | null = useConfigStore(
-    (state) => state.workflowConfig
-  );
+  const [messages, setMessages] = React.useState<IChatMessage[] | null>(null);
 
   let pageHeight, chatMaxHeight;
   if (typeof window !== "undefined") {
@@ -76,6 +76,36 @@ const ChatBox = ({
     const initMsgs: IChatMessage[] = parseMessages(initMessages);
     setMessages(initMsgs);
   }, [initMessages]);
+
+  React.useEffect(() => {
+  if (session && workflowConfig) {
+    const ws = connectWebSocket(
+      session.id,
+      workflowConfig.id,
+      (response: string) => {
+        if (response === "") {
+          setLoading(false);
+          return;
+        }
+        if (response && !response.startsWith("👤 User ")) {
+          const parts = response.split(" 🗣️ @User");
+          let messageText = parts.length > 1 ? parts[1] : response;
+          const botMessage: IChatMessage = {
+            text: messageText,
+            sender: "assistant",
+            metadata: null,
+          };
+          setMessages(prevMessages => [...prevMessages, botMessage]);
+        }
+      },
+      (error: IStatus) => {
+        setLoading(false);
+        setError(error);
+      }
+    );
+    setWs(ws);
+  }
+  }, [session, workflowConfig]);
 
   const promptButtons = examplePrompts.map((prompt, i) => {
     return (
@@ -232,51 +262,18 @@ const ChatBox = ({
 
   const getCompletion = (query: string) => {
     setError(null);
-    let messageHolder = Object.assign([], messages);
-
-    const userMessage: IChatMessage = {
-      text: query,
-      sender: "user",
-    };
-    messageHolder.push(userMessage);
-    setMessages(messageHolder);
-
-    const messagePayload: IMessage = {
-      agency_id: workflowConfig.id,
-      session_id: session?.id || "",
-      content: query,
-    };
-
-    const postData = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(messagePayload),
-    };
-
-    setLoading(true);
-
-    fetchJSON(postMsgUrl, postData, (data) => {
-      setLoading(false);
-      if (data && data.status) {
-        const botMessage: IChatMessage = {
-            text: data.data.content,
-            sender: "assistant",
-            metadata: data.data.metadata || null,
-          };
-          messageHolder.push(botMessage);
-          messageHolder = Object.assign([], messageHolder);
-          setMessages(messageHolder);
-      } else {
-        console.log("error", data);
-        message.error(data.error || "An unknown error occurred");
-      }
-    }, () => {
-      setLoading(false);
-      message.error("Connection error. Ensure server is up and running.");
-    });
+    if (ws) {
+      setLoading(true);
+      ws.send(query);
+      const userMessage: IChatMessage = {
+        text: query,
+        sender: "user",
+        metadata: null,
+      };
+      setMessages(prevMessages => [...prevMessages, userMessage]);
+    } else {
+      console.error("WebSocket not initialized");
+    }
   };
 
   const handleTextChange = (
