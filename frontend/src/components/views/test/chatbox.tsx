@@ -298,14 +298,14 @@ const ChatBox = ({
   return (
     <div className="text-primary relative h-full rounded">
       <div
-        style={{ zIndex: 100 }}
+        style={{ zIndex: -1 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}
         <div className="text-xs"> {workflowConfig?.name}</div>
       </div>
       <div
-        style={{ zIndex: 100 }}
+        style={{ zIndex: -1 }}
         className=" absolute right-0  text-secondary -top-8 rounded p-2"
       >
         {" "}

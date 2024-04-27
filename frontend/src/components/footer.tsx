@@ -19,15 +19,13 @@ const Footer = () => {
   return (
     <div className=" mt-4 text-primary p-3  border-t border-secondary flex ">
       <div className="text-xs flex-1">
-        Maintained by{" "}
         <a
           target={"_blank"}
           rel={"noopener noreferrer"}
           className="underlipne inline-block border-accent border-b hover:text-accent"
-          href="https://github.com/AI-in-Hand"
+          href="https://github.com/AI-in-Hand/platform"
         >
-          {" "}
-          AI in Hand
+          Source code
         </a>
       </div>
       {version && (
