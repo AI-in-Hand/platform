@@ -23,7 +23,7 @@
     "@mdx-js/mdx": "^3.0.1",
     "@mdx-js/react": "^2.3.0",
     "@monaco-editor/react": "^4.6.0",
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "^2.2.3",
     "@tailwindcss/line-clamp": "^0.4.0",
     "@tailwindcss/typography": "^0.5.9",
     "@types/lodash.debounce": "^4.0.9",
@@ -51,7 +51,7 @@
     "react-firebase-hooks": "^5.1.1",
     "react-inner-image-zoom": "^3.0.2",
     "react-markdown": "^9.0.1",
-    "react-redux": "^8.1.2",
+    "react-redux": "^9.1.1",
     "react-resizable": "^3.0.5",
     "react-router-dom": "^6.3.0",
     "react-syntax-highlighter": "^15.5.0",
@@ -63,7 +63,7 @@
     "zustand": "^4.4.6"
   },
   "devDependencies": {
-    "@types/node": "^18.7.13",
+    "@types/node": "^20.12.7",
     "@types/papaparse": "^5.3.14",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.15",
