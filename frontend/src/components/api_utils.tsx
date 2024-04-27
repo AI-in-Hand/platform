@@ -14,7 +14,6 @@ export function checkAndRefreshToken() {
 
     if (userState && userState.expiresIn) {
       if (Date.now() >= userState.expiresIn) {
-        // FIXME: sometimes auth is not defined
         auth.onAuthStateChanged(function (user) {
           if (user) {
             user
@@ -107,13 +106,45 @@ export function fetchJSON(
   });
 }
 
+export const connectWebSocket = (
+  sessionID: str,
+  workflowID: str,
+  onMessage: (data: any) => void,
+  onError: (error: IStatus) => void
+) => {
+  const serverUrl = window.location.host;
+  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
+  const user_id = store.getState().user.uid;
+  const accessToken = store.getState().user.accessToken;
+  const wsUrl = `${schema}${serverUrl}/ws/${user_id}/${workflowID}/${sessionID}`;
+
+  const ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    // Send the access token as the first message
+    ws.send(accessToken);
+  };
+
+  ws.onmessage = (event) => {
+    onMessage(event.data);
+  };
+
+  ws.onerror = (error) => {
+    onError({
+      status: false,
+      message: `WebSocket error: ${error}`,
+    });
+  };
+  return ws;
+};
+
 export const fetchMessages = (
-  session: IChatSession | null,
+  sessionID: string,
   onSuccess: (data: any) => void,
   onError: (error: IStatus) => void
 ) => {
   const serverUrl = getServerUrl();
-  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${session?.id}`;
+  const fetchMessagesUrl = `${serverUrl}/message/list?session_id=${sessionID}`;
   const payload = {
     method: "GET",
     headers: {
