@@ -46,8 +46,7 @@ const ChatBox = ({
   });
   const [ws, setWs] = React.useState(null);
 
-  const messages = useConfigStore((state) => state.messages);
-  const setMessages = useConfigStore((state) => state.setMessages);
+  const [messages, setMessages] = React.useState<IChatMessage[] | null>(null);
 
   let pageHeight, chatMaxHeight;
   if (typeof window !== "undefined") {
@@ -79,32 +78,34 @@ const ChatBox = ({
   }, [initMessages]);
 
   React.useEffect(() => {
-    if (session && workflowConfig) {
-      const ws = connectWebSocket(
-        session.id,
-        workflowConfig.id,
-        (response: string) => {
-          if (response === "") {
-            setLoading(false);
-            return;
-          }
-          if (!response.startsWith("👤 User ")) {
-            const botMessage: IChatMessage = {
-              text: response,
-              sender: "assistant",
-              metadata: null,
-            };
-            setMessages([...messages, botMessage]);
-          }
-        },
-        (error: IStatus) => {
+  if (session && workflowConfig) {
+    const ws = connectWebSocket(
+      session.id,
+      workflowConfig.id,
+      (response: string) => {
+        if (response === "") {
           setLoading(false);
-          setError(error);
+          return;
         }
-      );
-      setWs(ws);
-    }
-  }, [session, workflowConfig, messages]);
+        if (response && !response.startsWith("👤 User ")) {
+          const parts = response.split(" 🗣️ @User");
+          let messageText = parts.length > 1 ? parts[1] : response;
+          const botMessage: IChatMessage = {
+            text: messageText,
+            sender: "assistant",
+            metadata: null,
+          };
+          setMessages(prevMessages => [...prevMessages, botMessage]);
+        }
+      },
+      (error: IStatus) => {
+        setLoading(false);
+        setError(error);
+      }
+    );
+    setWs(ws);
+  }
+  }, [session, workflowConfig]);
 
   const promptButtons = examplePrompts.map((prompt, i) => {
     return (
@@ -269,9 +270,9 @@ const ChatBox = ({
         sender: "user",
         metadata: null,
       };
-      setMessages([...messages, userMessage]);
+      setMessages(prevMessages => [...prevMessages, userMessage]);
     } else {
-      console.log("ws not initialized");
+      console.error("WebSocket not initialized");
     }
   };
 
