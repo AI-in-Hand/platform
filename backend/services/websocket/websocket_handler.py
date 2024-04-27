@@ -168,6 +168,9 @@ class WebSocketHandler:
         ):
             pass
 
+        # Signal the end of the response
+        await self.connection_manager.send_message("", websocket)
+
     async def _process_single_message_response(
         self, get_next_response: Callable, websocket: WebSocket, loop: asyncio.AbstractEventLoop
     ) -> bool:
