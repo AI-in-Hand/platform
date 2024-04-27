@@ -138,18 +138,6 @@ export const connectWebSocket = (
     });
   };
 
-  // Token refresh logic
-  setInterval(() => {
-    checkAndRefreshToken().then((canProceed) => {
-      if (!canProceed) {
-        onError({
-          status: false,
-          message: "Refresh the page or login again.",
-        });
-        ws.close();
-      }
-    });
-  }, 60 * 1000); // check every minute
 
   return ws;
 };
