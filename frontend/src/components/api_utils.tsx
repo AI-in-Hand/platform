@@ -116,13 +116,13 @@ export const connectWebSocket = (
   const serverUrl = window.location.host;
   const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
   const user_id = store.getState().user.uid;
+  const accessToken = store.getState().user.accessToken;
   const wsUrl = `${schema}${serverUrl}/ws/${user_id}/${workflowID}/${sessionID}`;
 
   const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
     // Send the access token as the first message
-    const accessToken = store.getState().user.accessToken;
     ws.send(accessToken);
   };
 
