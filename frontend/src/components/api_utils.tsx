@@ -1,4 +1,5 @@
 import { message } from "antd";
+import { WebSocket } from "ws";
 import { auth } from "../firebase/firebase-config";
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
@@ -123,11 +124,11 @@ export const connectWebSocket = (
   ws.onopen = () => {
     // Send the access token as the first message
     const accessToken = store.getState().user.accessToken;
-    ws.send(JSON.stringify({ type: 'auth', token: accessToken }));
+    ws.send(accessToken);
   };
 
   ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
+    const data = event.data;
     onMessage(data);
   };
 

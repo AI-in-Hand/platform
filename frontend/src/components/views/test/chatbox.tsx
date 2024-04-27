@@ -15,7 +15,7 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { fetchJSON, getServerUrl } from "../../api_utils";
+import { connectWebSocket, fetchJSON, getServerUrl } from "../../api_utils";
 import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import { BounceLoader, MarkdownView } from "../../atoms";
@@ -31,6 +31,9 @@ const ChatBox = ({
   const session: IChatSession | null = useConfigStore((state) => state.session);
   const textAreaInputRef = React.useRef<HTMLTextAreaElement>(null);
   const messageBoxInputRef = React.useRef<HTMLDivElement>(null);
+  const workflowConfig: IFlowConfig | null = useConfigStore(
+    (state) => state.workflowConfig
+  );
 
   const serverUrl = getServerUrl();
   const postMsgUrl = `${serverUrl}/message`;
@@ -41,12 +44,10 @@ const ChatBox = ({
     status: true,
     message: "All good",
   });
+  const [ws, setWs] = React.useState(null);
 
   const messages = useConfigStore((state) => state.messages);
   const setMessages = useConfigStore((state) => state.setMessages);
-  const workflowConfig: IFlowConfig | null = useConfigStore(
-    (state) => state.workflowConfig
-  );
 
   let pageHeight, chatMaxHeight;
   if (typeof window !== "undefined") {
@@ -76,6 +77,37 @@ const ChatBox = ({
     const initMsgs: IChatMessage[] = parseMessages(initMessages);
     setMessages(initMsgs);
   }, [initMessages]);
+
+  // define a side effect with connectWebSocket if session and workflowConfig are defined
+  React.useEffect(() => {
+    if (session && workflowConfig) {
+      const ws = connectWebSocket(
+        session.id,
+        workflowConfig.id,
+        (data) => {
+          setLoading(false);
+          if (data && data.status) {
+            const botMessage: IChatMessage = {
+              text: data.data,
+              sender: "assistant",
+              metadata: null,
+            };
+            messageHolder.push(botMessage);
+            messageHolder = Object.assign([], messageHolder);
+            setMessages(messageHolder);
+          } else {
+            console.log("error", data);
+            message.error(data.error || "An unknown error occurred");
+          }
+        },
+        () => {
+          setLoading(false);
+          message.error("Connection error. Ensure server is up and running.");
+        }
+      );
+      setWs(ws);
+    }
+  }, [session, workflowConfig]);
 
   const promptButtons = examplePrompts.map((prompt, i) => {
     return (
@@ -241,40 +273,9 @@ const ChatBox = ({
     messageHolder.push(userMessage);
     setMessages(messageHolder);
 
-    const messagePayload: IMessage = {
-      agency_id: workflowConfig.id,
-      session_id: session?.id || "",
-      content: query,
-    };
-
     setLoading(true);
 
-    // Send the message via WebSocket
-    const ws = connectWebSocket(
-      session,
-      (data) => {
-        setLoading(false);
-        if (data && data.status) {
-          const botMessage: IChatMessage = {
-            text: data.data.content,
-            sender: "assistant",
-            metadata: data.data.metadata || null,
-          };
-          messageHolder.push(botMessage);
-          messageHolder = Object.assign([], messageHolder);
-          setMessages(messageHolder);
-        } else {
-          console.log("error", data);
-          message.error(data.error || "An unknown error occurred");
-        }
-      },
-      () => {
-        setLoading(false);
-        message.error("Connection error. Ensure server is up and running.");
-      }
-    );
-
-    ws.send(JSON.stringify(messagePayload));
+    ws.send(query);
   };
 
   const handleTextChange = (
