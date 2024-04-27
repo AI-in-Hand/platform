@@ -126,8 +126,7 @@ export const connectWebSocket = (
   };
 
   ws.onmessage = (event) => {
-    const data = event.data;
-    onMessage(data);
+    onMessage(event.data);
   };
 
   ws.onerror = (error) => {

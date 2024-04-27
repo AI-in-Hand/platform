@@ -85,8 +85,11 @@ const ChatBox = ({
         session.id,
         workflowConfig.id,
         (response: string) => {
-          setLoading(false);
-          if (response) {
+          if (response === "") {
+            setLoading(false);
+            return;
+          }
+          if (!response.startsWith("👤 User ")) {
             const botMessage: IChatMessage = {
               text: response,
               sender: "assistant",
@@ -94,9 +97,6 @@ const ChatBox = ({
             };
             messageHolder.push(botMessage);
             setMessages(messageHolder);
-          } else {
-            console.log("error", response);
-            message.error(response || "An unknown error occurred");
           }
         },
         () => {
