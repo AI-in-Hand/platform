@@ -78,7 +78,6 @@ const ChatBox = ({
     setMessages(initMsgs);
   }, [initMessages]);
 
-  // define a side effect with connectWebSocket if session and workflowConfig are defined
   React.useEffect(() => {
     if (session && workflowConfig) {
       const ws = connectWebSocket(
