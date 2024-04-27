@@ -1,5 +1,4 @@
 import { message } from "antd";
-import { WebSocket } from "ws";
 import { auth } from "../firebase/firebase-config";
 import { store } from "../store";
 import { RefreshToken } from "../store/actions/usersActions";
