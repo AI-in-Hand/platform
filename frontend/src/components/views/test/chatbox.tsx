@@ -80,7 +80,6 @@ const ChatBox = ({
 
   React.useEffect(() => {
     if (session && workflowConfig) {
-      let messageHolder = Object.assign([], messages);
       const ws = connectWebSocket(
         session.id,
         workflowConfig.id,
@@ -95,7 +94,7 @@ const ChatBox = ({
               sender: "assistant",
               metadata: null,
             };
-            setMessages((prevMessages) => [...prevMessages, botMessage]);
+            setMessages([...messages, botMessage]);
           }
         },
         (error: IStatus) => {
@@ -105,7 +104,7 @@ const ChatBox = ({
       );
       setWs(ws);
     }
-  }, [session, workflowConfig]);
+  }, [session, workflowConfig, messages]);
 
   const promptButtons = examplePrompts.map((prompt, i) => {
     return (
@@ -270,9 +269,7 @@ const ChatBox = ({
         sender: "user",
         metadata: null,
       };
-      let messageHolder = Object.assign([], messages);
-      messageHolder.push(userMessage);
-      setMessages(messageHolder);
+      setMessages([...messages, userMessage]);
     } else {
       console.log("ws not initialized");
     }
