@@ -84,11 +84,11 @@ const ChatBox = ({
       const ws = connectWebSocket(
         session.id,
         workflowConfig.id,
-        (data) => {
+        (response) => {
           setLoading(false);
-          if (data && data.status) {
+          if (response) {
             const botMessage: IChatMessage = {
-              text: data.data,
+              text: response,
               sender: "assistant",
               metadata: null,
             };
@@ -96,8 +96,8 @@ const ChatBox = ({
             messageHolder = Object.assign([], messageHolder);
             setMessages(messageHolder);
           } else {
-            console.log("error", data);
-            message.error(data.error || "An unknown error occurred");
+            console.log("error", response);
+            message.error(response || "An unknown error occurred");
           }
         },
         () => {

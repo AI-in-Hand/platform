@@ -137,8 +137,6 @@ export const connectWebSocket = (
       message: `WebSocket error: ${error}`,
     });
   };
-
-
   return ws;
 };
 
