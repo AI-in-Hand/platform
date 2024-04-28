@@ -93,6 +93,9 @@ async def delete_agent(
             detail="Agent cannot be deleted as it is currently used in a team configuration",
         )
 
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
+
     await manager.delete_agent(id, current_user.id)
 
     configs = await manager.get_agent_list(current_user.id)
