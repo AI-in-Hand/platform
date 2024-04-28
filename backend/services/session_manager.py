@@ -3,6 +3,7 @@ from typing import Any
 
 from agency_swarm import Agency
 
+from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
 from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.adapters.session_adapter import SessionAdapter
@@ -43,7 +44,7 @@ class SessionManager:
         self.session_storage.delete(session_id)
 
         client = get_openai_client(self.user_secret_manager)
-        client.beta.threads.delete(thread_id=session_id, timeout=10.0)
+        client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""

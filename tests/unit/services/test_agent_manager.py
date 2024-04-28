@@ -86,7 +86,7 @@ async def test_delete_agent(mock_openai_client, agent_manager, storage_mock):
     storage_mock.load_by_id.assert_called_once_with(TEST_AGENT_ID)
     storage_mock.delete.assert_called_once_with(TEST_AGENT_ID)
     mock_openai_client.return_value.beta.assistants.delete.assert_called_once_with(
-        assistant_id=TEST_AGENT_ID, timeout=10.0
+        assistant_id=TEST_AGENT_ID, timeout=30.0
     )
 
 

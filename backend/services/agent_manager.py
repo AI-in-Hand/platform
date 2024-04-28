@@ -6,6 +6,7 @@ from http import HTTPStatus
 from agency_swarm import Agent
 from fastapi import HTTPException
 
+from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
 from backend.custom_skills import SKILL_MAPPING
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
@@ -71,7 +72,7 @@ class AgentManager:
         self.storage.delete(agent_id)
 
         client = get_openai_client(self.user_secret_manager)
-        client.beta.assistants.delete(assistant_id=agent_id, timeout=10.0)
+        client.beta.assistants.delete(assistant_id=agent_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""

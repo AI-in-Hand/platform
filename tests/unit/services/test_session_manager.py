@@ -48,7 +48,7 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
 def test_delete_session(mock_openai_client, session_manager, session_storage_mock):
     session_manager.delete_session("session_id")
     session_storage_mock.delete.assert_called_once_with("session_id")
-    mock_openai_client.return_value.beta.threads.delete.assert_called_once_with(thread_id="session_id", timeout=10.0)
+    mock_openai_client.return_value.beta.threads.delete.assert_called_once_with(thread_id="session_id", timeout=30.0)
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
