@@ -65,6 +65,10 @@ async def delete_session(
 ) -> SessionListResponse:
     """Delete the session with the given id."""
     logger.info(f"Deleting session: {id}, user: {current_user.id}")
+
+    # Set the user_id in the context variables
+    ContextEnvVarsManager.set("user_id", current_user.id)
+
     session_manager.delete_session(id)
 
     sessions_for_api = session_manager.get_sessions_for_user(current_user.id)

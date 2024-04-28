@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -76,7 +76,8 @@ async def test_handle_agent_creation_or_update_existing_agent(agent_manager, sto
 
 
 @pytest.mark.asyncio
-async def test_delete_agent(agent_manager, storage_mock):
+@patch("backend.services.agent_manager.get_openai_client")
+async def test_delete_agent(mock_openai_client, agent_manager, storage_mock):
     config = AgentFlowSpec(id=TEST_AGENT_ID, user_id=TEST_USER_ID, config={"name": "Agent1"})
     storage_mock.load_by_id.return_value = config
 
@@ -84,6 +85,9 @@ async def test_delete_agent(agent_manager, storage_mock):
 
     storage_mock.load_by_id.assert_called_once_with(TEST_AGENT_ID)
     storage_mock.delete.assert_called_once_with(TEST_AGENT_ID)
+    mock_openai_client.return_value.beta.assistants.delete.assert_called_once_with(
+        assistant_id=TEST_AGENT_ID, timeout=10.0
+    )
 
 
 @pytest.mark.asyncio
