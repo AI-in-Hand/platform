@@ -88,6 +88,7 @@ const ChatBox = ({
           return;
         }
         if (response && !response.startsWith("👤 User ")) {
+          setLoading(true);
           const parts = response.split(" 🗣️ @User");
           let messageText = parts.length > 1 ? parts[1] : response;
           const botMessage: IChatMessage = {

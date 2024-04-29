@@ -94,6 +94,7 @@ const DeployView = () => {
           tabBarStyle={{ paddingLeft: 0, marginLeft: 0 }}
           defaultActiveKey="1"
           tabPosition="left"
+          size="large"
           items={[
             {
               label: (
