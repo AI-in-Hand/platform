@@ -121,7 +121,7 @@ def test_create_variables_success(mock_firestore_client):
 # Test 11: Successful update of existing variables
 def test_update_variables_success(mock_firestore_client):
     mock_firestore_client.setup_mock_data(
-        "user_variables", TEST_USER_ID, {"VARIABLE1": "value1", "VARIABLE2": "value2"}
+        "user_variables", TEST_USER_ID, {"VARIABLE1": "value1", "VARIABLE2": "value2", "VARIABLE4": "value4"}
     )
     variables = {"VARIABLE1": "new_value", "VARIABLE2": "", "VARIABLE3": "value3"}
 
