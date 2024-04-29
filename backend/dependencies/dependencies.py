@@ -5,7 +5,7 @@ from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
-from backend.repositories.user_secret_storage import UserSecretStorage
+from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.adapters.session_adapter import SessionAdapter
@@ -15,7 +15,7 @@ from backend.services.auth_service import AuthService
 from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
 from backend.services.websocket.websocket_handler import WebSocketHandler
 from backend.settings import settings
@@ -59,10 +59,10 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
     return RedisCacheManager(redis)
 
 
-def get_user_secret_manager(
-    user_secret_storage: UserSecretStorage = Depends(UserSecretStorage),
-) -> UserSecretManager:
-    return UserSecretManager(user_secret_storage)
+def get_user_variable_manager(
+    user_variable_storage: UserVariableStorage = Depends(UserVariableStorage),
+) -> UserVariableManager:
+    return UserVariableManager(user_variable_storage)
 
 
 def get_skill_manager(
@@ -73,29 +73,29 @@ def get_skill_manager(
 
 def get_agent_manager(
     storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
-    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
+    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
     skill_storage: SkillConfigStorage = Depends(SkillConfigStorage),
 ) -> AgentManager:
-    return AgentManager(storage, user_secret_manager, skill_storage)
+    return AgentManager(storage, user_variable_manager, skill_storage)
 
 
 def get_agency_manager(
     agent_manager: AgentManager = Depends(get_agent_manager),
     agency_config_storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
-    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
+    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
 ) -> AgencyManager:
-    return AgencyManager(agent_manager, agency_config_storage, user_secret_manager)
+    return AgencyManager(agent_manager, agency_config_storage, user_variable_manager)
 
 
 def get_session_manager(
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
-    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
+    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
     session_adapter: SessionAdapter = Depends(get_session_adapter),
 ) -> SessionManager:
     """Returns a SessionManager object"""
     return SessionManager(
         session_storage=session_storage,
-        user_secret_manager=user_secret_manager,
+        user_variable_manager=user_variable_manager,
         session_adapter=session_adapter,
     )
 

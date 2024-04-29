@@ -33,6 +33,7 @@ async def get_agency_list(
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     manager: AgencyManager = Depends(get_agency_manager),
 ) -> AgencyListResponse:
+    """Get the list of agencies"""
     agencies = await manager.get_agency_list(current_user.id)
     agencies_for_api = [adapter.to_api(agency) for agency in agencies]
     return AgencyListResponse(data=agencies_for_api)
@@ -46,6 +47,9 @@ async def get_agency_config(
     manager: AgencyManager = Depends(get_agency_manager),
     storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
+    """Get the agency configuration.
+    NOTE: currently this endpoint is not used in the frontend.
+    """
     agency_config = storage.load_by_id(id)
     if not agency_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
@@ -63,7 +67,7 @@ async def create_or_update_agency(
     config: AgencyConfigForAPI = Body(...),
     manager: AgencyManager = Depends(get_agency_manager),
 ) -> AgencyListResponse:
-    """Create or update an agency and return its id"""
+    """Create or update an agency and return the list of agencies"""
     # Transform the API model to the internal model
     config = adapter.to_model(config)
 

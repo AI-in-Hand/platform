@@ -13,16 +13,19 @@ from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.oai_client import get_openai_client
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 
 logger = logging.getLogger(__name__)
 
 
 class AgentManager:
     def __init__(
-        self, storage: AgentFlowSpecStorage, user_secret_manager: UserSecretManager, skill_storage: SkillConfigStorage
+        self,
+        storage: AgentFlowSpecStorage,
+        user_variable_manager: UserVariableManager,
+        skill_storage: SkillConfigStorage,
     ) -> None:
-        self.user_secret_manager = user_secret_manager
+        self.user_variable_manager = user_variable_manager
         self.storage = storage
         self.skill_storage = skill_storage
 
@@ -71,7 +74,7 @@ class AgentManager:
         self._validate_agent_ownership(config, current_user_id)
         self.storage.delete(agent_id)
 
-        client = get_openai_client(self.user_secret_manager)
+        client = get_openai_client(self.user_variable_manager)
         client.beta.assistants.delete(assistant_id=agent_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:

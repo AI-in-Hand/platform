@@ -11,8 +11,8 @@ from tests.testing_utils.constants import TEST_AGENT_ID
 
 
 @pytest.fixture
-def agent_manager(storage_mock, user_secret_manager_mock, skill_storage_mock):
-    return AgentManager(storage_mock, user_secret_manager_mock, skill_storage_mock)
+def agent_manager(storage_mock, user_variable_manager_mock, skill_storage_mock):
+    return AgentManager(storage_mock, user_variable_manager_mock, skill_storage_mock)
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def storage_mock():
 
 
 @pytest.fixture
-def user_secret_manager_mock():
+def user_variable_manager_mock():
     return MagicMock()
 
 

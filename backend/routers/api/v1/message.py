@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_manager, get_session_manager, get_user_secret_manager
+from backend.dependencies.dependencies import get_agency_manager, get_session_manager, get_user_variable_manager
 from backend.models.auth import User
 from backend.models.message import Message
 from backend.models.response_models import MessagePostData, MessagePostResponse
@@ -16,7 +16,7 @@ from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.oai_client import get_openai_client
 from backend.services.session_manager import SessionManager
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,12 @@ message_router = APIRouter(
 async def get_message_list(
     current_user: Annotated[User, Depends(get_current_user)],
     session_id: str,
-    after: str | None = None,
+    limit: int = 20,
+    before: str | None = None,
     session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
-    user_secret_manager: UserSecretManager = Depends(get_user_secret_manager),
+    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
 ) -> list[Message]:
-    """Return a list of last 20 messages for the given session."""
+    """Get the list of messages for the given session_id."""
     # check if the current_user has permissions to send a message to the agency
     session_config = session_storage.load_by_id(session_id)
     if not session_config:
@@ -48,8 +49,8 @@ async def get_message_list(
     ContextEnvVarsManager.set("user_id", current_user.id)
 
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
-    client = get_openai_client(user_secret_manager)
-    messages = client.beta.threads.messages.list(thread_id=session_id, after=after, order="asc")
+    client = get_openai_client(user_variable_manager)
+    messages = client.beta.threads.messages.list(thread_id=session_id, limit=limit, before=before, order="asc")
     messages_output = [
         Message(
             id=message.id,
@@ -71,7 +72,7 @@ async def post_message(
     agency_manager: AgencyManager = Depends(get_agency_manager),
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> MessagePostResponse:
-    """Send a message to the User Proxy of the given agency."""
+    """Send a message to the User Proxy (the main agent) for the given agency_id and session_id."""
     agency_id = request.agency_id
     user_message = request.content
     session_id = request.session_id

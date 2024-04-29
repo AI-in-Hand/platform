@@ -105,7 +105,8 @@ async def execute_skill(
     manager: SkillManager = Depends(get_skill_manager),
     executor: SkillExecutor = Depends(SkillExecutor),
 ) -> ExecuteSkillResponse:
-    """Execute a skill."""
+    """Execute a skill by using the user prompt as input to GPT-4, which fills in the skill kwargs.
+    Returns the output of the skill."""
     config = manager.get_skill_config(payload.id)
     manager.check_user_permissions(config, current_user.id)
 
