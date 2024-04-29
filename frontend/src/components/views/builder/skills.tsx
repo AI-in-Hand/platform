@@ -351,7 +351,7 @@ const SkillsView = ({}: any) => {
               className="text-sm p-2 px-3"
               onClick={() => {
                 // setShowNewSkillModal(true);
-                message.info("Coming soon! In the meanwhile, try using existing skills.");
+                message.info("Coming soon! You can submit a pull request on our GitHub repository to add your skill.");
               }}
             >
               {" "}
