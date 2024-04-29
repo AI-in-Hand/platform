@@ -4,7 +4,7 @@
 
 This repository contains the backend implementation of a web application built using FastAPI, a modern,
 fast (high-performance), web framework for building APIs with Python. The application provides various functionalities,
-including managing agencies, agents, skills, sessions, and user secrets.
+including managing agencies, agents, skills, sessions, and user variables.
 
 ## Table of Contents
 

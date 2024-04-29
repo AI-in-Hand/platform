@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.agent_manager import AgentManager
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +19,11 @@ class AgencyManager:
         self,
         agent_manager: AgentManager,
         agency_config_storage: AgencyConfigStorage,
-        user_secret_manager: UserSecretManager,
+        user_variable_manager: UserVariableManager,
     ) -> None:
         self.storage = agency_config_storage
         self.agent_manager = agent_manager
-        self.user_secret_manager = user_secret_manager
+        self.user_variable_manager = user_variable_manager
 
     async def get_agency_list(self, user_id: str) -> list[AgencyConfig]:
         """Get the list of agencies for the user. It will return the agencies for the user and the templates."""

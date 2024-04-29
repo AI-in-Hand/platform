@@ -25,7 +25,7 @@ def session_storage_mock():
 def session_manager(session_storage_mock):
     return SessionManager(
         session_storage=session_storage_mock,
-        user_secret_manager=MagicMock(),
+        user_variable_manager=MagicMock(),
         session_adapter=MagicMock(),
     )
 

@@ -8,18 +8,18 @@ from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.oai_client import get_openai_client
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 
 
 class SessionManager:
     def __init__(
         self,
         session_storage: SessionConfigStorage,
-        user_secret_manager: UserSecretManager,
+        user_variable_manager: UserVariableManager,
         session_adapter: SessionAdapter,
     ):
         self.session_storage = session_storage
-        self.user_secret_manager = user_secret_manager
+        self.user_variable_manager = user_variable_manager
         self.session_adapter = session_adapter
 
     def get_session(self, session_id: str) -> SessionConfig | None:
@@ -43,7 +43,7 @@ class SessionManager:
         """Delete the session with the given ID."""
         self.session_storage.delete(session_id)
 
-        client = get_openai_client(self.user_secret_manager)
+        client = get_openai_client(self.user_variable_manager)
         client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:

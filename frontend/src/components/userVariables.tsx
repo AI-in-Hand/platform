@@ -5,15 +5,15 @@ import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const UserVariables = () => {
   const [form] = Form.useForm();
-  const [secrets, setSecrets] = useState<{ [key: string]: string }>({});
+  const [variables, setVariables] = useState<{ [key: string]: string }>({});
   const serverUrl = getServerUrl();
-  const getUserSecretsUrl = `${serverUrl}/user/settings/secrets`;
+  const getUserVariablesUrl = `${serverUrl}/user/settings/variables`;
 
   useEffect(() => {
-    fetchSecrets();
+    fetchVariables();
   }, []);
 
-  const fetchSecrets = () => {
+  const fetchVariables = () => {
     const payLoad = {
       method: 'GET',
       headers: {
@@ -22,11 +22,11 @@ const UserVariables = () => {
     };
     const onSuccess = (data: any) => {
       if (data && data.status) {
-        const fetchedSecrets = {};
+        const fetchedVariables = {};
         data.data.forEach((key) => {
-          fetchedSecrets[key] = '***';
+          fetchedVariables[key] = '***';
         });
-        setSecrets(fetchedSecrets);
+        setVariables(fetchedVariables);
       } else {
         message.error(data.message);
       }
@@ -34,19 +34,19 @@ const UserVariables = () => {
     const onError = (err: any) => {
       message.error(err.message);
     };
-    fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
+    fetchJSON(getUserVariablesUrl, payLoad, onSuccess, onError);
   };
 
-  const saveSecrets = (values: any) => {
-    const updatedSecrets: { [key: string]: string } = {};
-    Object.keys(secrets).forEach((key) => {
+  const saveVariables = (values: any) => {
+    const updatedVariables: { [key: string]: string } = {};
+    Object.keys(variables).forEach((key) => {
       if (values[key] !== '***') {
-        updatedSecrets[key] = values[key] || '';
+        updatedVariables[key] = values[key] || '';
       }
     });
-    Object.entries(values.newSecrets || {}).forEach(([_, { key, value }]) => {
+    Object.entries(values.newVariables || {}).forEach(([_, { key, value }]) => {
       if (key) {
-        updatedSecrets[key] = value || '';
+        updatedVariables[key] = value || '';
       }
     });
 
@@ -55,16 +55,16 @@ const UserVariables = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(updatedSecrets),
+      body: JSON.stringify(updatedVariables),
     };
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
-        const newSecrets = {};
+        const newVariables = {};
         data.data.forEach((key) => {
-          newSecrets[key] = '***';
+          newVariables[key] = '***';
         });
-        setSecrets(newSecrets);
+        setVariables(newVariables);
         form.resetFields();
       } else {
         message.error(data.message);
@@ -73,7 +73,7 @@ const UserVariables = () => {
     const onError = (err: any) => {
       message.error(err.message);
     };
-    fetchJSON(getUserSecretsUrl, payLoad, onSuccess, onError);
+    fetchJSON(getUserVariablesUrl, payLoad, onSuccess, onError);
   };
 
   const columns = [
@@ -97,9 +97,9 @@ const UserVariables = () => {
       key: 'action',
       render: (_, record: any) => (
         <Button onClick={() => {
-          const newSecrets = { ...secrets };
-          delete newSecrets[record.key];
-          setSecrets(newSecrets);
+          const newVariables = { ...variables };
+          delete newVariables[record.key];
+          setVariables(newVariables);
           form.setFieldsValue({ [record.key]: undefined });
         }}>
           <XMarkIcon className="w-5 h-5 inline-block mr-1" />
@@ -108,9 +108,9 @@ const UserVariables = () => {
     },
   ];
 
-  const data = Object.keys(secrets).map((key) => ({
+  const data = Object.keys(variables).map((key) => ({
     key,
-    value: secrets[key],
+    value: variables[key],
   }));
 
   return (
@@ -125,8 +125,8 @@ const UserVariables = () => {
 
       <details>
         <summary><strong>Understanding Variables</strong> (click to expand or hide)</summary>
-        <section aria-labelledby="secrets-introduction">
-          <h2 id="secrets-introduction">Introduction</h2>
+        <section aria-labelledby="variables-introduction">
+          <h2 id="variables-introduction">Introduction</h2>
           <p>
             Use variables to securely access sensitive data like API keys in your skills. They're encrypted at rest and decrypted only during use.
           </p>
@@ -139,20 +139,20 @@ const UserVariables = () => {
           <h2 id="usage-instructions">Using Variables in Skills</h2>
           <p>Example usage for a variable named <code>AIRTABLE_TOKEN</code>:</p>
           <pre>
-            <code>from backend.services.user_secret_manager import UserSecretManager</code><br />
-            <code>user_secret_manager = UserSecretManager(UserSecretStorage())</code><br />
-            <code>airtable_token = user_secret_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
+            <code>from backend.services.user_variable_manager import UserVariableManager</code><br />
+            <code>user_variable_manager = UserVariableManager(UserVariableStorage())</code><br />
+            <code>airtable_token = user_variable_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
           </pre>
         </section>
       </details>
 
-      <section aria-labelledby="secrets-list">
-        <h2 id="secrets-list">Your Variables</h2>
+      <section aria-labelledby="variables-list">
+        <h2 id="variables-list">Your Variables</h2>
         <p>Here's a list of your variables. Add new or update existing ones as needed.</p>
 
-        <Form form={form} onFinish={saveSecrets}>
+        <Form form={form} onFinish={saveVariables}>
           <Table columns={columns} dataSource={data} pagination={false} rowKey="key" />
-          <Form.List name="newSecrets">
+          <Form.List name="newVariables">
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
@@ -179,7 +179,7 @@ const UserVariables = () => {
                 ))}
                 <Form.Item>
                   <Button type="dashed" onClick={() => add()} block>
-                    <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Secret
+                    <PlusIcon className="w-5 h-5 inline-block mr-1" /> Add Variable
                   </Button>
                 </Form.Item>
               </>

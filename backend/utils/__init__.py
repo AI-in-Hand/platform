@@ -7,9 +7,9 @@ import firebase_admin
 import tiktoken
 from firebase_admin import credentials
 
-from backend.repositories.user_secret_storage import UserSecretStorage
+from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.oai_client import get_openai_client
-from backend.services.user_secret_manager import UserSecretManager
+from backend.services.user_variable_manager import UserVariableManager
 from backend.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,12 @@ def init_firebase_app():
 
 def init_openai_client():
     """Initialize the OpenAI client."""
-    user_secret_manager = UserSecretManager(UserSecretStorage())
-    return get_openai_client(user_secret_manager=user_secret_manager)
+    user_variable_manager = UserVariableManager(UserVariableStorage())
+    return get_openai_client(user_variable_manager=user_variable_manager)
 
 
 def patch_openai_client():
-    """Patch the agency_swarm's openai client to use the user secret manager."""
+    """Patch the agency_swarm's openai client to use the user variable manager."""
     sys.modules["agency_swarm.util.oai"].get_openai_client = init_openai_client
     sys.modules["agency_swarm.threads.thread"].get_openai_client = init_openai_client
     sys.modules["agency_swarm.agents.agent"].get_openai_client = init_openai_client
@@ -59,7 +59,7 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, api_k
     if api_key:
         client = get_openai_client(api_key=api_key)
     else:
-        client = get_openai_client(user_secret_manager=UserSecretManager(UserSecretStorage()))
+        client = get_openai_client(user_variable_manager=UserVariableManager(UserVariableStorage()))
     completion = client.chat.completions.create(
         model=model,
         messages=[

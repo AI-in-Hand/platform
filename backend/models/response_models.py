@@ -82,8 +82,8 @@ class MessagePostResponse(BaseResponse):
 # User API
 
 
-class UserSecretsResponse(BaseResponse):
-    data: list[str] = Field(..., description="The list of secret names.")
+class UserVariablesResponse(BaseResponse):
+    data: list[str] = Field(..., description="The list of variable names.")
 
 
 # =================================================================================================

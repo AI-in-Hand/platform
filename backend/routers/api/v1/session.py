@@ -63,7 +63,7 @@ async def delete_session(
     id: str = Query(..., description="The unique identifier of the session"),
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> SessionListResponse:
-    """Delete the session with the given id."""
+    """Delete the session with the given id and return a list of all sessions for the current user."""
     logger.info(f"Deleting session: {id}, user: {current_user.id}")
 
     # Set the user_id in the context variables
