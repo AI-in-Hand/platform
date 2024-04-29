@@ -1,5 +1,6 @@
 import logging
 
+from backend.exceptions import UnsetVariableError
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.encryption_service import EncryptionService
@@ -26,7 +27,7 @@ class UserVariableManager:
         document = self._user_variable_storage.get_all_variables(user_id) or {}
         value = document.get(key)
         if not value:
-            raise ValueError(f"Variable {key} not set for the given user. Please set it first.")
+            raise UnsetVariableError(key=key)
         return self._encryption_service.decrypt(value)
 
     def set_by_key(self, key: str, value: str) -> None:

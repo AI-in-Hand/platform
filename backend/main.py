@@ -5,6 +5,7 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
+from backend.exceptions import UnsetVariableError
 from backend.routers.api import api_router
 from backend.routers.websocket import websocket_router
 from backend.utils.logging_utils import setup_logging
@@ -18,6 +19,7 @@ from backend.exception_handlers import (  # noqa  # isort:skip
     unhandled_exception_handler,
     request_validation_error_handler,
     openai_authentication_error_handler,
+    unset_variable_error_handler,
 )
 
 from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
@@ -53,6 +55,7 @@ api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler
 api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
 api_app.add_exception_handler(OpenAIAuthenticationError, openai_authentication_error_handler)
+api_app.add_exception_handler(UnsetVariableError, unset_variable_error_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)
 
 ws_app = FastAPI(root_path="/ws")

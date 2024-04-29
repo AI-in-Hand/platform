@@ -7,9 +7,11 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 
 from backend.dependencies.dependencies import get_agency_adapter
+from backend.exceptions import UnsetVariableError
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
+from backend.services.agency_manager import AgencyManager
 
 
 @pytest.fixture
@@ -86,6 +88,15 @@ def test_openai_authentication_error(client, caplog):
     assert "message" in response.json()["data"]
     assert "Authentication Error" in response.json()["data"]["message"]
     assert "request: http://testserver/api/v1/agent?id=123 exc: Authentication Error" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_unset_variable_error(client):
+    with patch.object(AgencyManager, "get_agency", side_effect=UnsetVariableError(key="MISSING_KEY")):
+        response = client.post("/api/v1/session?agency_id=123")
+    assert response.status_code == 400
+    assert "message" in response.json()["data"]
+    assert "Variable MISSING_KEY is not set. Please set it first." in response.json()["data"]["message"]
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_agent_storage_to_raise_unhandled_exception")
