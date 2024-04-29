@@ -25,6 +25,7 @@ class UserVariableStorage:
         collection.document(user_id).set(variables)
 
     def update_variables(self, user_id: str, variables: dict[str, str]) -> None:
+        """Update user variables based on user_id"""
         logger.info(f"Updating user variables for user_id: {user_id}")
         collection = self.db.collection(self.collection_name)
         collection.document(user_id).update(variables)
