@@ -1,6 +1,8 @@
 # AI in Hand Platform
 [![Actions Status](https://github.com/AI-in-Hand/platform/workflows/Test/badge.svg)](https://github.com/AI-in-Hand/platform/actions)
 [![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/nick_bobrowski_.svg?style=social&label=Follow%20%40nick_bobrowski_)](https://twitter.com/nick_bobrowski_)
+[![Join our Discord!](https://img.shields.io/discord/1233159105057918996?label=Discord)](https://discord.gg/wmSvRkw8R9)
 
 AI in Hand Platform is an open-source API and web application for managing LLM-driven multi-agent workflows.
 Building on OpenAI's Assistants API, it offers a collaborative environment for developing, testing, and deploying AI teams.
