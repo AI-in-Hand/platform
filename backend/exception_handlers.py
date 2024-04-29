@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 
+from backend.exceptions import UnsetVariableError
+
 logger = logging.getLogger(__name__)
 
 
@@ -46,6 +48,15 @@ def openai_authentication_error_handler(request: Request, exc: OpenAIAuthenticat
     return JSONResponse(
         status_code=HTTPStatus.UNAUTHORIZED,
         content={"data": {"message": exc.message}},
+    )
+
+
+def unset_variable_error_handler(request: Request, exc: UnsetVariableError) -> JSONResponse:
+    """Handle errors when a variable is not set"""
+    logger.warning(f"request: {request.url} exc: {exc}")
+    return JSONResponse(
+        status_code=HTTPStatus.BAD_REQUEST,
+        content={"data": {"message": str(exc)}},
     )
 
 
