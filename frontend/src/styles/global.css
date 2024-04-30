@@ -431,3 +431,7 @@ div#gatsby-focus-wrapper {
 .ant-select-disabled {
   background-color: #f5f5f5;
 }
+
+.ant-typography {
+  @apply text-primary !important;
+}
