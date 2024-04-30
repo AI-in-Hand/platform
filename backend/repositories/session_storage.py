@@ -28,6 +28,11 @@ class SessionConfigStorage:
         collection = self.db.collection(self.collection_name)
         collection.document(session_config.id).set(session_config.model_dump())
 
+    def update(self, session_id: str, fields: dict[str, str]) -> None:
+        """Update the session with the given fields."""
+        collection = self.db.collection(self.collection_name)
+        collection.document(session_id).update(fields)
+
     def delete(self, session_id: str) -> None:
         collection = self.db.collection(self.collection_name)
         collection.document(session_id).delete()

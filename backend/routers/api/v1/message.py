@@ -95,7 +95,11 @@ async def post_message(
         response = await asyncio.to_thread(
             agency.get_completion, message=user_message, yield_messages=False, message_files=None
         )
-        return MessagePostResponse(data=MessagePostData(content=response))
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
         raise HTTPException(status_code=500, detail="Something went wrong") from e
+
+    # update the session timestamp
+    session_manager.update_session_timestamp(session_id)
+
+    return MessagePostResponse(data=MessagePostData(content=response))

@@ -39,6 +39,11 @@ class SessionManager:
         self.session_storage.save(session_config)
         return session_id
 
+    def update_session_timestamp(self, session_id: str) -> None:
+        """Update the session with the given ID."""
+        timestamp = datetime.now(UTC).isoformat()
+        self.session_storage.update(session_id, {"timestamp": timestamp})
+
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         self.session_storage.delete(session_id)

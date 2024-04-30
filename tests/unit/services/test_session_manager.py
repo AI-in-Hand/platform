@@ -44,6 +44,11 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
     session_storage_mock.save.assert_called_once_with(expected_session_config)
 
 
+def test_update_session_timestamp(session_manager, session_storage_mock):
+    session_manager.update_session_timestamp("session_id")
+    session_storage_mock.update.assert_called_once_with("session_id", {"timestamp": mock.ANY})
+
+
 @patch("backend.services.session_manager.get_openai_client")
 def test_delete_session(mock_openai_client, session_manager, session_storage_mock):
     session_manager.delete_session("session_id")
