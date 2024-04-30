@@ -426,3 +426,8 @@ div#gatsby-focus-wrapper {
 .ant-table-wrapper .ant-table-tbody .ant-table-row:hover > td {
   @apply bg-light text-primary;
 }
+
+/* Select styles */
+.ant-select-disabled {
+  background-color: #f5f5f5;
+}

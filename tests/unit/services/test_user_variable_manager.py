@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
+from backend.exceptions import UnsetVariableError
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.encryption_service import EncryptionService
 from backend.services.user_variable_manager import UserVariableManager
@@ -25,9 +26,9 @@ def test_get_by_key_success(mock_get, mock_firestore_client):
 def test_get_by_key_non_existing(mock_get, mock_firestore_client, mock_user_variables):
     mock_firestore_client.setup_mock_data("user_variables", TEST_USER_ID, mock_user_variables)
     manager = UserVariableManager(user_variable_storage=UserVariableStorage())
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(UnsetVariableError) as exc_info:
         manager.get_by_key("MISSING_KEY")
-    assert "Variable MISSING_KEY not set for the given user" in str(exc_info.value)
+    assert "Variable MISSING_KEY is not set" in str(exc_info)
     mock_get.assert_called_once()
 
 
@@ -35,9 +36,9 @@ def test_get_by_key_non_existing(mock_get, mock_firestore_client, mock_user_vari
 @patch("backend.services.context_vars_manager.ContextEnvVarsManager.get", return_value=TEST_USER_ID)
 def test_get_by_key_no_variables_set(mock_get):
     manager = UserVariableManager(user_variable_storage=UserVariableStorage())
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(UnsetVariableError) as exc_info:
         manager.get_by_key("ANY_KEY")
-    assert "Variable ANY_KEY not set for the given user" in str(exc_info.value)
+    assert "Variable ANY_KEY is not set" in str(exc_info)
     mock_get.assert_called_once()
 
 
