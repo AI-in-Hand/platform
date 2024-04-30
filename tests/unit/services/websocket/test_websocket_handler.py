@@ -2,11 +2,14 @@ import asyncio
 from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 from fastapi import HTTPException, WebSocket
+from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocketDisconnect
 from websockets import ConnectionClosedOK
 
+from backend.exceptions import UnsetVariableError
 from backend.services.websocket.websocket_handler import WebSocketHandler
 
 
@@ -140,7 +143,7 @@ async def test_process_messages_websocket_disconnect(websocket_handler):
         result = await websocket_handler._process_messages(websocket, agency_id, agency, session_id, user_id)
 
     assert result is False
-    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, user_id)
+    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, session_id, user_id)
 
 
 @pytest.mark.asyncio
@@ -158,7 +161,51 @@ async def test_process_messages_connection_closed(websocket_handler):
         result = await websocket_handler._process_messages(websocket, agency_id, agency, session_id, user_id)
 
     assert result is False
-    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, user_id)
+    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, session_id, user_id)
+
+
+@pytest.mark.asyncio
+async def test_process_messages_unset_variable_error(websocket_handler):
+    websocket = AsyncMock(spec=WebSocket)
+    agency_id = "agency_id"
+    agency = AsyncMock()
+    session_id = "session_id"
+    user_id = "user_id"
+    expected_error_message = "Variable Variable XXX not set is not set. Please set it first."
+
+    with patch.object(
+        websocket_handler, "_process_single_message", new_callable=AsyncMock
+    ) as process_single_message_mock:
+        process_single_message_mock.side_effect = UnsetVariableError("Variable XXX not set")
+        result = await websocket_handler._process_messages(websocket, agency_id, agency, session_id, user_id)
+
+    assert result is False
+    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, session_id, user_id)
+    websocket_handler.connection_manager.send_message.assert_awaited_once_with(expected_error_message, websocket)
+
+
+@pytest.mark.asyncio
+async def test_process_messages_openai_authentication_error(websocket_handler):
+    websocket = AsyncMock(spec=WebSocket)
+    agency_id = "agency_id"
+    agency = AsyncMock()
+    session_id = "session_id"
+    user_id = "user_id"
+    expected_error_message = "Authentication Error"
+    request = httpx.Request(method="GET", url="http://testserver/api/v1/agent?id=123")
+    response = httpx.Response(401, request=request)
+
+    with patch.object(
+        websocket_handler, "_process_single_message", new_callable=AsyncMock
+    ) as process_single_message_mock:
+        process_single_message_mock.side_effect = OpenAIAuthenticationError(
+            expected_error_message, response=response, body={}
+        )
+        result = await websocket_handler._process_messages(websocket, agency_id, agency, session_id, user_id)
+
+    assert result is False
+    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, session_id, user_id)
+    websocket_handler.connection_manager.send_message.assert_awaited_once_with(expected_error_message, websocket)
 
 
 @pytest.mark.asyncio
@@ -176,7 +223,7 @@ async def test_process_messages_exception(websocket_handler):
         result = await websocket_handler._process_messages(websocket, agency_id, agency, session_id, user_id)
 
     assert result is True
-    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, user_id)
+    process_single_message_mock.assert_awaited_once_with(websocket, agency_id, agency, session_id, user_id)
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         "Something went wrong. Please try again.", websocket
     )
@@ -186,6 +233,7 @@ async def test_process_messages_exception(websocket_handler):
 async def test_process_single_message_non_empty_message(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     agency_id = "agency_id"
+    session_id = "session_id"
     agency = AsyncMock()
     user_id = "user_id"
     user_message = "User message"
@@ -196,7 +244,7 @@ async def test_process_single_message_non_empty_message(websocket_handler):
         websocket_handler, "_process_single_message_response", new_callable=AsyncMock
     ) as process_single_message_response_mock:
         process_single_message_response_mock.side_effect = [True, False]
-        await websocket_handler._process_single_message(websocket, agency_id, agency, user_id)
+        await websocket_handler._process_single_message(websocket, agency_id, agency, session_id, user_id)
 
     websocket.receive_text.assert_awaited_once()
     assert process_single_message_response_mock.await_count == 2
@@ -206,13 +254,14 @@ async def test_process_single_message_non_empty_message(websocket_handler):
 async def test_process_single_message_empty_message(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     agency_id = "agency_id"
+    session_id = "session_id"
     agency = AsyncMock()
     user_id = "user_id"
     user_message = "   "
 
     websocket.receive_text.return_value = user_message
 
-    await websocket_handler._process_single_message(websocket, agency_id, agency, user_id)
+    await websocket_handler._process_single_message(websocket, agency_id, agency, session_id, user_id)
 
     websocket.receive_text.assert_awaited_once()
     agency.get_completion.assert_not_called()

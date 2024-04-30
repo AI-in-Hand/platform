@@ -4,8 +4,10 @@ from collections.abc import Callable
 
 from agency_swarm import Agency
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
+from openai import AuthenticationError as OpenAIAuthenticationError
 from websockets.exceptions import ConnectionClosedOK
 
+from backend.exceptions import UnsetVariableError
 from backend.models.session_config import SessionConfig
 from backend.services.agency_manager import AgencyManager
 from backend.services.auth_service import AuthService
@@ -135,8 +137,14 @@ class WebSocketHandler:
         :return: True if the processing should continue, False otherwise.
         """
         try:
-            await self._process_single_message(websocket, agency_id, agency, user_id)
+            await self._process_single_message(websocket, agency_id, agency, session_id, user_id)
         except (WebSocketDisconnect, ConnectionClosedOK):
+            return False
+        except UnsetVariableError as exception:
+            await self.connection_manager.send_message(str(exception), websocket)
+            return False
+        except OpenAIAuthenticationError as exception:
+            await self.connection_manager.send_message(exception.message, websocket)
             return False
         except Exception as exception:
             logger.exception(
@@ -146,7 +154,9 @@ class WebSocketHandler:
             await self.connection_manager.send_message("Something went wrong. Please try again.", websocket)
         return True
 
-    async def _process_single_message(self, websocket: WebSocket, agency_id: str, agency: Agency, user_id: str) -> None:
+    async def _process_single_message(
+        self, websocket: WebSocket, agency_id: str, agency: Agency, session_id: str, user_id: str
+    ) -> None:
         """
         Process a single user message and send the response to the websocket.
 
@@ -159,6 +169,9 @@ class WebSocketHandler:
         if not user_message.strip():
             await self.connection_manager.send_message("Message not provided", websocket)
             return
+
+        # Update the session timestamp when a message is sent
+        self.session_manager.update_session_timestamp(session_id)
 
         loop = asyncio.get_running_loop()
         response_generator = agency.get_completion(message=user_message, yield_messages=True)

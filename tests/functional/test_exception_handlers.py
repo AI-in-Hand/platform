@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import httpx
 import pytest
-from httpx import Request
 from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 
@@ -28,7 +27,7 @@ def mock_agency_adapter_to_raise_pydantic_validation_error():
 
 @pytest.fixture
 def mock_agent_storage_to_raise_openai_authentication_error():
-    request = Request(method="GET", url="http://testserver/api/v1/agent?id=123")
+    request = httpx.Request(method="GET", url="http://testserver/api/v1/agent?id=123")
     response = httpx.Response(401, request=request)
     exception = OpenAIAuthenticationError("Authentication Error", response=response, body={})
     with patch.object(AgentFlowSpecStorage, "load_by_id", side_effect=exception):
