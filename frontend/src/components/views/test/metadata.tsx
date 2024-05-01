@@ -14,6 +14,7 @@ import {
   ImageLoader,
   MarkdownView,
   PdfViewer,
+  AgentRow,
 } from "../../atoms";
 import { getServerUrl } from "../../api_utils";
 import { formatDuration } from "../../utils";
@@ -199,17 +200,7 @@ const MetaDataView = ({ metadata }: { metadata: any | null }) => {
   const messages = (metadata.messages || []).map((message: any, i: number) => {
     return (
       <div className=" mb-2 border-dashed" key={"messagerow" + i}>
-        <GroupView
-          title={
-            <div className="rounded p-1 px-2 inline-block text-xs bg-secondary">
-              <span className="font-semibold">{message.sender}</span> ( to{" "}
-              {message.recipient} )
-            </div>
-          }
-          className="m"
-        >
-          <MarkdownView data={message.message?.content} className="text-sm" />
-        </GroupView>
+        <AgentRow message={message} />
       </div>
     );
   });
@@ -232,7 +223,7 @@ const MetaDataView = ({ metadata }: { metadata: any | null }) => {
         </div>
       )}
       {hasContent && (
-        <div className="rounded bg-primary p-2">
+        <div className="rounded mt-2">
           <CollapseBox
             open={true}
             title={`Results (${files.length} file${

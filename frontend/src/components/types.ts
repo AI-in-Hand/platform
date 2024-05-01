@@ -64,17 +64,6 @@ export interface IFlowConfig {
   user_id?: string;
 }
 
-export interface IModelConfig {
-  model: string;
-  api_key?: string;
-  api_version?: string;
-  base_url?: string;
-  api_type?: string;
-  user_id?: string;
-  timestamp?: string;
-  description?: string;
-}
-
 export interface IMetadataFile {
   name: string;
   path: string;
@@ -88,6 +77,7 @@ export interface IChatSession {
   user_id: string;
   timestamp: string;
   flow_config: IFlowConfig;
+  name: string;
 }
 
 export interface ISkill {

@@ -20,7 +20,6 @@ function classNames(...classes: string[]) {
 
 const Header = ({ meta, link }: any) => {
   const { email, loggedIn } = useSelector(state => state.user);
-  const userAvatarUrl = "";
   const dispatch = useDispatch();
   const logout = () => {
     dispatch(ResetState());
@@ -145,14 +144,7 @@ const Header = ({ meta, link }: any) => {
                         <div>
                           <Menu.Button className="bg-primary rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
                             <span className="sr-only">Open user menu</span>
-                            {/* {userAvatarUrl && (
-                              <img
-                                className="h-8 w-8 rounded-full"
-                                src={userAvatarUrl}
-                                alt=""
-                              />
-                            )} */}
-                            {!userAvatarUrl && email && (
+                            {email && (
                               <div className="border-2 bg-accent pt-1 h-8 w-8 align-middle text-sm text-white rounded-full">
                                 {email[0].toUpperCase()}
                               </div>
@@ -227,14 +219,7 @@ const Header = ({ meta, link }: any) => {
               <div className="pt-4 pb-3 border-t border-secondary">
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
-                    {/* {userAvatarUrl && (
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src={userAvatarUrl}
-                        alt=""
-                      />
-                    )} */}
-                    {!userAvatarUrl && email && (
+                    {email && (
                       <div className="border-2 bg-accent text-sm text-white h-8 w-8 pt-1   rounded-full text-center">
                         {email[0].toUpperCase()}
                       </div>
