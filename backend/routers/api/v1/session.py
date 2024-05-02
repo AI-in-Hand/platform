@@ -45,12 +45,14 @@ async def create_session(
     ContextEnvVarsManager.set("user_id", current_user.id)
 
     new_thread_ids: dict[str, Any] = {}
-    agency = await agency_manager.get_agency(agency_id, thread_ids=new_thread_ids, user_id=current_user.id)
-    if not agency:
+    agency, agency_config = await agency_manager.get_agency(
+        agency_id, thread_ids=new_thread_ids, user_id=current_user.id
+    )
+    if not agency or not agency_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 
     session_id = session_manager.create_session(
-        agency, agency_id=agency_id, user_id=current_user.id, thread_ids=new_thread_ids
+        agency, name=agency_config.name, agency_id=agency_id, user_id=current_user.id, thread_ids=new_thread_ids
     )
 
     sessions_for_api = session_manager.get_sessions_for_user(current_user.id)

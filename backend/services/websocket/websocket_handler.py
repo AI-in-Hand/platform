@@ -94,7 +94,7 @@ class WebSocketHandler:
         session_config = self.session_manager.get_session(session_id)
         if not session_config:
             return session_config, None
-        agency = await self.agency_manager.get_agency(agency_id, session_config.thread_ids, user_id)
+        agency, _ = await self.agency_manager.get_agency(agency_id, session_config.thread_ids, user_id)
         return session_config, agency
 
     async def _handle_websocket_messages(

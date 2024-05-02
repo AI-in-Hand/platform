@@ -8,6 +8,7 @@ from tests.testing_utils.constants import TEST_AGENCY_ID
 def session_config_data():
     return {
         "id": "test_session_id",
+        "name": "Test agency",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
         "thread_ids": {},

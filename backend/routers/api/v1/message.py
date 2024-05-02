@@ -87,7 +87,9 @@ async def post_message(
     if not session_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     # permissions are checked in the agency_manager.get_agency method
-    agency = await agency_manager.get_agency(agency_id, thread_ids=session_config.thread_ids, user_id=current_user.id)
+    agency, _ = await agency_manager.get_agency(
+        agency_id, thread_ids=session_config.thread_ids, user_id=current_user.id
+    )
     if not agency:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
 

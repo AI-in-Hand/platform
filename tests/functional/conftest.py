@@ -44,6 +44,7 @@ def client():
 def mock_session_storage(mock_firestore_client):
     session_data = {
         "id": "test_session_id",
+        "name": "Test agency",
         "user_id": TEST_USER_ID,
         "agency_id": TEST_AGENCY_ID,
         "thread_ids": {},

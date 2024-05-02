@@ -60,6 +60,7 @@ def test_get_message_list_session_not_found(client):
 def test_get_message_list_unauthorized(client, mock_firestore_client):
     test_session_config = {
         "id": "test_session_id",
+        "name": "Test agency",
         "user_id": "other_user_id",
         "agency_id": TEST_AGENCY_ID,
         "timestamp": "2021-01-01T00:00:00Z",
@@ -142,6 +143,7 @@ def test_post_message_processing_failure(client, mock_construct_agency, mock_fir
         "test_session_id",
         {
             "id": "test_session_id",
+            "name": "Test agency",
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
             "thread_ids": {},

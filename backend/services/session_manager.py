@@ -26,11 +26,14 @@ class SessionManager:
         """Return the session with the given ID."""
         return self.session_storage.load_by_id(session_id)
 
-    def create_session(self, agency: Agency, agency_id: str, user_id: str, thread_ids: dict[str, Any]) -> str:
+    def create_session(
+        self, agency: Agency, name: str, agency_id: str, user_id: str, thread_ids: dict[str, Any]
+    ) -> str:
         """Create a new session for the given agency and return its id."""
         session_id = agency.main_thread.id
         session_config = SessionConfig(
             id=session_id,
+            name=name,
             user_id=user_id,
             agency_id=agency_id,
             thread_ids=thread_ids,

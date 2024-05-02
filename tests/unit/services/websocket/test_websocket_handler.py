@@ -31,7 +31,7 @@ async def test_handle_websocket_connection(websocket_handler):
 
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.return_value = MagicMock()
-    websocket_handler.agency_manager.get_agency.return_value = AsyncMock()
+    websocket_handler.agency_manager.get_agency.return_value = (AsyncMock(), MagicMock())
 
     with patch.object(websocket_handler, "_handle_websocket_messages", new_callable=AsyncMock) as handle_messages_mock:
         await websocket_handler.handle_websocket_connection(websocket, user_id, agency_id, session_id)
@@ -53,7 +53,7 @@ async def test_handle_websocket_connection_session_or_agency_not_found(websocket
 
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.return_value = None
-    websocket_handler.agency_manager.get_agency.return_value = None
+    websocket_handler.agency_manager.get_agency.return_value = (None, None)
 
     await websocket_handler.handle_websocket_connection(websocket, user_id, agency_id, session_id)
 
