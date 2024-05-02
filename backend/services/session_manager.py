@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
+from http import HTTPStatus
 from typing import Any
 
 from agency_swarm import Agency
+from fastapi import HTTPException
 
 from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
 from backend.models.session_config import SessionConfig, SessionConfigForAPI
@@ -42,6 +44,10 @@ class SessionManager:
         self.session_storage.save(session_config)
         return session_id
 
+    def rename_session(self, session_id: str, new_name: str) -> None:
+        """Rename the session with the given ID."""
+        self.session_storage.update(session_id, {"name": new_name})
+
     def update_session_timestamp(self, session_id: str) -> None:
         """Update the session with the given ID."""
         timestamp = datetime.now(UTC).isoformat()
@@ -64,3 +70,11 @@ class SessionManager:
         sessions_for_api = [self.session_adapter.to_api(session) for session in sessions]
         sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
         return sorted_sessions
+
+    @staticmethod
+    def validate_session_ownership(target_user_id: str, current_user_id: str) -> None:
+        """Validate the ownership of the session."""
+        if target_user_id != current_user_id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session."
+            )

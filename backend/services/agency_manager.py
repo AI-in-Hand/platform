@@ -93,12 +93,12 @@ class AgencyManager:
 
     @staticmethod
     def validate_agency_ownership(
-        claiming_user_id: str | None, current_user_id: str, allow_template: bool = False
+        target_user_id: str | None, current_user_id: str, allow_template: bool = False
     ) -> None:
         """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
-        if not claiming_user_id and allow_template:
+        if not target_user_id and allow_template:
             return
-        if claiming_user_id != current_user_id:
+        if target_user_id != current_user_id:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
             )
