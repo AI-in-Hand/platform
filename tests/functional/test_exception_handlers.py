@@ -60,15 +60,23 @@ def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestor
 
     assert response.status_code == 400
     assert "message" in response.json()["data"]
+    assert response.json()["data"]["message"] == "Invalid request"
     assert "Validation Error" in caplog.text
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_request_validation_error(client):
-    response = client.put("/api/v1/agent", json={})
+    template_config = {
+        "id": "template_agency_id",
+        "name": "Test agency",
+        "shared_instructions": "Manifesto",
+        "flows": [{"sender": None, "receiver": None}],
+    }
+
+    response = client.put("/api/v1/agency", json=template_config)
     assert response.status_code == 422
     assert "message" in response.json()["data"]
-    assert "body, config: Field required" in response.json()["data"]["message"]
+    assert response.json()["data"]["message"] == "Sender agent is required"
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
