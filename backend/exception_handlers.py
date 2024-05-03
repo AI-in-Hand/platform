@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def pydantic_validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
     logger.warning(f"request: {request.url} exc: {exc}")
-    error_message = ", ".join([error["msg"] for error in exc.errors()])
+    error_message = exc.errors()[0]["msg"].split(", ")[-1] if exc.errors() else "Invalid request"
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
         content={"data": {"message": error_message}},
@@ -25,8 +25,7 @@ def pydantic_validation_error_handler(request: Request, exc: ValidationError) ->
 def request_validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     # Log the exception for debugging purposes
     logger.warning(f"request: {request.url} exc: {exc}")
-    error_message = ", ".join([f"{error['loc']}: {error['msg']}" for error in exc.errors()])
-    error_message = error_message.replace("(", "").replace(")", "").replace("'", "")
+    error_message = exc.errors()[0]["msg"].split(", ")[-1] if exc.errors() else "Invalid request"
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         content={"data": {"message": error_message}},
