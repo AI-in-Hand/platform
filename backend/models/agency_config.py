@@ -1,6 +1,16 @@
+import logging
+
 from pydantic import BaseModel, Field, conlist, field_validator
 
+from backend.exceptions import (
+    ValidationErrorEmptyFlows,
+    ValidationErrorMissingReceiver,
+    ValidationErrorMissingSender,
+    ValidationErrorSameSenderReceiver,
+)
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
+
+logger = logging.getLogger(__name__)
 
 
 class AgencyConfig(BaseModel):
@@ -25,7 +35,7 @@ class AgencyConfig(BaseModel):
     def validate_main_agent(cls, v, values):  # noqa: ARG003
         """Validate the main agent is not None"""
         if not v:
-            raise ValueError("Please add at least one agent")
+            raise ValidationErrorEmptyFlows
         return v
 
     @field_validator("agency_chart", mode="after")
@@ -38,11 +48,12 @@ class AgencyConfig(BaseModel):
         # Check if all elements are lists of unique strings
         for chart_row in v.values():
             if len(set(chart_row)) != len(chart_row):
-                raise ValueError("Chart row must be unique")
+                raise ValidationErrorSameSenderReceiver
 
         # Check if the main_agent is in the agency chart
         main_agent = values.data.get("main_agent")
-        if main_agent not in {agent for sublist in v.values() for agent in sublist}:
+        if main_agent and main_agent not in {agent for sublist in v.values() for agent in sublist}:
+            logger.error(f"Main agent {main_agent} not in the agency chart")
             raise ValueError("The main agent must be in the agency chart")
 
         return v
@@ -59,7 +70,7 @@ class CommunicationFlow(BaseModel):
     def validate_sender(cls, v, values):  # noqa: ARG003
         """Validate the sender agent is not None"""
         if not v:
-            raise ValueError("Sender agent is required")
+            raise ValidationErrorMissingSender
         return v
 
 
@@ -84,12 +95,12 @@ class AgencyConfigForAPI(BaseModel):
         - If the number of flows is greater than 1, each flow has a receiver
         """
         if len(v) == 0:
-            raise ValueError("Please add at least one agent")
+            raise ValidationErrorEmptyFlows
 
         for flow in v:
             if not flow.sender:
-                raise ValueError("Sender agent is required")
+                raise ValidationErrorMissingSender
             if len(v) > 1 and not flow.receiver:
-                raise ValueError("Receiver agent is required")
+                raise ValidationErrorMissingReceiver
 
         return v

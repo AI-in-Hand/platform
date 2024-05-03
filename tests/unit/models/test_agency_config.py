@@ -49,7 +49,7 @@ def test_duplicate_agents_in_agency_chart():
             main_agent="Agent1",
             agency_chart={"0": ["Agent1", "Agent1"]},
         )
-    assert "Chart row must be unique" in str(excinfo.value)
+    assert "Cannot set the same agent as both sender and receiver" in str(excinfo.value)
 
 
 def test_main_agent_not_set():
