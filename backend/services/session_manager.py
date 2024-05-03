@@ -21,7 +21,14 @@ class SessionManager:
         self.session_storage = session_storage
         self.user_variable_manager = user_variable_manager
         self.session_adapter = session_adapter
-        self.openai_client = get_openai_client(self.user_variable_manager)
+        self._openai_client = None
+
+    @property
+    def openai_client(self):
+        """Lazily get the OpenAI client."""
+        if self._openai_client is None:
+            self._openai_client = get_openai_client(self.user_variable_manager)
+        return self._openai_client
 
     def get_session(self, session_id: str) -> SessionConfig | None:
         """Return the session with the given ID."""

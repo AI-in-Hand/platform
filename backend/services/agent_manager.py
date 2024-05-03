@@ -28,7 +28,14 @@ class AgentManager:
         self.user_variable_manager = user_variable_manager
         self.storage = storage
         self.skill_storage = skill_storage
-        self.openai_client = get_openai_client(self.user_variable_manager)
+        self._openai_client = None
+
+    @property
+    def openai_client(self):
+        """Lazily get the OpenAI client."""
+        if self._openai_client is None:
+            self._openai_client = get_openai_client(self.user_variable_manager)
+        return self._openai_client
 
     async def get_agent_list(self, user_id: str, owned_by_user: bool = False) -> list[AgentFlowSpec]:
         user_configs = self.storage.load_by_user_id(user_id)

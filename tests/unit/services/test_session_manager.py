@@ -50,7 +50,7 @@ def test_update_session_timestamp(session_manager, session_storage_mock):
 
 
 def test_delete_session(session_manager, session_storage_mock, session_config_data):
-    session_manager.openai_client = MagicMock()
+    session_manager._openai_client = MagicMock()
     session_config_data["thread_ids"].update({"sender_id": {"receiver_id": "sender_receiver_thread_id"}})
     session_storage_mock.load_by_id = MagicMock(return_value=SessionConfig(**session_config_data))
 
@@ -61,7 +61,7 @@ def test_delete_session(session_manager, session_storage_mock, session_config_da
         MagicMock(thread_id="sender_receiver_thread_id", timeout=30.0),
         MagicMock(thread_id="test_session_id", timeout=30.0),
     ]
-    session_manager.openai_client.beta.threads.delete.assert_has_calls(*delete_calls)
+    session_manager._openai_client.beta.threads.delete.assert_has_calls(*delete_calls)
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
