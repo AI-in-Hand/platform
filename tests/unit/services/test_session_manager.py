@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -49,11 +49,13 @@ def test_update_session_timestamp(session_manager, session_storage_mock):
     session_storage_mock.update.assert_called_once_with("session_id", {"timestamp": mock.ANY})
 
 
-@patch("backend.services.session_manager.get_openai_client")
-def test_delete_session(mock_openai_client, session_manager, session_storage_mock):
+def test_delete_session(session_manager, session_storage_mock):
+    session_manager.openai_client = MagicMock()
+
     session_manager.delete_session("session_id")
+
     session_storage_mock.delete.assert_called_once_with("session_id")
-    mock_openai_client.return_value.beta.threads.delete.assert_called_once_with(thread_id="session_id", timeout=30.0)
+    session_manager.openai_client.beta.threads.delete.assert_called_once_with(thread_id="session_id", timeout=30.0)
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):

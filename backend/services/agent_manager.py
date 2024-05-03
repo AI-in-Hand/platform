@@ -28,6 +28,7 @@ class AgentManager:
         self.user_variable_manager = user_variable_manager
         self.storage = storage
         self.skill_storage = skill_storage
+        self.openai_client = get_openai_client(self.user_variable_manager)
 
     async def get_agent_list(self, user_id: str, owned_by_user: bool = False) -> list[AgentFlowSpec]:
         user_configs = self.storage.load_by_user_id(user_id)
@@ -74,8 +75,7 @@ class AgentManager:
         self._validate_agent_ownership(config, current_user_id)
         self.storage.delete(agent_id)
 
-        client = get_openai_client(self.user_variable_manager)
-        client.beta.assistants.delete(assistant_id=agent_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
+        self.openai_client.beta.assistants.delete(assistant_id=agent_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     async def _create_or_update_agent(self, config: AgentFlowSpec) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""

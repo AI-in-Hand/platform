@@ -21,6 +21,7 @@ class SessionManager:
         self.session_storage = session_storage
         self.user_variable_manager = user_variable_manager
         self.session_adapter = session_adapter
+        self.openai_client = get_openai_client(self.user_variable_manager)
 
     def get_session(self, session_id: str) -> SessionConfig | None:
         """Return the session with the given ID."""
@@ -57,8 +58,7 @@ class SessionManager:
 
     def _delete_session_via_api(self, session_id: str) -> None:
         """Delete the session with the given ID."""
-        client = get_openai_client(self.user_variable_manager)
-        client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
+        self.openai_client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""
