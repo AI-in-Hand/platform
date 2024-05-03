@@ -69,8 +69,8 @@ def test_create_session_agency_not_found(client, mock_firestore_client):
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_delete_session_success(client, mock_firestore_client):
-    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", {"id": "test_session_id"})
+def test_delete_session_success(client, mock_firestore_client, session_config_data):
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
     response = client.delete("/api/v1/session?id=test_session_id")
     assert response.status_code == 200

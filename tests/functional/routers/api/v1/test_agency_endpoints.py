@@ -222,7 +222,6 @@ def test_create_or_update_agency_missing_agent(client, agency_adapter, mock_fire
 def test_delete_agency_success(mock_openai_client, client, mock_firestore_client, session_config_data):
     db_agency = {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency", "main_agent": "sender_agent_id"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
-    session_config_data["thread_ids"] = {"main_thread": "test_session_id"}
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
     response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")

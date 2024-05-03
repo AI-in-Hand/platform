@@ -88,7 +88,7 @@ def test_post_message_success(client, mock_construct_agency, mock_firestore_clie
     assert response.status_code == 200
     # We will check for the actual message we set up to be sent
     assert response.json()["data"] == {"content": "Hello, world!"}
-    mock_construct_agency.assert_awaited_once_with(AgencyConfig(**agency_data), {})
+    mock_construct_agency.assert_awaited_once_with(AgencyConfig(**agency_data), {"main_thread": "test_session_id"})
 
 
 # Agency/session configuration not found

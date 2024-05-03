@@ -49,19 +49,22 @@ def test_update_session_timestamp(session_manager, session_storage_mock):
     session_storage_mock.update.assert_called_once_with("session_id", {"timestamp": mock.ANY})
 
 
-def test_delete_session(session_manager, session_storage_mock):
+def test_delete_session(session_manager, session_storage_mock, session_config_data):
     session_manager.openai_client = MagicMock()
+    session_storage_mock.load_by_id = MagicMock(return_value=SessionConfig(**session_config_data))
 
-    session_manager.delete_session("session_id")
+    session_manager.delete_session("test_session_id")
 
-    session_storage_mock.delete.assert_called_once_with("session_id")
-    session_manager.openai_client.beta.threads.delete.assert_called_once_with(thread_id="session_id", timeout=30.0)
+    session_storage_mock.delete.assert_called_once_with("test_session_id")
+    session_manager.openai_client.beta.threads.delete.assert_called_once_with(thread_id="test_session_id", timeout=30.0)
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
-    session_manager.load_by_agency_id = MagicMock(return_value=[MagicMock(id="session_id")])
+    session_storage_mock.load_by_agency_id = MagicMock(return_value=[MagicMock(id="session_id")])
+    session_manager.delete_session = MagicMock()
+
     session_manager.delete_sessions_by_agency_id("agency_id")
-    session_storage_mock.delete_session.assert_called_once_with("session_id")
+    session_manager.delete_session.assert_called_once_with("session_id")
 
 
 def test_get_sessions_for_user(session_manager, session_storage_mock):
