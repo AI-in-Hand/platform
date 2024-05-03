@@ -13,37 +13,31 @@ class UnsetVariableError(ValueError):
 class HandledValidationError(ValueError):
     """A base class for all custom validation errors that we handle in the dedicated exception handler."""
 
-    def __init__(self, message: str):
-        super().__init__(message)
+    message = "A validation error occurred"
+
+    def __init__(self):
+        super().__init__(self.message)
 
 
 class ValidationErrorEmptyFlows(HandledValidationError):
     """Exception raised when the flows list is empty."""
 
-    def __init__(self):
-        message = "Please add at least one agent"
-        super().__init__(message)
+    message = "Please add at least one agent"
 
 
 class ValidationErrorSameSenderReceiver(HandledValidationError):
     """Exception raised when the same agent is set as both sender and receiver."""
 
-    def __init__(self):
-        message = "Cannot set the same agent as both sender and receiver"
-        super().__init__(message)
+    message = "Cannot set the same agent as both sender and receiver"
 
 
 class ValidationErrorMissingSender(HandledValidationError):
     """Exception raised when the sender agent is not set."""
 
-    def __init__(self):
-        message = "Sender agent is required"
-        super().__init__(message)
+    message = "Sender agent is required"
 
 
 class ValidationErrorMissingReceiver(HandledValidationError):
     """Exception raised when the receiver agent is not set."""
 
-    def __init__(self):
-        message = "Receiver agent is required"
-        super().__init__(message)
+    message = "Receiver agent is required"
