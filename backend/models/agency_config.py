@@ -98,8 +98,6 @@ class AgencyConfigForAPI(BaseModel):
             raise ValidationErrorEmptyFlows
 
         for flow in v:
-            if not flow.sender:
-                raise ValidationErrorMissingSender
             if len(v) > 1 and not flow.receiver:
                 raise ValidationErrorMissingReceiver
 
