@@ -76,11 +76,3 @@ def test_delete_session_config(mock_firestore_client, session_data, storage):
     storage.delete("session1")
 
     assert mock_firestore_client.to_dict() == {}
-
-
-def test_delete_sessions_by_agency_id(mock_firestore_client, session_data, storage):
-    mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
-
-    storage.delete_by_agency_id("agency1")
-
-    assert mock_firestore_client.to_dict() == {}

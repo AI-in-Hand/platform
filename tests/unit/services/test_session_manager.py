@@ -57,8 +57,9 @@ def test_delete_session(mock_openai_client, session_manager, session_storage_moc
 
 
 def test_delete_sessions_by_agency_id(session_manager, session_storage_mock):
+    session_manager.load_by_agency_id = MagicMock(return_value=[MagicMock(id="session_id")])
     session_manager.delete_sessions_by_agency_id("agency_id")
-    session_storage_mock.delete_by_agency_id.assert_called_once_with("agency_id")
+    session_storage_mock.delete_session.assert_called_once_with("session_id")
 
 
 def test_get_sessions_for_user(session_manager, session_storage_mock):

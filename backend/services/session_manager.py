@@ -46,14 +46,25 @@ class SessionManager:
 
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
-        self.session_storage.delete(session_id)
+        session_config = self.get_session(session_id)
+        if session_config:
+            main_thread_id: str = session_config.thread_ids.pop("main_thread")  # type: ignore
+            self._delete_session_via_api(main_thread_id)
+            for receiver in session_config.thread_ids.values():
+                for thread_id in receiver.values():  # type: ignore
+                    self._delete_session_via_api(thread_id)
+            self.session_storage.delete(session_id)
 
+    def _delete_session_via_api(self, session_id: str) -> None:
+        """Delete the session with the given ID."""
         client = get_openai_client(self.user_variable_manager)
         client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""
-        self.session_storage.delete_by_agency_id(agency_id)
+        sessions = self.session_storage.load_by_agency_id(agency_id)
+        for session in sessions:
+            self.delete_session(session.id)
 
     def get_sessions_for_user(self, user_id: str) -> list[SessionConfigForAPI]:
         """Return a list of all sessions for the given user."""
