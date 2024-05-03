@@ -12,20 +12,24 @@ from backend.services.context_vars_manager import ContextEnvVarsManager
 
 
 @pytest.mark.asyncio
-async def test_no_authorization_header():
+async def test_no_authorization_header(mocker):
     request = Mock(headers={})
     call_next = AsyncMock(return_value=Response(status_code=200))
+    get_user_spy = mocker.spy(AuthService, "get_user")
 
     middleware = UserContextMiddleware(app=None)
     response = await middleware.dispatch(request, call_next)
 
     call_next.assert_called_once()
     assert response.status_code == 200
+    get_user_spy.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_invalid_token():
-    with patch.object(AuthService, "get_user", side_effect=HTTPException(status_code=HTTPStatus.UNAUTHORIZED)):
+    with patch.object(
+        AuthService, "get_user", side_effect=HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+    ) as mock_get_user:
         request = Mock(headers={"Authorization": "Bearer invalidtoken"})
         call_next = AsyncMock(return_value=Response())
 
@@ -34,6 +38,7 @@ async def test_invalid_token():
 
         call_next.assert_called_once()
         assert response.status_code == 200
+        mock_get_user.assert_called_once_with("invalidtoken")
 
 
 @pytest.mark.asyncio
@@ -42,7 +47,7 @@ async def test_valid_token(caplog):
 
     user_mock = User(id="123", email="test_email")
     with (
-        patch.object(AuthService, "get_user", return_value=user_mock),
+        patch.object(AuthService, "get_user", return_value=user_mock) as mock_get_user,
         patch.object(ContextEnvVarsManager, "set") as mock_set,
     ):
         request = Mock(headers={"Authorization": "Bearer validtoken"})
@@ -53,5 +58,6 @@ async def test_valid_token(caplog):
 
         call_next.assert_called_once()
         mock_set.assert_called_with("user_id", "123")
+        mock_get_user.assert_called_once_with("validtoken")
         assert "Current User ID set in context: 123" in caplog.text
         assert response.status_code == 200
