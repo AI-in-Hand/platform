@@ -36,8 +36,3 @@ class SessionConfigStorage:
     def delete(self, session_id: str) -> None:
         collection = self.db.collection(self.collection_name)
         collection.document(session_id).delete()
-
-    def delete_by_agency_id(self, agency_id: str) -> None:
-        sessions = self.load_by_agency_id(agency_id)
-        for session in sessions:
-            self.delete(session.id)

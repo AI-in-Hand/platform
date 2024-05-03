@@ -17,7 +17,6 @@ from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
-from backend.services.context_vars_manager import ContextEnvVarsManager
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +72,6 @@ async def create_or_update_agent(
     # Transform the API model to the internal model
     internal_config = adapter.to_model(config)
 
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
-
     await manager.handle_agent_creation_or_update(internal_config, current_user.id)
 
     configs = await manager.get_agent_list(current_user.id)
@@ -98,9 +94,6 @@ async def delete_agent(
             status_code=HTTPStatus.BAD_REQUEST,
             detail="Agent cannot be deleted as it is currently used in a team configuration",
         )
-
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
 
     await manager.delete_agent(id, current_user.id)
 

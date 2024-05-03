@@ -8,7 +8,7 @@ from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
 from tests.testing_utils import TEST_USER_ID, get_current_superuser_override, get_current_user_override
-from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID
+from tests.testing_utils.constants import TEST_AGENT_ID
 
 
 @pytest.mark.usefixtures("mock_setup_logging")
@@ -41,15 +41,8 @@ def client():
 
 
 @pytest.fixture
-def mock_session_storage(mock_firestore_client):
-    session_data = {
-        "id": "test_session_id",
-        "user_id": TEST_USER_ID,
-        "agency_id": TEST_AGENCY_ID,
-        "thread_ids": {},
-        "timestamp": "2021-01-01T00:00:00Z",
-    }
-    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_data)
+def mock_session_storage(mock_firestore_client, session_config_data):
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
 
 @pytest.fixture

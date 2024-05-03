@@ -5,6 +5,7 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
+from backend.dependencies.middleware import UserContextMiddleware
 from backend.exceptions import UnsetVariableError
 from backend.routers.api import api_router
 from backend.routers.websocket import websocket_router
@@ -22,10 +23,7 @@ from backend.exception_handlers import (  # noqa  # isort:skip
     unset_variable_error_handler,
 )
 
-from backend.routers.api.v1 import v1_router  # noqa  # isort:skip
-from backend.settings import settings  # noqa  # isort:skip
 from backend.utils import init_webserver_folders, init_firebase_app, patch_openai_client  # noqa  # isort:skip
-
 
 init_firebase_app()
 
@@ -57,6 +55,8 @@ api_app.add_exception_handler(HTTPException, http_exception_handler)
 api_app.add_exception_handler(OpenAIAuthenticationError, openai_authentication_error_handler)
 api_app.add_exception_handler(UnsetVariableError, unset_variable_error_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)
+
+app.add_middleware(UserContextMiddleware)
 
 ws_app = FastAPI(root_path="/ws")
 ws_app.include_router(websocket_router)
