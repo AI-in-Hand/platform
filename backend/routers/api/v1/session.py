@@ -11,7 +11,6 @@ from backend.models.auth import User
 from backend.models.request_models import RenameSessionRequest
 from backend.models.response_models import CreateSessionResponse, SessionListResponse
 from backend.services.agency_manager import AgencyManager
-from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
@@ -42,9 +41,6 @@ async def create_session(
     """Create a new session for the given agency and return a list of all sessions for the current user."""
     logger.info(f"Creating a new session for the agency: {agency_id}, and user: {current_user.id}")
 
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
-
     new_thread_ids: dict[str, Any] = {}
     agency, agency_config = await agency_manager.get_agency(
         agency_id, thread_ids=new_thread_ids, user_id=current_user.id
@@ -69,9 +65,6 @@ async def rename_session(
     """Rename the session with the given id and return a list of all sessions for the current user."""
     logger.info(f"Renaming session: {payload.id}, user: {current_user.id}")
 
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
-
     db_session = session_manager.get_session(payload.id)
     if not db_session:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
@@ -91,9 +84,6 @@ async def delete_session(
 ) -> SessionListResponse:
     """Delete the session with the given id and return a list of all sessions for the current user."""
     logger.info(f"Deleting session: {id}, user: {current_user.id}")
-
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
 
     session_manager.delete_session(id)
 

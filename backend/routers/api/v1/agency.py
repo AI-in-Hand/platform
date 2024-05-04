@@ -16,7 +16,6 @@ from backend.models.response_models import (
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.agency_manager import AgencyManager
-from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
@@ -70,9 +69,6 @@ async def create_or_update_agency(
     """Create or update an agency and return the list of agencies"""
     # Transform the API model to the internal model
     config = adapter.to_model(config)
-
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
 
     await manager.handle_agency_creation_or_update(config, current_user.id)
 

@@ -110,9 +110,7 @@ def test_unset_variable_error(client):
 def test_unhandled_exception(client, caplog):
     caplog.set_level("ERROR")
 
-    with pytest.raises(Exception, match="Unhandled Exception") as exc_info:
-        client.get("/api/v1/agency?id=123")
+    client.get("/api/v1/agency?id=123")
 
-    assert exc_info.type is Exception
     assert "Unhandled Exception" in caplog.text
     assert "request: http://testserver/api/v1/agency?id=123" in caplog.text

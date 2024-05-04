@@ -15,9 +15,9 @@ security = HTTPBearer()
 
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    authentication_manager: Annotated[AuthService, Depends(AuthService)],
+    auth_service: Annotated[AuthService, Depends(AuthService)],
 ) -> User:
-    return authentication_manager.get_user(credentials.credentials)
+    return auth_service.get_user(credentials.credentials)
 
 
 async def get_current_superuser(

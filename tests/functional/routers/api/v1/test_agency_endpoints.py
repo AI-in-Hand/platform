@@ -218,15 +218,18 @@ def test_create_or_update_agency_missing_agent(client, agency_adapter, mock_fire
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_session_storage")
-def test_delete_agency_success(client, mock_firestore_client):
+@patch("backend.services.session_manager.get_openai_client")
+def test_delete_agency_success(mock_openai_client, client, mock_firestore_client, session_config_data):
     db_agency = {"id": TEST_AGENCY_ID, "user_id": TEST_USER_ID, "name": "Test Agency", "main_agent": "sender_agent_id"}
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
 
     response = client.delete(f"/api/v1/agency?id={TEST_AGENCY_ID}")
     assert response.status_code == 200
     assert response.json() == {"status": True, "message": "Agency deleted", "data": []}
     assert mock_firestore_client.collection("agency_configs").to_dict() == {}
     assert mock_firestore_client.collection("session_configs").to_dict() == {}
+    mock_openai_client.return_value.beta.threads.delete.assert_called_with(thread_id="test_session_id", timeout=30.0)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

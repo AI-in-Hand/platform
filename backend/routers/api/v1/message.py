@@ -45,9 +45,6 @@ async def get_message_list(
             status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session"
         )
 
-    # Set the user_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
-
     # use OpenAI's Assistants API to get the messages by thread_id=session_id
     client = get_openai_client(user_variable_manager)
     messages = client.beta.threads.messages.list(thread_id=session_id, limit=limit, before=before, order="asc")
@@ -77,8 +74,7 @@ async def post_message(
     user_message = request.content
     session_id = request.session_id
 
-    # Set the user_id and agency_id in the context variables
-    ContextEnvVarsManager.set("user_id", current_user.id)
+    # Set the agency_id in the context variables
     ContextEnvVarsManager.set("agency_id", agency_id)
 
     logger.info(f"Received a message for agency_id: {agency_id}, session_id: {session_id}")

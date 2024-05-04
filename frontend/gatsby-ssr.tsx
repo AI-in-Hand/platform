@@ -7,10 +7,15 @@ const codeToRunOnClient = `(function() {
   } catch (e) {}
 })();`;
 
-export const onRenderBody = ({ setHeadComponents }) =>
+export const onRenderBody = ({ setHeadComponents, setPostBodyComponents }) => {
   setHeadComponents([
     <script
-      key="myscript"
+      key="darkmode-script"
       dangerouslySetInnerHTML={{ __html: codeToRunOnClient }}
     />,
   ]);
+
+  setPostBodyComponents([
+    <script key="chatbot-widget" src="/chatbot-widget.js" type="text/javascript" />,
+  ]);
+};

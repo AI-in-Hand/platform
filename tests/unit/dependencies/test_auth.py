@@ -32,7 +32,7 @@ def mock_verify_id_token():
 @pytest.mark.asyncio
 async def test_get_current_user_valid(mock_verify_id_token):
     user = await get_current_user(
-        HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid_token"), authentication_manager=AuthService()
+        HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid_token"), auth_service=AuthService()
     )
     assert user.id == user_data["uid"]
     assert not user.is_superuser
@@ -56,7 +56,7 @@ async def test_get_current_user_invalid(mock_verify_id_token, exception):
     with pytest.raises(HTTPException) as exc:
         await get_current_user(
             HTTPAuthorizationCredentials(scheme="Bearer", credentials="invalid_token"),
-            authentication_manager=AuthService(),
+            auth_service=AuthService(),
         )
         assert exc.value.status_code == 401
     mock_verify_id_token.assert_called_once_with("invalid_token", check_revoked=True)

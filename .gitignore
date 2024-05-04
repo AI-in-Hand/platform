@@ -165,8 +165,6 @@ settings.json
 
 .env
 
-*.log.jsonl
-
 # UI folder
 backend/ui/*
 backend/data/agency_data/*
