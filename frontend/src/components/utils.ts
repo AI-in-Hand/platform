@@ -2,7 +2,6 @@ import {
   IAgentConfig,
   IAgentFlowSpec,
   IFlowConfig,
-  IModelConfig,
   ISkill,
   IStatus,
 } from "./types";
