@@ -119,5 +119,5 @@ def truncate_oversized_chunk(chunk: str, max_tokens: int, delimiter: str) -> str
 
 
 def sanitize_id(input_string: str) -> str:
-    """Sanitize an ID to prevent injection attacks. Leave only alphanumeric characters."""
-    return "".join(char for char in input_string if char.isalnum())
+    """Sanitize an ID to prevent injection attacks. Leave only alphanumeric characters and "_"."""
+    return "".join(c for c in input_string if c.isalnum() or c == "_")
