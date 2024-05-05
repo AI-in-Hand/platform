@@ -12,6 +12,7 @@ from backend.models.request_models import RenameSessionRequest
 from backend.models.response_models import CreateSessionResponse, SessionListResponse
 from backend.services.agency_manager import AgencyManager
 from backend.services.session_manager import SessionManager
+from backend.utils import sanitize_id
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +64,15 @@ async def rename_session(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> SessionListResponse:
     """Rename the session with the given id and return a list of all sessions for the current user."""
-    logger.info(f"Renaming session: {payload.id}, user: {current_user.id}")
+    session_id = sanitize_id(payload.id)
+    logger.info(f"Renaming session: {session_id}, user: {current_user.id}")
 
-    db_session = session_manager.get_session(payload.id)
+    db_session = session_manager.get_session(session_id)
     if not db_session:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
 
     session_manager.validate_session_ownership(db_session.user_id, current_user.id)
-    session_manager.rename_session(payload.id, payload.name)
+    session_manager.rename_session(session_id, payload.name)
 
     sessions_for_api = session_manager.get_sessions_for_user(current_user.id)
     return SessionListResponse(message="Session renamed successfully", data=sessions_for_api)

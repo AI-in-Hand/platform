@@ -116,3 +116,8 @@ def truncate_oversized_chunk(chunk: str, max_tokens: int, delimiter: str) -> str
         chunk = tiktoken.get_encoding("gpt-4").decode(tokens)
         chunk += delimiter
     return chunk
+
+
+def sanitize_id(input_string: str) -> str:
+    """Sanitize an ID to prevent injection attacks. Leave only alphanumeric characters."""
+    return "".join(char for char in input_string if char.isalnum())
