@@ -29,7 +29,9 @@ class AgencyManager:
         """Get the list of agencies for the user. It will return the agencies for the user and the templates."""
         user_agencies = self.storage.load_by_user_id(user_id)
         template_agencies = self.storage.load_by_user_id(None)
-        return user_agencies + template_agencies
+        agencies = user_agencies + template_agencies
+        sorted_agencies = sorted(agencies, key=lambda x: x.timestamp, reverse=True)
+        return sorted_agencies
 
     async def get_agency(
         self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False

@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -12,4 +13,6 @@ class Message(BaseModel):
     session_id: str = Field(..., description="The identifier for the conversational thread.")
     role: Literal["user", "assistant"] = Field("user", description="The role of the sender of the message.")
     content: str = Field(..., description="The message to be sent to the agency.")
-    timestamp: str | None = Field(None, description="The timestamp when the message was created.")
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(UTC).isoformat(), description="The timestamp when the message was created."
+    )

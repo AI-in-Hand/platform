@@ -20,13 +20,22 @@ def test_get_agency_list_success(client, mock_firestore_client, agency_adapter):
         main_agent="Sender Agent",
         agents=["sender_agent_id", "receiver_agent_id"],
         agency_chart={"0": ["Sender Agent", "Receiver Agent"]},
+        timestamp="2024-05-05T00:14:57.487901+00:00",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency.model_dump())
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
+        "agent_configs",
+        "sender_agent_id",
+        {"id": "sender_agent_id", "config": {"name": "Sender Agent"}, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "receiver_agent_id", {"id": "receiver_agent_id", "config": {"name": "Receiver Agent"}}
+        "agent_configs",
+        "receiver_agent_id",
+        {
+            "id": "receiver_agent_id",
+            "config": {"name": "Receiver Agent"},
+            "timestamp": "2024-05-05T00:14:57.487901+00:00",
+        },
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
@@ -46,10 +55,13 @@ def test_get_agency_config(client, mock_firestore_client, agency_adapter):
         shared_instructions="Test Manifesto",
         main_agent="Sender Agent",
         agents=["sender_agent_id"],
+        timestamp="2024-05-05T00:14:57.487901+00:00",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
+        "agent_configs",
+        "sender_agent_id",
+        {"id": "sender_agent_id", "config": {"name": "Sender Agent"}, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
@@ -91,15 +103,18 @@ def test_create_agency_success(client, mock_agent_data_api, mock_agent_data_db, 
         "flows": [{"sender": mock_agent_data_api, "receiver": None}],
     }
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
+
     with patch(
         "backend.services.agency_manager.AgencyManager.handle_agency_creation_or_update", new_callable=AsyncMock
     ) as mock_create_or_update_agency:
         mock_create_or_update_agency.return_value = TEST_AGENCY_ID
         response = client.put("/api/v1/agency", json=template_config)
+
     assert response.status_code == 200
     assert isinstance(response.json()["data"], list)
-    model_template_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
-    mock_create_or_update_agency.assert_called_once_with(model_template_config, TEST_USER_ID)
+    expected_config = agency_adapter.to_model(AgencyConfigForAPI(**template_config))
+    expected_config.timestamp = mock.ANY
+    mock_create_or_update_agency.assert_called_once_with(expected_config, TEST_USER_ID)
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -113,13 +128,20 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent_data_ap
         "shared_instructions": "Original Manifesto",
         "agents": ["sender_agent_id"],
         "main_agent": "Sender Agent",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, initial_db_data)
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
     mock_firestore_client.setup_mock_data(
-        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+        "skill_configs",
+        "GenerateProposal",
+        {"title": "GenerateProposal", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
-    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_firestore_client.setup_mock_data(
+        "skill_configs",
+        "SearchWeb",
+        {"title": "SearchWeb", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
+    )
     new_data_payload = {
         "id": TEST_AGENCY_ID,
         "name": "Test agency",
@@ -127,7 +149,6 @@ def test_update_agency_success(client, mock_firestore_client, mock_agent_data_ap
         "shared_instructions": "Updated Manifesto",
         "flows": [{"sender": mock_agent_data_api, "receiver": None}],
         "user_id": TEST_USER_ID,
-        "timestamp": "2024-04-04T09:39:13.048457+00:00",
     }
     expected_data_from_api = new_data_payload.copy()
     expected_data_from_api["timestamp"] = mock.ANY
