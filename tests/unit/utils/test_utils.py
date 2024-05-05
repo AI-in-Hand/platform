@@ -1,9 +1,12 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from backend.utils import (
     chunk_input_with_token_limit,
     get_chat_completion,
     get_token_count,
+    sanitize_id,
     tokenize,
     truncate_oversized_chunk,
 )
@@ -48,3 +51,18 @@ def test_truncate_oversized_chunk(mock_get_encoding, mock_tokenize):
     mock_get_encoding.return_value.decode.return_value = "truncated"
     truncated = truncate_oversized_chunk("This is way too long.", 5, " ")
     assert truncated == "truncated "
+
+
+@pytest.mark.parametrize(
+    "input_string, expected_output",
+    [
+        ("abc123", "abc123"),
+        ("abc_123", "abc_123"),
+        ("abc-123", "abc123"),
+        ("abc\n123", "abc123"),
+        ("abc\r\n123", "abc123"),
+        ("abc!@#123", "abc123"),
+    ],
+)
+def test_sanitize_id(input_string, expected_output):
+    assert sanitize_id(input_string) == expected_output
