@@ -20,13 +20,22 @@ def test_get_agency_list_success(client, mock_firestore_client, agency_adapter):
         main_agent="Sender Agent",
         agents=["sender_agent_id", "receiver_agent_id"],
         agency_chart={"0": ["Sender Agent", "Receiver Agent"]},
+        timestamp="2024-05-05T00:14:57.487901+00:00",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency.model_dump())
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
+        "agent_configs",
+        "sender_agent_id",
+        {"id": "sender_agent_id", "config": {"name": "Sender Agent"}, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "receiver_agent_id", {"id": "receiver_agent_id", "config": {"name": "Receiver Agent"}}
+        "agent_configs",
+        "receiver_agent_id",
+        {
+            "id": "receiver_agent_id",
+            "config": {"name": "Receiver Agent"},
+            "timestamp": "2024-05-05T00:14:57.487901+00:00",
+        },
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
@@ -46,10 +55,13 @@ def test_get_agency_config(client, mock_firestore_client, agency_adapter):
         shared_instructions="Test Manifesto",
         main_agent="Sender Agent",
         agents=["sender_agent_id"],
+        timestamp="2024-05-05T00:14:57.487901+00:00",
     )
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, db_agency)
     mock_firestore_client.setup_mock_data(
-        "agent_configs", "sender_agent_id", {"id": "sender_agent_id", "config": {"name": "Sender Agent"}}
+        "agent_configs",
+        "sender_agent_id",
+        {"id": "sender_agent_id", "config": {"name": "Sender Agent"}, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
     expected_agency = agency_adapter.to_api(db_agency)
 
@@ -89,6 +101,7 @@ def test_create_agency_success(client, mock_agent_data_api, mock_agent_data_db, 
         "name": "Test agency",
         "shared_instructions": "Manifesto",
         "flows": [{"sender": mock_agent_data_api, "receiver": None}],
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
     with patch(

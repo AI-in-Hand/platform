@@ -38,7 +38,7 @@ async def test_get_agent_list(agent_manager, storage_mock):
 
     result = await agent_manager.get_agent_list(TEST_USER_ID)
 
-    assert result == user_configs + template_configs
+    assert result == template_configs + user_configs
     storage_mock.load_by_user_id.assert_any_call(TEST_USER_ID)
     storage_mock.load_by_user_id.assert_any_call(None)
 

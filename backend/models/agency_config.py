@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field, conlist, field_validator
 
@@ -28,7 +29,9 @@ class AgencyConfig(BaseModel):
         description="Dict representing the agency chart with agent names. "
         "Each item value is a pair of names: [sender, receiver]",
     )
-    timestamp: str | None = Field(None, description="Timestamp of the last update")
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(UTC).isoformat(), description="Timestamp of the last update"
+    )
 
     @field_validator("main_agent", mode="before", check_fields=True)
     @classmethod
@@ -84,7 +87,9 @@ class AgencyConfigForAPI(BaseModel):
     description: str = Field("", description="Description of the agency")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
     shared_instructions: str = Field("", description="Agency Manifesto")
-    timestamp: str | None = Field(None, description="Timestamp of the last update")
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(UTC).isoformat(), description="Timestamp of the last update"
+    )
 
     @field_validator("flows", mode="after")
     @classmethod

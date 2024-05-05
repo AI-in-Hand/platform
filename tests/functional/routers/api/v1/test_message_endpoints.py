@@ -62,7 +62,7 @@ def test_get_message_list_unauthorized(client, mock_firestore_client):
         "id": "test_session_id",
         "user_id": "other_user_id",
         "agency_id": TEST_AGENCY_ID,
-        "timestamp": "2021-01-01T00:00:00Z",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("session_configs", "test_session_id", test_session_config)
 
@@ -79,6 +79,7 @@ def test_post_message_success(client, mock_construct_agency, mock_firestore_clie
         "id": TEST_AGENCY_ID,
         "name": "Test Agency",
         "main_agent": "sender_agent_id",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
 
@@ -135,6 +136,7 @@ def test_post_message_processing_failure(client, mock_construct_agency, mock_fir
         "id": TEST_AGENCY_ID,
         "name": "Test Agency",
         "main_agent": "sender_agent_id",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_data)
     mock_firestore_client.setup_mock_data(
@@ -145,7 +147,7 @@ def test_post_message_processing_failure(client, mock_construct_agency, mock_fir
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
             "thread_ids": {},
-            "timestamp": "2021-01-01T00:00:00Z",
+            "timestamp": "2024-05-05T00:14:57.487901+00:00",
         },
     )
 
