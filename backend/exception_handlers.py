@@ -61,7 +61,7 @@ def unset_variable_error_handler(request: Request, exc: UnsetVariableError) -> J
 
 def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     # Log the exception for debugging purposes
-    logger.exception(f"request: {request.url} exc: {exc}")
+    logger.exception(f"request: {request.url} exc: {type(exc).__name__}: {exc}")
     return JSONResponse(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         content={"data": {"message": "Internal server error"}},

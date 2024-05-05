@@ -57,7 +57,7 @@ async def create_session(
     return CreateSessionResponse(data=sessions_for_api, session_id=session_id, message="Session created successfully")
 
 
-@session_router.post("/session")
+@session_router.post("/session/rename")
 async def rename_session(
     current_user: Annotated[User, Depends(get_current_user)],
     payload: RenameSessionRequest = Body(...),

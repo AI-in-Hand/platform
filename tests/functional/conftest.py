@@ -52,7 +52,7 @@ def agency_adapter():
 
 
 @pytest.fixture
-def mock_agent_data_api():
+def agent_config_data_api():
     return {
         "id": TEST_AGENT_ID,
         "type": "userproxy",
@@ -78,7 +78,7 @@ def mock_agent_data_api():
 
 
 @pytest.fixture
-def mock_agent_data_db(mock_agent_data_api):
-    db_config = mock_agent_data_api.copy()
+def agent_config_data_db(agent_config_data_api):
+    db_config = agent_config_data_api.copy()
     db_config["skills"] = ["GenerateProposal", "SearchWeb"]
     return db_config

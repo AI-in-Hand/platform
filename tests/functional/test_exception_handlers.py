@@ -41,7 +41,7 @@ def mock_agent_storage_to_raise_unhandled_exception():
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_agency_adapter_to_raise_pydantic_validation_error")
-def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestore_client, mock_agent_data_db):
+def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestore_client, agent_config_data_db):
     caplog.set_level(10)
 
     agency_data_db = {
@@ -53,7 +53,7 @@ def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestor
         "flows": [],
     }
     mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_db)
-    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", agent_config_data_db)
     agency_data_api = agency_adapter.to_api(AgencyConfig(**agency_data_db)).model_dump()
 
     response = client.put("/api/v1/agency", json=agency_data_api)

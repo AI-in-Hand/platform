@@ -1,20 +1,6 @@
-import pytest
-
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
-from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_USER_ID
-
-
-@pytest.fixture
-def agency_config_data():
-    return {
-        "id": TEST_AGENCY_ID,
-        "user_id": TEST_USER_ID,
-        "name": "Test Agency",
-        "main_agent": "agent1_name",
-        "agents": ["agent1_id"],
-        "timestamp": "2024-05-05T00:14:57.487901+00:00",
-    }
+from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID, TEST_USER_ID
 
 
 def test_load_agency_config_by_user_id(mock_firestore_client, agency_config_data):
@@ -42,8 +28,8 @@ def test_save_new_agency_config(mock_firestore_client):
     new_agency_data = {
         "user_id": TEST_USER_ID,
         "name": "New Test Agency",
-        "main_agent": "agent1_name",
-        "agents": ["agent1_id"],
+        "main_agent": "Sender Agent",
+        "agents": [TEST_AGENT_ID],
     }
     new_agency_config = AgencyConfig.model_validate(new_agency_data)
     mock_firestore_client.setup_mock_data("agency_configs", "new_test_agency_id", new_agency_data)
