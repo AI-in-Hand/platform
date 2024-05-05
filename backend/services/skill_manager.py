@@ -16,7 +16,9 @@ class SkillManager:
 
     def get_skill_list(self, current_user_id: str) -> list[SkillConfig]:
         """Get a list of configs for the skills owned by the current user and template (public) skills."""
-        return self.storage.load_by_user_id(current_user_id) + self.storage.load_by_user_id(None)
+        skills = self.storage.load_by_user_id(current_user_id) + self.storage.load_by_user_id(None)
+        sorted_skills = sorted(skills, key=lambda x: x.timestamp, reverse=True)
+        return sorted_skills
 
     def get_skill_config(self, id_: str) -> SkillConfig:
         """Get a skill configuration by ID."""

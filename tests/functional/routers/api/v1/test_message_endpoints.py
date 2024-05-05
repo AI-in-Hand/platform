@@ -34,7 +34,12 @@ def mock_construct_agency():
 
 @pytest.fixture
 def message_data():
-    return {"agency_id": TEST_AGENCY_ID, "session_id": "test_session_id", "content": "Hello, world!"}
+    return {
+        "agency_id": TEST_AGENCY_ID,
+        "session_id": "test_session_id",
+        "content": "Hello, world!",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
+    }
 
 
 # Successful retrieval of messages
