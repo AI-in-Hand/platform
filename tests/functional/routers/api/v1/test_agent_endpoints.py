@@ -17,9 +17,15 @@ def test_get_agent_list(mock_agent_data_api, mock_agent_data_db, client, mock_fi
     mock_firestore_client.setup_mock_data("agent_configs", TEST_AGENT_ID, mock_agent_data_db)
     mock_firestore_client.setup_mock_data("agent_configs", "agent2", mock_agent_data_db_template)
     mock_firestore_client.setup_mock_data(
-        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+        "skill_configs",
+        "GenerateProposal",
+        {"title": "GenerateProposal", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
-    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_firestore_client.setup_mock_data(
+        "skill_configs",
+        "SearchWeb",
+        {"title": "SearchWeb", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
+    )
 
     response = client.get("/api/v1/agent/list")
     assert response.status_code == 200
@@ -30,9 +36,15 @@ def test_get_agent_list(mock_agent_data_api, mock_agent_data_db, client, mock_fi
 def test_get_agent_list_owned_by_user(mock_agent_data_api, mock_agent_data_db, client, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agent_configs", TEST_AGENT_ID, mock_agent_data_db)
     mock_firestore_client.setup_mock_data(
-        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+        "skill_configs",
+        "GenerateProposal",
+        {"title": "GenerateProposal", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
-    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_firestore_client.setup_mock_data(
+        "skill_configs",
+        "SearchWeb",
+        {"title": "SearchWeb", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
+    )
 
     response = client.get("/api/v1/agent/list?owned_by_user=true")
     assert response.status_code == 200
@@ -43,9 +55,15 @@ def test_get_agent_list_owned_by_user(mock_agent_data_api, mock_agent_data_db, c
 def test_get_agent_config(client, mock_agent_data_api, mock_agent_data_db, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agent_configs", TEST_AGENT_ID, mock_agent_data_db)
     mock_firestore_client.setup_mock_data(
-        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+        "skill_configs",
+        "GenerateProposal",
+        {"title": "GenerateProposal", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
-    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_firestore_client.setup_mock_data(
+        "skill_configs",
+        "SearchWeb",
+        {"title": "SearchWeb", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
+    )
 
     response = client.get(f"/api/v1/agent?id={TEST_AGENT_ID}")
     assert response.status_code == 200
@@ -56,9 +74,15 @@ def test_get_agent_config(client, mock_agent_data_api, mock_agent_data_db, mock_
 def test_update_agent_success(client, mock_agent_data_api, mock_agent_data_db, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agent_configs", TEST_AGENT_ID, mock_agent_data_db)
     mock_firestore_client.setup_mock_data(
-        "skill_configs", "GenerateProposal", {"title": "GenerateProposal", "approved": True}
+        "skill_configs",
+        "GenerateProposal",
+        {"title": "GenerateProposal", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
     )
-    mock_firestore_client.setup_mock_data("skill_configs", "SearchWeb", {"title": "SearchWeb", "approved": True})
+    mock_firestore_client.setup_mock_data(
+        "skill_configs",
+        "SearchWeb",
+        {"title": "SearchWeb", "approved": True, "timestamp": "2024-05-05T00:14:57.487901+00:00"},
+    )
     expected_data = mock_agent_data_api.copy()
     expected_data["config"]["name"] = "Sender Agent (test_user_id)"
     expected_data["timestamp"] = mock.ANY

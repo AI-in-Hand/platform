@@ -13,7 +13,7 @@ def session_data():
         "user_id": TEST_USER_ID,
         "agency_id": "agency1",
         "thread_ids": {},
-        "timestamp": "2021-01-01T00:00:00Z",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
 
 
@@ -59,9 +59,9 @@ def test_load_session_config_by_agency_id(mock_firestore_client, session_data, s
 def test_update_session_config(mock_firestore_client, session_data, storage):
     mock_firestore_client.setup_mock_data("session_configs", "session1", session_data)
 
-    storage.update("session1", {"timestamp": "2021-01-02T00:00:00Z"})
+    storage.update("session1", {"timestamp": "2024-05-05T00:14:57.487901+00:00"})
 
-    assert mock_firestore_client.to_dict()["timestamp"] == "2021-01-02T00:00:00Z"
+    assert mock_firestore_client.to_dict()["timestamp"] == "2024-05-05T00:14:57.487901+00:00"
 
 
 def test_save_session_config(mock_firestore_client, session_data, storage):

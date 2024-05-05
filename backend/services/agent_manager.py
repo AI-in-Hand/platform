@@ -40,7 +40,9 @@ class AgentManager:
     async def get_agent_list(self, user_id: str, owned_by_user: bool = False) -> list[AgentFlowSpec]:
         user_configs = self.storage.load_by_user_id(user_id)
         template_configs = self.storage.load_by_user_id(None) if not owned_by_user else []
-        return user_configs + template_configs
+        agents = user_configs + template_configs
+        sorted_agents = sorted(agents, key=lambda x: x.timestamp, reverse=True)
+        return sorted_agents
 
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
         config = self.storage.load_by_id(agent_id)

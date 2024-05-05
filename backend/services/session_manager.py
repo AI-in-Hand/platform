@@ -32,6 +32,13 @@ class SessionManager:
             self._openai_client = get_openai_client(self.user_variable_manager)
         return self._openai_client
 
+    def get_sessions_for_user(self, user_id: str) -> list[SessionConfigForAPI]:
+        """Return a list of all sessions for the given user."""
+        sessions = self.session_storage.load_by_user_id(user_id)
+        sessions_for_api = [self.session_adapter.to_api(session) for session in sessions]
+        sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
+        return sorted_sessions
+
     def get_session(self, session_id: str) -> SessionConfig | None:
         """Return the session with the given ID."""
         return self.session_storage.load_by_id(session_id)
@@ -72,22 +79,15 @@ class SessionManager:
                     self._delete_session_via_api(thread_id)
             self.session_storage.delete(session_id)
 
-    def _delete_session_via_api(self, session_id: str) -> None:
-        """Delete the session with the given ID."""
-        self.openai_client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
-
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""
         sessions = self.session_storage.load_by_agency_id(agency_id)
         for session in sessions:
             self.delete_session(session.id)
 
-    def get_sessions_for_user(self, user_id: str) -> list[SessionConfigForAPI]:
-        """Return a list of all sessions for the given user."""
-        sessions = self.session_storage.load_by_user_id(user_id)
-        sessions_for_api = [self.session_adapter.to_api(session) for session in sessions]
-        sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
-        return sorted_sessions
+    def _delete_session_via_api(self, session_id: str) -> None:
+        """Delete the session with the given ID."""
+        self.openai_client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
 
     @staticmethod
     def validate_session_ownership(target_user_id: str, current_user_id: str) -> None:

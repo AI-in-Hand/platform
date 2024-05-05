@@ -14,6 +14,7 @@ def skill_data():
         "version": 1,
         "content": 'print("Hello, World!")',
         "approved": False,
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
 
 

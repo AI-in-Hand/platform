@@ -50,6 +50,7 @@ async def test_get_agency_construct_agency(agency_manager, mock_firestore_client
         "user_id": TEST_USER_ID,
         "main_agent": "agent1_name",
         "agents": ["agent1_id"],
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_dict)
     with patch.object(

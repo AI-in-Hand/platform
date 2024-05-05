@@ -70,5 +70,5 @@ def session_config_data():
         "name": "Test agency",
         "agency_id": TEST_AGENCY_ID,
         "thread_ids": {"main_thread": "test_session_id"},
-        "timestamp": "2021-10-01T00:00:00Z",
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
     }

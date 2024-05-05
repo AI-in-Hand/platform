@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -39,7 +38,6 @@ def test_create_session(agency_mock, session_manager, session_storage_mock):
         name="session_name",
         user_id="user_id",
         agency_id="agency_id",
-        timestamp=datetime.now(UTC).isoformat(),
     )
     expected_session_config.timestamp = mock.ANY
     session_storage_mock.save.assert_called_once_with(expected_session_config)

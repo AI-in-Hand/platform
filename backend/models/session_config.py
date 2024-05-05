@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from pydantic import BaseModel, Field
 
 from backend.models.agency_config import AgencyConfigForAPI
@@ -13,7 +15,10 @@ class SessionConfig(BaseModel):
     thread_ids: dict[str, str | dict[str, str]] = Field(
         default_factory=dict, description="Dict of thread IDs for each agent"
     )
-    timestamp: str = Field(..., description="The timestamp at which the session was created")
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now(UTC).isoformat(),
+        description="The timestamp at which the session was created",
+    )
 
 
 class SessionConfigForAPI(SessionConfig):
