@@ -11,12 +11,12 @@ def mock_websocket_handler():
         def __init__(self, *args, **kwargs):
             pass
 
-        async def handle_websocket_connection(self, websocket, user_id, agency_id, session_id):  # noqa: ARG002
+        async def handle_websocket_connection(self, websocket, client_id):  # noqa: ARG002
             await websocket.accept()
             try:
                 while True:
-                    data = await websocket.receive_text()
-                    await websocket.send_text(f"Echo: {data}")
+                    data = await websocket.receive_json()
+                    await websocket.send_json({"message": f"Echo: {data['message']}"})
             except WebSocketDisconnect:
                 await websocket.close()
 
@@ -27,8 +27,8 @@ def mock_websocket_handler():
 
 @pytest.mark.usefixtures("mock_websocket_handler")
 def test_websocket_connection(client):
-    with client.websocket_connect("/ws/user123/agency456/session789") as websocket:
-        websocket.send_text("Hello WebSocket")
-        data = websocket.receive_text()
+    with client.websocket_connect("/ws/client_id") as websocket:
+        websocket.send_json({"message": "Hello WebSocket"})
+        data = websocket.receive_json()
         websocket.close()
-        assert data == "Echo: Hello WebSocket"
+        assert data["message"] == "Echo: Hello WebSocket"
