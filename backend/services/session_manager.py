@@ -39,9 +39,12 @@ class SessionManager:
         sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
         return sorted_sessions
 
-    def get_session(self, session_id: str) -> SessionConfig | None:
+    def get_session(self, session_id: str) -> SessionConfig:
         """Return the session with the given ID."""
-        return self.session_storage.load_by_id(session_id)
+        session = self.session_storage.load_by_id(session_id)
+        if not session:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
+        return session
 
     def create_session(
         self, agency: Agency, name: str, agency_id: str, user_id: str, thread_ids: dict[str, Any]
@@ -71,13 +74,12 @@ class SessionManager:
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         session_config = self.get_session(session_id)
-        if session_config:
-            main_thread_id: str = session_config.thread_ids.pop("main_thread")  # type: ignore
-            self._delete_session_via_api(main_thread_id)
-            for receiver in session_config.thread_ids.values():
-                for thread_id in receiver.values():  # type: ignore
-                    self._delete_session_via_api(thread_id)
-            self.session_storage.delete(session_id)
+        main_thread_id: str = session_config.thread_ids.pop("main_thread")  # type: ignore
+        self._delete_session_via_api(main_thread_id)
+        for receiver in session_config.thread_ids.values():
+            for thread_id in receiver.values():  # type: ignore
+                self._delete_session_via_api(thread_id)
+        self.session_storage.delete(session_id)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""

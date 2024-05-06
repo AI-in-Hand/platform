@@ -68,9 +68,6 @@ async def rename_session(
     logger.info(f"Renaming session: {session_id}, user: {current_user.id}")
 
     db_session = session_manager.get_session(session_id)
-    if not db_session:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
-
     session_manager.validate_session_ownership(db_session.user_id, current_user.id)
     session_manager.rename_session(session_id, payload.name)
 
