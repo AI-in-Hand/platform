@@ -12,6 +12,7 @@ from backend.services.adapters.session_adapter import SessionAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
 from backend.services.auth_service import AuthService
+from backend.services.message_manager import MessageManager
 from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
@@ -100,10 +101,17 @@ def get_session_manager(
     )
 
 
+def get_message_manager(
+    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
+) -> MessageManager:
+    return MessageManager(user_variable_manager)
+
+
 def get_websocket_handler(
     connection_manager: WebSocketConnectionManager = Depends(WebSocketConnectionManager),
     auth_service: AuthService = Depends(AuthService),
-    session_manager: SessionManager = Depends(get_session_manager),
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    message_manager: MessageManager = Depends(get_message_manager),
+    session_manager: SessionManager = Depends(get_session_manager),
 ) -> WebSocketHandler:
-    return WebSocketHandler(connection_manager, auth_service, session_manager, agency_manager)
+    return WebSocketHandler(connection_manager, auth_service, agency_manager, message_manager, session_manager)

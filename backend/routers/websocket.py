@@ -21,7 +21,7 @@ async def websocket_session_endpoint(
 ) -> None:
     """
     WebSocket endpoint for maintaining conversation with a specific session.
-    Send messages to and from the userproxy of the given agency.
+    Send messages to and from the user proxy of the given agency.
 
     :param client_id: The client ID.
     :param websocket: The WebSocket connection.

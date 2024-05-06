@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
+from backend.models.message import Message
 from backend.models.session_config import SessionConfigForAPI
 from backend.models.skill_config import SkillConfig
 
@@ -70,12 +71,9 @@ class CreateSessionResponse(BaseResponse):
 # Message API
 
 
-class MessagePostData(BaseModel):
-    content: str = Field(..., description="The content of the message.")
-
-
 class MessagePostResponse(BaseResponse):
-    data: MessagePostData = Field(..., description="The data to be returned.")
+    data: list[Message] = Field(..., description="The list of messages.")
+    response: str = Field(..., description="The final agent response.")
 
 
 # =================================================================================================

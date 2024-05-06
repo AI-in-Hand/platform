@@ -12,6 +12,7 @@ from backend.models.session_config import SessionConfig
 from backend.services.agency_manager import AgencyManager
 from backend.services.auth_service import AuthService
 from backend.services.context_vars_manager import ContextEnvVarsManager
+from backend.services.message_manager import MessageManager
 from backend.services.session_manager import SessionManager
 from backend.services.websocket.utils import get_next_response
 from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
@@ -24,13 +25,15 @@ class WebSocketHandler:
         self,
         connection_manager: WebSocketConnectionManager,
         auth_service: AuthService,
-        session_manager: SessionManager,
         agency_manager: AgencyManager,
+        message_manager: MessageManager,
+        session_manager: SessionManager,
     ):
         self.connection_manager = connection_manager
         self.auth_service = auth_service
-        self.session_manager = session_manager
         self.agency_manager = agency_manager
+        self.message_manager = message_manager
+        self.session_manager = session_manager
 
     async def handle_websocket_connection(
         self,
@@ -120,8 +123,6 @@ class WebSocketHandler:
         :return: The session config and agency instances.
         """
         session_config = self.session_manager.get_session(session_id)
-        if not session_config:
-            return session_config, None
         agency, _ = await self.agency_manager.get_agency(agency_id, session_config.thread_ids, user_id)
         return session_config, agency
 
@@ -221,8 +222,14 @@ class WebSocketHandler:
             ):
                 pass
 
+            all_messages = self.message_manager.get_messages(session_id)
+            response = {
+                "status": True,
+                "message": "Message processed successfully",
+                "data": all_messages,
+            }
             await self.connection_manager.send_message(
-                {"type": "agent_response", "data": {"status": "success", "message": "Response generated"}},
+                {"type": "agent_response", "data": response, "connection_id": client_id},
                 client_id,
             )
         else:
@@ -236,7 +243,7 @@ class WebSocketHandler:
         """
         Process a single message response and send it to the websocket.
 
-        :param get_next_response: A function to get the next response.
+        :param get_next_response_func: A function to get the next response.
         :param client_id: The client ID.
         :param loop: The event loop.
 

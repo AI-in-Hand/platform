@@ -106,7 +106,7 @@ const ChatBox = ({
         text: message.content,
         sender: message.role === "user" ? "user" : "bot",
         metadata: meta,
-        msg_id: message.msg_id,
+        id: message.id,
       };
       return msg;
     });
@@ -393,7 +393,7 @@ const ChatBox = ({
     const userMessage: IChatMessage = {
       text: query,
       sender: "user",
-      msg_id: guid(),
+      id: guid(),
     };
     messageHolder.push(userMessage);
     setMessages(messageHolder);
@@ -401,7 +401,7 @@ const ChatBox = ({
     const messagePayload: IMessage = {
       role: "user",
       content: query,
-      msg_id: userMessage.msg_id,
+      id: userMessage.id,
       session_id: session?.id || "",
     };
 

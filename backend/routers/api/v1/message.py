@@ -1,21 +1,19 @@
 import asyncio
 import logging
-from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
-from backend.dependencies.dependencies import get_agency_manager, get_session_manager, get_user_variable_manager
+from backend.dependencies.dependencies import get_agency_manager, get_message_manager, get_session_manager
 from backend.models.auth import User
 from backend.models.message import Message
-from backend.models.response_models import MessagePostData, MessagePostResponse
+from backend.models.response_models import MessagePostResponse
 from backend.services.agency_manager import AgencyManager
 from backend.services.context_vars_manager import ContextEnvVarsManager
-from backend.services.oai_client import get_openai_client
+from backend.services.message_manager import MessageManager
 from backend.services.session_manager import SessionManager
-from backend.services.user_variable_manager import UserVariableManager
 
 logger = logging.getLogger(__name__)
 
@@ -31,29 +29,16 @@ async def get_message_list(
     session_id: str,
     limit: int = 20,
     before: str | None = None,
+    message_manager: MessageManager = Depends(get_message_manager),
     session_manager: SessionManager = Depends(get_session_manager),
-    user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
 ) -> list[Message]:
     """Get the list of messages for the given session_id."""
     # check if the current_user has permissions to send a message to the agency
     session_config = session_manager.get_session(session_id)
     session_manager.validate_session_ownership(session_config.user_id, current_user.id)
 
-    # use OpenAI's Assistants API to get the messages by thread_id=session_id
-    client = get_openai_client(user_variable_manager)
-    messages = client.beta.threads.messages.list(thread_id=session_id, limit=limit, before=before, order="asc")
-    messages_output = [
-        Message(
-            id=message.id,
-            content=message.content[0].text.value if message.content and message.content[0].text else "[No content]",
-            role=message.role,
-            timestamp=datetime.fromtimestamp(message.created_at, tz=UTC).isoformat(),
-            session_id=session_id,
-            agency_id=session_config.agency_id,
-        )
-        for message in messages
-    ]
-    return messages_output
+    messages = message_manager.get_messages(session_id, limit=limit, before=before)
+    return messages
 
 
 @message_router.post("/message")
@@ -61,6 +46,7 @@ async def post_message(
     current_user: Annotated[User, Depends(get_current_user)],
     request: Message,
     agency_manager: AgencyManager = Depends(get_agency_manager),
+    message_manager: MessageManager = Depends(get_message_manager),
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> MessagePostResponse:
     """Send a message to the User Proxy (the main agent) for the given agency_id and session_id."""
@@ -92,4 +78,7 @@ async def post_message(
     # update the session timestamp
     session_manager.update_session_timestamp(session_id)
 
-    return MessagePostResponse(data=MessagePostData(content=response))
+    # get the updated list of messages for the session
+    messages = message_manager.get_messages(session_id, limit=20)
+
+    return MessagePostResponse(data=messages, response=response)
