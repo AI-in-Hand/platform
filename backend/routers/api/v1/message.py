@@ -1,12 +1,12 @@
 import asyncio
 import logging
-from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_message_manager, get_session_manager
+from backend.exceptions import NotFoundError
 from backend.models.auth import User
 from backend.models.message import Message
 from backend.models.response_models import MessagePostResponse
@@ -65,7 +65,7 @@ async def post_message(
         agency_id, thread_ids=session_config.thread_ids, user_id=current_user.id
     )
     if not agency:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        raise NotFoundError("Agency", agency_id)
 
     try:
         response = await asyncio.to_thread(

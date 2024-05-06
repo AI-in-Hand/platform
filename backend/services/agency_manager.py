@@ -6,6 +6,7 @@ from typing import Any
 from agency_swarm import Agency, Agent
 from fastapi import HTTPException
 
+from backend.exceptions import NotFoundError
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.agent_manager import AgentManager
@@ -67,7 +68,7 @@ class AgencyManager:
         if config.id:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+                raise NotFoundError("Agency", config.id)
             self.validate_agency_ownership(config_db.user_id, current_user_id)
         self._validate_agent_ownership(config.agents, current_user_id)
 

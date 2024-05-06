@@ -75,7 +75,7 @@ def test_get_agency_config_not_found(client):
     # Simulate non-existent agency by not setting up any data for it
     response = client.get("/api/v1/agency?id=non_existent_agency")
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Agency not found"}}
+    assert response.json() == {"data": {"message": "Agency not found: non_existent_agency"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -261,7 +261,7 @@ def test_delete_agency_success(mock_openai_client, client, mock_firestore_client
 def test_delete_agency_not_found(client):
     response = client.delete("/api/v1/agency?id=non_existent_agency")
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Agency not found"}}
+    assert response.json() == {"data": {"message": "Agency not found: non_existent_agency"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

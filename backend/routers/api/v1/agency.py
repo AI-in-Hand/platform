@@ -7,6 +7,7 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_adapter, get_agency_manager, get_session_manager
+from backend.exceptions import NotFoundError
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
@@ -51,7 +52,7 @@ async def get_agency_config(
     """
     agency_config = storage.load_by_id(id)
     if not agency_config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        raise NotFoundError("Agency", id)
     manager.validate_agency_ownership(agency_config.user_id, current_user.id, allow_template=True)
 
     # Transform the internal model to the API model
@@ -89,7 +90,7 @@ async def delete_agency(
     """Delete an agency"""
     db_config = storage.load_by_id(id)
     if not db_config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        raise NotFoundError("Agency", id)
     if db_config.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
 

@@ -71,7 +71,7 @@ def test_create_session_agency_not_found(client, mock_firestore_client):
     with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=(None, None))) as mock_get_agency:
         response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
-        assert response.json() == {"data": {"message": "Agency not found"}}
+        assert response.json() == {"data": {"message": "Agency not found: test_session_id"}}
         assert mock_firestore_client.collection("session_configs").to_dict() == {}
         mock_get_agency.assert_awaited_once_with("test_session_id", thread_ids={}, user_id=TEST_USER_ID)
 
@@ -105,7 +105,7 @@ def test_rename_session_success(
 def test_rename_session_not_found(client, mock_firestore_client):
     response = client.post("/api/v1/session/rename", json={"id": "test_session_id", "name": "New session name"})
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Session not found"}}
+    assert response.json() == {"data": {"message": "Session not found: test_session_id"}}
     assert mock_firestore_client.collection("session_configs").to_dict() == {}
 
 

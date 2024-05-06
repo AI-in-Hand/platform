@@ -7,6 +7,7 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_agent_adapter, get_agent_manager
+from backend.exceptions import NotFoundError
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
@@ -53,7 +54,7 @@ async def get_agent_config(
     """
     config = storage.load_by_id(id)
     if not config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+        raise NotFoundError("Agent", id)
     # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")

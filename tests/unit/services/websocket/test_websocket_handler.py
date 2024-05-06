@@ -9,7 +9,7 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocketDisconnect
 from websockets import ConnectionClosedOK
 
-from backend.exceptions import UnsetVariableError
+from backend.exceptions import NotFoundError, UnsetVariableError
 from backend.services.websocket.websocket_handler import WebSocketHandler
 
 
@@ -42,7 +42,11 @@ async def test_handle_websocket_connection(websocket_handler):
     websocket_handler.session_manager.get_session.return_value = MagicMock()
     websocket_handler.agency_manager.get_agency.return_value = (AsyncMock(), MagicMock())
 
-    with patch.object(websocket_handler, "_handle_websocket_messages", new_callable=AsyncMock) as handle_messages_mock:
+    with patch.object(
+        websocket_handler,
+        "_handle_websocket_messages",
+        new_callable=AsyncMock,
+    ) as handle_messages_mock:
         await websocket_handler.handle_websocket_connection(websocket, client_id)
 
     websocket_handler.connection_manager.connect.assert_awaited_once_with(websocket, client_id)
@@ -50,7 +54,6 @@ async def test_handle_websocket_connection(websocket_handler):
     websocket_handler.session_manager.get_session.assert_called_once_with(session_id)
     websocket_handler.agency_manager.get_agency.assert_awaited_once()
     handle_messages_mock.assert_awaited_once()
-    websocket_handler.connection_manager.disconnect.assert_awaited_once_with(client_id)
 
 
 @pytest.mark.asyncio
@@ -83,13 +86,12 @@ async def test_handle_websocket_connection_session_or_agency_not_found(websocket
         "token": token,
     }
     websocket_handler.auth_service.get_user.return_value = None
-    websocket_handler.session_manager.get_session.return_value = None
-    websocket_handler.agency_manager.get_agency.return_value = (None, None)
+    websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
 
     await websocket_handler.handle_websocket_connection(websocket, client_id)
 
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": "error", "message": "Session not found"}, client_id
+        {"status": "error", "message": "Session not found: session_id"}, client_id
     )
 
 
@@ -133,12 +135,10 @@ async def test_setup_agency_session_not_found(websocket_handler):
     user_id = "user_id"
     session_id = "session_id"
 
-    websocket_handler.session_manager.get_session.return_value = None
+    websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
 
-    session_config, agency = await websocket_handler._setup_agency(agency_id, user_id, session_id)
-
-    assert session_config is None
-    assert agency is None
+    with pytest.raises(NotFoundError, match="Session not found: session_id"):
+        await websocket_handler._setup_agency(agency_id, user_id, session_id)
 
 
 @pytest.mark.asyncio

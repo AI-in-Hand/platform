@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from openai import AuthenticationError as OpenAIAuthenticationError
 from pydantic import ValidationError
 
-from backend.exceptions import UnsetVariableError
+from backend.exceptions import NotFoundError, UnsetVariableError
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,15 @@ def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse
     return JSONResponse(
         status_code=exc.status_code,
         content={"data": {"message": exc.detail}},
+    )
+
+
+def not_found_error_handler(request: Request, exc: NotFoundError) -> JSONResponse:
+    """Handle errors when a resource is not found"""
+    logger.warning(f"request: {request.url} exc: {exc}")
+    return JSONResponse(
+        status_code=HTTPStatus.NOT_FOUND,
+        content={"data": {"message": str(exc)}},
     )
 
 

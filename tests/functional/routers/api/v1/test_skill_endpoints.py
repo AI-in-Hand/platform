@@ -53,7 +53,7 @@ def test_get_skill_config_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.get(f"/api/v1/skill?id={skill_id}")
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Skill not found"}}
+    assert response.json() == {"data": {"message": "Skill not found: nonexistent_skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -83,7 +83,7 @@ def test_delete_skill_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.delete(f"/api/v1/skill?id={skill_id}")
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Skill not found"}}
+    assert response.json() == {"data": {"message": "Skill not found: nonexistent_skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_superuser")
@@ -138,7 +138,7 @@ def test_update_skill_config_not_found(skill_config_data, client, mock_firestore
     skill_config_data["id"] = "nonexistent_skill"
     response = client.put("/api/v1/skill", json=skill_config_data)
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Skill not found"}}
+    assert response.json() == {"data": {"message": "Skill not found: nonexistent_skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
@@ -157,7 +157,7 @@ def test_execute_skill_not_found(client):
     skill_id = "nonexistent_skill"
     response = client.post("/api/v1/skill/execute", json={"id": skill_id, "user_prompt": "test prompt"})
     assert response.status_code == 404
-    assert response.json() == {"data": {"message": "Skill not found"}}
+    assert response.json() == {"data": {"message": "Skill not found: nonexistent_skill"}}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

@@ -1,3 +1,4 @@
+from backend.exceptions import NotFoundError
 from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
@@ -19,7 +20,7 @@ class SessionAdapter:
         """
         agency_config = self.agency_config_storage.load_by_id(session_config.agency_id)
         if agency_config is None:
-            raise ValueError(f"Agency with id {session_config.agency_id} not found")
+            raise NotFoundError("Agency", session_config.agency_id)
 
         agency_config_for_api = self.agency_adapter.to_api(agency_config)
 

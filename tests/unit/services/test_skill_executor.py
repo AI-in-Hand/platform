@@ -18,9 +18,7 @@ def test_get_skill_class_not_found():
     service = SkillExecutor()
     with pytest.raises(Exception) as exc_info:
         service._get_skill_class(skill_name)
-    assert "Skill NonExistingSkill not found" in str(
-        exc_info.value
-    ), "The function did not raise the expected exception"
+    assert "Skill not found: NonExistingSkill" in str(exc_info.value)
 
 
 def test_get_skill_arguments():

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from backend.dependencies.auth import get_current_superuser, get_current_user
 from backend.dependencies.dependencies import get_skill_manager
+from backend.exceptions import NotFoundError
 from backend.models.auth import User
 from backend.models.request_models import SkillExecutePostRequest
 from backend.models.response_models import (
@@ -91,7 +92,7 @@ async def approve_skill(
     NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
     config = storage.load_by_id(id)
     if not config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
+        raise NotFoundError("Skill", id)
 
     config.approved = True
     storage.save(config)

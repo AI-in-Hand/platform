@@ -6,6 +6,7 @@ from agency_swarm import Agency
 from fastapi import HTTPException
 
 from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
+from backend.exceptions import NotFoundError
 from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.adapters.session_adapter import SessionAdapter
@@ -43,7 +44,7 @@ class SessionManager:
         """Return the session with the given ID."""
         session = self.session_storage.load_by_id(session_id)
         if not session:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
+            raise NotFoundError("Session", session_id)
         return session
 
     def create_session(
@@ -96,5 +97,5 @@ class SessionManager:
         """Validate the ownership of the session."""
         if target_user_id != current_user_id:
             raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session."
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session"
             )

@@ -80,11 +80,23 @@ def test_request_validation_error(client):
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_http_exception(client):
+def test_http_exception(client, mock_firestore_client, agent_config_data_db):
+    agent_config_data_db["user_id"] = "another_user_id"
+    mock_firestore_client.setup_mock_data("agent_configs", "123", agent_config_data_db)
+
+    response = client.get("/api/v1/agent?id=123")
+
+    assert response.status_code == 403
+    assert "message" in response.json()["data"]
+    assert response.json()["data"]["message"] == "You don't have permissions to access this agent"
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_not_found_error(client):
     response = client.get("/api/v1/agent?id=123")
     assert response.status_code == 404
     assert "message" in response.json()["data"]
-    assert "Agent not found" in response.json()["data"]["message"]
+    assert "Agent not found: 123" in response.json()["data"]["message"]
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_agent_storage_to_raise_openai_authentication_error")
