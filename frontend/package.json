@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@ant-design/charts": "^2.0.3",
-    "@headlessui/react": "^1.7.16",
+    "@headlessui/react": "^2.0.0",
     "@heroicons/react": "^2.0.18",
     "@mdx-js/mdx": "^3.0.1",
     "@mdx-js/react": "^2.3.0",
