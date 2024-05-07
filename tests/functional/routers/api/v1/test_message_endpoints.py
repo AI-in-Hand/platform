@@ -173,12 +173,12 @@ def test_post_message_processing_failure(client, mock_construct_agency, mock_fir
         },
     )
 
-    mock_construct_agency.return_value.get_completion.side_effect = Exception("Something went wrong")
+    mock_construct_agency.return_value.get_completion.side_effect = Exception
 
     # Sending a message
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 500
-    assert response.json()["data"]["message"] == "Something went wrong"
+    assert response.json()["data"]["message"] == "Something went wrong. We are investigating the problem."
 
     mock_construct_agency.assert_called_once_with(AgencyConfig(**agency_data), {})

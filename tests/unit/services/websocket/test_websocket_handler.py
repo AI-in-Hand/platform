@@ -264,7 +264,12 @@ async def test_process_messages_exception(websocket_handler):
     assert result is True
     process_single_message_mock.assert_awaited_once_with(websocket, client_id, agency_id, agency, session_id, user_id)
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": "error", "message": "Something went wrong. Please try again."}, client_id
+        {
+            "status": "error",
+            "message": "Something went wrong. We are investigating the problem. "
+            "Please try again or report the problem to our chatbot widget.",
+        },
+        client_id,
     )
 
 

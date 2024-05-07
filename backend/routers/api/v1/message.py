@@ -73,7 +73,7 @@ async def post_message(
         )
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
-        raise HTTPException(status_code=500, detail="Something went wrong") from e
+        raise HTTPException(status_code=500, detail="Something went wrong. We are investigating the problem.") from e
 
     # update the session timestamp
     session_manager.update_session_timestamp(session_id)

@@ -49,6 +49,8 @@ class WebSocketHandler:
         await self.connection_manager.connect(websocket, client_id)
         logger.info(f"WebSocket connected for client_id: {client_id}")
 
+        agency_id = None
+        session_id = None
         try:
             message = await websocket.receive_json()
             user_id = message.get("user_id")
@@ -90,9 +92,17 @@ class WebSocketHandler:
         except NotFoundError as exception:
             await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
         except Exception as exception:
-            logger.exception("Exception while processing message: " f"client_id: {client_id}, error: {str(exception)}")
+            logger.exception(
+                "Exception while processing message: "
+                f"agency_id: {agency_id}, session_id: {session_id}, client_id: {client_id}, error: {str(exception)}"
+            )
             await self.connection_manager.send_message(
-                {"status": "error", "message": "Something went wrong. Please try again."}, client_id
+                {
+                    "status": "error",
+                    "message": "Something went wrong. We are investigating the problem. "
+                    "Please try again or report the problem to our chatbot widget.",
+                },
+                client_id,
             )
 
     async def _authenticate(self, client_id: str, user_id: str, token: str) -> None:
@@ -173,22 +183,12 @@ class WebSocketHandler:
         """
         try:
             await self._process_single_message(websocket, client_id, agency_id, agency, session_id, user_id)
-        except (WebSocketDisconnect, ConnectionClosedOK):
-            return False
         except UnsetVariableError as exception:
             await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
             return False
         except OpenAIAuthenticationError as exception:
             await self.connection_manager.send_message({"status": "error", "message": exception.message}, client_id)
             return False
-        except Exception as exception:
-            logger.exception(
-                "Exception while processing message: "
-                f"agency_id: {agency_id}, session_id: {session_id}, error: {str(exception)}"
-            )
-            await self.connection_manager.send_message(
-                {"status": "error", "message": "Something went wrong. Please try again."}, client_id
-            )
         return True
 
     async def _process_single_message(
