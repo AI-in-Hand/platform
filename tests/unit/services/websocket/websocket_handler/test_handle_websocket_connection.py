@@ -24,7 +24,7 @@ async def test_handle_websocket_connection(websocket_handler):
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.return_value = MagicMock()
@@ -71,7 +71,7 @@ async def test_handle_websocket_connection_session_not_found(websocket_handler):
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
@@ -96,7 +96,7 @@ async def test_handle_websocket_connection_agency_not_found(websocket_handler):
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.return_value = MagicMock()
@@ -147,7 +147,7 @@ async def test_handle_websocket_connection_unset_variable_error(websocket_handle
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = UnsetVariableError("Variable XXX not set")
 
@@ -174,7 +174,7 @@ async def test_handle_websocket_connection_openai_authentication_error(websocket
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = OpenAIAuthenticationError(
         expected_error_message, response=response, body={}
@@ -201,7 +201,7 @@ async def test_handle_websocket_connection_not_found_error(websocket_handler):
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
@@ -226,7 +226,7 @@ async def test_handle_websocket_connection_exception(websocket_handler):
         "user_id": user_id,
         "agency_id": agency_id,
         "session_id": session_id,
-        "token": token,
+        "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = Exception("Some exception")
 

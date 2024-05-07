@@ -55,24 +55,22 @@ class WebSocketHandler:
         try:
             message = await websocket.receive_json()
             user_id = message.get("user_id")
-            agency_id = message.get("agency_id")
             session_id = message.get("session_id")
-            token = message.get("token")
+            token = message.get("access_token")
 
-            if not user_id or not agency_id or not session_id or not token:
+            if not user_id or not session_id or not token:
                 await self.connection_manager.send_message(
                     {"status": "error", "message": "Missing required fields"}, client_id
                 )
                 return
 
             logger.info(
-                f"WebSocket connected for client_id: {client_id}, agency_id: {agency_id}, "
-                f"user_id: {user_id}, session_id: {session_id}"
+                f"WebSocket connected for client_id: {client_id}, " f"user_id: {user_id}, session_id: {session_id}"
             )
 
             await self._authenticate(client_id, user_id, token)
 
-            session, agency = await self._setup_agency(agency_id, user_id, session_id)
+            session, agency = await self._setup_agency(user_id, session_id)
 
             if not session or not agency:
                 await self.connection_manager.send_message(
@@ -81,7 +79,7 @@ class WebSocketHandler:
                 )
                 return
 
-            await self._handle_websocket_messages(websocket, client_id, agency_id, agency, session_id, user_id)
+            await self._handle_websocket_messages(websocket, client_id, agency, session_id)
 
         except (WebSocketDisconnect, ConnectionClosedOK):
             await self.connection_manager.disconnect(client_id)
@@ -119,67 +117,58 @@ class WebSocketHandler:
             raise WebSocketDisconnect from None
         ContextEnvVarsManager.set("user_id", user_id)
 
-    async def _setup_agency(
-        self, agency_id: str, user_id: str, session_id: str
-    ) -> tuple[SessionConfig | None, Agency | None]:
+    async def _setup_agency(self, user_id: str, session_id: str) -> tuple[SessionConfig | None, Agency | None]:
         """
         Set up the agency and thread IDs for the WebSocket connection.
 
-        :param agency_id: The agency ID.
         :param user_id: The user ID.
         :param session_id: The session ID.
 
         :return: The session config and agency instances.
         """
-        session_config = self.session_manager.get_session(session_id)
-        agency, _ = await self.agency_manager.get_agency(agency_id, session_config.thread_ids, user_id)
-        return session_config, agency
+        session = self.session_manager.get_session(session_id)
+        agency, _ = await self.agency_manager.get_agency(session.agency_id, session.thread_ids, user_id)
+        ContextEnvVarsManager.set("user_id", user_id)
+        ContextEnvVarsManager.set("agency_id", session.agency_id)
+        return session, agency
 
     async def _handle_websocket_messages(
         self,
         websocket: WebSocket,
         client_id: str,
-        agency_id: str,
         agency: Agency,
         session_id: str,
-        user_id: str,
     ) -> None:
         """
         Handle the WebSocket messages for a specific session.
 
         :param websocket: The WebSocket connection.
         :param client_id: The client ID.
-        :param agency_id: The agency ID.
         :param agency: The agency instance.
         :param session_id: The session ID.
-        :param user_id: The user ID.
         """
-        while await self._process_messages(websocket, client_id, agency_id, agency, session_id, user_id):
+        while await self._process_messages(websocket, client_id, agency, session_id):
             pass
 
     async def _process_messages(
         self,
         websocket: WebSocket,
         client_id: str,
-        agency_id: str,
         agency: Agency,
         session_id: str,
-        user_id: str,
     ) -> bool:
         """
         Receive messages from the websocket and process them.
 
         :param websocket: The WebSocket connection.
         :param client_id: The client ID.
-        :param agency_id: The agency ID.
         :param agency: The agency instance.
         :param session_id: The session ID.
-        :param user_id: The user ID.
 
         :return: True if the processing should continue, False otherwise.
         """
         try:
-            await self._process_single_message(websocket, client_id, agency_id, agency, session_id, user_id)
+            await self._process_single_message(websocket, client_id, agency, session_id)
         except UnsetVariableError as exception:
             await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
             return False
@@ -189,19 +178,19 @@ class WebSocketHandler:
         return True
 
     async def _process_single_message(
-        self, websocket: WebSocket, client_id: str, agency_id: str, agency: Agency, session_id: str, user_id: str
+        self, websocket: WebSocket, client_id: str, agency: Agency, session_id: str
     ) -> None:
         """
         Process a single user message and send the response to the websocket.
 
         :param websocket: The WebSocket connection.
-        :param agency_id: The agency ID.
         :param agency: The agency instance.
-        :param user_id: The user ID.
         """
         message = await websocket.receive_json()
         message_type = message.get("type")
         message_data = message.get("data")
+        user_id = ContextEnvVarsManager.get("user_id")
+        agency_id = ContextEnvVarsManager.get("agency_id")
 
         if message_type == "user_message":
             user_message = message_data.get("message")

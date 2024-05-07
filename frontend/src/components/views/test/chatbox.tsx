@@ -381,6 +381,7 @@ const ChatBox = ({
     setError(null);
     socketMsgs = [];
     let messageHolder = Object.assign([], messages);
+    let accessToken = store.getState().user.accessToken;
 
     const userMessage: IChatMessage = {
       text: query,
@@ -415,6 +416,7 @@ const ChatBox = ({
           connection_id: connectionId,
           data: postBody,
           type: "user_message",
+          access_token: accessToken,
         })
       );
       console.log("sending on socket ..");
