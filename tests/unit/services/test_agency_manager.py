@@ -57,7 +57,7 @@ async def test_get_agency_construct_agency(agency_manager, mock_firestore_client
         agency_manager, "_construct_agency_and_update_assistants", new_callable=AsyncMock
     ) as mock_construct:
         mock_construct.return_value = MagicMock(spec=Agency)
-        agency = await agency_manager.get_agency(TEST_AGENCY_ID, {}, TEST_USER_ID)
+        agency, _ = await agency_manager.get_agency(TEST_AGENCY_ID, {}, TEST_USER_ID)
         assert agency is not None
         mock_construct.assert_called_once_with(AgencyConfig(**agency_config_dict), {})
 

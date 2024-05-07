@@ -47,8 +47,8 @@ def message_data():
 def mock_get_messages():
     with patch("backend.services.message_manager.MessageManager.get_messages") as mock:
         mock.return_value = [
-            Message(id="1", role="user", content="Hello", agency_id=TEST_AGENCY_ID, session_id="test_session_id"),
-            Message(id="2", role="assistant", content="Hi", agency_id=TEST_AGENCY_ID, session_id="test_session_id"),
+            Message(id="1", role="user", content="Hello", session_id="test_session_id"),
+            Message(id="2", role="assistant", content="Hi", session_id="test_session_id"),
         ]
         yield mock
 

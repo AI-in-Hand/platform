@@ -36,19 +36,15 @@ class AgencyManager:
 
     async def get_agency(
         self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False
-    ) -> tuple[Agency | None, AgencyConfig | None]:
+    ) -> tuple[Agency, AgencyConfig]:
         """Get the agency from the Firestore. It will construct the agency and update the assistants."""
         agency_config = self.storage.load_by_id(id_)
         if not agency_config:
-            logger.error(f"Agency with id {id_} not found.")
-            return None, None
+            raise NotFoundError("Agency", id_)
 
         self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
 
         agency = await self._construct_agency_and_update_assistants(agency_config, thread_ids)
-        if not agency:
-            logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
-            return None, None
         return agency, agency_config
 
     def is_agent_used_in_agencies(self, agent_id: str) -> bool:

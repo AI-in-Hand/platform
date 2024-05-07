@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_message_manager, get_session_manager
-from backend.exceptions import NotFoundError
 from backend.models.auth import User
 from backend.models.message import Message
 from backend.models.response_models import MessagePostResponse
@@ -50,26 +49,24 @@ async def post_message(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> MessagePostResponse:
     """Send a message to the User Proxy (the main agent) for the given agency_id and session_id."""
-    agency_id = request.agency_id
-    user_message = request.content
     session_id = request.session_id
+
+    session_config = session_manager.get_session(session_id)
+    agency_id = session_config.agency_id
 
     # Set the agency_id in the context variables
     ContextEnvVarsManager.set("agency_id", agency_id)
 
     logger.info(f"Received a message for agency_id: {agency_id}, session_id: {session_id}")
 
-    session_config = session_manager.get_session(session_id)
     # permissions are checked in the agency_manager.get_agency method
     agency, _ = await agency_manager.get_agency(
         agency_id, thread_ids=session_config.thread_ids, user_id=current_user.id
     )
-    if not agency:
-        raise NotFoundError("Agency", agency_id)
 
     try:
         response = await asyncio.to_thread(
-            agency.get_completion, message=user_message, yield_messages=False, message_files=None
+            agency.get_completion, message=request.content, yield_messages=False, message_files=None
         )
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")

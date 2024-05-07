@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from backend.exceptions import NotFoundError
 from backend.services.agency_manager import AgencyManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
@@ -68,10 +69,12 @@ def test_create_session_success(client, mock_firestore_client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_agency_not_found(client, mock_firestore_client):
-    with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=(None, None))) as mock_get_agency:
+    with patch.object(
+        AgencyManager, "get_agency", AsyncMock(side_effect=NotFoundError("Agency", TEST_AGENCY_ID))
+    ) as mock_get_agency:
         response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
-        assert response.json() == {"data": {"message": "Agency not found: test_session_id"}}
+        assert response.json() == {"data": {"message": "Agency not found: test_agency_id"}}
         assert mock_firestore_client.collection("session_configs").to_dict() == {}
         mock_get_agency.assert_awaited_once_with("test_session_id", thread_ids={}, user_id=TEST_USER_ID)
 

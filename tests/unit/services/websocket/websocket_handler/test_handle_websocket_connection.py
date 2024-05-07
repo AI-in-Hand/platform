@@ -99,12 +99,12 @@ async def test_handle_websocket_connection_agency_not_found(websocket_handler):
     }
     websocket_handler.auth_service.get_user.return_value = None
     websocket_handler.session_manager.get_session.return_value = MagicMock()
-    websocket_handler.agency_manager.get_agency.return_value = (None, None)
+    websocket_handler.agency_manager.get_agency.side_effect = NotFoundError("Agency", agency_id)
 
     await websocket_handler.handle_websocket_connection(websocket, client_id)
 
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": "error", "message": "Agency not found"}, client_id
+        {"status": "error", "message": "Agency not found: agency_id"}, client_id
     )
 
 

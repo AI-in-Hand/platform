@@ -6,7 +6,6 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_session_manager
-from backend.exceptions import NotFoundError
 from backend.models.auth import User
 from backend.models.request_models import RenameSessionRequest
 from backend.models.response_models import CreateSessionResponse, SessionListResponse
@@ -46,8 +45,6 @@ async def create_session(
     agency, agency_config = await agency_manager.get_agency(
         agency_id, thread_ids=new_thread_ids, user_id=current_user.id
     )
-    if not agency or not agency_config:
-        raise NotFoundError("Agency", agency_id)
 
     session_id = session_manager.create_session(
         agency, name=agency_config.name, agency_id=agency_id, user_id=current_user.id, thread_ids=new_thread_ids
