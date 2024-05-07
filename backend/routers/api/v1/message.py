@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.constants import INTERNAL_ERROR_MESSAGE
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_message_manager, get_session_manager
 from backend.models.auth import User
@@ -70,7 +71,7 @@ async def post_message(
         )
     except Exception as e:
         logger.exception(f"Error sending message to agency {agency_id}, session {session_id}")
-        raise HTTPException(status_code=500, detail="Something went wrong. We are investigating the problem.") from e
+        raise HTTPException(status_code=500, detail=INTERNAL_ERROR_MESSAGE) from e
 
     # update the session timestamp
     session_manager.update_session_timestamp(session_id)

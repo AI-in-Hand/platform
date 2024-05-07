@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from agency_swarm import Agency
 
+from backend.constants import INTERNAL_ERROR_MESSAGE
 from backend.dependencies.dependencies import get_user_variable_manager
 from backend.models.agency_config import AgencyConfig
 from backend.models.message import Message
@@ -179,6 +180,6 @@ def test_post_message_processing_failure(client, mock_construct_agency, mock_fir
     response = client.post("/api/v1/message", json=message_data)
 
     assert response.status_code == 500
-    assert response.json()["data"]["message"] == "Something went wrong. We are investigating the problem."
+    assert response.json()["data"]["message"] == INTERNAL_ERROR_MESSAGE
 
     mock_construct_agency.assert_called_once_with(AgencyConfig(**agency_data), {})

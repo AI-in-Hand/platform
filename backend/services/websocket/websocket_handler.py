@@ -7,6 +7,7 @@ from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from openai import AuthenticationError as OpenAIAuthenticationError
 from websockets.exceptions import ConnectionClosedOK
 
+from backend.constants import INTERNAL_ERROR_MESSAGE
 from backend.exceptions import NotFoundError, UnsetVariableError
 from backend.models.session_config import SessionConfig
 from backend.services.agency_manager import AgencyManager
@@ -97,11 +98,7 @@ class WebSocketHandler:
                 f"agency_id: {agency_id}, session_id: {session_id}, client_id: {client_id}, error: {str(exception)}"
             )
             await self.connection_manager.send_message(
-                {
-                    "status": "error",
-                    "message": "Something went wrong. We are investigating the problem. "
-                    "Please try again or report the problem to our chatbot widget.",
-                },
+                {"status": "error", "message": INTERNAL_ERROR_MESSAGE},
                 client_id,
             )
 

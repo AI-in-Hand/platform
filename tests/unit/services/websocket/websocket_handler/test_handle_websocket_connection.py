@@ -7,6 +7,7 @@ from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocketDisconnect
 from websockets import ConnectionClosedOK
 
+from backend.constants import INTERNAL_ERROR_MESSAGE
 from backend.exceptions import NotFoundError, UnsetVariableError
 
 
@@ -234,8 +235,7 @@ async def test_handle_websocket_connection_exception(websocket_handler):
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {
             "status": "error",
-            "message": "Something went wrong. We are investigating the problem. "
-            "Please try again or report the problem to our chatbot widget.",
+            "message": INTERNAL_ERROR_MESSAGE,
         },
         client_id,
     )
