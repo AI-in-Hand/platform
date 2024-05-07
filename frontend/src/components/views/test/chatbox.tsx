@@ -21,7 +21,7 @@ import {
   IMessage,
   IStatus,
 } from "../../types";
-import { getServerUrl } from "../../api_utils";
+import { fetchJSON, getServerUrl } from "../../api_utils";
 import { examplePrompts, guid } from "../../utils";
 import MetaDataView from "./metadata";
 import {
@@ -31,6 +31,7 @@ import {
   LoadingBar,
   MarkdownView,
 } from "../../atoms";
+import { store } from "../../../store";
 import { useConfigStore } from "../../../hooks/store";
 
 let socketMsgs: any[] = [];
@@ -57,21 +58,9 @@ const ChatBox = ({
 
   const [retries, setRetries] = React.useState(0);
 
-  const serverUrl = getServerUrl();
-
-  let websocketUrl = serverUrl.replace("http", "ws") + "/ws/";
-
-  // check if there is a protocol in the serverUrl e.g. /api. if use the page url
-  if (!serverUrl.includes("http")) {
-    const pageUrl = window.location.href;
-    const url = new URL(pageUrl);
-    const protocol = url.protocol;
-    const host = url.host;
-    const baseUrl = protocol + "//" + host + serverUrl;
-    websocketUrl = baseUrl.replace("http", "ws") + "/ws/";
-  } else {
-    websocketUrl = serverUrl.replace("http", "ws") + "/ws/";
-  }
+  const serverUrl = window.location.host;
+  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
+  const websocketUrl = `${schema}${serverUrl}/ws/`;
 
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");
@@ -287,6 +276,7 @@ const ChatBox = ({
     console.log("socketUrl", socketUrl);
     if (!wsClient.current) {
       const client = new WebSocket(socketUrl);
+      const accessToken = store.getState().user.accessToken;
       wsClient.current = client;
       client.onerror = (e) => {
         console.log("ws error", e);
@@ -295,6 +285,8 @@ const ChatBox = ({
       client.onopen = () => {
         setWsConnectionStatus("connected");
         console.log("ws opened");
+        // Send the access token as the first message
+        client.send(accessToken);
       };
 
       client.onclose = () => {
@@ -398,19 +390,12 @@ const ChatBox = ({
     messageHolder.push(userMessage);
     setMessages(messageHolder);
 
-    const messagePayload: IMessage = {
+    const textUrl = `${serverUrl}/message`;
+    const postBody: IMessage = {
       role: "user",
       content: query,
       id: userMessage.id,
       session_id: session?.id || "",
-    };
-
-    const textUrl = `${serverUrl}/message`;
-    const postBody = {
-      message: messagePayload,
-      workflow: workflowConfig,
-      session: session,
-      connection_id: connectionId,
     };
     const postData = {
       method: "POST",
@@ -434,35 +419,24 @@ const ChatBox = ({
       );
       console.log("sending on socket ..");
     } else {
-      fetch(textUrl, postData)
-        .then((res) => {
-          if (res.status === 200) {
-            res.json().then((data) => {
-              processAgentResponse(data);
-            });
-          } else {
-            res.json().then((data) => {
-              console.log("error", data);
-              ToastMessage.error(data.message);
-              setLoading(false);
-            });
-            ToastMessage.error(
-              "Connection error. Ensure server is up and running."
-            );
-          }
-        })
-        .catch(() => {
-          setLoading(false);
-
-          ToastMessage.error(
-            "Connection error. Ensure server is up and running."
-          );
-        })
-        .finally(() => {
+      fetchJSON(
+        textUrl,
+        postData,
+        (data) => {
+          processAgentResponse(data);
           setTimeout(() => {
             scrollChatBox(messageBoxInputRef);
           }, 500);
-        });
+        },
+        (error) => {
+          console.log("error", error);
+          ToastMessage.error(error.message);
+          setLoading(false);
+          setTimeout(() => {
+            scrollChatBox(messageBoxInputRef);
+          }, 500);
+        }
+      );
     }
   };
 

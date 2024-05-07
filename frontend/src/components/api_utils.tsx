@@ -106,38 +106,6 @@ export function fetchJSON(
   });
 }
 
-export const connectWebSocket = (
-  sessionID: str,
-  workflowID: str,
-  onMessage: (data: any) => void,
-  onError: (error: IStatus) => void
-) => {
-  const serverUrl = window.location.host;
-  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
-  const user_id = store.getState().user.uid;
-  const accessToken = store.getState().user.accessToken;
-  const wsUrl = `${schema}${serverUrl}/ws/${user_id}/${workflowID}/${sessionID}`;
-
-  const ws = new WebSocket(wsUrl);
-
-  ws.onopen = () => {
-    // Send the access token as the first message
-    ws.send(accessToken);
-  };
-
-  ws.onmessage = (event) => {
-    onMessage(event.data);
-  };
-
-  ws.onerror = (error) => {
-    onError({
-      status: false,
-      message: `WebSocket error: ${error}`,
-    });
-  };
-  return ws;
-};
-
 export const fetchMessages = (
   sessionID: string,
   onSuccess: (data: any) => void,

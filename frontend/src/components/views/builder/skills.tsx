@@ -10,6 +10,7 @@ import { Button, Input, Modal, message, MenuProps, Dropdown } from "antd";
 import * as React from "react";
 import { ISkill, IStatus } from "../../types";
 import { appContext } from "../../../hooks/provider";
+import { useSelector } from "react-redux";
 import { fetchJSON, getServerUrl } from "../../api_utils";
 import {
   getSampleSkill,
