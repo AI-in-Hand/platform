@@ -34,23 +34,19 @@ class AgencyManager:
         sorted_agencies = sorted(agencies, key=lambda x: x.timestamp, reverse=True)
         return sorted_agencies
 
-    async def get_agency_config(self, id_: str, current_user_id: str) -> AgencyConfig:
+    async def get_agency_config(self, id_: str, user_id: str, allow_template: bool = False) -> AgencyConfig:
         """Get the agency configuration by ID."""
         agency_config = self.storage.load_by_id(id_)
         if not agency_config:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-        self.validate_agency_ownership(agency_config.user_id, current_user_id, allow_template=True)
+            raise NotFoundError("Agency", id_)
+        self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
         return agency_config
 
     async def get_agency(
         self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False
     ) -> tuple[Agency, AgencyConfig]:
         """Get the agency from the Firestore. It will construct the agency and update the assistants."""
-        agency_config = self.storage.load_by_id(id_)
-        if not agency_config:
-            raise NotFoundError("Agency", id_)
-
-        self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
+        agency_config = await self.get_agency_config(id_, user_id, allow_template=allow_template)
 
         agency = await self._construct_agency_and_update_assistants(agency_config, thread_ids)
         return agency, agency_config

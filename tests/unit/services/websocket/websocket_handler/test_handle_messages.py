@@ -225,9 +225,6 @@ async def test_process_single_message_agency_not_found(websocket_handler):
         patch.object(
             websocket_handler, "_setup_agency", new_callable=AsyncMock, side_effect=NotFoundError("Agency", "agency_id")
         ),
+        pytest.raises(NotFoundError, match="Agency not found: agency_id"),
     ):
         await websocket_handler._process_single_message(websocket, client_id)
-
-    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": False, "message": "Agency not found: agency_id"}, client_id
-    )

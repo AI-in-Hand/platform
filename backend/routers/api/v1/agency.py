@@ -47,7 +47,7 @@ async def get_agency_config(
     """Get the agency configuration.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    agency_config = await manager.get_agency_config(id, current_user.id)
+    agency_config = await manager.get_agency_config(id, current_user.id, allow_template=True)
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)
