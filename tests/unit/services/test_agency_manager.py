@@ -9,7 +9,7 @@ from backend.dependencies.dependencies import get_user_variable_manager
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
-from backend.services.agency_manager import AgencyManager
+from backend.services.agency_manager import AgencyManager, agency_cache
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID
 
@@ -161,6 +161,9 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     mock_agent_2.top_p = 1.0
     mock_agent_2.examples = []
 
+    # Clear the agency cache before the test
+    agency_cache.clear()
+
     # Construct the agency
     with patch.object(agency_manager, "_load_and_construct_agents", new_callable=AsyncMock) as mock_load_agents:
         mock_load_agents.return_value = {"Sender Agent": mock_agent_1, "agent2_name": mock_agent_2}
@@ -171,6 +174,20 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     assert len(agency.agents) == 2
     assert agency.agents == [mock_agent_1, mock_agent_2]
     assert agency.shared_instructions == "manifesto"
+
+    # Verify that the agency is cached
+    cache_key = (agency_config.id, frozenset())
+    assert cache_key in agency_cache
+    assert agency_cache[cache_key] == agency
+
+    # Call the method again with the same arguments
+    with patch.object(agency_manager, "_load_and_construct_agents", new_callable=AsyncMock) as mock_load_agents:
+        mock_load_agents.return_value = {"Sender Agent": mock_agent_1, "agent2_name": mock_agent_2}
+        cached_agency = await agency_manager._construct_agency_and_update_assistants(agency_config, {})
+
+    # Verify that the cached agency is returned
+    assert cached_agency == agency
+    assert mock_load_agents.call_count == 0  # Ensure that _load_and_construct_agents is not called again
 
 
 @pytest.mark.asyncio

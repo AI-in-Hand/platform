@@ -4,6 +4,7 @@ from http import HTTPStatus
 from typing import Any
 
 from agency_swarm import Agency, Agent
+from cachetools import LRUCache
 from fastapi import HTTPException
 
 from backend.exceptions import NotFoundError
@@ -13,6 +14,8 @@ from backend.services.agent_manager import AgentManager
 from backend.services.user_variable_manager import UserVariableManager
 
 logger = logging.getLogger(__name__)
+
+agency_cache: LRUCache = LRUCache(maxsize=1000)
 
 
 class AgencyManager:
@@ -123,6 +126,11 @@ class AgencyManager:
         Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants). Returns the Agency instance if successful, otherwise None.
         """
+        # Check if the agency is already in the cache
+        cache_key = (agency_config.id, frozenset(thread_ids.items()))
+        if cache_key in agency_cache:
+            return agency_cache[cache_key]
+
         agents = await self._load_and_construct_agents(agency_config)
 
         agency_chart = []
@@ -133,14 +141,19 @@ class AgencyManager:
                 new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart.values()]
                 agency_chart.extend(new_agency_chart)
 
-        # call Agency.__init__ to create or update the agency
-        return Agency(
+        # Call Agency.__init__ to create or update the agency
+        agency = Agency(
             agency_chart,
             shared_instructions=agency_config.shared_instructions,
             threads_callbacks=(
                 {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)} if thread_ids is not None else None
             ),
         )
+
+        # Store the constructed agency in the cache
+        agency_cache[cache_key] = agency
+
+        return agency
 
     def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
         """Validate the agent ownership. It will check if the current user has permissions to use the agents."""

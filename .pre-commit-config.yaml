@@ -23,4 +23,6 @@ repos:
         args:
           - --no-warn-no-return
           - --ignore-missing-imports
-        additional_dependencies: [redis==5.0.1]
+        additional_dependencies:
+            - redis
+            - types-cachetools
