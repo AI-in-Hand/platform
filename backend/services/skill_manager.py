@@ -67,3 +67,9 @@ class SkillManager:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill"
             )
+
+    async def approve_skill(self, id_: str) -> None:
+        """Approve a skill configuration."""
+        config = self.get_skill_config(id_)
+        config.approved = True
+        self.storage.save(config)

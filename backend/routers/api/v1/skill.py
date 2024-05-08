@@ -6,7 +6,6 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from backend.dependencies.auth import get_current_superuser, get_current_user
 from backend.dependencies.dependencies import get_skill_manager
-from backend.exceptions import NotFoundError
 from backend.models.auth import User
 from backend.models.request_models import SkillExecutePostRequest
 from backend.models.response_models import (
@@ -16,7 +15,6 @@ from backend.models.response_models import (
     SkillListResponse,
 )
 from backend.models.skill_config import SkillConfig
-from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.skill_executor import SkillExecutor
 from backend.services.skill_manager import SkillManager
 
@@ -86,16 +84,11 @@ async def delete_skill(
 async def approve_skill(
     current_superuser: Annotated[User, Depends(get_current_superuser)],  # noqa: ARG001
     id: str = Query(..., description="The unique identifier of the skill"),
-    storage: SkillConfigStorage = Depends(SkillConfigStorage),
+    manager: SkillManager = Depends(get_skill_manager),
 ):
     """Approve a skill configuration. This endpoint is only accessible to superusers (currently not accessible).
     NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
-    config = storage.load_by_id(id)
-    if not config:
-        raise NotFoundError("Skill", id)
-
-    config.approved = True
-    storage.save(config)
+    await manager.approve_skill(id)
     return BaseResponse(message="Skill configuration approved")
 
 

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -144,9 +145,10 @@ async def test_get_agent_existing(agent_manager, storage_mock):
 async def test_get_agent_non_existing(agent_manager, storage_mock):
     storage_mock.load_by_id.return_value = None
 
-    result = await agent_manager.get_agent(TEST_AGENT_ID)
+    with pytest.raises(HTTPException) as exc_info:
+        await agent_manager.get_agent(TEST_AGENT_ID)
+    assert exc_info.value.status_code == HTTPStatus.NOT_FOUND
 
-    assert result is None
     storage_mock.load_by_id.assert_called_once_with(TEST_AGENT_ID)
 
 

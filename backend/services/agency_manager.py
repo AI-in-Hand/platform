@@ -34,6 +34,14 @@ class AgencyManager:
         sorted_agencies = sorted(agencies, key=lambda x: x.timestamp, reverse=True)
         return sorted_agencies
 
+    async def get_agency_config(self, id_: str, current_user_id: str) -> AgencyConfig:
+        """Get the agency configuration by ID."""
+        agency_config = self.storage.load_by_id(id_)
+        if not agency_config:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        self.validate_agency_ownership(agency_config.user_id, current_user_id, allow_template=True)
+        return agency_config
+
     async def get_agency(
         self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False
     ) -> tuple[Agency, AgencyConfig]:
@@ -86,8 +94,12 @@ class AgencyManager:
                 # TODO: Handle this error (raise exception?)
         return agents
 
-    async def delete_agency(self, agency_id: str) -> None:
+    async def delete_agency(self, agency_id: str, current_user_id: str) -> None:
         """Delete the agency from the Firestore."""
+        agency_config = self.storage.load_by_id(agency_id)
+        if not agency_config:
+            raise NotFoundError("Agency", agency_id)
+        self.validate_agency_ownership(agency_config.user_id, current_user_id)
         self.storage.delete(agency_id)
 
     @staticmethod

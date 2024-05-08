@@ -2,19 +2,17 @@ import logging
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_adapter, get_agency_manager, get_session_manager
-from backend.exceptions import NotFoundError
 from backend.models.agency_config import AgencyConfigForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
     AgencyListResponse,
     GetAgencyResponse,
 )
-from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.session_manager import SessionManager
@@ -45,15 +43,11 @@ async def get_agency_config(
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     manager: AgencyManager = Depends(get_agency_manager),
-    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
     """Get the agency configuration.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    agency_config = storage.load_by_id(id)
-    if not agency_config:
-        raise NotFoundError("Agency", id)
-    manager.validate_agency_ownership(agency_config.user_id, current_user.id, allow_template=True)
+    agency_config = await manager.get_agency_config(id, current_user.id)
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)
@@ -85,16 +79,9 @@ async def delete_agency(
     id: str = Query(..., description="The unique identifier of the agency"),
     manager: AgencyManager = Depends(get_agency_manager),
     session_manager: SessionManager = Depends(get_session_manager),
-    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> AgencyListResponse:
     """Delete an agency"""
-    db_config = storage.load_by_id(id)
-    if not db_config:
-        raise NotFoundError("Agency", id)
-    if db_config.user_id != current_user.id:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
-
-    await manager.delete_agency(id)
+    await manager.delete_agency(id, current_user.id)
     session_manager.delete_sessions_by_agency_id(id)
 
     agencies = await manager.get_agency_list(current_user.id)

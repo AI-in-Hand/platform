@@ -7,14 +7,12 @@ from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
 from backend.dependencies.dependencies import get_agency_manager, get_agent_adapter, get_agent_manager
-from backend.exceptions import NotFoundError
 from backend.models.agent_flow_spec import AgentFlowSpecForAPI
 from backend.models.auth import User
 from backend.models.response_models import (
     AgentListResponse,
     GetAgentResponse,
 )
-from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
@@ -47,14 +45,12 @@ async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
+    manager: AgentManager = Depends(get_agent_manager),
 ) -> GetAgentResponse:
     """Get the configuration of a specific agent.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    config = storage.load_by_id(id)
-    if not config:
-        raise NotFoundError("Agent", id)
+    _, config = await manager.get_agent(id)
     # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")
