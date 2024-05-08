@@ -93,7 +93,7 @@ const ChatBox = ({
       }
       const msg: IChatMessage = {
         text: message.content,
-        sender: message.role === "user" ? "user" : "bot",
+        sender: message.role === "user" ? "user" : "assistant",
         metadata: meta,
         id: message.id,
       };
@@ -415,7 +415,7 @@ const ChatBox = ({
           access_token: accessToken,
         })
       );
-      console.log("sending on socket ..");
+      console.log("sending on socket...");
     } else {
       fetchJSON(
         textUrl,

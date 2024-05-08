@@ -51,49 +51,22 @@ class WebSocketHandler:
         await self.connection_manager.connect(websocket, client_id)
         logger.info(f"WebSocket connected for client_id: {client_id}")
 
-        session_id = None
         try:
-            message = await websocket.receive_json()
-            session_id = message.get("data", {}).get("session_id")
-            token = message.get("access_token")
-
-            if not session_id or not token:
-                await self.connection_manager.send_message(
-                    {"status": "error", "message": "Missing required fields"}, client_id
-                )
-                return
-
-            logger.info(f"WebSocket connected for client_id: {client_id}, session_id: {session_id}")
-
-            user = await self._authenticate(client_id, token)
-
-            session, agency = await self._setup_agency(user.id, session_id)
-
-            if not session or not agency:
-                await self.connection_manager.send_message(
-                    {"status": "error", "message": "Session not found" if not session else "Agency not found"},
-                    client_id,
-                )
-                return
-
-            await self._handle_websocket_messages(websocket, client_id, agency, session_id)
+            await self._handle_websocket_messages(websocket, client_id)
 
         except (WebSocketDisconnect, ConnectionClosedOK):
             await self.connection_manager.disconnect(client_id)
             logger.info(f"WebSocket disconnected for client_id: {client_id}")
         except UnsetVariableError as exception:
-            await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": str(exception)}, client_id)
         except OpenAIAuthenticationError as exception:
-            await self.connection_manager.send_message({"status": "error", "message": exception.message}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": exception.message}, client_id)
         except NotFoundError as exception:
-            await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": str(exception)}, client_id)
         except Exception as exception:
-            logger.exception(
-                "Exception while processing message: "
-                f"session_id: {session_id}, client_id: {client_id}, error: {str(exception)}"
-            )
+            logger.exception("Exception while processing message: " f"client_id: {client_id}, error: {str(exception)}")
             await self.connection_manager.send_message(
-                {"status": "error", "message": INTERNAL_ERROR_MESSAGE},
+                {"status": False, "message": INTERNAL_ERROR_MESSAGE},
                 client_id,
             )
 
@@ -109,7 +82,7 @@ class WebSocketHandler:
             user = self.auth_service.get_user(token)
         except HTTPException:
             logger.info(f"Invalid token {token} for client_id: {client_id}")
-            await self.connection_manager.send_message({"status": "error", "message": "Invalid token"}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": "Invalid token"}, client_id)
             raise WebSocketDisconnect from None
 
         ContextEnvVarsManager.set("user_id", user.id)
@@ -133,67 +106,75 @@ class WebSocketHandler:
         self,
         websocket: WebSocket,
         client_id: str,
-        agency: Agency,
-        session_id: str,
     ) -> None:
         """
         Handle the WebSocket messages for a specific session.
 
         :param websocket: The WebSocket connection.
         :param client_id: The client ID.
-        :param agency: The agency instance.
-        :param session_id: The session ID.
         """
-        while await self._process_messages(websocket, client_id, agency, session_id):
+        while await self._process_messages(websocket, client_id):
             pass
 
     async def _process_messages(
         self,
         websocket: WebSocket,
         client_id: str,
-        agency: Agency,
-        session_id: str,
     ) -> bool:
         """
         Receive messages from the websocket and process them.
 
         :param websocket: The WebSocket connection.
         :param client_id: The client ID.
-        :param agency: The agency instance.
-        :param session_id: The session ID.
 
         :return: True if the processing should continue, False otherwise.
         """
         try:
-            await self._process_single_message(websocket, client_id, agency, session_id)
+            await self._process_single_message(websocket, client_id)
         except UnsetVariableError as exception:
-            await self.connection_manager.send_message({"status": "error", "message": str(exception)}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": str(exception)}, client_id)
             return False
         except OpenAIAuthenticationError as exception:
-            await self.connection_manager.send_message({"status": "error", "message": exception.message}, client_id)
+            await self.connection_manager.send_message({"status": False, "message": exception.message}, client_id)
             return False
         return True
 
-    async def _process_single_message(
-        self, websocket: WebSocket, client_id: str, agency: Agency, session_id: str
-    ) -> None:
+    async def _process_single_message(self, websocket: WebSocket, client_id: str) -> None:
         """
         Process a single user message and send the response to the websocket.
 
         :param websocket: The WebSocket connection.
-        :param agency: The agency instance.
+        :param client_id: The client ID.
         """
         message = await websocket.receive_json()
         message_type = message.get("type")
         message_data = message.get("data")
-        user_id = ContextEnvVarsManager.get("user_id")
-        agency_id = ContextEnvVarsManager.get("agency_id")
+        token = message.get("access_token")
+
+        if not token:
+            await self.connection_manager.send_message(
+                {"status": False, "message": "Access token not provided"}, client_id
+            )
+            return
+
+        user = await self._authenticate(client_id, token)
 
         if message_type == "user_message":
-            user_message = message_data.get("message")
-            if not user_message:
+            user_message = message_data.get("content")
+            session_id = message_data.get("session_id")
+
+            if not user_message or not session_id:
                 await self.connection_manager.send_message(
-                    {"status": "error", "message": "Message not provided"}, client_id
+                    {"status": False, "message": "Message or session ID not provided"}, client_id
+                )
+                return
+
+            session, agency = await self._setup_agency(user.id, session_id)
+
+            if not session or not agency:
+                await self.connection_manager.send_message(
+                    {"status": False, "message": "Session not found" if not session else "Agency not found"},
+                    client_id,
                 )
                 return
 
@@ -203,24 +184,23 @@ class WebSocketHandler:
             response_generator = agency.get_completion(message=user_message, yield_messages=True)
 
             while await self._process_single_message_response(
-                lambda: get_next_response(response_generator, user_id, agency_id), client_id, loop
+                lambda: get_next_response(response_generator, user.id, session.agency_id), client_id, loop
             ):
                 pass
 
             all_messages = self.message_manager.get_messages(session_id)
+            all_messages_dict = [message.model_dump() for message in all_messages]
             response = {
                 "status": True,
                 "message": "Message processed successfully",
-                "data": all_messages,
+                "data": all_messages_dict,
             }
             await self.connection_manager.send_message(
                 {"type": "agent_response", "data": response, "connection_id": client_id},
                 client_id,
             )
         else:
-            await self.connection_manager.send_message(
-                {"status": "error", "message": "Invalid message type"}, client_id
-            )
+            await self.connection_manager.send_message({"status": False, "message": "Invalid message type"}, client_id)
 
     async def _process_single_message_response(
         self, get_next_response_func: Callable, client_id: str, loop: asyncio.AbstractEventLoop
@@ -238,6 +218,15 @@ class WebSocketHandler:
         if response is None:
             return False
 
-        response_text = response.get_formatted_content()
-        await self.connection_manager.send_message({"type": "agent_message", "data": response_text}, client_id)
+        await self.connection_manager.send_message(
+            {
+                "type": "agent_message",
+                "data": {
+                    "sender": response.sender_name,
+                    "recipient": response.receiver_name,
+                    "message": {"content": response.content},
+                },
+            },
+            client_id,
+        )
         return True
