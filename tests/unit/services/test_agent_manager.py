@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException
+from http import HTTPStatus
 
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
