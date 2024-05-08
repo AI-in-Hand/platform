@@ -32,12 +32,12 @@ async def get_message_list(
     session_id: str,
     limit: int = 20,
     before: str | None = None,
-    session_storage: SessionConfigStorage = Depends(SessionConfigStorage),
+    session_manager: SessionManager = Depends(get_session_manager),
     user_variable_manager: UserVariableManager = Depends(get_user_variable_manager),
 ) -> list[Message]:
     """Get the list of messages for the given session_id."""
     # check if the current_user has permissions to send a message to the agency
-    session_config = session_storage.load_by_id(session_id)
+    session_config = session_manager.get_session(session_id)
     if not session_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.user_id != current_user.id:

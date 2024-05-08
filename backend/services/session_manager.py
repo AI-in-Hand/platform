@@ -79,3 +79,7 @@ class SessionManager:
     def _delete_session_via_api(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         self.openai_client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
+
+    def get_session_config(self, session_id: str) -> SessionConfig | None:
+        """Get the session configuration by ID."""
+        return self.session_storage.load_by_id(session_id)

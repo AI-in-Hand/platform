@@ -85,16 +85,16 @@ async def delete_skill(
 async def approve_skill(
     current_superuser: Annotated[User, Depends(get_current_superuser)],  # noqa: ARG001
     id: str = Query(..., description="The unique identifier of the skill"),
-    storage: SkillConfigStorage = Depends(SkillConfigStorage),
+    manager: SkillManager = Depends(get_skill_manager),
 ):
     """Approve a skill configuration. This endpoint is only accessible to superusers (currently not accessible).
     NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
-    config = storage.load_by_id(id)
+    config = manager.get_skill_config(id)
     if not config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
     config.approved = True
-    storage.save(config)
+    manager.update_skill_config(config)
     return BaseResponse(message="Skill configuration approved")
 
 

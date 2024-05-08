@@ -46,13 +46,13 @@ async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
+    manager: AgentManager = Depends(get_agent_manager),
 ) -> GetAgentResponse:
     """Get the configuration of a specific agent.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    config = storage.load_by_id(id)
-    if not config:
+    agent, config = await manager.get_agent(id)
+    if not agent:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
     # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:

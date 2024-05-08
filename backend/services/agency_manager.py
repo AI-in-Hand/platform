@@ -89,8 +89,12 @@ class AgencyManager:
                 # TODO: Handle this error (raise exception?)
         return agents
 
-    async def delete_agency(self, agency_id: str) -> None:
+    async def delete_agency(self, agency_id: str, current_user_id: str) -> None:
         """Delete the agency from the Firestore."""
+        agency_config = self.storage.load_by_id(agency_id)
+        if not agency_config:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        self.validate_agency_ownership(agency_config.user_id, current_user_id)
         self.storage.delete(agency_id)
 
     @staticmethod
@@ -151,3 +155,11 @@ class AgencyManager:
         # FIXME: current limitation: all agents must belong to the current user.
         # to fix: If the agent is a template (agent_flow_spec.user_id is None), it should be copied for the current user
         # (reuse the code from api/agent.py)
+
+    async def get_agency_config(self, id_: str, current_user_id: str) -> AgencyConfig:
+        """Get the agency configuration by ID."""
+        agency_config = self.storage.load_by_id(id_)
+        if not agency_config:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        self.validate_agency_ownership(agency_config.user_id, current_user_id, allow_template=True)
+        return agency_config
