@@ -44,15 +44,11 @@ async def get_agency_config(
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     manager: AgencyManager = Depends(get_agency_manager),
-    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> GetAgencyResponse:
     """Get the agency configuration.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    agency_config = storage.load_by_id(id)
-    if not agency_config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    manager.validate_agency_ownership(agency_config.user_id, current_user.id, allow_template=True)
+    agency_config = await manager.get_agency_config(id, current_user.id)
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)
@@ -77,23 +73,16 @@ async def create_or_update_agency(
     return AgencyListResponse(message="Saved", data=agencies_for_api)
 
 
-@agency_router.delete("/agency")
+@agency_router.delete("/agency")  
 async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
     id: str = Query(..., description="The unique identifier of the agency"),
     manager: AgencyManager = Depends(get_agency_manager),
     session_manager: SessionManager = Depends(get_session_manager),
-    storage: AgencyConfigStorage = Depends(AgencyConfigStorage),
 ) -> AgencyListResponse:
     """Delete an agency"""
-    db_config = storage.load_by_id(id)
-    if not db_config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-    if db_config.user_id != current_user.id:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency")
-
-    await manager.delete_agency(id)
+    await manager.delete_agency(id, current_user.id)
     session_manager.delete_sessions_by_agency_id(id)
 
     agencies = await manager.get_agency_list(current_user.id)

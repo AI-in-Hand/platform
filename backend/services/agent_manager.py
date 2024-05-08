@@ -44,11 +44,10 @@ class AgentManager:
         sorted_agents = sorted(agents, key=lambda x: x.timestamp, reverse=True)
         return sorted_agents
 
-    async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec] | None:
+    async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec]:
         config = self.storage.load_by_id(agent_id)
         if not config:
-            logger.error(f"Agent configuration for {agent_id} could not be found in the Firestore database.")
-            return None
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
 
