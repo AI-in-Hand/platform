@@ -41,20 +41,18 @@ async def get_agent_list(
     return AgentListResponse(data=configs_for_api)
 
 
-@agent_router.get("/agent")
+@agent_router.get("/agent")  
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
     id: str = Query(..., description="The unique identifier of the agent"),
-    storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage),
+    manager: AgentManager = Depends(get_agent_manager),
 ) -> GetAgentResponse:
     """Get the configuration of a specific agent.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    config = storage.load_by_id(id)
-    if not config:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
-    # check if the current user is the owner of the agent
+    _, config = await manager.get_agent(id)
+    # check if the current user is the owner of the agent 
     if config.user_id and config.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")
     config_for_api = adapter.to_api(config)
