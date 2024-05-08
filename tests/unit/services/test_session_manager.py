@@ -31,10 +31,11 @@ def session_manager(session_storage_mock):
 
 # Tests
 def test_create_session(agency_mock, session_manager, session_storage_mock):
-    session_id = session_manager.create_session(agency_mock, "agency_id", "user_id", thread_ids={})
+    session_id = session_manager.create_session(agency_mock, "session_name", "agency_id", "user_id", thread_ids={})
     assert session_id == "main_thread_id", "The session ID should be the ID of the main thread."
     expected_session_config = SessionConfig(
         id="main_thread_id",
+        name="session_name",
         user_id="user_id",
         agency_id="agency_id",
     )

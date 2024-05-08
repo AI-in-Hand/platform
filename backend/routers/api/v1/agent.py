@@ -13,7 +13,6 @@ from backend.models.response_models import (
     AgentListResponse,
     GetAgentResponse,
 )
-from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.services.adapters.agent_adapter import AgentAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.agent_manager import AgentManager
@@ -41,7 +40,7 @@ async def get_agent_list(
     return AgentListResponse(data=configs_for_api)
 
 
-@agent_router.get("/agent")  
+@agent_router.get("/agent")
 async def get_agent_config(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgentAdapter, Depends(get_agent_adapter)],
@@ -52,7 +51,7 @@ async def get_agent_config(
     NOTE: currently this endpoint is not used in the frontend.
     """
     _, config = await manager.get_agent(id)
-    # check if the current user is the owner of the agent 
+    # check if the current user is the owner of the agent
     if config.user_id and config.user_id != current_user.id:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agent")
     config_for_api = adapter.to_api(config)

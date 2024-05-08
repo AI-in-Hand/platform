@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from starlette.staticfiles import StaticFiles
 
 from backend.dependencies.middleware import UserContextMiddleware
-from backend.exceptions import UnsetVariableError
+from backend.exceptions import NotFoundError, UnsetVariableError
 from backend.routers.api import api_router
 from backend.routers.websocket import websocket_router
 from backend.utils.logging_utils import setup_logging
@@ -21,6 +21,7 @@ from backend.exception_handlers import (  # noqa  # isort:skip
     request_validation_error_handler,
     openai_authentication_error_handler,
     unset_variable_error_handler,
+    not_found_error_handler,
 )
 
 from backend.utils import init_webserver_folders, init_firebase_app, patch_openai_client  # noqa  # isort:skip
@@ -52,6 +53,7 @@ api_app.include_router(api_router)
 api_app.add_exception_handler(ValidationError, pydantic_validation_error_handler)
 api_app.add_exception_handler(RequestValidationError, request_validation_error_handler)
 api_app.add_exception_handler(HTTPException, http_exception_handler)
+api_app.add_exception_handler(NotFoundError, not_found_error_handler)
 api_app.add_exception_handler(OpenAIAuthenticationError, openai_authentication_error_handler)
 api_app.add_exception_handler(UnsetVariableError, unset_variable_error_handler)
 api_app.add_exception_handler(Exception, unhandled_exception_handler)

@@ -4,9 +4,9 @@ import AgentsView from "./agents";
 import WorkflowView from "./workflow";
 import { Tabs } from "antd";
 import {
-  VariableIcon,
   UserIcon,
   UserGroupIcon,
+  VariableIcon,
   WrenchIcon,
 } from "@heroicons/react/24/outline";
 import UserVariables from "../../userVariables";
@@ -68,11 +68,11 @@ const BuildView = () => {
             },
             {
               label: (
-                <div className="w-full  ">
+                <>
                   {" "}
                   <WrenchIcon className="h-4 w-4 inline-block mr-1" />
                   Skills
-                </div>
+                </>
               ),
               key: "2",
               children: <SkillsView />,

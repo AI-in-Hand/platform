@@ -72,7 +72,7 @@ For more details on running and developing the backend and frontend, refer to th
 
 The backend of the AI in Hand Platform is built using FastAPI and provides various functionalities,
 including managing agencies, agents, skills, sessions, and user variables.
-It integrates with Google Firestore database for persistence of agency configurations.
+It integrates with Google Firestore database for configuration persistence.
 
 For detailed information on the backend, including project structure, API documentation, custom skills,
 and contributing guidelines, please refer to the [Backend README](backend/README.md).

@@ -51,8 +51,8 @@ The function call parameters must be returned in JSON format.\
         try:
             return getattr(custom_skills, skill_name)
         except AttributeError as e:
-            logger.exception(f"Skill {skill_name} not found")
-            raise Exception(f"Skill {skill_name} not found") from e
+            logger.exception(f"Skill not found: {skill_name}")
+            raise RuntimeError(f"Skill not found: {skill_name}") from e
 
     @staticmethod
     def _execute_skill(skill_class: BaseTool, args: str) -> str | None:

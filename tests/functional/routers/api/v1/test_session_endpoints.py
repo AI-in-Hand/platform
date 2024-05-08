@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from backend.exceptions import NotFoundError
 from backend.services.agency_manager import AgencyManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
@@ -23,8 +24,13 @@ def test_get_session_list(session_config_data, client, mock_firestore_client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_success(client, mock_firestore_client):
-    with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=MagicMock())) as mock_get_agency:
-        mock_get_agency.return_value.main_thread.id = "new_session_id"
+    agency_mock = MagicMock()
+    agency_mock.main_thread.id = "new_session_id"
+    agency_config_mock = MagicMock()
+    agency_config_mock.name = "Test agency"
+    with patch.object(
+        AgencyManager, "get_agency", AsyncMock(return_value=(agency_mock, agency_config_mock))
+    ) as mock_get_agency:
         # mock Firestore to pass the security user_id check
         agency_config = {
             "id": TEST_AGENCY_ID,
@@ -41,6 +47,7 @@ def test_create_session_success(client, mock_firestore_client):
             {
                 "agency_id": TEST_AGENCY_ID,
                 "id": "new_session_id",
+                "name": "Test agency",
                 "thread_ids": mock.ANY,
                 "timestamp": mock.ANY,
                 "user_id": TEST_USER_ID,
@@ -52,6 +59,7 @@ def test_create_session_success(client, mock_firestore_client):
         # Check if the session config was created
         assert mock_firestore_client.collection("session_configs").to_dict() == {
             "id": "new_session_id",
+            "name": "Test agency",
             "user_id": TEST_USER_ID,
             "agency_id": TEST_AGENCY_ID,
             "thread_ids": {},
@@ -61,11 +69,47 @@ def test_create_session_success(client, mock_firestore_client):
 
 @pytest.mark.usefixtures("mock_get_current_user")
 def test_create_session_agency_not_found(client, mock_firestore_client):
-    with patch.object(AgencyManager, "get_agency", AsyncMock(return_value=None)):
+    with patch.object(
+        AgencyManager, "get_agency", AsyncMock(side_effect=NotFoundError("Agency", TEST_AGENCY_ID))
+    ) as mock_get_agency:
         response = client.post("/api/v1/session?agency_id=test_session_id")
         assert response.status_code == 404
-        assert response.json() == {"data": {"message": "Agency not found"}}
+        assert response.json() == {"data": {"message": "Agency not found: test_agency_id"}}
         assert mock_firestore_client.collection("session_configs").to_dict() == {}
+        mock_get_agency.assert_awaited_once_with("test_session_id", thread_ids={}, user_id=TEST_USER_ID)
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_rename_session_success(
+    client, mock_firestore_client, agency_config_data, agent_config_data_db, session_config_data
+):
+    mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, agency_config_data)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", agent_config_data_db)
+    mock_firestore_client.setup_mock_data("session_configs", "test_session_id", session_config_data)
+    expected_response = session_config_data.copy()
+    expected_response["name"] = "New session name"
+    expected_response["flow_config"] = mock.ANY
+
+    response = client.post("/api/v1/session/rename", json={"id": "test_session_id", "name": "New session name"})
+    assert response.status_code == 200
+    assert response.json()["data"] == [expected_response]
+    # Check if the session config was updated
+    assert mock_firestore_client.collection("session_configs").to_dict() == {
+        "id": "test_session_id",
+        "name": "New session name",
+        "user_id": TEST_USER_ID,
+        "agency_id": TEST_AGENCY_ID,
+        "thread_ids": {"main_thread": "test_session_id"},
+        "timestamp": mock.ANY,
+    }
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_rename_session_not_found(client, mock_firestore_client):
+    response = client.post("/api/v1/session/rename", json={"id": "test_session_id", "name": "New session name"})
+    assert response.status_code == 404
+    assert response.json() == {"data": {"message": "Session not found: test_session_id"}}
+    assert mock_firestore_client.collection("session_configs").to_dict() == {}
 
 
 @pytest.mark.usefixtures("mock_get_current_user")

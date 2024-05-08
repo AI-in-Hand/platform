@@ -41,7 +41,7 @@ def mock_agent_storage_to_raise_unhandled_exception():
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_agency_adapter_to_raise_pydantic_validation_error")
-def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestore_client, mock_agent_data_db):
+def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestore_client, agent_config_data_db):
     caplog.set_level(10)
 
     agency_data_db = {
@@ -53,7 +53,7 @@ def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestor
         "flows": [],
     }
     mock_firestore_client.setup_mock_data("agency_configs", "existing_agency", agency_data_db)
-    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", mock_agent_data_db)
+    mock_firestore_client.setup_mock_data("agent_configs", "sender_agent_id", agent_config_data_db)
     agency_data_api = agency_adapter.to_api(AgencyConfig(**agency_data_db)).model_dump()
 
     response = client.put("/api/v1/agency", json=agency_data_api)
@@ -61,6 +61,7 @@ def test_pydantic_validation_error(caplog, client, agency_adapter, mock_firestor
     assert response.status_code == 400
     assert "message" in response.json()["data"]
     assert response.json()["data"]["message"] == "Invalid request"
+    assert response.json()["data"]["errors"] == []
     assert "Validation Error" in caplog.text
 
 
@@ -77,14 +78,35 @@ def test_request_validation_error(client):
     assert response.status_code == 422
     assert "message" in response.json()["data"]
     assert response.json()["data"]["message"] == "Sender agent is required"
+    assert response.json()["data"]["errors"] == [
+        {
+            "ctx": {"error": {}},
+            "input": None,
+            "loc": ["body", "flows", 0, "sender"],
+            "msg": "Value error, Sender agent is required",
+            "type": "value_error",
+        }
+    ]
 
 
 @pytest.mark.usefixtures("mock_get_current_user")
-def test_http_exception(client):
+def test_http_exception(client, mock_firestore_client, agent_config_data_db):
+    agent_config_data_db["user_id"] = "another_user_id"
+    mock_firestore_client.setup_mock_data("agent_configs", "123", agent_config_data_db)
+
+    response = client.get("/api/v1/agent?id=123")
+
+    assert response.status_code == 403
+    assert "message" in response.json()["data"]
+    assert response.json()["data"]["message"] == "You don't have permissions to access this agent"
+
+
+@pytest.mark.usefixtures("mock_get_current_user")
+def test_not_found_error(client):
     response = client.get("/api/v1/agent?id=123")
     assert response.status_code == 404
     assert "message" in response.json()["data"]
-    assert "Agent not found" in response.json()["data"]["message"]
+    assert "Agent not found: 123" in response.json()["data"]["message"]
 
 
 @pytest.mark.usefixtures("mock_get_current_user", "mock_agent_storage_to_raise_openai_authentication_error")

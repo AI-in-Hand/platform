@@ -1,9 +1,12 @@
 from datetime import UTC, datetime
+from http import HTTPStatus
 from typing import Any
 
 from agency_swarm import Agency
+from fastapi import HTTPException
 
 from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
+from backend.exceptions import NotFoundError
 from backend.models.session_config import SessionConfig, SessionConfigForAPI
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.services.adapters.session_adapter import SessionAdapter
@@ -37,15 +40,21 @@ class SessionManager:
         sorted_sessions = sorted(sessions_for_api, key=lambda x: x.timestamp, reverse=True)
         return sorted_sessions
 
-    def get_session(self, session_id: str) -> SessionConfig | None:
+    def get_session(self, session_id: str) -> SessionConfig:
         """Return the session with the given ID."""
-        return self.session_storage.load_by_id(session_id)
+        session = self.session_storage.load_by_id(session_id)
+        if not session:
+            raise NotFoundError("Session", session_id)
+        return session
 
-    def create_session(self, agency: Agency, agency_id: str, user_id: str, thread_ids: dict[str, Any]) -> str:
+    def create_session(
+        self, agency: Agency, name: str, agency_id: str, user_id: str, thread_ids: dict[str, Any]
+    ) -> str:
         """Create a new session for the given agency and return its id."""
         session_id = agency.main_thread.id
         session_config = SessionConfig(
             id=session_id,
+            name=name,
             user_id=user_id,
             agency_id=agency_id,
             thread_ids=thread_ids,
@@ -53,6 +62,10 @@ class SessionManager:
         )
         self.session_storage.save(session_config)
         return session_id
+
+    def rename_session(self, session_id: str, new_name: str) -> None:
+        """Rename the session with the given ID."""
+        self.session_storage.update(session_id, {"name": new_name})
 
     def update_session_timestamp(self, session_id: str) -> None:
         """Update the session with the given ID."""
@@ -62,13 +75,12 @@ class SessionManager:
     def delete_session(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         session_config = self.get_session(session_id)
-        if session_config:
-            main_thread_id: str = session_config.thread_ids.pop("main_thread")  # type: ignore
-            self._delete_session_via_api(main_thread_id)
-            for receiver in session_config.thread_ids.values():
-                for thread_id in receiver.values():  # type: ignore
-                    self._delete_session_via_api(thread_id)
-            self.session_storage.delete(session_id)
+        main_thread_id: str = session_config.thread_ids.pop("main_thread")  # type: ignore
+        self._delete_session_via_api(main_thread_id)
+        for receiver in session_config.thread_ids.values():
+            for thread_id in receiver.values():  # type: ignore
+                self._delete_session_via_api(thread_id)
+        self.session_storage.delete(session_id)
 
     def delete_sessions_by_agency_id(self, agency_id: str) -> None:
         """Delete all sessions for the given agency."""
@@ -79,3 +91,11 @@ class SessionManager:
     def _delete_session_via_api(self, session_id: str) -> None:
         """Delete the session with the given ID."""
         self.openai_client.beta.threads.delete(thread_id=session_id, timeout=DEFAULT_OPENAI_API_TIMEOUT)
+
+    @staticmethod
+    def validate_session_ownership(target_user_id: str, current_user_id: str) -> None:
+        """Validate the ownership of the session."""
+        if target_user_id != current_user_id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this session"
+            )

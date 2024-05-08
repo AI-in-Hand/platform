@@ -2,18 +2,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException
-from http import HTTPStatus
 
+from backend.exceptions import NotFoundError
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
 from backend.services.agent_manager import AgentManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENT_ID
-
-
-@pytest.fixture
-def agent_manager(storage_mock, user_variable_manager_mock, skill_storage_mock):
-    return AgentManager(storage_mock, user_variable_manager_mock, skill_storage_mock)
 
 
 @pytest.fixture
@@ -29,6 +24,11 @@ def user_variable_manager_mock():
 @pytest.fixture
 def skill_storage_mock():
     return MagicMock()
+
+
+@pytest.fixture
+def agent_manager(storage_mock, user_variable_manager_mock, skill_storage_mock):
+    return AgentManager(storage_mock, user_variable_manager_mock, skill_storage_mock)
 
 
 @pytest.mark.asyncio
@@ -95,11 +95,10 @@ async def test_delete_agent(agent_manager, storage_mock):
 async def test_delete_agent_not_found(agent_manager, storage_mock):
     storage_mock.load_by_id.return_value = None
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(NotFoundError, match=f"Agent not found: {TEST_AGENT_ID}") as exc_info:
         await agent_manager.delete_agent(TEST_AGENT_ID, TEST_USER_ID)
 
-    assert exc_info.value.status_code == 404
-    assert exc_info.value.detail == "Agent not found"
+    assert str(exc_info.value) == f"Agent not found: {TEST_AGENT_ID}"
 
 
 @pytest.mark.asyncio
@@ -144,10 +143,9 @@ async def test_get_agent_existing(agent_manager, storage_mock):
 @pytest.mark.asyncio
 async def test_get_agent_non_existing(agent_manager, storage_mock):
     storage_mock.load_by_id.return_value = None
-    
-    with pytest.raises(HTTPException) as exc_info:
+
+    with pytest.raises(NotFoundError, match="Agent not found: sender_agent_id"):
         await agent_manager.get_agent(TEST_AGENT_ID)
-    assert exc_info.value.status_code == HTTPStatus.NOT_FOUND  
 
     storage_mock.load_by_id.assert_called_once_with(TEST_AGENT_ID)
 

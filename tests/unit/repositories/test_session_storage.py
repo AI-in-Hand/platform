@@ -9,6 +9,7 @@ from tests.testing_utils import TEST_USER_ID
 def session_data():
     return {
         "id": "session1",
+        "name": "session_name",
         "user_id": TEST_USER_ID,
         "agency_id": "agency1",
         "thread_ids": {},

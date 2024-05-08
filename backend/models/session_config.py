@@ -9,6 +9,7 @@ class SessionConfig(BaseModel):
     """Session configuration model"""
 
     id: str = Field(..., description="Unique identifier for the session")
+    name: str = Field(..., description="The name of the session")
     user_id: str = Field(..., description="The user ID associated with the session")
     agency_id: str = Field(..., description="Unique identifier for the agency")
     thread_ids: dict[str, str | dict[str, str]] = Field(

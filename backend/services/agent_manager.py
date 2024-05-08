@@ -8,6 +8,7 @@ from fastapi import HTTPException
 
 from backend.constants import DEFAULT_OPENAI_API_TIMEOUT
 from backend.custom_skills import SKILL_MAPPING
+from backend.exceptions import NotFoundError
 from backend.models.agent_flow_spec import AgentFlowSpec
 from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
@@ -47,7 +48,7 @@ class AgentManager:
     async def get_agent(self, agent_id: str) -> tuple[Agent, AgentFlowSpec]:
         config = self.storage.load_by_id(agent_id)
         if not config:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+            raise NotFoundError("Agent", agent_id)
         agent = await asyncio.to_thread(self._construct_agent, config)
         return agent, config
 
@@ -62,7 +63,7 @@ class AgentManager:
         if config.id:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+                raise NotFoundError("Agent", config.id)
             self._validate_agent_ownership(config_db, current_user_id)
             self._validate_agent_name(config, config_db)
 
@@ -79,7 +80,7 @@ class AgentManager:
     async def delete_agent(self, agent_id: str, current_user_id: str) -> None:
         config = self.storage.load_by_id(agent_id)
         if not config:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
+            raise NotFoundError("Agent", agent_id)
         self._validate_agent_ownership(config, current_user_id)
         self.storage.delete(agent_id)
 

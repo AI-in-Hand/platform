@@ -5,7 +5,7 @@ import pytest
 
 from backend.settings import settings
 from tests.testing_utils import reset_context_vars
-from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_ENCRYPTION_KEY, TEST_USER_ID
+from tests.testing_utils.constants import TEST_AGENCY_ID, TEST_AGENT_ID, TEST_ENCRYPTION_KEY, TEST_USER_ID
 from tests.testing_utils.mock_firestore_client import MockFirestoreClient
 
 oai_mock = MagicMock(get_openai_client=MagicMock(return_value=MagicMock(timeout=10)))
@@ -63,10 +63,23 @@ def mock_setup_logging():
 
 
 @pytest.fixture
+def agency_config_data():
+    return {
+        "id": TEST_AGENCY_ID,
+        "user_id": TEST_USER_ID,
+        "name": "Test Agency",
+        "main_agent": "Sender Agent",
+        "agents": [TEST_AGENT_ID],
+        "timestamp": "2024-05-05T00:14:57.487901+00:00",
+    }
+
+
+@pytest.fixture
 def session_config_data():
     return {
         "id": "test_session_id",
         "user_id": TEST_USER_ID,
+        "name": "Test agency",
         "agency_id": TEST_AGENCY_ID,
         "thread_ids": {"main_thread": "test_session_id"},
         "timestamp": "2024-05-05T00:14:57.487901+00:00",

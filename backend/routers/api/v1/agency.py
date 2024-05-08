@@ -2,7 +2,7 @@ import logging
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends
 from fastapi.params import Query
 
 from backend.dependencies.auth import get_current_user
@@ -13,7 +13,6 @@ from backend.models.response_models import (
     AgencyListResponse,
     GetAgencyResponse,
 )
-from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.agency_manager import AgencyManager
 from backend.services.session_manager import SessionManager
@@ -48,7 +47,7 @@ async def get_agency_config(
     """Get the agency configuration.
     NOTE: currently this endpoint is not used in the frontend.
     """
-    agency_config = await manager.get_agency_config(id, current_user.id)
+    agency_config = await manager.get_agency_config(id, current_user.id, allow_template=True)
 
     # Transform the internal model to the API model
     config_for_api = adapter.to_api(agency_config)
@@ -73,7 +72,7 @@ async def create_or_update_agency(
     return AgencyListResponse(message="Saved", data=agencies_for_api)
 
 
-@agency_router.delete("/agency")  
+@agency_router.delete("/agency")
 async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],

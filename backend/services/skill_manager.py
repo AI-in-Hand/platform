@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException
 
+from backend.exceptions import NotFoundError
 from backend.models.skill_config import SkillConfig
 from backend.repositories.skill_config_storage import SkillConfigStorage
 
@@ -24,7 +25,7 @@ class SkillManager:
         """Get a skill configuration by ID."""
         config_db = self.storage.load_by_id(id_)
         if not config_db:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
+            raise NotFoundError("Skill", id_)
         return config_db
 
     def create_skill_version(self, config: SkillConfig, current_user_id: str) -> tuple[str, int]:

@@ -21,10 +21,12 @@ const RAView = () => {
   };
 
   const [config, setConfig] = React.useState(null);
+  const connectionId = useConfigStore((state) => state.connectionId);
 
   React.useEffect(() => {
     setLocalStorage("ara_config", config);
   }, [config]);
+
   const [error, setError] = React.useState<IStatus | null>({
     status: true,
     message: "All good",
@@ -74,8 +76,9 @@ const RAView = () => {
               </div>
             </div>
           )}
+
           {workflowConfig !== null && session !== null && (
-            <ChatBox initMessages={messages} />
+            <ChatBox initMessages={messages} connectionId={connectionId} />
           )}
         </div>
       </div>

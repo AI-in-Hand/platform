@@ -15,7 +15,6 @@ from backend.models.response_models import (
     SkillListResponse,
 )
 from backend.models.skill_config import SkillConfig
-from backend.repositories.skill_config_storage import SkillConfigStorage
 from backend.services.skill_executor import SkillExecutor
 from backend.services.skill_manager import SkillManager
 

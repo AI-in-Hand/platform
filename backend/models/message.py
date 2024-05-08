@@ -9,7 +9,6 @@ class Message(BaseModel):
     Corresponds to the IMessage interface in the frontend."""
 
     id: str | None = Field(None, description="The unique identifier for the message.")
-    agency_id: str = Field(..., description="The unique identifier for the agency.")
     session_id: str = Field(..., description="The identifier for the conversational thread.")
     role: Literal["user", "assistant"] = Field("user", description="The role of the sender of the message.")
     content: str = Field(..., description="The message to be sent to the agency.")

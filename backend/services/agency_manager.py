@@ -1,17 +1,23 @@
+import json
 import logging
 from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import Any
 
 from agency_swarm import Agency, Agent
+from cachetools import LRUCache
 from fastapi import HTTPException
 
+from backend.exceptions import NotFoundError
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.agent_manager import AgentManager
 from backend.services.user_variable_manager import UserVariableManager
+from backend.utils import hash_string
 
 logger = logging.getLogger(__name__)
+
+agency_cache: LRUCache = LRUCache(maxsize=1000)
 
 
 class AgencyManager:
@@ -33,30 +39,22 @@ class AgencyManager:
         sorted_agencies = sorted(agencies, key=lambda x: x.timestamp, reverse=True)
         return sorted_agencies
 
-    async def get_agency_config(self, id_: str, current_user_id: str) -> AgencyConfig:
+    async def get_agency_config(self, id_: str, user_id: str, allow_template: bool = False) -> AgencyConfig:
         """Get the agency configuration by ID."""
         agency_config = self.storage.load_by_id(id_)
         if not agency_config:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
-        self.validate_agency_ownership(agency_config.user_id, current_user_id, allow_template=True)
+            raise NotFoundError("Agency", id_)
+        self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
         return agency_config
 
     async def get_agency(
         self, id_: str, thread_ids: dict[str, Any], user_id: str, allow_template: bool = False
-    ) -> Agency | None:
+    ) -> tuple[Agency, AgencyConfig]:
         """Get the agency from the Firestore. It will construct the agency and update the assistants."""
-        agency_config = self.storage.load_by_id(id_)
-        if not agency_config:
-            logger.error(f"Agency with id {id_} not found.")
-            return None
-
-        self.validate_agency_ownership(agency_config.user_id, user_id, allow_template=allow_template)
+        agency_config = await self.get_agency_config(id_, user_id, allow_template=allow_template)
 
         agency = await self._construct_agency_and_update_assistants(agency_config, thread_ids)
-        if not agency:
-            logger.error(f"Agency configuration for {id_} could not be found in the Firestore database.")
-            return None
-        return agency
+        return agency, agency_config
 
     def is_agent_used_in_agencies(self, agent_id: str) -> bool:
         """Check if the agent is part of any agency configurations."""
@@ -75,7 +73,7 @@ class AgencyManager:
         if config.id:
             config_db = self.storage.load_by_id(config.id)
             if not config_db:
-                raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+                raise NotFoundError("Agency", config.id)
             self.validate_agency_ownership(config_db.user_id, current_user_id)
         self._validate_agent_ownership(config.agents, current_user_id)
 
@@ -101,18 +99,18 @@ class AgencyManager:
         """Delete the agency from the Firestore."""
         agency_config = self.storage.load_by_id(agency_id)
         if not agency_config:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+            raise NotFoundError("Agency", agency_id)
         self.validate_agency_ownership(agency_config.user_id, current_user_id)
         self.storage.delete(agency_id)
 
     @staticmethod
     def validate_agency_ownership(
-        claiming_user_id: str | None, current_user_id: str, allow_template: bool = False
+        target_user_id: str | None, current_user_id: str, allow_template: bool = False
     ) -> None:
         """Validate the agency ownership. It will check if the current user has permissions to update the agency."""
-        if not claiming_user_id and allow_template:
+        if not target_user_id and allow_template:
             return
-        if claiming_user_id != current_user_id:
+        if target_user_id != current_user_id:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this agency"
             )
@@ -130,6 +128,13 @@ class AgencyManager:
         Gets the agency config from the Firestore, constructs agents and agency
         (agency-swarm also updates assistants). Returns the Agency instance if successful, otherwise None.
         """
+        # Check if the agency is already in the cache
+        agency_config_str = agency_config.model_dump_json()
+        thread_ids_str = json.dumps(thread_ids)
+        cache_key = hash_string(agency_config_str + thread_ids_str)
+        if cache_key in agency_cache:
+            return agency_cache[cache_key]
+
         agents = await self._load_and_construct_agents(agency_config)
 
         agency_chart = []
@@ -140,14 +145,19 @@ class AgencyManager:
                 new_agency_chart = [[agents[name] for name in layer] for layer in agency_config.agency_chart.values()]
                 agency_chart.extend(new_agency_chart)
 
-        # call Agency.__init__ to create or update the agency
-        return Agency(
+        # Call Agency.__init__ to create or update the agency
+        agency = Agency(
             agency_chart,
             shared_instructions=agency_config.shared_instructions,
             threads_callbacks=(
                 {"load": lambda: thread_ids, "save": lambda x: thread_ids.update(x)} if thread_ids is not None else None
             ),
         )
+
+        # Store the constructed agency in the cache
+        agency_cache[cache_key] = agency
+
+        return agency
 
     def _validate_agent_ownership(self, agents: list[str], current_user_id: str) -> None:
         """Validate the agent ownership. It will check if the current user has permissions to use the agents."""

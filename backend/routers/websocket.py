@@ -13,22 +13,18 @@ websocket_router = APIRouter(
 )
 
 
-@websocket_router.websocket("/{user_id}/{agency_id}/{session_id}")
+@websocket_router.websocket("/{client_id}")
 async def websocket_session_endpoint(
-    user_id: str,
-    agency_id: str,
-    session_id: str,
+    client_id: str,
     websocket=Depends(get_websocket),
     websocket_handler: WebSocketHandler = Depends(get_websocket_handler),
 ) -> None:
     """
     WebSocket endpoint for maintaining conversation with a specific session.
-    Send messages to and from the userproxy of the given agency.
+    Send messages to and from the user proxy of the given agency.
 
+    :param client_id: The client ID.
     :param websocket: The WebSocket connection.
-    :param user_id: The user ID associated with the session.
-    :param agency_id: The agency ID associated with the session.
-    :param session_id: The session ID.
     :param websocket_handler: The WebSocket handler instance.
     """
-    await websocket_handler.handle_websocket_connection(websocket, user_id, agency_id, session_id)
+    await websocket_handler.handle_websocket_connection(websocket, client_id)

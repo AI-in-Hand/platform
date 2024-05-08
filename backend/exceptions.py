@@ -2,6 +2,14 @@
 # This file is reserved for custom exception classes.
 
 
+class NotFoundError(ValueError):
+    """Exception raised when an entity is not found in the database."""
+
+    def __init__(self, entity_name: str, id_: str):
+        message = f"{entity_name} not found: {id_}"
+        super().__init__(message)
+
+
 class UnsetVariableError(ValueError):
     """Exception raised when a required variable is unset or not defined."""
 
