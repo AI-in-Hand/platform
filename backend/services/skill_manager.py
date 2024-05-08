@@ -66,3 +66,7 @@ class SkillManager:
             raise HTTPException(
                 status_code=HTTPStatus.FORBIDDEN, detail="You don't have permissions to access this skill"
             )
+
+    def update_skill_config(self, config: SkillConfig) -> None:
+        """Update the skill configuration in the storage."""
+        self.storage.save(config)
