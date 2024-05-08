@@ -36,5 +36,5 @@ async def test_authenticate_invalid_token(websocket_handler):
 
     websocket_handler.auth_service.get_user.assert_called_once_with(token)
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": "error", "message": "Invalid token"}, client_id
+        {"status": False, "message": "Invalid token"}, client_id
     )

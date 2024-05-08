@@ -6,7 +6,7 @@ from backend.services.websocket.websocket_handler import WebSocketHandler
 
 
 @pytest.fixture
-def websocket_handler():
+def websocket_handler() -> WebSocketHandler:
     connection_manager = AsyncMock()
     auth_service = MagicMock()
     agency_manager = AsyncMock()
