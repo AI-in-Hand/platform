@@ -58,9 +58,10 @@ const ChatBox = ({
 
   const [retries, setRetries] = React.useState(0);
 
-  const serverUrl = window.location.host;
-  const schema = serverUrl.includes("localhost") ? "ws://" : "wss://";
-  const websocketUrl = `${schema}${serverUrl}/ws/`;
+  const host = window.location.host;
+  const serverUrl = getServerUrl();
+  const wsSchema = host.includes("localhost") || host.includes("127.0.0.1") ? "ws://" : "wss://";
+  const websocketUrl = `${wsSchema}${host}/ws/`;
 
   const [loading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");

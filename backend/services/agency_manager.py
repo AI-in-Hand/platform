@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import UTC, datetime
 from http import HTTPStatus
@@ -12,6 +13,7 @@ from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.services.agent_manager import AgentManager
 from backend.services.user_variable_manager import UserVariableManager
+from backend.utils import hash_string
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +129,9 @@ class AgencyManager:
         (agency-swarm also updates assistants). Returns the Agency instance if successful, otherwise None.
         """
         # Check if the agency is already in the cache
-        cache_key = (agency_config.id, frozenset(thread_ids.items()))
+        agency_config_str = agency_config.model_dump_json()
+        thread_ids_str = json.dumps(thread_ids)
+        cache_key = hash_string(agency_config_str + thread_ids_str)
         if cache_key in agency_cache:
             return agency_cache[cache_key]
 

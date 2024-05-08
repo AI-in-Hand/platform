@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import sys
@@ -122,3 +123,8 @@ def sanitize_id(input_string: str) -> str:
     """Sanitize an ID to prevent injection attacks. Leave only alphanumeric characters and "_"."""
     input_string = input_string.replace("\r\n", "").replace("\n", "")
     return "".join(c for c in input_string if c.isalnum() or c == "_")
+
+
+def hash_string(input_string: str) -> str:
+    """Hash a string using SHA-256."""
+    return hashlib.sha256(input_string.encode("utf-8")).hexdigest()

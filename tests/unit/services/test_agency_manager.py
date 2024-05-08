@@ -143,6 +143,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
         agents=[TEST_AGENT_ID, "agent2_id"],
         main_agent="Sender Agent",
         agency_chart={"0": ["Sender Agent", "agent2_name"]},
+        timestamp="2024-05-05T00:14:57.487901+00:00",
     )
 
     # Mock agents
@@ -176,7 +177,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
     assert agency.shared_instructions == "manifesto"
 
     # Verify that the agency is cached
-    cache_key = (agency_config.id, frozenset())
+    cache_key = "8147cad3c67ff29b97a59e6e1fc1ae9ddc4e6738c2d41190516480a916d0c40e"
     assert cache_key in agency_cache
     assert agency_cache[cache_key] == agency
 
