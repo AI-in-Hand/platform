@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from backend.dependencies.dependencies import get_user_variable_manager
 from backend.models.agency_config import AgencyConfig
 from backend.repositories.agency_config_storage import AgencyConfigStorage
-from backend.repositories.user_variable_storage import UserVariableStorage
+from backend.repositories.user_variable_storage import UserVariableStorage  
 from backend.services.agency_manager import AgencyManager
 from tests.testing_utils import TEST_USER_ID
 from tests.testing_utils.constants import TEST_AGENCY_ID
@@ -177,10 +177,11 @@ async def test_construct_agency_single_layer_chart(agency_manager):
 async def test_delete_agency(agency_manager, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {
         "id": TEST_AGENCY_ID,
-        "name": "Test Agency",
-        "main_agent": "Test Agent"
+        "name": "Test Agency", 
+        "main_agent": "Test Agent",
+        "user_id": TEST_USER_ID
     })
-    await agency_manager.delete_agency(TEST_AGENCY_ID, current_user_id="mock_user_id")
+    await agency_manager.delete_agency(TEST_AGENCY_ID, current_user_id=TEST_USER_ID)
     assert mock_firestore_client.to_dict() == {}
 
 
