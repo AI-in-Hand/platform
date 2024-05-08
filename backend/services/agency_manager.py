@@ -96,6 +96,11 @@ class AgencyManager:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
         self.validate_agency_ownership(agency_config.user_id, current_user_id)
         self.storage.delete(agency_id)
+        agency_config = self.storage.load_by_id(agency_id)
+        if not agency_config:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agency not found")
+        self.validate_agency_ownership(agency_config.user_id, current_user_id)
+        self.storage.delete(agency_id)
 
     @staticmethod
     def validate_agency_ownership(

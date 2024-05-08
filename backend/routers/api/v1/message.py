@@ -37,7 +37,7 @@ async def get_message_list(
 ) -> list[Message]:
     """Get the list of messages for the given session_id."""
     # check if the current_user has permissions to send a message to the agency
-    session_config = session_manager.get_session(session_id)
+    session_config = await session_manager.get_session_config(session_id)
     if not session_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Session not found")
     if session_config.user_id != current_user.id:

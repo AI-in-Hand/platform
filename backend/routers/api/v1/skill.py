@@ -89,12 +89,12 @@ async def approve_skill(
 ):
     """Approve a skill configuration. This endpoint is only accessible to superusers (currently not accessible).
     NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
-    config = manager.get_skill_config(id)
-    if not config:
+    skill_config = manager.get_skill_config(id)
+    if not skill_config:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Skill not found")
 
-    config.approved = True
-    manager.update_skill_config(config)
+    skill_config.approved = True
+    manager.update_skill_config(skill_config)
     return BaseResponse(message="Skill configuration approved")
 
 
