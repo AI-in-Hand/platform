@@ -9,6 +9,7 @@ from websockets.exceptions import ConnectionClosedOK
 
 from backend.constants import INTERNAL_ERROR_MESSAGE
 from backend.exceptions import NotFoundError, UnsetVariableError
+from backend.models.auth import User
 from backend.models.session_config import SessionConfig
 from backend.services.agency_manager import AgencyManager
 from backend.services.auth_service import AuthService
@@ -50,27 +51,23 @@ class WebSocketHandler:
         await self.connection_manager.connect(websocket, client_id)
         logger.info(f"WebSocket connected for client_id: {client_id}")
 
-        agency_id = None
         session_id = None
         try:
             message = await websocket.receive_json()
-            user_id = message.get("user_id")
-            session_id = message.get("session_id")
+            session_id = message.get("data", {}).get("session_id")
             token = message.get("access_token")
 
-            if not user_id or not session_id or not token:
+            if not session_id or not token:
                 await self.connection_manager.send_message(
                     {"status": "error", "message": "Missing required fields"}, client_id
                 )
                 return
 
-            logger.info(
-                f"WebSocket connected for client_id: {client_id}, " f"user_id: {user_id}, session_id: {session_id}"
-            )
+            logger.info(f"WebSocket connected for client_id: {client_id}, session_id: {session_id}")
 
-            await self._authenticate(client_id, user_id, token)
+            user = await self._authenticate(client_id, token)
 
-            session, agency = await self._setup_agency(user_id, session_id)
+            session, agency = await self._setup_agency(user.id, session_id)
 
             if not session or not agency:
                 await self.connection_manager.send_message(
@@ -93,29 +90,30 @@ class WebSocketHandler:
         except Exception as exception:
             logger.exception(
                 "Exception while processing message: "
-                f"agency_id: {agency_id}, session_id: {session_id}, client_id: {client_id}, error: {str(exception)}"
+                f"session_id: {session_id}, client_id: {client_id}, error: {str(exception)}"
             )
             await self.connection_manager.send_message(
                 {"status": "error", "message": INTERNAL_ERROR_MESSAGE},
                 client_id,
             )
 
-    async def _authenticate(self, client_id: str, user_id: str, token: str) -> None:
+    async def _authenticate(self, client_id: str, token: str) -> User:
         """Authenticate the user before sending messages.
         Process the token sent by the user and authenticate the user using Firebase.
         If the token is invalid, send an error message to the user.
 
         :param client_id: The client ID.
-        :param user_id: The user ID.
         :param token: The token sent by the user.
         """
         try:
-            self.auth_service.get_user(token)
+            user = self.auth_service.get_user(token)
         except HTTPException:
-            logger.info(f"Invalid token for user_id: {user_id}")
+            logger.info(f"Invalid token {token} for client_id: {client_id}")
             await self.connection_manager.send_message({"status": "error", "message": "Invalid token"}, client_id)
             raise WebSocketDisconnect from None
-        ContextEnvVarsManager.set("user_id", user_id)
+
+        ContextEnvVarsManager.set("user_id", user.id)
+        return user
 
     async def _setup_agency(self, user_id: str, session_id: str) -> tuple[SessionConfig | None, Agency | None]:
         """
@@ -128,7 +126,6 @@ class WebSocketHandler:
         """
         session = self.session_manager.get_session(session_id)
         agency, _ = await self.agency_manager.get_agency(session.agency_id, session.thread_ids, user_id)
-        ContextEnvVarsManager.set("user_id", user_id)
         ContextEnvVarsManager.set("agency_id", session.agency_id)
         return session, agency
 

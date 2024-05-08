@@ -276,7 +276,6 @@ const ChatBox = ({
     console.log("socketUrl", socketUrl);
     if (!wsClient.current) {
       const client = new WebSocket(socketUrl);
-      const accessToken = store.getState().user.accessToken;
       wsClient.current = client;
       client.onerror = (e) => {
         console.log("ws error", e);
@@ -285,8 +284,6 @@ const ChatBox = ({
       client.onopen = () => {
         setWsConnectionStatus("connected");
         console.log("ws opened");
-        // Send the access token as the first message
-        client.send(accessToken);
       };
 
       client.onclose = () => {
@@ -413,7 +410,6 @@ const ChatBox = ({
     if (wsClient.current && wsClient.current.readyState === 1) {
       wsClient.current.send(
         JSON.stringify({
-          connection_id: connectionId,
           data: postBody,
           type: "user_message",
           access_token: accessToken,

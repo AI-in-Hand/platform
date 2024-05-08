@@ -15,18 +15,16 @@ from backend.exceptions import NotFoundError, UnsetVariableError
 async def test_handle_websocket_connection(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
-    websocket_handler.auth_service.get_user.return_value = None
+    websocket_handler.auth_service.get_user.return_value = MagicMock()
     websocket_handler.session_manager.get_session.return_value = MagicMock()
     websocket_handler.agency_manager.get_agency.return_value = (AsyncMock(), MagicMock())
 
@@ -62,18 +60,16 @@ async def test_handle_websocket_connection_missing_fields(websocket_handler):
 async def test_handle_websocket_connection_session_not_found(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
-    websocket_handler.auth_service.get_user.return_value = None
+    websocket_handler.auth_service.get_user.return_value = MagicMock()
     websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
 
     await websocket_handler.handle_websocket_connection(websocket, client_id)
@@ -87,18 +83,17 @@ async def test_handle_websocket_connection_session_not_found(websocket_handler):
 async def test_handle_websocket_connection_agency_not_found(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
     agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
-    websocket_handler.auth_service.get_user.return_value = None
+    websocket_handler.auth_service.get_user.return_value = MagicMock()
     websocket_handler.session_manager.get_session.return_value = MagicMock()
     websocket_handler.agency_manager.get_agency.side_effect = NotFoundError("Agency", agency_id)
 
@@ -137,16 +132,14 @@ async def test_handle_websocket_connection_connection_closed(websocket_handler):
 async def test_handle_websocket_connection_unset_variable_error(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
     expected_error_message = "Variable Variable XXX not set is not set. Please set it first."
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = UnsetVariableError("Variable XXX not set")
@@ -162,8 +155,6 @@ async def test_handle_websocket_connection_unset_variable_error(websocket_handle
 async def test_handle_websocket_connection_openai_authentication_error(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
     expected_error_message = "Authentication Error"
@@ -171,9 +162,9 @@ async def test_handle_websocket_connection_openai_authentication_error(websocket
     response = httpx.Response(401, request=request)
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = OpenAIAuthenticationError(
@@ -191,19 +182,17 @@ async def test_handle_websocket_connection_openai_authentication_error(websocket
 async def test_handle_websocket_connection_not_found_error(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
     expected_error_message = "Session not found: session_id"
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
-    websocket_handler.auth_service.get_user.return_value = None
+    websocket_handler.auth_service.get_user.return_value = MagicMock()
     websocket_handler.session_manager.get_session.side_effect = NotFoundError("Session", session_id)
 
     await websocket_handler.handle_websocket_connection(websocket, client_id)
@@ -217,15 +206,13 @@ async def test_handle_websocket_connection_not_found_error(websocket_handler):
 async def test_handle_websocket_connection_exception(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    user_id = "user_id"
-    agency_id = "agency_id"
     session_id = "session_id"
     token = "valid_token"
 
     websocket.receive_json.return_value = {
-        "user_id": user_id,
-        "agency_id": agency_id,
-        "session_id": session_id,
+        "data": {
+            "session_id": session_id,
+        },
         "access_token": token,
     }
     websocket_handler.auth_service.get_user.side_effect = Exception("Some exception")
