@@ -49,7 +49,7 @@ class AgentManager:
         if not config:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Agent not found")
         agent = await asyncio.to_thread(self._construct_agent, config)
-        return agent, config  
+        return agent, config
 
     async def handle_agent_creation_or_update(self, config: AgentFlowSpec, current_user_id: str) -> str:
         """Create or update an agent. If the agent already exists, it will be updated."""

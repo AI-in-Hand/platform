@@ -90,7 +90,7 @@ async def approve_skill(
     """Approve a skill configuration. This endpoint is only accessible to superusers (currently not accessible).
     NOTE: currently this endpoint is not used in the frontend, and you can only approve skills directly in the DB."""
     await manager.approve_skill(id)
-    return BaseResponse(message="Skill configuration approved")  
+    return BaseResponse(message="Skill configuration approved")
 
 
 @skill_router.post("/skill/execute")

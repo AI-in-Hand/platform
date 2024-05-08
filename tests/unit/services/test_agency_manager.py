@@ -176,7 +176,7 @@ async def test_construct_agency_single_layer_chart(agency_manager):
 @pytest.mark.asyncio
 async def test_delete_agency(agency_manager, mock_firestore_client):
     mock_firestore_client.setup_mock_data("agency_configs", TEST_AGENCY_ID, {"id": TEST_AGENCY_ID})
-    await agency_manager.delete_agency(TEST_AGENCY_ID)
+    await agency_manager.delete_agency(TEST_AGENCY_ID, current_user_id="mock_user_id")
     assert mock_firestore_client.to_dict() == {}
 
 

@@ -73,7 +73,7 @@ async def create_or_update_agency(
     return AgencyListResponse(message="Saved", data=agencies_for_api)
 
 
-@agency_router.delete("/agency")
+@agency_router.delete("/agency")  
 async def delete_agency(
     current_user: Annotated[User, Depends(get_current_user)],
     adapter: Annotated[AgencyAdapter, Depends(get_agency_adapter)],
