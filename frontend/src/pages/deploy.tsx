@@ -1,7 +1,7 @@
 import * as React from "react";
 import Layout from "../components/layout";
 import { graphql } from "gatsby";
-import DeployView from "../components/views/deploy/deploy";
+import DeployView from "../components/views/deployment/deploy";
 
 // markup
 const IndexPage = ({ data }: any) => {
