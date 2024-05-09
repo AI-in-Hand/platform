@@ -615,26 +615,28 @@ const ChatBox = ({
               </div>
             </form>
           </div>{" "}
-          <div>
-            <div className="mt-2 text-xs text-secondary">
-              <Tooltip title={`Socket ${wsConnectionStatus}`}>
-                <div
-                  className={`w-1 h-3 rounded  inline-block mr-1 ${getConnectionColor(
-                    wsConnectionStatus
-                  )}`}
-                ></div>{" "}
-              </Tooltip>
-              Blank slate? Try one of the example prompts below{" "}
-            </div>
+          {textAreaInputRef.current && textAreaInputRef.current.value.trim() === "" && (
+            <div>
+              <div className="mt-2 text-xs text-secondary">
+                <Tooltip title={`Socket ${wsConnectionStatus}`}>
+                  <div
+                    className={`w-1 h-3 rounded  inline-block mr-1 ${getConnectionColor(
+                      wsConnectionStatus
+                    )}`}
+                  ></div>{" "}
+                </Tooltip>
+                Blank slate? Try one of the example prompts below{" "}
+              </div>
 
-            <div
-              className={`mt-2 inline-flex gap-2 flex-wrap  ${
-                loading ? "brightness-75 pointer-events-none" : ""
-              }`}
-            >
-              {promptButtons}
+              <div
+                className={`mt-2 inline-flex gap-2 flex-wrap  ${
+                  loading ? "brightness-75 pointer-events-none" : ""
+                }`}
+              >
+                {promptButtons}
+              </div>
             </div>
-          </div>
+          )}
           {error && !error.status && (
             <div className="p-2   rounded mt-4 text-orange-500 text-sm">
               {" "}
