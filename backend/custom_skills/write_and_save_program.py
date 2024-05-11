@@ -3,8 +3,13 @@ from pathlib import Path
 from agency_swarm import BaseTool
 from pydantic import Field
 
+import boto3
+from botocore.exceptions import NoCredentialsError
+
 from backend.constants import AGENCY_DATA_DIR
 from backend.services.context_vars_manager import ContextEnvVarsManager
+from backend.repositories.user_variable_storage import UserVariableStorage
+from backend.services.user_variable_manager import UserVariableManager
 
 
 class File(BaseTool):
@@ -23,27 +28,23 @@ class File(BaseTool):
     body: str = Field(..., description="Correct contents of a file")
 
     def run(self) -> str:
-        if ".." in self.file_name or self.file_name.startswith("/"):
-            return "Invalid file path. Directory traversal is not allowed."
+        user_variable_manager = UserVariableManager(UserVariableStorage())
+        aws_access_key_id = user_variable_manager.get_by_key("AWS_ACCESS_KEY_ID") 
+        aws_secret_access_key = user_variable_manager.get_by_key("AWS_SECRET_ACCESS_KEY")
 
-        agency_id = ContextEnvVarsManager.get("agency_id")
-        agency_path = AGENCY_DATA_DIR / agency_id
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key
+        )
 
-        # Extract the directory path from the file name
-        directory_path = Path(self.file_name).parent
-        directory = agency_path / directory_path
+        bucket_name = "my-bucket"  # replace with your bucket name
 
-        # Ensure the directory exists
-        directory.mkdir(parents=True, exist_ok=True)
-
-        # Construct the full path using the directory and file name
-        full_path = directory / Path(self.file_name).name
-
-        # Write the file
-        with open(full_path, "w") as file:
-            file.write(self.body)
-
-        return f"File written to {full_path.as_posix()}"
+        try:
+            s3.put_object(Bucket=bucket_name, Key=self.file_name, Body=self.body)
+            return f"File {self.file_name} uploaded to {bucket_name}"
+        except NoCredentialsError:
+            return "S3 credentials not available"
 
 
 class WriteAndSaveProgram(BaseTool):
