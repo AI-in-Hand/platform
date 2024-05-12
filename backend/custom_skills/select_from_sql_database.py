@@ -85,5 +85,6 @@ if __name__ == "__main__":
         order_by="id",
         order_direction="ASC",
         limit=10,
+    )
     print(tool.run())
     """
