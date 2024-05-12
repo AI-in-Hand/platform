@@ -55,7 +55,6 @@ def agency_adapter():
 def agent_config_data_api():
     return {
         "id": TEST_AGENT_ID,
-        "type": "userproxy",
         "config": {
             "name": "Sender Agent",
             "system_message": "Do something important.",

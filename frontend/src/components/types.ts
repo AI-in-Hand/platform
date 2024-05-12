@@ -33,22 +33,12 @@ export interface IAgentConfig {
 }
 
 export interface IAgentFlowSpec {
-  type: "assistant" | "userproxy" | "groupchat";
   config: IAgentConfig;
   timestamp?: string;
   id?: string;
   skills?: Array<ISkill>;
   description?: string;
   user_id?: string;
-}
-
-export interface IGroupChatConfig {
-  agents: Array<IAgentFlowSpec>;
-  admin_name: string;
-  messages: Array<any>;
-  max_round: number;
-  speaker_selection_method: "auto" | "round_robin" | "random";
-  allow_repeat_speaker: boolean | Array<IAgentConfig>;
 }
 
 export interface IFlowConfig {

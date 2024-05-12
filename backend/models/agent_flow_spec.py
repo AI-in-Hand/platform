@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -27,7 +26,6 @@ class AgentFlowSpec(BaseModel):
     """Config for an agent"""
 
     id: str | None = Field(None, description="Unique identifier for the configuration")
-    type: Literal["assistant", "userproxy", "groupchat"] = Field("userproxy", description="Type of the agent")
     config: AgentConfig = Field(..., description="Agent configuration")
     timestamp: str = Field(
         default_factory=lambda: datetime.now(UTC).isoformat(), description="Timestamp of the last update"

@@ -9,7 +9,6 @@ def test_to_model(agent_adapter):
     ]
     agent_flow_spec_api = AgentFlowSpecForAPI(
         id="1234",
-        type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=skill_configs,
         description="Test Description",
@@ -17,7 +16,6 @@ def test_to_model(agent_adapter):
 
     agent_flow_spec = agent_adapter.to_model(agent_flow_spec_api)
 
-    assert agent_flow_spec.type == "assistant"
     assert agent_flow_spec.config.name == "Test Agent"
     assert agent_flow_spec.skills == ["Skill 1", "Skill 2"]
     assert agent_flow_spec.description == "Test Description"
@@ -30,7 +28,6 @@ def test_to_api(agent_adapter, mocker):
     ]
     agent_flow_spec = AgentFlowSpec(
         id="1234",
-        type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=["Skill 1", "Skill 2"],
         description="Test Description",
@@ -44,7 +41,6 @@ def test_to_api(agent_adapter, mocker):
 
     agent_flow_spec_api = agent_adapter.to_api(agent_flow_spec)
 
-    assert agent_flow_spec_api.type == "assistant"
     assert agent_flow_spec_api.config.name == "Test Agent"
     assert agent_flow_spec_api.skills == skill_configs
     assert agent_flow_spec_api.description == "Test Description"
@@ -53,7 +49,6 @@ def test_to_api(agent_adapter, mocker):
 def test_to_api_without_skills(agent_adapter):
     agent_flow_spec = AgentFlowSpec(
         id="1234",
-        type="assistant",
         config=AgentConfig(name="Test Agent"),
         skills=[],
         description="Test Description",
@@ -61,7 +56,6 @@ def test_to_api_without_skills(agent_adapter):
 
     agent_flow_spec_api = agent_adapter.to_api(agent_flow_spec)
 
-    assert agent_flow_spec_api.type == "assistant"
     assert agent_flow_spec_api.config.name == "Test Agent"
     assert agent_flow_spec_api.skills == []
     assert agent_flow_spec_api.description == "Test Description"

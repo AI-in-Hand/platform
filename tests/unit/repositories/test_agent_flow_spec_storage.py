@@ -9,7 +9,6 @@ from tests.testing_utils import TEST_USER_ID
 def agent_data():
     return {
         "id": "agent1",
-        "type": "userproxy",
         "config": {
             "name": "example_name",
             "system_message": "Do something important",
