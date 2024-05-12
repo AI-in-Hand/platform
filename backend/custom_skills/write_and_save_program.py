@@ -1,10 +1,9 @@
-from pathlib import Path
-
 from agency_swarm import BaseTool
 from pydantic import Field
 
-from backend.constants import AGENCY_DATA_DIR
-from backend.services.context_vars_manager import ContextEnvVarsManager
+from backend.repositories.s3_storage import S3Handler
+from backend.repositories.user_variable_storage import UserVariableStorage
+from backend.services.user_variable_manager import UserVariableManager
 
 
 class File(BaseTool):
@@ -23,27 +22,13 @@ class File(BaseTool):
     body: str = Field(..., description="Correct contents of a file")
 
     def run(self) -> str:
-        if ".." in self.file_name or self.file_name.startswith("/"):
-            return "Invalid file path. Directory traversal is not allowed."
+        user_variable_manager = UserVariableManager(UserVariableStorage())
+        aws_access_key_id = user_variable_manager.get_by_key("AWS_ACCESS_KEY_ID")
+        aws_secret_access_key = user_variable_manager.get_by_key("AWS_SECRET_ACCESS_KEY")
+        bucket_name = user_variable_manager.get_by_key("AWS_BUCKET_NAME")
 
-        agency_id = ContextEnvVarsManager.get("agency_id")
-        agency_path = AGENCY_DATA_DIR / agency_id
-
-        # Extract the directory path from the file name
-        directory_path = Path(self.file_name).parent
-        directory = agency_path / directory_path
-
-        # Ensure the directory exists
-        directory.mkdir(parents=True, exist_ok=True)
-
-        # Construct the full path using the directory and file name
-        full_path = directory / Path(self.file_name).name
-
-        # Write the file
-        with open(full_path, "w") as file:
-            file.write(self.body)
-
-        return f"File written to {full_path.as_posix()}"
+        s3_handler = S3Handler(aws_access_key_id, aws_secret_access_key, bucket_name)
+        return s3_handler.upload_file(self.file_name, self.body)
 
 
 class WriteAndSaveProgram(BaseTool):
