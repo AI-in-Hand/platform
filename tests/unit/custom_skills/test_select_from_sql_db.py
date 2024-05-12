@@ -1,12 +1,12 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from backend.custom_skills.select_from_relational_db import SelectFromRelationalDB
+from backend.custom_skills import SelectFromSQLDatabase
 
 
-@patch("backend.custom_skills.select_from_relational_db.UserVariableManager")
-@patch("backend.custom_skills.select_from_relational_db.create_engine")
-@patch("backend.custom_skills.select_from_relational_db.sessionmaker")
+@patch("backend.custom_skills.select_from_sql_database.UserVariableManager")
+@patch("backend.custom_skills.select_from_sql_database.create_engine")
+@patch("backend.custom_skills.select_from_sql_database.sessionmaker")
 def test_select_from_db_success(mock_sessionmaker, mock_create_engine, mock_user_variable_manager):
     # Mock the user variable manager to return database credentials
     mock_variable_storage = MagicMock()
@@ -27,7 +27,7 @@ def test_select_from_db_success(mock_sessionmaker, mock_create_engine, mock_user
     mock_sessionmaker.return_value = mock_session_class
     mock_create_engine.return_value.dispose = MagicMock()
 
-    tool = SelectFromRelationalDB(
+    tool = SelectFromSQLDatabase(
         database_name="testdb",
         table="users",
         columns=["id", "name", "email"],
@@ -44,9 +44,9 @@ def test_select_from_db_success(mock_sessionmaker, mock_create_engine, mock_user
     mock_session.execute.assert_called_once()
 
 
-@patch("backend.custom_skills.select_from_relational_db.UserVariableManager")
-@patch("backend.custom_skills.select_from_relational_db.create_engine")
-@patch("backend.custom_skills.select_from_relational_db.sessionmaker")
+@patch("backend.custom_skills.select_from_sql_database.UserVariableManager")
+@patch("backend.custom_skills.select_from_sql_database.create_engine")
+@patch("backend.custom_skills.select_from_sql_database.sessionmaker")
 def test_select_from_db_failure(mock_sessionmaker, mock_create_engine, mock_user_variable_manager):
     mock_variable_storage = MagicMock()
     mock_variable_storage.get_by_key.side_effect = ["postgresql://username@host:5432/", "secret"]
@@ -58,7 +58,7 @@ def test_select_from_db_failure(mock_sessionmaker, mock_create_engine, mock_user
     mock_sessionmaker.return_value = mock_session_class
     mock_create_engine.return_value.dispose = MagicMock()
 
-    tool = SelectFromRelationalDB(
+    tool = SelectFromSQLDatabase(
         database_name="testdb",
         table="users",
         columns=["id", "name", "email"],

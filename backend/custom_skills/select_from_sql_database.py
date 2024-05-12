@@ -21,8 +21,8 @@ from backend.services.user_variable_manager import UserVariableManager
 logger = logging.getLogger(__name__)
 
 
-class SelectFromRelationalDB(BaseTool):
-    """Select rows from a relational database using SQLAlchemy."""
+class SelectFromSQLDatabase(BaseTool):
+    """Select rows from a SQL database using SQLAlchemy."""
 
     database_name: str = Field(..., description="Database name (for PostgreSQL, MySQL) or SID (for Oracle).")
     table: str = Field(..., description="Table name to select from.")
@@ -33,7 +33,7 @@ class SelectFromRelationalDB(BaseTool):
     limit: int = Field(default=100, description="Maximum number of rows to return.")
 
     def run(self) -> str:
-        """Select rows from a relational database using SQLAlchemy."""
+        """Execute the SQL query and return the result as a JSON string."""
         user_variable_manager = UserVariableManager(UserVariableStorage())
         database_url_prefix = user_variable_manager.get_by_key("DATABASE_URL_PREFIX")
         database_password = user_variable_manager.get_by_key("DATABASE_PASSWORD")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     user_id = "<your Firebase user id>"
     ContextEnvVarsManager.set("user_id", user_id)
     init_firebase_app()
-    tool = SelectFromRelationalDB(
+    tool = SelectFromSQLDatabase(
         database_name="your_database",
         table="users",
         columns=["id", "name", "email"],
