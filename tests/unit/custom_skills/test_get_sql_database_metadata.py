@@ -1,3 +1,5 @@
+import json
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -62,9 +64,10 @@ def test_run_success(get_sql_database_metadata, mock_user_variable_manager):
 def test_run_exception(get_sql_database_metadata, mock_user_variable_manager, caplog):
     # Arrange
     mock_user_variable_manager.get_by_key.side_effect = ["postgresql://username@host:port/", "password"]
-    expected_output = '{"error": "An error occurred while processing the request"}'
+    expected_error_message = "Error while listing tables and columns from database: Database connection error"
+    expected_output = json.dumps({"error": expected_error_message})
 
-    caplog.set_level("INFO")
+    caplog.set_level(logging.INFO)
 
     with (
         patch("backend.custom_skills.get_sql_database_metadata.create_engine") as mock_create_engine,
@@ -73,12 +76,12 @@ def test_run_exception(get_sql_database_metadata, mock_user_variable_manager, ca
             return_value=mock_user_variable_manager,
         ),
     ):
+        # Simulate an exception being raised by the create_engine function
         mock_create_engine.side_effect = Exception("Database connection error")
 
-        # Act & Assert
-        with pytest.raises(Exception) as exc_info:
-            result = get_sql_database_metadata.run()
-            assert result == expected_output
+        # Act
+        result = get_sql_database_metadata.run()
 
-        assert str(exc_info.value) == "Database connection error"
-        assert "Error while listing tables and columns from database: Database connection error" in caplog.text
+        # Assert
+        assert result == expected_output
+        assert expected_error_message in caplog.text
