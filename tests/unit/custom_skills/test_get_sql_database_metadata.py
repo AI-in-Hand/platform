@@ -71,13 +71,18 @@ def test_run_exception(get_sql_database_metadata, mock_user_variable_manager, ca
 
     with (
         patch("backend.custom_skills.get_sql_database_metadata.create_engine") as mock_create_engine,
+        patch("backend.custom_skills.get_sql_database_metadata.MetaData") as mock_metadata,
         patch(
             "backend.custom_skills.get_sql_database_metadata.UserVariableManager",
             return_value=mock_user_variable_manager,
         ),
     ):
-        # Simulate an exception being raised by the create_engine function
-        mock_create_engine.side_effect = Exception("Database connection error")
+        mock_engine = MagicMock()
+        mock_create_engine.return_value = mock_engine
+
+        mock_metadata_instance = MagicMock()
+        mock_metadata.return_value = mock_metadata_instance
+        mock_metadata_instance.reflect.side_effect = Exception("Database connection error")
 
         # Act
         result = get_sql_database_metadata.run()
@@ -85,3 +90,4 @@ def test_run_exception(get_sql_database_metadata, mock_user_variable_manager, ca
         # Assert
         assert result == expected_output
         assert expected_error_message in caplog.text
+        mock_engine.dispose.assert_called_once()
