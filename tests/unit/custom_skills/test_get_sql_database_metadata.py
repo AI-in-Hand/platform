@@ -59,10 +59,12 @@ def test_run_success(get_sql_database_metadata, mock_user_variable_manager):
         mock_engine.dispose.assert_called_once()
 
 
-def test_run_exception(get_sql_database_metadata, mock_user_variable_manager):
+def test_run_exception(get_sql_database_metadata, mock_user_variable_manager, caplog):
     # Arrange
     mock_user_variable_manager.get_by_key.side_effect = ["postgresql://username@host:port/", "password"]
     expected_output = '{"error": "An error occurred while processing the request"}'
+
+    caplog.set_level("INFO")
 
     with (
         patch("backend.custom_skills.get_sql_database_metadata.create_engine") as mock_create_engine,
@@ -70,7 +72,6 @@ def test_run_exception(get_sql_database_metadata, mock_user_variable_manager):
             "backend.custom_skills.get_sql_database_metadata.UserVariableManager",
             return_value=mock_user_variable_manager,
         ),
-        patch("backend.custom_skills.get_sql_database_metadata.logger") as mock_logger,
     ):
         mock_create_engine.side_effect = Exception("Database connection error")
 
@@ -80,6 +81,4 @@ def test_run_exception(get_sql_database_metadata, mock_user_variable_manager):
             assert result == expected_output
 
         assert str(exc_info.value) == "Database connection error"
-        mock_logger.exception.assert_called_once_with(
-            "Error while listing tables and columns from database: Database connection error"
-        )
+        assert "Error while listing tables and columns from database: Database connection error" in caplog.text
