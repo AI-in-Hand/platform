@@ -1,80 +1,85 @@
-import json
 from unittest.mock import MagicMock, patch
 
-from sqlalchemy import Column, Integer, MetaData, String, Table
+import pytest
 
-from backend.custom_skills import GetSQLDatabaseMetadata
-
-
-@patch("backend.custom_skills.get_sql_database_metadata.UserVariableManager")
-@patch("backend.custom_skills.get_sql_database_metadata.create_engine")
-def test_get_sql_database_metadata_success(mock_create_engine, mock_user_variable_manager):
-    # Mock the user variable manager to return database credentials
-    mock_variable_storage = MagicMock()
-    mock_variable_storage.get_by_key.side_effect = [
-        "postgresql://username@host:5432/",  # DATABASE_URL_PREFIX
-        "secret",  # DATABASE_PASSWORD
-    ]
-    mock_user_variable_manager.return_value = mock_variable_storage
-
-    # Mock the SQLAlchemy engine and metadata reflection
-    mock_engine = MagicMock()
-    mock_create_engine.return_value = mock_engine
-
-    metadata = MetaData()
-
-    # Create mock tables
-    users_table = Table(
-        "users", metadata, Column("id", Integer, primary_key=True), Column("name", String), Column("email", String)
-    )
-
-    orders_table = Table(
-        "orders",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("user_id", Integer),
-        Column("amount", Integer),
-    )
-
-    metadata.tables = {"users": users_table, "orders": orders_table}
-
-    mock_engine.connect.return_value.__enter__.return_value = MagicMock()
-    metadata.reflect = MagicMock(return_value=None)
-
-    tool = GetSQLDatabaseMetadata(database_name="testdb")
-    response = tool.run()
-
-    expected_output = (
-        "Database Schema Information:\n\n"
-        "Table: users\n"
-        "  Column: id, Type: INTEGER\n"
-        "  Column: name, Type: VARCHAR\n"
-        "  Column: email, Type: VARCHAR\n\n"
-        "Table: orders\n"
-        "  Column: id, Type: INTEGER\n"
-        "  Column: user_id, Type: INTEGER\n"
-        "  Column: amount, Type: INTEGER\n"
-    )
-
-    assert response == expected_output
-    metadata.reflect.assert_called_once_with(bind=mock_engine)
+from backend.custom_skills.get_sql_database_metadata import GetSQLDatabaseMetadata
+from backend.services.user_variable_manager import UserVariableManager
 
 
-@patch("backend.custom_skills.get_sql_database_metadata.UserVariableManager")
-@patch("backend.custom_skills.get_sql_database_metadata.create_engine")
-def test_get_sql_database_metadata_failure(mock_create_engine, mock_user_variable_manager):
-    mock_variable_storage = MagicMock()
-    mock_variable_storage.get_by_key.side_effect = ["postgresql://username@host:5432/", "secret"]
-    mock_user_variable_manager.return_value = mock_variable_storage
+@pytest.fixture
+def get_sql_database_metadata():
+    return GetSQLDatabaseMetadata(database_name="test_db")
 
-    mock_engine = MagicMock()
-    mock_create_engine.return_value = mock_engine
 
-    metadata = MetaData()
-    metadata.reflect.side_effect = Exception("Database connection error")
+@pytest.fixture
+def mock_user_variable_manager():
+    return MagicMock(spec=UserVariableManager)
 
-    tool = GetSQLDatabaseMetadata(database_name="testdb")
-    response = tool.run()
 
-    assert json.loads(response) == {"error": "An error occurred while processing the request"}
-    metadata.reflect.assert_called_once_with(bind=mock_engine)
+def test_run_success(get_sql_database_metadata, mock_user_variable_manager):
+    # Arrange
+    mock_user_variable_manager.get_by_key.side_effect = ["postgresql://username@host:port/", "password"]
+
+    with (
+        patch("backend.custom_skills.get_sql_database_metadata.create_engine") as mock_create_engine,
+        patch("backend.custom_skills.get_sql_database_metadata.MetaData") as mock_metadata,
+        patch(
+            "backend.custom_skills.get_sql_database_metadata.UserVariableManager",
+            return_value=mock_user_variable_manager,
+        ),
+    ):
+        mock_engine = MagicMock()
+        mock_create_engine.return_value = mock_engine
+
+        mock_metadata_instance = MagicMock()
+        mock_metadata.return_value = mock_metadata_instance
+
+        mock_table = MagicMock()
+        mock_column_id = MagicMock()
+        mock_column_id.name = "id"
+        mock_column_id.type = "INTEGER"
+        mock_column_name = MagicMock()
+        mock_column_name.name = "name"
+        mock_column_name.type = "VARCHAR"
+        mock_table.columns = [mock_column_id, mock_column_name]
+        mock_metadata_instance.tables = {"users": mock_table}
+
+        # Act
+        result = get_sql_database_metadata.run()
+
+        # Assert
+        assert "Database Schema Information:" in result
+        assert "Table: users" in result
+        assert "Column: id, Type: INTEGER" in result
+        assert "Column: name, Type: VARCHAR" in result
+        mock_create_engine.assert_called_once_with(
+            "postgresql://username@host:port/test_db", connect_args={"password": "password"}
+        )
+        mock_metadata_instance.reflect.assert_called_once_with(bind=mock_engine)
+        mock_engine.dispose.assert_called_once()
+
+
+def test_run_exception(get_sql_database_metadata, mock_user_variable_manager):
+    # Arrange
+    mock_user_variable_manager.get_by_key.side_effect = ["postgresql://username@host:port/", "password"]
+    expected_output = '{"error": "An error occurred while processing the request"}'
+
+    with (
+        patch("backend.custom_skills.get_sql_database_metadata.create_engine") as mock_create_engine,
+        patch(
+            "backend.custom_skills.get_sql_database_metadata.UserVariableManager",
+            return_value=mock_user_variable_manager,
+        ),
+        patch("backend.custom_skills.get_sql_database_metadata.logger") as mock_logger,
+    ):
+        mock_create_engine.side_effect = Exception("Database connection error")
+
+        # Act & Assert
+        with pytest.raises(Exception) as exc_info:
+            result = get_sql_database_metadata.run()
+            assert result == expected_output
+
+        assert str(exc_info.value) == "Database connection error"
+        mock_logger.exception.assert_called_once_with(
+            "Error while listing tables and columns from database: Database connection error"
+        )

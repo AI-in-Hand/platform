@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetSQLDatabaseMetadata(BaseTool):
-    """List tables and their columns with types from a SQL database using SQLAlchemy."""
+    """Get metadata (tables and columns) from a SQL database using SQLAlchemy."""
 
     database_name: str = Field(..., description="Database name (for PostgreSQL, MySQL) or SID (for Oracle).")
 
@@ -53,7 +53,8 @@ class GetSQLDatabaseMetadata(BaseTool):
 
             return formatted_str
         except Exception as e:
-            logger.exception(f"Error while listing tables and columns from database: {e}")
-            return json.dumps({"error": "An error occurred while processing the request"})
+            error_message = f"Error while listing tables and columns from database: {str(e)}"
+            logger.exception(error_message)
+            return json.dumps({"error": error_message})
         finally:
             engine.dispose()
