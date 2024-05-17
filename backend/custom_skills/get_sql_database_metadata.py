@@ -58,3 +58,14 @@ class GetSQLDatabaseMetadata(BaseTool):
             return json.dumps({"error": error_message})
         finally:
             engine.dispose()
+
+
+if __name__ == "__main__":
+    """
+    Example usage:
+    user_id = "<your Firebase user id>"
+    ContextEnvVarsManager.set("user_id", user_id)
+    init_firebase_app()
+    tool = GetSQLDatabaseMetadata(database_name="your_database")
+    print(tool.run())
+    """
