@@ -273,12 +273,16 @@ class WebSocketHandler:
 
             self.session_manager.update_session_timestamp(session_id)
 
+            def get_completion_stream_wrapper():
+                # Set the user_id and agency_id in the context variables
+                ContextEnvVarsManager.set("user_id", user.id)
+                ContextEnvVarsManager.set("agency_id", session.agency_id)
+                agency.get_completion_stream(user_message, WebSocketEventHandler)
+
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(
                 None,
-                agency.get_completion_stream,
-                user_message,
-                WebSocketEventHandler,
+                get_completion_stream_wrapper,
             )
 
             all_messages = self.message_manager.get_messages(session_id)
