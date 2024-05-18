@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from agency_swarm.messages import MessageOutput
 
 from backend.services.context_vars_manager import ContextEnvVarsManager
-from backend.services.websocket.utils import get_next_response
+from backend.services.websocket.websocket_handler import get_next_response
 
 
 def test_get_next_response_with_response():

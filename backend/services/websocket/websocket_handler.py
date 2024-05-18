@@ -1,8 +1,9 @@
 import asyncio
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 
 from agency_swarm import Agency
+from agency_swarm.messages import MessageOutput
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from openai import AuthenticationError as OpenAIAuthenticationError
 from websockets.exceptions import ConnectionClosedOK
@@ -16,7 +17,6 @@ from backend.services.auth_service import AuthService
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.message_manager import MessageManager
 from backend.services.session_manager import SessionManager
-from backend.services.websocket.utils import get_next_response
 from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
 
 logger = logging.getLogger(__name__)
@@ -181,8 +181,10 @@ class WebSocketHandler:
             self.session_manager.update_session_timestamp(session_id)
 
             loop = asyncio.get_running_loop()
-            response_generator = agency.get_completion(message=user_message, yield_messages=True)
+            response_generator = agency.get_completion(message=user_message, yield_messages=True)  # TODO: Remove this
+            # agency.get_completion_stream(user_message, event_handler=EventHandler)  # Replace with this
 
+            # TODO: replace this code below with EventHandler
             while await self._process_single_message_response(
                 lambda: get_next_response(response_generator, user.id, session.agency_id), client_id, loop
             ):
@@ -230,3 +232,15 @@ class WebSocketHandler:
             client_id,
         )
         return True
+
+
+def get_next_response(
+    response_generator: Generator[MessageOutput, None, None], user_id: str, agency_id: str
+) -> MessageOutput | None:
+    try:
+        # Set the user_id and agency_id in the context variables
+        ContextEnvVarsManager.set("user_id", user_id)
+        ContextEnvVarsManager.set("agency_id", agency_id)
+        return next(response_generator)
+    except StopIteration:
+        return None
