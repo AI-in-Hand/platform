@@ -110,7 +110,7 @@ def test_update_skill_config_success(skill_config_data, client, mock_firestore_c
     assert response.status_code == 200
     assert len(response.json()["data"]) == 1
     assert response.json()["data"][0]["id"] == "skill1"
-    assert response.json()["message"] == "Version 2 of the skill skill1 created"
+    assert response.json()["message"] == "Version 2 of the skill Skill 1 Updated created"
 
     # Verify if the skill configuration is updated in the mock Firestore client
     updated_config = SkillConfigStorage().load_by_id("skill1")
