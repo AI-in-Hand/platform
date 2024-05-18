@@ -1,4 +1,3 @@
-import asyncio
 from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -260,18 +259,13 @@ async def test_process_single_message_user_message(websocket_handler):
     websocket_handler.agency_manager.get_agency.return_value = (agency, None)
     websocket_handler.message_manager.get_messages.return_value = all_messages
 
-    with patch.object(
-        websocket_handler, "_process_single_message_response", new_callable=AsyncMock
-    ) as process_single_message_response_mock:
-        process_single_message_response_mock.side_effect = [True, False]
-        await websocket_handler._process_single_message(websocket, client_id)
+    await websocket_handler._process_single_message(websocket, client_id)
 
     websocket.receive_json.assert_awaited_once()
     websocket_handler.auth_service.get_user.assert_called_once_with(token)
     websocket_handler.session_manager.get_session.assert_called_once_with(session_id)
     websocket_handler.agency_manager.get_agency.assert_awaited_once_with(session.agency_id, session.thread_ids, user.id)
     websocket_handler.session_manager.update_session_timestamp.assert_called_once_with(session_id)
-    assert process_single_message_response_mock.await_count == 2
     websocket_handler.message_manager.get_messages.assert_called_once_with(session_id)
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {
@@ -299,44 +293,4 @@ async def test_process_single_message_invalid_message_type(websocket_handler):
 
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {"status": False, "message": "Invalid message type"}, client_id
-    )
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_no_response(websocket_handler):
-    client_id = "client_id"
-    get_next_response_func = MagicMock(return_value=None)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is False
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_not_awaited()
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_with_response(websocket_handler):
-    client_id = "client_id"
-    response = MagicMock()
-    response.sender_name = "Sender"
-    response.receiver_name = "Receiver"
-    response.content = "Response content"
-    get_next_response_func = MagicMock(return_value=response)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is True
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {
-            "type": "agent_message",
-            "data": {
-                "sender": "Sender",
-                "recipient": "Receiver",
-                "message": {"content": "Response content"},
-            },
-        },
-        client_id,
     )
