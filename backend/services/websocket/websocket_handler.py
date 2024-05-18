@@ -149,6 +149,7 @@ class WebSocketHandler:
         :param client_id: The client ID.
         """
         connection_manager = self.connection_manager
+        loop = asyncio.get_running_loop()
 
         class WebSocketEventHandler(AssistantEventHandler):
             agent_name = None
@@ -157,7 +158,7 @@ class WebSocketHandler:
             @override
             def on_text_created(self, text: Text) -> None:  # type: ignore
                 """Callback that is fired when a text content block is created"""
-                asyncio.create_task(
+                loop.create_task(
                     connection_manager.send_message(
                         {
                             "type": "agent_status",
@@ -172,7 +173,7 @@ class WebSocketHandler:
                 """Callback that is fired whenever a text content delta is returned
                 by the API.
                 """
-                asyncio.create_task(
+                loop.create_task(
                     connection_manager.send_message(
                         {"type": "agent_status", "data": {"message": delta.value}},
                         client_id,
@@ -182,7 +183,7 @@ class WebSocketHandler:
             @override
             def on_text_done(self, text: Text) -> None:  # type: ignore
                 """Callback that is fired when a text content block is done"""
-                asyncio.create_task(
+                loop.create_task(
                     connection_manager.send_message(
                         {
                             "type": "agent_message",
@@ -198,7 +199,7 @@ class WebSocketHandler:
 
             def on_tool_call_created(self, tool_call: ToolCall) -> None:
                 """Callback that is fired when a tool call is created"""
-                asyncio.create_task(
+                loop.create_task(
                     connection_manager.send_message(
                         {
                             "type": "agent_status",
@@ -212,14 +213,14 @@ class WebSocketHandler:
                 """Callback that is fired when a tool call delta is encountered"""
                 if delta.type == "code_interpreter":
                     if delta.code_interpreter.input:
-                        asyncio.create_task(
+                        loop.create_task(
                             connection_manager.send_message(
                                 {"type": "agent_status", "data": {"message": delta.code_interpreter.input}},
                                 client_id,
                             )
                         )
                     if delta.code_interpreter.outputs:
-                        asyncio.create_task(
+                        loop.create_task(
                             connection_manager.send_message(
                                 {"type": "agent_status", "data": {"message": "\n\noutput > "}},
                                 client_id,
@@ -227,7 +228,7 @@ class WebSocketHandler:
                         )
                         for output in delta.code_interpreter.outputs:
                             if output.type == "logs":
-                                asyncio.create_task(
+                                loop.create_task(
                                     connection_manager.send_message(
                                         {"type": "agent_status", "data": {"message": f"\n{output.logs}"}},
                                         client_id,
@@ -279,7 +280,6 @@ class WebSocketHandler:
                 ContextEnvVarsManager.set("agency_id", session.agency_id)
                 agency.get_completion_stream(user_message, WebSocketEventHandler)
 
-            loop = asyncio.get_running_loop()
             await loop.run_in_executor(
                 None,
                 get_completion_stream_wrapper,
