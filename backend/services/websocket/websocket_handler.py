@@ -1,9 +1,6 @@
-import asyncio
 import logging
-from collections.abc import Callable, Generator
 
 from agency_swarm import Agency
-from agency_swarm.messages import MessageOutput
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from openai import AuthenticationError as OpenAIAuthenticationError
 from openai.lib.streaming import AsyncAssistantEventHandler
@@ -177,6 +174,21 @@ class WebSocketHandler:
                     client_id,
                 )
 
+            @override
+            async def on_text_done(self, text: Text) -> None:  # type: ignore
+                """Callback that is fired when a text content block is done"""
+                await connection_manager.send_message(
+                    {
+                        "type": "agent_message",
+                        "data": {
+                            "sender": self.recipient_agent_name,
+                            "recipient": self.agent_name,
+                            "message": {"content": text.value},
+                        },
+                    },
+                    client_id,
+                )
+
             async def on_tool_call_created(self, tool_call: ToolCall) -> None:
                 """Callback that is fired when a tool call is created"""
                 await connection_manager.send_message(
@@ -261,44 +273,3 @@ class WebSocketHandler:
             )
         else:
             await self.connection_manager.send_message({"status": False, "message": "Invalid message type"}, client_id)
-
-    async def _process_single_message_response(
-        self, get_next_response_func: Callable, client_id: str, loop: asyncio.AbstractEventLoop
-    ) -> bool:
-        """
-        Process a single message response and send it to the websocket.
-
-        :param get_next_response_func: A function to get the next response.
-        :param client_id: The client ID.
-        :param loop: The event loop.
-
-        :return: True if there are more responses to send, False otherwise.
-        """
-        response = await loop.run_in_executor(None, get_next_response_func)
-        if response is None:
-            return False
-
-        await self.connection_manager.send_message(
-            {
-                "type": "agent_message",
-                "data": {
-                    "sender": response.sender_name,
-                    "recipient": response.receiver_name,
-                    "message": {"content": response.content},
-                },
-            },
-            client_id,
-        )
-        return True
-
-
-def get_next_response(
-    response_generator: Generator[MessageOutput, None, None], user_id: str, agency_id: str
-) -> MessageOutput | None:
-    try:
-        # Set the user_id and agency_id in the context variables
-        ContextEnvVarsManager.set("user_id", user_id)
-        ContextEnvVarsManager.set("agency_id", agency_id)
-        return next(response_generator)
-    except StopIteration:
-        return None
