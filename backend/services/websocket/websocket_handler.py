@@ -6,6 +6,10 @@ from agency_swarm import Agency
 from agency_swarm.messages import MessageOutput
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from openai import AuthenticationError as OpenAIAuthenticationError
+from openai.lib.streaming import AsyncAssistantEventHandler
+from openai.types.beta.threads import Text, TextDelta
+from openai.types.beta.threads.runs import ToolCall, ToolCallDelta
+from typing_extensions import override
 from websockets.exceptions import ConnectionClosedOK
 
 from backend.constants import INTERNAL_ERROR_MESSAGE
@@ -146,6 +150,68 @@ class WebSocketHandler:
         :param websocket: The WebSocket connection.
         :param client_id: The client ID.
         """
+        connection_manager = self.connection_manager
+
+        class WebSocketEventHandler(AsyncAssistantEventHandler):
+            agent_name = None
+            recipient_agent_name = None
+
+            @override
+            async def on_text_created(self, text: Text) -> None:  # type: ignore
+                """Callback that is fired when a text content block is created"""
+                await connection_manager.send_message(
+                    {
+                        "type": "agent_status",
+                        "data": {"message": f"\n{self.recipient_agent_name} @ {self.agent_name}  > "},
+                    },
+                    client_id,
+                )
+
+            @override
+            async def on_text_delta(self, delta: TextDelta, snapshot: Text) -> None:  # type: ignore
+                """Callback that is fired whenever a text content delta is returned
+                by the API.
+                """
+                await connection_manager.send_message(
+                    {"type": "agent_status", "data": {"message": delta.value}},
+                    client_id,
+                )
+
+            async def on_tool_call_created(self, tool_call: ToolCall) -> None:
+                """Callback that is fired when a tool call is created"""
+                await connection_manager.send_message(
+                    {
+                        "type": "agent_status",
+                        "data": {"message": f"\n{self.recipient_agent_name} > {tool_call.type}\n"},
+                    },
+                    client_id,
+                )
+
+            async def on_tool_call_delta(self, delta: ToolCallDelta, snapshot: ToolCall) -> None:  # noqa:  ARG002
+                """Callback that is fired when a tool call delta is encountered"""
+                if delta.type == "code_interpreter":
+                    if delta.code_interpreter.input:
+                        await connection_manager.send_message(
+                            {"type": "agent_status", "data": {"message": delta.code_interpreter.input}},
+                            client_id,
+                        )
+                    if delta.code_interpreter.outputs:
+                        await connection_manager.send_message(
+                            {"type": "agent_status", "data": {"message": "\n\noutput > "}},
+                            client_id,
+                        )
+                        for output in delta.code_interpreter.outputs:
+                            if output.type == "logs":
+                                await connection_manager.send_message(
+                                    {"type": "agent_status", "data": {"message": f"\n{output.logs}"}},
+                                    client_id,
+                                )
+
+            @classmethod
+            def on_all_streams_end(cls):
+                """Fires when streams for all agents have ended."""
+                pass  # Handled in WebSocketHandler._process_single_message
+
         message = await websocket.receive_json()
         message_type = message.get("type")
         message_data = message.get("data")
@@ -180,15 +246,7 @@ class WebSocketHandler:
 
             self.session_manager.update_session_timestamp(session_id)
 
-            loop = asyncio.get_running_loop()
-            response_generator = agency.get_completion(message=user_message, yield_messages=True)  # TODO: Remove this
-            # agency.get_completion_stream(user_message, event_handler=EventHandler)  # Replace with this
-
-            # TODO: replace this code below with EventHandler
-            while await self._process_single_message_response(
-                lambda: get_next_response(response_generator, user.id, session.agency_id), client_id, loop
-            ):
-                pass
+            agency.get_completion_stream(user_message, event_handler=WebSocketEventHandler)
 
             all_messages = self.message_manager.get_messages(session_id)
             all_messages_dict = [message.model_dump() for message in all_messages]
