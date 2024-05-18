@@ -329,6 +329,8 @@ const ChatBox = ({
           const agentStatusSpan = document.getElementById("agentstatusspan");
           if (agentStatusSpan) {
             agentStatusSpan.innerHTML += data.data.message;
+            // Scroll to the bottom of the agent status container
+            agentStatusSpan.scrollTop = agentStatusSpan.scrollHeight;
           }
         } else if (data && data.type === "agent_response") {
           // indicates a final agent response
