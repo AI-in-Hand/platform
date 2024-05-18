@@ -3,8 +3,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from openai.types.beta.threads import Text, TextDelta
-from openai.types.beta.threads.runs import CodeInterpreterToolCallDelta, ToolCall
-from openai.types.beta.threads.runs.code_interpreter_tool_call_delta import CodeInterpreter
+from openai.types.beta.threads.runs import CodeInterpreterToolCall, CodeInterpreterToolCallDelta
+from openai.types.beta.threads.runs.code_interpreter_tool_call import CodeInterpreter
+from openai.types.beta.threads.runs.code_interpreter_tool_call_delta import CodeInterpreter as CodeInterpreterDelta
 
 
 @pytest.mark.asyncio
@@ -133,7 +134,13 @@ async def test_on_tool_call_created(websocket_handler):
         def get_completion_stream_mock(message, event_handler_cls):  # noqa: ARG001
             event_handler_cls.agent_name = "Agent"
             event_handler_cls.recipient_agent_name = "Recipient"
-            event_handler_cls().on_tool_call_created(ToolCall(type="code_interpreter"))
+            event_handler_cls().on_tool_call_created(
+                CodeInterpreterToolCall(
+                    id="123",
+                    code_interpreter=CodeInterpreter(input="Sample input", outputs=[]),
+                    type="code_interpreter",
+                )
+            )
 
         agency_mock.get_completion_stream.side_effect = get_completion_stream_mock
 
@@ -191,7 +198,7 @@ async def test_on_tool_call_delta(websocket_handler):
                     type="code_interpreter",
                     input="Sample input",
                     outputs=[{"type": "logs", "logs": "Sample logs"}],
-                    code_interpreter=CodeInterpreter(input="Sample input", outputs=[]),
+                    code_interpreter=CodeInterpreterDelta(input="Sample input", outputs=[]),
                 ),
                 MagicMock(),
             )
