@@ -45,7 +45,8 @@ class SelectFromSQLDatabase(BaseTool):
         Session = sessionmaker(bind=engine)
 
         # Construct the raw SQL query dynamically
-        sql_query = f"SELECT {', '.join(self.columns)} FROM {self.table}"
+        columns = "*" if "*" in self.columns else ", ".join(self.columns)
+        sql_query = f"SELECT {columns} FROM {self.table}"
 
         # Applying filters
         if self.filters:
@@ -62,8 +63,8 @@ class SelectFromSQLDatabase(BaseTool):
         try:
             with Session() as session:
                 result = session.execute(text(sql_query), params=self.filters)
-            rows = [dict(zip(self.columns, row, strict=False)) for row in result]
-            return json.dumps(rows, indent=4)
+                rows = [row._asdict() for row in result]
+            return json.dumps(rows, indent=4, default=str)
         except Exception as e:
             logger.exception(f"Error while selecting from database: {e}")
             return json.dumps({"error": "An error occurred while processing the request"})
