@@ -1,8 +1,6 @@
-from http import HTTPStatus
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
@@ -115,62 +113,6 @@ async def test_handle_websocket_connection_exception(websocket_handler):
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {"status": False, "message": expected_error_message}, client_id
     )
-
-
-@pytest.mark.asyncio
-async def test_authenticate_valid_token(websocket_handler):
-    client_id = "client_id"
-    token = "valid_token"
-    user = User(id="user_id", email="user@example.com")
-    websocket_handler.auth_service.get_user.return_value = user
-
-    result = await websocket_handler._authenticate(client_id, token)
-
-    assert result == user
-    websocket_handler.auth_service.get_user.assert_called_once_with(token)
-
-
-@pytest.mark.asyncio
-async def test_authenticate_invalid_token(websocket_handler):
-    client_id = "client_id"
-    token = "invalid_token"
-    websocket_handler.auth_service.get_user.side_effect = HTTPException(
-        status_code=HTTPStatus.UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
-    )
-
-    with pytest.raises(WebSocketDisconnect):
-        await websocket_handler._authenticate(client_id, token)
-
-    websocket_handler.auth_service.get_user.assert_called_once_with(token)
-    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": False, "message": "Invalid token"}, client_id
-    )
-
-
-@pytest.mark.asyncio
-async def test_setup_agency(websocket_handler):
-    user_id = "user_id"
-    session_id = "session_id"
-    session = SessionConfig(
-        id="session_id",
-        name="Session",
-        user_id=user_id,
-        agency_id="agency_id",
-        thread_ids={"thread1": "thread1", "thread2": "thread2"},
-    )
-    agency = MagicMock()
-
-    websocket_handler.session_manager.get_session.return_value = session
-    websocket_handler.agency_manager.get_agency.return_value = (agency, None)
-
-    result_session, result_agency = await websocket_handler._setup_agency(user_id, session_id)
-
-    assert result_session == session
-    assert result_agency == agency
-    websocket_handler.session_manager.get_session.assert_called_once_with(session_id)
-    websocket_handler.agency_manager.get_agency.assert_awaited_once_with(session.agency_id, session.thread_ids, user_id)
 
 
 @pytest.mark.asyncio
