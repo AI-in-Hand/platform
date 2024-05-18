@@ -1,9 +1,10 @@
+import asyncio
 import logging
 
 from agency_swarm import Agency
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from openai import AuthenticationError as OpenAIAuthenticationError
-from openai.lib.streaming import AsyncAssistantEventHandler
+from openai.lib.streaming import AssistantEventHandler
 from openai.types.beta.threads import Text, TextDelta
 from openai.types.beta.threads.runs import ToolCall, ToolCallDelta
 from typing_extensions import override
@@ -149,74 +150,88 @@ class WebSocketHandler:
         """
         connection_manager = self.connection_manager
 
-        class WebSocketEventHandler(AsyncAssistantEventHandler):
+        class WebSocketEventHandler(AssistantEventHandler):
             agent_name = None
             recipient_agent_name = None
 
             @override
-            async def on_text_created(self, text: Text) -> None:  # type: ignore
+            def on_text_created(self, text: Text) -> None:  # type: ignore
                 """Callback that is fired when a text content block is created"""
-                await connection_manager.send_message(
-                    {
-                        "type": "agent_status",
-                        "data": {"message": f"\n{self.recipient_agent_name} @ {self.agent_name}  > "},
-                    },
-                    client_id,
+                asyncio.create_task(
+                    connection_manager.send_message(
+                        {
+                            "type": "agent_status",
+                            "data": {"message": f"\n{self.recipient_agent_name} @ {self.agent_name}  > "},
+                        },
+                        client_id,
+                    )
                 )
 
             @override
-            async def on_text_delta(self, delta: TextDelta, snapshot: Text) -> None:  # type: ignore
+            def on_text_delta(self, delta: TextDelta, snapshot: Text) -> None:  # type: ignore
                 """Callback that is fired whenever a text content delta is returned
                 by the API.
                 """
-                await connection_manager.send_message(
-                    {"type": "agent_status", "data": {"message": delta.value}},
-                    client_id,
+                asyncio.create_task(
+                    connection_manager.send_message(
+                        {"type": "agent_status", "data": {"message": delta.value}},
+                        client_id,
+                    )
                 )
 
             @override
-            async def on_text_done(self, text: Text) -> None:  # type: ignore
+            def on_text_done(self, text: Text) -> None:  # type: ignore
                 """Callback that is fired when a text content block is done"""
-                await connection_manager.send_message(
-                    {
-                        "type": "agent_message",
-                        "data": {
-                            "sender": self.recipient_agent_name,
-                            "recipient": self.agent_name,
-                            "message": {"content": text.value},
+                asyncio.create_task(
+                    connection_manager.send_message(
+                        {
+                            "type": "agent_message",
+                            "data": {
+                                "sender": self.recipient_agent_name,
+                                "recipient": self.agent_name,
+                                "message": {"content": text.value},
+                            },
                         },
-                    },
-                    client_id,
+                        client_id,
+                    )
                 )
 
-            async def on_tool_call_created(self, tool_call: ToolCall) -> None:
+            def on_tool_call_created(self, tool_call: ToolCall) -> None:
                 """Callback that is fired when a tool call is created"""
-                await connection_manager.send_message(
-                    {
-                        "type": "agent_status",
-                        "data": {"message": f"\n{self.recipient_agent_name} > {tool_call.type}\n"},
-                    },
-                    client_id,
+                asyncio.create_task(
+                    connection_manager.send_message(
+                        {
+                            "type": "agent_status",
+                            "data": {"message": f"\n{self.recipient_agent_name} > {tool_call.type}\n"},
+                        },
+                        client_id,
+                    )
                 )
 
-            async def on_tool_call_delta(self, delta: ToolCallDelta, snapshot: ToolCall) -> None:  # noqa:  ARG002
+            def on_tool_call_delta(self, delta: ToolCallDelta, snapshot: ToolCall) -> None:  # noqa:  ARG002
                 """Callback that is fired when a tool call delta is encountered"""
                 if delta.type == "code_interpreter":
                     if delta.code_interpreter.input:
-                        await connection_manager.send_message(
-                            {"type": "agent_status", "data": {"message": delta.code_interpreter.input}},
-                            client_id,
+                        asyncio.create_task(
+                            connection_manager.send_message(
+                                {"type": "agent_status", "data": {"message": delta.code_interpreter.input}},
+                                client_id,
+                            )
                         )
                     if delta.code_interpreter.outputs:
-                        await connection_manager.send_message(
-                            {"type": "agent_status", "data": {"message": "\n\noutput > "}},
-                            client_id,
+                        asyncio.create_task(
+                            connection_manager.send_message(
+                                {"type": "agent_status", "data": {"message": "\n\noutput > "}},
+                                client_id,
+                            )
                         )
                         for output in delta.code_interpreter.outputs:
                             if output.type == "logs":
-                                await connection_manager.send_message(
-                                    {"type": "agent_status", "data": {"message": f"\n{output.logs}"}},
-                                    client_id,
+                                asyncio.create_task(
+                                    connection_manager.send_message(
+                                        {"type": "agent_status", "data": {"message": f"\n{output.logs}"}},
+                                        client_id,
+                                    )
                                 )
 
             @classmethod
@@ -258,7 +273,13 @@ class WebSocketHandler:
 
             self.session_manager.update_session_timestamp(session_id)
 
-            agency.get_completion_stream(user_message, event_handler=WebSocketEventHandler)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                None,
+                agency.get_completion_stream,
+                user_message,
+                WebSocketEventHandler,
+            )
 
             all_messages = self.message_manager.get_messages(session_id)
             all_messages_dict = [message.model_dump() for message in all_messages]
