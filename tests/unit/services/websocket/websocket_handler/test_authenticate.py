@@ -1,22 +1,23 @@
 from http import HTTPStatus
-from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
 from starlette.websockets import WebSocketDisconnect
 
+from backend.models.auth import User
+
 
 @pytest.mark.asyncio
-async def test_authenticate_success(websocket_handler):
+async def test_authenticate_valid_token(websocket_handler):
     client_id = "client_id"
     token = "valid_token"
 
-    user_mock = MagicMock()
-    websocket_handler.auth_service.get_user.return_value = user_mock
+    user = User(id="user_id", email="user@example.com")
+    websocket_handler.auth_service.get_user.return_value = user
 
-    actual_user = await websocket_handler._authenticate(client_id, token)
+    result = await websocket_handler._authenticate(client_id, token)
 
-    assert actual_user == user_mock
+    assert result == user
     websocket_handler.auth_service.get_user.assert_called_once_with(token)
 
 
