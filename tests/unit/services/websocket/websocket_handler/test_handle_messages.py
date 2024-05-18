@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -6,7 +5,7 @@ import pytest
 from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocket
 
-from backend.exceptions import NotFoundError, UnsetVariableError
+from backend.exceptions import UnsetVariableError
 
 
 @pytest.mark.asyncio
@@ -79,19 +78,21 @@ async def test_process_single_message_user_message(websocket_handler):
     }
 
     with (
-        patch.object(
-            websocket_handler, "_process_single_message_response", new_callable=AsyncMock
-        ) as process_single_message_response_mock,
         patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock) as authenticate_mock,
         patch.object(websocket_handler, "_setup_agency", new_callable=AsyncMock) as setup_agency_mock,
     ):
-        process_single_message_response_mock.side_effect = [True, False]
-        setup_agency_mock.return_value = (MagicMock(), MagicMock())
+        user_mock = MagicMock()
+        authenticate_mock.return_value = user_mock
+        session_mock = MagicMock()
+        agency_mock = MagicMock()
+        setup_agency_mock.return_value = (session_mock, agency_mock)
         await websocket_handler._process_single_message(websocket, client_id)
 
-    authenticate_mock.assert_awaited_once()
-    setup_agency_mock.assert_awaited_once()
-    process_single_message_response_mock.assert_awaited()
+    authenticate_mock.assert_awaited_once_with(client_id, token)
+    setup_agency_mock.assert_awaited_once_with(user_mock.id, session_id)
+    websocket_handler.session_manager.update_session_timestamp.assert_called_once_with(session_id)
+    websocket_handler.message_manager.get_messages.assert_called_once_with(session_id)
+    websocket_handler.connection_manager.send_message.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -125,44 +126,6 @@ async def test_process_single_message_invalid_message_type(websocket_handler):
 
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {"status": False, "message": "Invalid message type"}, client_id
-    )
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_no_response(websocket_handler):
-    client_id = "client_id"
-    get_next_response_func = MagicMock(return_value=None)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is False
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_not_awaited()
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_with_response(websocket_handler):
-    client_id = "client_id"
-    response = MagicMock()
-    response.content = "Response text"
-    get_next_response_func = MagicMock(return_value=response)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is True
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {
-            "type": "agent_message",
-            "data": {
-                "sender": response.sender_name,
-                "recipient": response.receiver_name,
-                "message": {"content": "Response text"},
-            },
-        },
-        client_id,
     )
 
 
@@ -222,9 +185,10 @@ async def test_process_single_message_agency_not_found(websocket_handler):
 
     with (
         patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock),
-        patch.object(
-            websocket_handler, "_setup_agency", new_callable=AsyncMock, side_effect=NotFoundError("Agency", "agency_id")
-        ),
-        pytest.raises(NotFoundError, match="Agency not found: agency_id"),
+        patch.object(websocket_handler, "_setup_agency", new_callable=AsyncMock, return_value=(MagicMock(), None)),
     ):
         await websocket_handler._process_single_message(websocket, client_id)
+
+    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
+        {"status": False, "message": "Agency not found"}, client_id
+    )
