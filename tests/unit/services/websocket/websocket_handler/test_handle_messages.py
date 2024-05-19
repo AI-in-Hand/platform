@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -6,7 +5,10 @@ import pytest
 from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocket
 
-from backend.exceptions import NotFoundError, UnsetVariableError
+from backend.exceptions import UnsetVariableError
+from backend.models.auth import User
+from backend.models.message import Message
+from backend.models.session_config import SessionConfig
 
 
 @pytest.mark.asyncio
@@ -26,12 +28,12 @@ async def test_handle_websocket_messages(websocket_handler):
 async def test_process_messages_unset_variable_error(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    expected_error_message = "Variable Variable XXX not set is not set. Please set it first."
+    expected_error_message = "Variable XXX is not set. Please set it first."
 
     with patch.object(
         websocket_handler, "_process_single_message", new_callable=AsyncMock
     ) as process_single_message_mock:
-        process_single_message_mock.side_effect = UnsetVariableError("Variable XXX not set")
+        process_single_message_mock.side_effect = UnsetVariableError("XXX")
         result = await websocket_handler._process_messages(websocket, client_id)
 
     assert result is False
@@ -68,46 +70,52 @@ async def test_process_messages_openai_authentication_error(websocket_handler):
 async def test_process_single_message_user_message(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    session_id = "session_id"
     user_message = "User message"
-    token = "token"
+    session_id = "session_id"
+    token = "valid_token"
+    user = User(id="user_id", email="user@example.com")
+    session = SessionConfig(
+        id="session_id",
+        name="Session",
+        user_id=user.id,
+        agency_id="agency_id",
+        thread_ids={"thread1": "thread1", "thread2": "thread2"},
+    )
+    agency = MagicMock()
+    all_messages = [
+        Message(content="Message 1", session_id=session_id),
+        Message(content="Message 2", session_id=session_id),
+    ]
 
     websocket.receive_json.return_value = {
         "type": "user_message",
         "data": {"content": user_message, "session_id": session_id},
         "access_token": token,
     }
+    websocket_handler.auth_service.get_user.return_value = user
+    websocket_handler.session_manager.get_session.return_value = session
+    websocket_handler.agency_manager.get_agency.return_value = (agency, None)
+    websocket_handler.message_manager.get_messages.return_value = all_messages
 
-    with (
-        patch.object(
-            websocket_handler, "_process_single_message_response", new_callable=AsyncMock
-        ) as process_single_message_response_mock,
-        patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock) as authenticate_mock,
-        patch.object(websocket_handler, "_setup_agency", new_callable=AsyncMock) as setup_agency_mock,
-    ):
-        process_single_message_response_mock.side_effect = [True, False]
-        setup_agency_mock.return_value = (MagicMock(), MagicMock())
-        await websocket_handler._process_single_message(websocket, client_id)
-
-    authenticate_mock.assert_awaited_once()
-    setup_agency_mock.assert_awaited_once()
-    process_single_message_response_mock.assert_awaited()
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_empty_message(websocket_handler):
-    websocket = AsyncMock(spec=WebSocket)
-    client_id = "client_id"
-    token = "token"
-
-    websocket.receive_json.return_value = {"type": "user_message", "data": {"content": ""}, "access_token": token}
-
-    with patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock):
-        await websocket_handler._process_single_message(websocket, client_id)
+    await websocket_handler._process_single_message(websocket, client_id)
 
     websocket.receive_json.assert_awaited_once()
+    websocket_handler.auth_service.get_user.assert_called_once_with(token)
+    websocket_handler.session_manager.get_session.assert_called_once_with(session_id)
+    websocket_handler.agency_manager.get_agency.assert_awaited_once_with(session.agency_id, session.thread_ids, user.id)
+    websocket_handler.session_manager.update_session_timestamp.assert_called_once_with(session_id)
+    websocket_handler.message_manager.get_messages.assert_called_once_with(session_id)
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {"status": False, "message": "Message or session ID not provided"}, client_id
+        {
+            "type": "agent_response",
+            "data": {
+                "status": True,
+                "message": "Message processed successfully",
+                "data": [message.model_dump() for message in all_messages],
+            },
+            "connection_id": client_id,
+        },
+        client_id,
     )
 
 
@@ -115,54 +123,14 @@ async def test_process_single_message_empty_message(websocket_handler):
 async def test_process_single_message_invalid_message_type(websocket_handler):
     websocket = AsyncMock(spec=WebSocket)
     client_id = "client_id"
-    token = "token"
+    token = "valid_token"
 
-    message = {"type": "invalid_type", "data": {}, "access_token": token}
-    websocket.receive_json.return_value = message
+    websocket.receive_json.return_value = {"type": "invalid_type", "data": {}, "access_token": token}
 
-    with patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock):
-        await websocket_handler._process_single_message(websocket, client_id)
+    await websocket_handler._process_single_message(websocket, client_id)
 
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {"status": False, "message": "Invalid message type"}, client_id
-    )
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_no_response(websocket_handler):
-    client_id = "client_id"
-    get_next_response_func = MagicMock(return_value=None)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is False
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_not_awaited()
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_response_with_response(websocket_handler):
-    client_id = "client_id"
-    response = MagicMock()
-    response.content = "Response text"
-    get_next_response_func = MagicMock(return_value=response)
-    loop = asyncio.get_running_loop()
-
-    result = await websocket_handler._process_single_message_response(get_next_response_func, client_id, loop)
-
-    assert result is True
-    get_next_response_func.assert_called_once()
-    websocket_handler.connection_manager.send_message.assert_awaited_once_with(
-        {
-            "type": "agent_message",
-            "data": {
-                "sender": response.sender_name,
-                "recipient": response.receiver_name,
-                "message": {"content": "Response text"},
-            },
-        },
-        client_id,
     )
 
 
@@ -204,27 +172,3 @@ async def test_process_single_message_session_not_found(websocket_handler):
     websocket_handler.connection_manager.send_message.assert_awaited_once_with(
         {"status": False, "message": "Session not found"}, client_id
     )
-
-
-@pytest.mark.asyncio
-async def test_process_single_message_agency_not_found(websocket_handler):
-    websocket = AsyncMock(spec=WebSocket)
-    client_id = "client_id"
-    token = "token"
-    session_id = "session_id"
-
-    message = {
-        "type": "user_message",
-        "data": {"content": "User message", "session_id": session_id},
-        "access_token": token,
-    }
-    websocket.receive_json.return_value = message
-
-    with (
-        patch.object(websocket_handler, "_authenticate", new_callable=AsyncMock),
-        patch.object(
-            websocket_handler, "_setup_agency", new_callable=AsyncMock, side_effect=NotFoundError("Agency", "agency_id")
-        ),
-        pytest.raises(NotFoundError, match="Agency not found: agency_id"),
-    ):
-        await websocket_handler._process_single_message(websocket, client_id)

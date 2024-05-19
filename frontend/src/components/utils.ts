@@ -205,7 +205,6 @@ export const assistantConfigSystemMessage = "You are a helpful AI assistant. Sol
 
 export const sampleAgentConfig = () => {
   const sampleAgent: IAgentFlowSpec = {
-    type: "assistant",
     config: {
       name: "sample_assistant",
       system_message: assistantConfigSystemMessage,
@@ -225,7 +224,6 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     },
   };
   const userProxyFlowSpec: IAgentFlowSpec = {
-    type: "userproxy",
     config: userProxyConfig,
   };
   const assistantConfig: IAgentConfig = {
@@ -233,7 +231,6 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
     system_message: assistantConfigSystemMessage,
   };
   const assistantFlowSpec: IAgentFlowSpec = {
-    type: "assistant",
     config: assistantConfig,
   };
   const workFlowConfig: IFlowConfig = {
@@ -252,6 +249,10 @@ export const sampleWorkflowConfig = (type = "twoagents") => {
 
 export const getModels = () => {
   const models = [
+    {
+      label: "GPT-4o",
+      value: "gpt-4o",
+    },
     {
       label: "GPT-4-Turbo",
       value: "gpt-4-turbo",

@@ -814,7 +814,7 @@ export const AgentFlowSpecView = ({
     setFlowSpec(updatedFlowSpec);
   };
 
-  const nameValidation = checkAndSanitizeInput(flowSpec?.config?.name);
+  // const nameValidation = checkAndSanitizeInput(flowSpec?.config?.name);
 
   return (
     <>
@@ -838,11 +838,11 @@ export const AgentFlowSpecView = ({
                   onControlChange(e.target.value, "name");
                 }}
               />
-              {!nameValidation.status && (
+              {/* {!nameValidation.status && (
                 <div className="text-xs text-red-500 mt-2">
                   {nameValidation.message}
                 </div>
-              )}
+              )} */}
             </>
           }
         />
@@ -900,7 +900,6 @@ export const AgentFlowSpecView = ({
                 className="mt-2 w-full"
                 defaultValue={flowSpec.config.model}
                 value={flowSpec.config.model}
-                disabled={flowSpec.id && flowSpec.user_id}
                 onChange={(value: any) => {
                   onControlChange(value, "model");
                 }}
