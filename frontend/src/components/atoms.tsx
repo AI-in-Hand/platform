@@ -907,6 +907,16 @@ export const AgentFlowSpecView = ({
                   label: model.label,
                   value: model.value,
                 }))}
+                mode="tags"
+                showSearch
+                tokenSeparators={[',']}
+                maxTagCount={1}
+                onSelect={(value: any) => {
+                  onControlChange(value, "model");
+                }}
+                onDeselect={(value: any) => {
+                  onControlChange("gpt-3.5-turbo", "model");
+                }}
               />
             }
           />
