@@ -907,6 +907,8 @@ export const AgentFlowSpecView = ({
                   label: model.label,
                   value: model.value,
                 }))}
+                mode="combobox"
+                showSearch
               />
             }
           />
