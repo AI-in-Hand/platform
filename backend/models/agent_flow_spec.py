@@ -17,6 +17,7 @@ class AgentConfig(BaseModel):
     name: str = Field(..., description="Name of the agent")
     system_message: str = Field("", description="System message")
     model: str = Field(settings.gpt_small_model, description="Model for the agent to use")
+    temperature: float = Field(..., description="temperature of the agent")
     code_execution_config: CodeExecutionConfig = Field(
         CodeExecutionConfig(), description="Configuration for code execution"
     )

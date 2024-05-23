@@ -30,6 +30,7 @@ export interface IAgentConfig {
   system_message: string | "";
   model: string;
   code_execution_config?: boolean | string | { [key: string]: any } | null;
+  temperature: float | 0.1;
 }
 
 export interface IAgentFlowSpec {
