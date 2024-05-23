@@ -17,7 +17,7 @@ class AgentConfig(BaseModel):
     name: str = Field(..., description="Name of the agent")
     system_message: str = Field("", description="System message")
     model: str = Field(settings.gpt_small_model, description="Model for the agent to use")
-    temperature: float = Field(..., description="temperature of the agent")
+    temperature: float = Field(0.1, description="temperature of the agent")
     code_execution_config: CodeExecutionConfig = Field(
         CodeExecutionConfig(), description="Configuration for code execution"
     )
@@ -35,6 +35,7 @@ class AgentFlowSpec(BaseModel):
         default_factory=list, description="List of skill titles"
     )
     description: str = Field("", description="Description of the agent")
+    temperature: float = Field(0.1, description="temperature of the agent")
     user_id: str | None = Field(None, description="The user ID owning this configuration")
 
 
