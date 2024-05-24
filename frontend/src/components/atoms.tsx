@@ -1497,7 +1497,7 @@ export const CardHoverBar = ({
         onClick={item.onClick}
       >
         <Tooltip title={item.hoverText}>
-          <item.icon className=" w-5, h-5 cursor-pointer inline-block" />
+          <item.icon className="w-4 h-4 cursor-pointer inline-block" />
         </Tooltip>
       </div>
     );

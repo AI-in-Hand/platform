@@ -7,6 +7,7 @@ import {
   TrashIcon,
   UserGroupIcon,
   UsersIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Dropdown, MenuProps, Modal, Tooltip, message } from "antd";
 import * as React from "react";
@@ -26,6 +27,7 @@ import {
   LaunchButton,
   LoadingOverlay,
 } from "../../atoms";
+import Swal from "sweetalert2";
 
 const WorkflowView = ({}: any) => {
   const [loading, setLoading] = React.useState(false);
@@ -81,29 +83,47 @@ const WorkflowView = ({}: any) => {
   };
 
   const deleteWorkFlow = (workflow: IFlowConfig) => {
-    setError(null);
-    setLoading(true);
     // const fetch;
     const payLoad = {
       method: "DELETE",
       headers: {},
     };
 
-    const onSuccess = (data: any) => {
-      if (data && data.status) {
-        message.success(data.message);
-        setWorkflows(data.data);
-      } else {
-        message.error(data.message);
+    Swal.fire({
+      title: "Delete",
+      icon: "warning",
+      html: "Do you want to delete this team?",
+      showCloseButton: false,
+      showCancelButton: true,
+      focusConfirm: false,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#1639a3",
+      cancelButtonColor: "#d33",
+  }).then((result) => {
+      if (result.isConfirmed) {
+        setError(null);
+        setLoading(true);
+
+        const onSuccess = (data: any) => {
+          if (data && data.status) {
+            message.success(data.message);
+            setWorkflows(data.data);
+          } else {
+            message.error(data.message);
+          }
+          setLoading(false);
+        };
+        const onError = (err: any) => {
+          setError(err);
+          message.error(err.message);
+          setLoading(false);
+        };
+        console.log("team");
+        
+        fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
       }
-      setLoading(false);
-    };
-    const onError = (err: any) => {
-      setError(err);
-      message.error(err.message);
-      setLoading(false);
-    };
-    fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
+  });
   };
 
   const saveWorkFlow = (workflow: IFlowConfig) => {
@@ -201,7 +221,7 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Download">
-                    <ArrowDownTrayIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <ArrowDownTrayIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
                 <div
@@ -218,7 +238,19 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Make a Copy">
-                    <DocumentDuplicateIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <DocumentDuplicateIcon className="w-4 h-4 cursor-pointer inline-block" />
+                  </Tooltip>
+                </div>
+                <div
+                  role="button"
+                  className="text-accent text-xs inline-block hover:bg-primary p-2 rounded"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedWorkflow(workflow);
+                  }}
+                >
+                  <Tooltip title="Edit">
+                    <PencilIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
                 <div
@@ -230,7 +262,7 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Delete">
-                    <TrashIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <TrashIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
               </div>

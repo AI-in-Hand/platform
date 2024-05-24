@@ -5,6 +5,7 @@ import {
   InformationCircleIcon,
   PlusIcon,
   TrashIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Dropdown, MenuProps, Modal, message } from "antd";
 import * as React from "react";
@@ -25,6 +26,8 @@ import {
   LaunchButton,
   LoadingOverlay,
 } from "../../atoms";
+import Swal from "sweetalert2";
+
 
 const AgentsView = ({}: any) => {
   const [loading, setLoading] = React.useState(false);
@@ -53,29 +56,45 @@ const AgentsView = ({}: any) => {
   );
 
   const deleteAgent = (agent: IAgentFlowSpec) => {
-    setError(null);
-    setLoading(true);
     // const fetch;
     const payLoad = {
       method: "DELETE",
       headers: {},
     };
 
-    const onSuccess = (data: any) => {
-      if (data && data.status) {
-        message.success(data.message);
-        setAgents(data.data);
-      } else {
-        message.error(data.message);
+    Swal.fire({
+      title: "Delete",
+      icon: "warning",
+      html: "Do you want to delete this agent?",
+      showCloseButton: false,
+      showCancelButton: true,
+      focusConfirm: false,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#1639a3",
+      cancelButtonColor: "#d33",
+  }).then((result) => {
+      if (result.isConfirmed) {
+        setError(null);
+        setLoading(true);
+
+        const onSuccess = (data: any) => {
+          if (data && data.status) {
+            message.success(data.message);
+            setAgents(data.data);
+          } else {
+            message.error(data.message);
+          }
+          setLoading(false);
+        };
+        const onError = (err: any) => {
+          setError(err);
+          message.error(err.message);
+          setLoading(false);
+        };
+        fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
       }
-      setLoading(false);
-    };
-    const onError = (err: any) => {
-      setError(err);
-      message.error(err.message);
-      setLoading(false);
-    };
-    fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
+  });   
   };
 
   const fetchAgents = () => {
@@ -180,6 +199,15 @@ const AgentsView = ({}: any) => {
           setShowNewAgentModal(true);
         },
         hoverText: "Make a Copy",
+      },
+      {
+        title: "Edit",
+        icon: PencilIcon,
+        onClick: (e: any) => {
+          setSelectedAgent(agent);
+          setShowAgentModal(true);
+        },
+        hoverText: "Edit",
       },
       {
         title: "Delete",
