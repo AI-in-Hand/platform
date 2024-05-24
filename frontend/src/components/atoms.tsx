@@ -922,29 +922,25 @@ export const AgentFlowSpecView = ({
           />
         )}
 
-        {/* {llm_config && llm_config.config_list.length > 0 && (
-          <ControlRowView
-            title="Temperature"
-            className="mt-4"
-            description="Defines the randomness of the agent's response."
-            value={llm_config.temperature}
-            control={
-              <Slider
-                min={0}
-                max={2}
-                step={0.1}
-                defaultValue={llm_config.temperature || 0.1}
-                onChange={(value: any) => {
-                  const llm_config = {
-                    ...flowSpec.config.llm_config,
-                    temperature: value,
-                  };
-                  onControlChange(llm_config, "llm_config");
-                }}
-              />
-            }
-          />
-        )} */}
+        {(
+            <ControlRowView
+                title="Temperature"
+                className="mt-4"
+                description="Defines the randomness of the agent's response."
+                value={flowSpec.config.temperature || 0.0}
+                control={
+                  <Slider
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      defaultValue={flowSpec.config.temperature || 0.0}
+                      onChange={(value: any) => {
+                        onControlChange(value, "temperature");
+                      }}
+                  />
+                }
+            />
+        )}
 
         {
           <ControlRowView
