@@ -106,6 +106,7 @@ class AgentManager:
             instructions=agent_flow_spec.config.system_message,
             files_folder=agent_flow_spec.config.code_execution_config.work_dir,
             tools=[SKILL_MAPPING[skill] for skill in agent_flow_spec.skills],
+            temperature=agent_flow_spec.config.temperature,
             model=agent_flow_spec.config.model,
         )
         return agent
