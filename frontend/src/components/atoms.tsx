@@ -927,13 +927,13 @@ export const AgentFlowSpecView = ({
                 title="Temperature"
                 className="mt-4"
                 description="Defines the randomness of the agent's response."
-                value={flowSpec.config.temperature || 0.1}
+                value={flowSpec.config.temperature || 0.0}
                 control={
                   <Slider
                       min={0}
                       max={1}
-                      step={0.1}
-                      defaultValue={flowSpec.config.temperature || 0.1}
+                      step={0.01}
+                      defaultValue={flowSpec.config.temperature || 0.0}
                       onChange={(value: any) => {
                         onControlChange(value, "temperature");
                       }}
