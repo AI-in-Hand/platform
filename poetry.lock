@@ -6,8 +6,10 @@ version = "0.2.2"
 description = "An open source agent orchestration framework built on top of the latest OpenAI Assistants API."
 optional = false
 python-versions = ">=3.7"
-files = []
-develop = false
+files = [
+    {file = "agency_swarm-0.2.2-py3-none-any.whl", hash = "sha256:0335939545a92fc8548fecbbee8f0d6114c40485ed93a18ca3919f1ab50bf29f"},
+    {file = "agency_swarm-0.2.2.tar.gz", hash = "sha256:b6c72821f174d9e59e0822aa01b756e10629c2a9df386693045c8982bde62dc3"},
+]
 
 [package.dependencies]
 deepdiff = "6.7.1"
@@ -17,12 +19,6 @@ openai = "1.27.0"
 python-dotenv = "1.0.0"
 rich = "13.7.0"
 termcolor = "2.3.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/VRSEN/agency-swarm.git"
-reference = "main"
-resolved_reference = "d58ee7ca0ec2ce14886ff0a23f98da06f2fc7312"
 
 [[package]]
 name = "aiohttp"
@@ -4078,13 +4074,13 @@ multidict = ">=4.0"
 
 [[package]]
 name = "zipp"
-version = "3.18.2"
+version = "3.19.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "zipp-3.18.2-py3-none-any.whl", hash = "sha256:dce197b859eb796242b0622af1b8beb0a722d52aa2f57133ead08edd5bf5374e"},
-    {file = "zipp-3.18.2.tar.gz", hash = "sha256:6278d9ddbcfb1f1089a88fde84481528b07b0e10474e09dcfe53dad4069fa059"},
+    {file = "zipp-3.19.0-py3-none-any.whl", hash = "sha256:96dc6ad62f1441bcaccef23b274ec471518daf4fbbc580341204936a5a3dddec"},
+    {file = "zipp-3.19.0.tar.gz", hash = "sha256:952df858fb3164426c976d9338d3961e8e8b3758e2e059e0f754b8c4262625ee"},
 ]
 
 [package.extras]
@@ -4094,4 +4090,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11.0a1,<3.13"
-content-hash = "e1a20d1c7c53a45026a2e9ad6db1c40bec1f6c4aef65f6a579504581b2e81a0b"
+content-hash = "002a208d5fe9657715cd0f5950a46d75a072305af0dad4e08ec96671df122f98"
