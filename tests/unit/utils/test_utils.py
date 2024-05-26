@@ -23,33 +23,33 @@ def test_get_chat_completion():
         assert response == "test response"
 
 
-@patch("backend.utils.tiktoken.get_encoding")
-def test_tokenize(mock_get_encoding):
-    mock_get_encoding.return_value.encode.return_value = [1, 2, 3]
-    tokens = tokenize("sample text")
+@patch("backend.utils.tiktoken.encoding_for_model")
+def test_tokenize(mock_encoding_for_model):
+    mock_encoding_for_model.return_value.encode.return_value = [1, 2, 3]
+    tokens = tokenize("sample text", "gpt-4o")
     assert tokens == [1, 2, 3]
 
 
 @patch("backend.utils.tokenize")
 def test_get_token_count(mock_tokenize):
     mock_tokenize.return_value = [1, 2, 3]
-    count = get_token_count("sample text")
+    count = get_token_count("sample text", "gpt-4o")
     assert count == 3
 
 
 @patch("backend.utils.get_token_count")
 def test_chunk_input_with_token_limit_within_limit(mock_get_token_count):
-    mock_get_token_count.side_effect = lambda text: len(text)  # Simplified token count
-    chunks = chunk_input_with_token_limit("This is a test.", 10, " ")
+    mock_get_token_count.side_effect = lambda text, _: len(text)  # Simplified token count
+    chunks = chunk_input_with_token_limit("This is a test.", 10, " ", "gpt-4o")
     assert chunks == ["This is a ", "test. "]
 
 
 @patch("backend.utils.tokenize")
-@patch("backend.utils.tiktoken.get_encoding")
-def test_truncate_oversized_chunk(mock_get_encoding, mock_tokenize):
-    mock_tokenize.side_effect = lambda text: list(range(len(text)))  # Fake tokens
-    mock_get_encoding.return_value.decode.return_value = "truncated"
-    truncated = truncate_oversized_chunk("This is way too long.", 5, " ")
+@patch("backend.utils.tiktoken.encoding_for_model")
+def test_truncate_oversized_chunk(mock_encoding_for_model, mock_tokenize):
+    mock_tokenize.side_effect = lambda text, _: list(range(len(text)))  # Fake tokens
+    mock_encoding_for_model.return_value.decode.return_value = "truncated"
+    truncated = truncate_oversized_chunk("This is way too long.", 5, " ", model="gpt-4o")
     assert truncated == "truncated "
 
 
