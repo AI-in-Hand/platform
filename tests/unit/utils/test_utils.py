@@ -53,6 +53,19 @@ def test_truncate_oversized_chunk(mock_encoding_for_model, mock_tokenize):
     assert truncated == "truncated "
 
 
+@patch("backend.utils.get_token_count")
+@patch("backend.utils.truncate_oversized_chunk")
+def test_chunk_input_with_token_limit_oversized_chunk(mock_truncate_oversized_chunk, mock_get_token_count):
+    mock_get_token_count.side_effect = lambda text, _: len(text)  # Simplified token count
+    mock_truncate_oversized_chunk.return_value = "This is a truncated "
+
+    chunks = chunk_input_with_token_limit("This is a very long chunk that exceeds the token limit.", 20, " ", "gpt-4")
+    assert chunks == ["This is a truncated ", "chunk that exceeds ", "the token limit. "]
+    mock_truncate_oversized_chunk.assert_called_once_with(
+        "This is a very long chunk ", max_tokens=20, delimiter=" ", model="gpt-4"
+    )
+
+
 @pytest.mark.parametrize(
     "input_string, expected_output",
     [
