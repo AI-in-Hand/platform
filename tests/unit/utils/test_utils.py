@@ -39,7 +39,7 @@ def test_get_token_count(mock_tokenize):
 
 @patch("backend.utils.get_token_count")
 def test_chunk_input_with_token_limit_within_limit(mock_get_token_count):
-    mock_get_token_count.side_effect = lambda text, _: len(text)  # Simplified token count
+    mock_get_token_count.side_effect = lambda text, _: len(text)
     chunks = chunk_input_with_token_limit("This is a test.", 10, " ", "gpt-4o")
     assert chunks == ["This is a ", "test. "]
 
@@ -55,15 +55,23 @@ def test_truncate_oversized_chunk(mock_encoding_for_model, mock_tokenize):
 
 @patch("backend.utils.get_token_count")
 @patch("backend.utils.truncate_oversized_chunk")
-def test_chunk_input_with_token_limit_oversized_chunk(mock_truncate_oversized_chunk, mock_get_token_count):
-    mock_get_token_count.side_effect = lambda text, _: len(text)  # Simplified token count
-    mock_truncate_oversized_chunk.return_value = "This is a truncated "
+def test_chunk_input_with_token_limit_oversized_chunk(mock_truncate_oversized_chunk, mock_get_token_count, caplog):
+    caplog.set_level("WARNING")
 
-    chunks = chunk_input_with_token_limit("This is a very long chunk that exceeds the token limit.", 20, " ", "gpt-4")
-    assert chunks == ["This is a truncated ", "chunk that exceeds ", "the token limit. "]
-    mock_truncate_oversized_chunk.assert_called_once_with(
-        "This is a very long chunk ", max_tokens=20, delimiter=" ", model="gpt-4"
+    mock_get_token_count.side_effect = lambda text, _: len(text)
+    mock_truncate_oversized_chunk.return_value = "_This_is_a_very_long"
+
+    chunks = chunk_input_with_token_limit(
+        "_This_is_a_very_long_chunk_ that exceeds the token limit.",
+        20,
+        " ",
+        "gpt-4",
     )
+    assert chunks == [" ", "_This_is_a_very_long ", "that exceeds the ", "token limit. "]
+    mock_truncate_oversized_chunk.assert_called_once_with(
+        "_This_is_a_very_long_chunk_", max_tokens=20, delimiter=" ", model="gpt-4"
+    )
+    assert "Part of the input is longer than 20 tokens." in caplog.text
 
 
 @pytest.mark.parametrize(
