@@ -51,6 +51,9 @@ class SummarizeAllCodeInPath(BaseTool):
         default=None,
         description="Truncate the output to this many characters. If None or skipped, the output is not truncated.",
     )
+    model: str = Field(
+        default=settings.gpt_small_model, description="A model to use for summarization, defaults to gpt-3.5-turbo"
+    )
 
     def run(self, api_key: str | None = None) -> str:
         """Run the skill and return the output."""
@@ -62,7 +65,7 @@ class SummarizeAllCodeInPath(BaseTool):
         ).run()
 
         # Chunk the input based on token limit
-        chunks = chunk_input_with_token_limit(full_code, max_tokens=16385 // 2, delimiter=delimiter)
+        chunks = chunk_input_with_token_limit(full_code, max_tokens=16385 // 2, delimiter=delimiter, model=self.model)
 
         outputs = []
         for chunk in chunks:
@@ -70,7 +73,7 @@ class SummarizeAllCodeInPath(BaseTool):
                 system_message=SYSTEM_MESSAGE,
                 user_prompt=chunk,
                 temperature=0.0,
-                model=settings.gpt_small_model,
+                model=self.model,
                 api_key=api_key,
             )
             outputs.append(output)

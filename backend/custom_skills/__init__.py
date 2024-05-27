@@ -3,6 +3,7 @@ from agency_swarm.tools import CodeInterpreter, Retrieval
 
 from backend.custom_skills.build_directory_tree import BuildDirectoryTree
 from backend.custom_skills.generate_proposal import GenerateProposal
+from backend.custom_skills.get_sql_database_metadata import GetSQLDatabaseMetadata
 from backend.custom_skills.print_all_files_in_path import PrintAllFilesInPath
 from backend.custom_skills.print_file_contents import PrintFileContents
 from backend.custom_skills.save_lead_to_airtable import SaveLeadToAirtable
@@ -17,6 +18,7 @@ SKILL_MAPPING = {
     "Retrieval": Retrieval,
     "BuildDirectoryTree": BuildDirectoryTree,
     "GenerateProposal": GenerateProposal,
+    "GetSQLDatabaseMetadata": GetSQLDatabaseMetadata,
     "PrintAllFilesInPath": PrintAllFilesInPath,
     "PrintFileContents": PrintFileContents,
     "SaveLeadToAirtable": SaveLeadToAirtable,
