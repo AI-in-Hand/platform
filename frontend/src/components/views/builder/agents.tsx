@@ -73,6 +73,7 @@ const AgentsView = ({}: any) => {
       cancelButtonText: "No",
       confirmButtonColor: "#1639a3",
       cancelButtonColor: "#d33",
+      returnFocus: false,
   }).then((result) => {
       if (result.isConfirmed) {
         setError(null);

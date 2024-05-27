@@ -27,7 +27,6 @@ const MainLayouts = ({ data }: any) => {
       <Footer />
     </div>
   );
-console.log(restricted,'restricted')
   useEffect(() => {
     if (shouldBeInSignInPage()) {
       navigate("/sign-in");
