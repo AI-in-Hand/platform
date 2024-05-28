@@ -23,11 +23,11 @@ import {
 import {
   BounceLoader,
   Card,
+  DeleteConfirmation,
   FlowConfigViewer,
   LaunchButton,
   LoadingOverlay,
 } from "../../atoms";
-import Swal from "sweetalert2";
 
 const WorkflowView = ({}: any) => {
   const [loading, setLoading] = React.useState(false);
@@ -89,42 +89,30 @@ const WorkflowView = ({}: any) => {
       headers: {},
     };
 
-    Swal.fire({
-      title: "Delete",
-      icon: "warning",
-      html: "Do you want to delete this team?",
-      showCloseButton: false,
-      showCancelButton: true,
-      focusConfirm: false,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
-      confirmButtonColor: "#1639a3",
-      cancelButtonColor: "#d33",
-      returnFocus: false,
-  }).then((result) => {
-      if (result.isConfirmed) {
+    const onSuccess = (data: any) => {
+      if (data && data.status) {
+        message.success(data.message);
+        setWorkflows(data.data);
+      } else {
+        message.error(data.message);
+      }
+      setLoading(false);
+    };
+    const onError = (err: any) => {
+      setError(err);
+      message.error(err.message);
+      setLoading(false);
+    };
+
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this team?",
+      () => {
         setError(null);
         setLoading(true);
-
-        const onSuccess = (data: any) => {
-          if (data && data.status) {
-            message.success(data.message);
-            setWorkflows(data.data);
-          } else {
-            message.error(data.message);
-          }
-          setLoading(false);
-        };
-        const onError = (err: any) => {
-          setError(err);
-          message.error(err.message);
-          setLoading(false);
-        };
-        console.log("team");
-        
         fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
       }
-  });
+    ); 
   };
 
   const saveWorkFlow = (workflow: IFlowConfig) => {
