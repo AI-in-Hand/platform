@@ -1183,11 +1183,17 @@ const AgentModal = ({
   showAgentModal,
   setShowAgentModal,
   handler,
+  selectedSenderAgents,
+  selectedReceiverAgents,
+  isReceiver = false,
 }: {
   agent: IAgentFlowSpec | null;
   showAgentModal: boolean;
   setShowAgentModal: (show: boolean) => void;
   handler?: (agent: IAgentFlowSpec | null) => void;
+  selectedSenderAgents: string[];
+  selectedReceiverAgents: string[];
+  isReceiver?: boolean;
 }) => {
   const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(agent);
   const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(null);
@@ -1200,6 +1206,9 @@ const AgentModal = ({
   useEffect(() => {
     fetchAgents();
   }, []);
+
+  console.log(isReceiver,"isReceiver");
+  
 
   const fetchAgents = () => {
     const onSuccess = (data: any) => {
@@ -1219,10 +1228,15 @@ const AgentModal = ({
     fetchJSON(listAgentsUrl, payLoad, onSuccess, onError);
   };
 
+  const availableAgentsOptions = isReceiver
+  ? flowSpecs.filter((spec, index) => !selectedSenderAgents.includes(spec.id))
+  : flowSpecs.filter((spec, index) => !selectedReceiverAgents.includes(spec.id)); // Filter out agents present in selectedSenderAgents;
+
   const handleAgentChange = (value: any) => {
     setSelectedFlowSpec(value);
-    setLocalAgent(flowSpecs[value]);
+    setLocalAgent(availableAgentsOptions[value]);
   };
+
 
   return (
     <Modal
@@ -1255,7 +1269,7 @@ const AgentModal = ({
             defaultValue={selectedFlowSpec}
             value={selectedFlowSpec}
             onChange={handleAgentChange}
-            options={flowSpecs.map((spec, index) => ({
+            options={availableAgentsOptions.map((spec, index) => ({
               label: spec.config.name,
               value: index,
             }))}
@@ -1270,9 +1284,15 @@ const AgentModal = ({
 export const AgentSelector = ({
   flowSpec,
   setFlowSpec,
+  selectedSenderAgents,
+  selectedReceiverAgents,
+  isReceiver = false,
 }: {
   flowSpec: IAgentFlowSpec | null;
   setFlowSpec: (agent: IAgentFlowSpec | null) => void;
+  selectedSenderAgents: string[];
+  selectedReceiverAgents: string[];
+  isReceiver?: boolean;
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -1311,6 +1331,10 @@ export const AgentSelector = ({
             handler={(agent: IAgentFlowSpec | null) => {
               setFlowSpec(agent);
             }}
+            // availableAgents={availableAgents}
+            selectedSenderAgents={selectedSenderAgents}
+            selectedReceiverAgents={selectedReceiverAgents}
+            isReceiver={isReceiver}
           />
         </>
       }
@@ -1332,7 +1356,7 @@ export const FlowConfigViewer = ({
     const updatedFlowConfig = { ...flowConfig, [key]: value };
     setLocalFlowConfig(updatedFlowConfig);
     setFlowConfig(updatedFlowConfig);
-  };
+  };  
 
   const updateSenderFlowSpec = (index: number, newFlowSpec: IAgentFlowSpec) => {
     const updatedFlows = [...localFlowConfig.flows];
@@ -1368,6 +1392,17 @@ export const FlowConfigViewer = ({
     setLocalFlowConfig({ ...localFlowConfig, flows: updatedFlows });
     setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
   };
+
+  const selectedSenderAgents = localFlowConfig.flows
+  .map(flow => flow.sender?.id)
+  .filter(Boolean);
+
+  const selectedReceiverAgents = localFlowConfig.flows
+  .map(flow => flow.receiver?.id)
+  .filter(Boolean);
+  // console.log(selectedSenderAgents,"selectedSenderAgents");
+  // console.log(selectedReceiverAgents,"selectedReceiverAgents");
+  
 
   return (
     <>
@@ -1409,6 +1444,8 @@ export const FlowConfigViewer = ({
               setFlowSpec={(newFlowSpec) =>
                 updateSenderFlowSpec(index, newFlowSpec)
               }
+              selectedSenderAgents={selectedSenderAgents}
+              selectedReceiverAgents={selectedReceiverAgents}
             />
           </div>
           <div className="w-1/2">
@@ -1422,6 +1459,9 @@ export const FlowConfigViewer = ({
               setFlowSpec={(newFlowSpec) =>
                 updateReceiverFlowSpec(index, newFlowSpec)
               }
+              selectedSenderAgents={selectedSenderAgents}
+              selectedReceiverAgents={selectedReceiverAgents}
+              isReceiver={true}
             />
           </div>
           <button onClick={() => removeFlow(index)}>Remove</button>
