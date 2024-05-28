@@ -7,6 +7,7 @@ import {
   TrashIcon,
   UserGroupIcon,
   UsersIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Dropdown, MenuProps, Modal, Tooltip, message } from "antd";
 import * as React from "react";
@@ -22,6 +23,7 @@ import {
 import {
   BounceLoader,
   Card,
+  DeleteConfirmation,
   FlowConfigViewer,
   LaunchButton,
   LoadingOverlay,
@@ -81,8 +83,6 @@ const WorkflowView = ({}: any) => {
   };
 
   const deleteWorkFlow = (workflow: IFlowConfig) => {
-    setError(null);
-    setLoading(true);
     // const fetch;
     const payLoad = {
       method: "DELETE",
@@ -103,7 +103,16 @@ const WorkflowView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
+
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this team?",
+      () => {
+        setError(null);
+        setLoading(true);
+        fetchJSON(`${deleteWorkflowsUrl}?id=${workflow.id}`, payLoad, onSuccess, onError);
+      }
+    ); 
   };
 
   const saveWorkFlow = (workflow: IFlowConfig) => {
@@ -201,7 +210,7 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Download">
-                    <ArrowDownTrayIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <ArrowDownTrayIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
                 <div
@@ -218,7 +227,19 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Make a Copy">
-                    <DocumentDuplicateIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <DocumentDuplicateIcon className="w-4 h-4 cursor-pointer inline-block" />
+                  </Tooltip>
+                </div>
+                <div
+                  role="button"
+                  className="text-accent text-xs inline-block hover:bg-primary p-2 rounded"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedWorkflow(workflow);
+                  }}
+                >
+                  <Tooltip title="Edit">
+                    <PencilIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
                 <div
@@ -230,7 +251,7 @@ const WorkflowView = ({}: any) => {
                   }}
                 >
                   <Tooltip title="Delete">
-                    <TrashIcon className=" w-5, h-5 cursor-pointer inline-block" />
+                    <TrashIcon className="w-4 h-4 cursor-pointer inline-block" />
                   </Tooltip>
                 </div>
               </div>

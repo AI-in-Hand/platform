@@ -5,6 +5,7 @@ import {
   InformationCircleIcon,
   PlusIcon,
   TrashIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Dropdown, MenuProps, Modal, message } from "antd";
 import * as React from "react";
@@ -22,6 +23,7 @@ import {
   BounceLoader,
   Card,
   CardHoverBar,
+  DeleteConfirmation,
   LaunchButton,
   LoadingOverlay,
 } from "../../atoms";
@@ -53,8 +55,6 @@ const AgentsView = ({}: any) => {
   );
 
   const deleteAgent = (agent: IAgentFlowSpec) => {
-    setError(null);
-    setLoading(true);
     // const fetch;
     const payLoad = {
       method: "DELETE",
@@ -75,7 +75,16 @@ const AgentsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
+
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this agent?",
+      () => {
+        setError(null);
+        setLoading(true);
+        fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
+      }
+    );   
   };
 
   const fetchAgents = () => {
@@ -180,6 +189,15 @@ const AgentsView = ({}: any) => {
           setShowNewAgentModal(true);
         },
         hoverText: "Make a Copy",
+      },
+      {
+        title: "Edit",
+        icon: PencilIcon,
+        onClick: (e: any) => {
+          setSelectedAgent(agent);
+          setShowAgentModal(true);
+        },
+        hoverText: "Edit",
       },
       {
         title: "Delete",
