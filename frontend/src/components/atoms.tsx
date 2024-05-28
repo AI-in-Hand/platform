@@ -1207,9 +1207,6 @@ const AgentModal = ({
     fetchAgents();
   }, []);
 
-  console.log(isReceiver,"isReceiver");
-  
-
   const fetchAgents = () => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
@@ -1230,7 +1227,7 @@ const AgentModal = ({
 
   const availableAgentsOptions = isReceiver
   ? flowSpecs.filter((spec, index) => !selectedSenderAgents.includes(spec.id))
-  : flowSpecs.filter((spec, index) => !selectedReceiverAgents.includes(spec.id)); // Filter out agents present in selectedSenderAgents;
+  : flowSpecs.filter((spec, index) => !selectedReceiverAgents.includes(spec.id));
 
   const handleAgentChange = (value: any) => {
     setSelectedFlowSpec(value);
@@ -1399,10 +1396,7 @@ export const FlowConfigViewer = ({
 
   const selectedReceiverAgents = localFlowConfig.flows
   .map(flow => flow.receiver?.id)
-  .filter(Boolean);
-  // console.log(selectedSenderAgents,"selectedSenderAgents");
-  // console.log(selectedReceiverAgents,"selectedReceiverAgents");
-  
+  .filter(Boolean); 
 
   return (
     <>
