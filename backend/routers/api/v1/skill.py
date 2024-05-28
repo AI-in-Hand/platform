@@ -65,7 +65,7 @@ async def create_skill_version(
     """
     skill_id, skill_version = manager.create_skill_version(config, current_user.id)
     configs = manager.get_skill_list(current_user.id)
-    return SkillListResponse(data=configs, message=f"Version {skill_version} of the skill {skill_id} created")
+    return SkillListResponse(data=configs, message=f"Version {skill_version} of the skill {config.title} created")
 
 
 @skill_router.delete("/skill")

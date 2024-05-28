@@ -1,7 +1,7 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-LARGE_GPT_MODEL = "gpt-4-turbo"
+LARGE_GPT_MODEL = "gpt-4o"
 SMALL_GPT_MODEL = "gpt-3.5-turbo"
 
 
