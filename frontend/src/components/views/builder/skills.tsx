@@ -5,6 +5,7 @@ import {
   InformationCircleIcon,
   PlusIcon,
   TrashIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Input, Modal, message, MenuProps, Dropdown } from "antd";
 import * as React from "react";
@@ -22,6 +23,7 @@ import {
   BounceLoader,
   Card,
   CardHoverBar,
+  DeleteConfirmation,
   LoadingOverlay,
   MonacoEditor,
 } from "../../atoms";
@@ -49,14 +51,11 @@ const SkillsView = ({}: any) => {
   const [newSkill, setNewSkill] = React.useState<ISkill | null>(sampleSkill);
 
   const deleteSkill = (skill: ISkill) => {
-    setError(null);
-    setLoading(true);
-    // const fetch;
     const payLoad = {
       method: "DELETE",
       headers: {},
     };
-
+  
     const onSuccess = (data: any) => {
       if (data && data.status) {
         message.success(data.message);
@@ -71,7 +70,16 @@ const SkillsView = ({}: any) => {
       message.error(err.message);
       setLoading(false);
     };
-    fetchJSON(`${deleteSkillsUrl}?id=${skill.id}`, payLoad, onSuccess, onError);
+  
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this skill?",
+      () => {
+        setError(null);
+        setLoading(true);
+        fetchJSON(`${deleteSkillsUrl}?id=${skill.id}`, payLoad, onSuccess, onError);
+      }
+    ); 
   };
 
   const fetchSkills = () => {
@@ -179,6 +187,15 @@ const SkillsView = ({}: any) => {
           setShowNewSkillModal(true);
         },
         hoverText: "Make a Copy",
+      },
+      {
+        title: "Edit",
+        icon: PencilIcon,
+        onClick: (e: any) => {
+          setSelectedSkill(skill);
+          setShowSkillModal(true);
+        },
+        hoverText: "Edit",
       },
       {
         title: "Delete",

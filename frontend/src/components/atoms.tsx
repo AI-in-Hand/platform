@@ -47,6 +47,7 @@ import {
   IStatus,
 } from "./types";
 import TextArea from "antd/es/input/TextArea";
+import Swal from "sweetalert2";
 
 const { useToken } = theme;
 interface CodeProps {
@@ -1502,7 +1503,7 @@ export const CardHoverBar = ({
         onClick={item.onClick}
       >
         <Tooltip title={item.hoverText}>
-          <item.icon className=" w-5, h-5 cursor-pointer inline-block" />
+          <item.icon className="w-4 h-4 cursor-pointer inline-block" />
         </Tooltip>
       </div>
     );
@@ -1533,4 +1534,24 @@ export const AgentRow = ({ message }: { message: any }) => {
       <MarkdownView data={message.message?.content} className="text-sm" />
     </GroupView>
   );
+};
+
+export const DeleteConfirmation = (title: string, message: string, onConfirm: () => void)=> {
+  Swal.fire({
+    title: title,
+    icon: "warning",
+    html: message,
+    showCloseButton: false,
+    showCancelButton: true,
+    focusConfirm: false,
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    confirmButtonColor: "#1639a3",
+    cancelButtonColor: "#d33",
+    returnFocus: false,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      onConfirm();
+    }
+  });
 };
