@@ -26,8 +26,10 @@ pyairtable = "^2.3.3"
 pydantic = "^2.7.0"
 pydantic-settings = "^2.1.0"
 pymysql = "^1.1.1"
+pyodbc = "^5.1.0"
 redis = "^5.0.4"
-sqlalchemy = "^2.0.30"
+sqlalchemy = "^1.4.52"
+sqlalchemy-redshift = "^0.8.14"
 tiktoken = "^0.7.0"
 uvicorn = {extras = ["standard"], version = "^0.29.0"}
 
