@@ -63,6 +63,7 @@ def agent_config_data_api():
                 "work_dir": None,
                 "use_docker": False,
             },
+            "temperature": 0.0
         },
         "timestamp": "2024-05-05T00:14:57.487901+00:00",
         "skills": [
@@ -73,6 +74,7 @@ def agent_config_data_api():
         ],
         "description": "An example agent.",
         "user_id": TEST_USER_ID,
+        "temperature": 0.0
     }
 
 

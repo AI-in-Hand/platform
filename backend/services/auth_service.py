@@ -18,7 +18,7 @@ class AuthService:
         try:
             decoded_token = auth.verify_id_token(token, check_revoked=True)
         except (ValueError, InvalidArgumentError, UnknownError) as err:
-            logger.error(f"Invalid authentication credentials: {err}")
+            logger.info(f"Invalid authentication credentials: {err}")
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail="Could not validate credentials",

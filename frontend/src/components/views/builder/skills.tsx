@@ -23,10 +23,10 @@ import {
   BounceLoader,
   Card,
   CardHoverBar,
+  DeleteConfirmation,
   LoadingOverlay,
   MonacoEditor,
 } from "../../atoms";
-import Swal from "sweetalert2";
 
 const SkillsView = ({}: any) => {
   const [loading, setLoading] = React.useState(false);
@@ -51,45 +51,35 @@ const SkillsView = ({}: any) => {
   const [newSkill, setNewSkill] = React.useState<ISkill | null>(sampleSkill);
 
   const deleteSkill = (skill: ISkill) => {
-    // const fetch;
     const payLoad = {
       method: "DELETE",
       headers: {},
     };
-
-    Swal.fire({
-      title: "Delete",
-      icon: "warning",
-      html: "Do you want to delete this skill?",
-      showCloseButton: false,
-      showCancelButton: true,
-      focusConfirm: false,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
-      confirmButtonColor: "#1639a3",
-      cancelButtonColor: "#d33",
-      returnFocus: false, 
-  }).then((result) => {
-      if (result.isConfirmed) {
+  
+    const onSuccess = (data: any) => {
+      if (data && data.status) {
+        message.success(data.message);
+        setSkills(data.data);
+      } else {
+        message.error(data.message);
+      }
+      setLoading(false);
+    };
+    const onError = (err: any) => {
+      setError(err);
+      message.error(err.message);
+      setLoading(false);
+    };
+  
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this skill?",
+      () => {
         setError(null);
         setLoading(true);
-        const onSuccess = (data: any) => {
-          if (data && data.status) {
-            message.success(data.message);
-            setSkills(data.data);
-          } else {
-            message.error(data.message);
-          }
-          setLoading(false);
-        };
-        const onError = (err: any) => {
-          setError(err);
-          message.error(err.message);
-          setLoading(false);
-        };
         fetchJSON(`${deleteSkillsUrl}?id=${skill.id}`, payLoad, onSuccess, onError);
       }
-  }); 
+    ); 
   };
 
   const fetchSkills = () => {

@@ -32,6 +32,9 @@ class SummarizeCode(BaseTool):
     file_name: Path = Field(
         ..., description="The name of the file to be summarized. It can be a relative or absolute path."
     )
+    model: str = Field(
+        default=settings.gpt_small_model, description="A model to use for summarization, defaults to gpt-3.5-turbo"
+    )
 
     def run(self, api_key: str | None = None) -> str:
         code = PrintFileContents(file_name=self.file_name).run()
@@ -39,7 +42,7 @@ class SummarizeCode(BaseTool):
             system_message=SYSTEM_MESSAGE,
             user_prompt=code,
             temperature=0.0,
-            model=settings.gpt_small_model,
+            model=self.model,
             api_key=api_key,
         )
         return output

@@ -124,6 +124,15 @@ const UserVariables = () => {
       </section>
 
       <details>
+        <summary><strong>Using Azure OpenAI</strong> (click to expand or hide)</summary>
+        <section>
+          <p>
+            To use Azure OpenAI, set the following variables: AZURE_OPENAI_ENDPOINT (e.g. https://example-resource.azure.openai.com/), OPENAI_API_VERSION (e.g. 2024-02-15-preview), AZURE_OPENAI_API_KEY.
+          </p>
+        </section>
+      </details>
+
+      <details>
         <summary><strong>Understanding Variables</strong> (click to expand or hide)</summary>
         <section aria-labelledby="variables-introduction">
           <h2 id="variables-introduction">Introduction</h2>

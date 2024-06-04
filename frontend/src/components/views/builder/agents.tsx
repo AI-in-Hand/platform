@@ -23,11 +23,10 @@ import {
   BounceLoader,
   Card,
   CardHoverBar,
+  DeleteConfirmation,
   LaunchButton,
   LoadingOverlay,
 } from "../../atoms";
-import Swal from "sweetalert2";
-
 
 const AgentsView = ({}: any) => {
   const [loading, setLoading] = React.useState(false);
@@ -62,40 +61,30 @@ const AgentsView = ({}: any) => {
       headers: {},
     };
 
-    Swal.fire({
-      title: "Delete",
-      icon: "warning",
-      html: "Do you want to delete this agent?",
-      showCloseButton: false,
-      showCancelButton: true,
-      focusConfirm: false,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
-      confirmButtonColor: "#1639a3",
-      cancelButtonColor: "#d33",
-      returnFocus: false,
-  }).then((result) => {
-      if (result.isConfirmed) {
+    const onSuccess = (data: any) => {
+      if (data && data.status) {
+        message.success(data.message);
+        setAgents(data.data);
+      } else {
+        message.error(data.message);
+      }
+      setLoading(false);
+    };
+    const onError = (err: any) => {
+      setError(err);
+      message.error(err.message);
+      setLoading(false);
+    };
+
+    DeleteConfirmation(
+      "Delete",
+      "Do you want to delete this agent?",
+      () => {
         setError(null);
         setLoading(true);
-
-        const onSuccess = (data: any) => {
-          if (data && data.status) {
-            message.success(data.message);
-            setAgents(data.data);
-          } else {
-            message.error(data.message);
-          }
-          setLoading(false);
-        };
-        const onError = (err: any) => {
-          setError(err);
-          message.error(err.message);
-          setLoading(false);
-        };
         fetchJSON(`${deleteAgentUrl}?id=${agent.id}`, payLoad, onSuccess, onError);
       }
-  });   
+    );   
   };
 
   const fetchAgents = () => {

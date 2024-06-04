@@ -72,29 +72,29 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, api_k
     return completion.choices[0].message.content
 
 
-def tokenize(text: str) -> list[int]:
+def tokenize(text: str, model: str) -> list[int]:
     """Tokenize a string using tiktoken tokenizer."""
-    return tiktoken.get_encoding("cl100k_base").encode(text)
+    return tiktoken.encoding_for_model(model).encode(text)
 
 
-def get_token_count(text: str) -> int:
+def get_token_count(text: str, model: str) -> int:
     """Get the number of tokens using tiktoken tokenizer."""
-    return len(tokenize(text))
+    return len(tokenize(text, model))
 
 
-def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str) -> list:
+def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str, model: str) -> list:
     chunks = []
     parts = input_str.split(delimiter)
     current_chunk: list[str] = []
 
     current_tokens = 0
     for part in parts:
-        part_token_count = get_token_count(part + delimiter)
+        part_token_count = get_token_count(part + delimiter, model)
         if current_tokens + part_token_count > max_tokens:
             new_chunk = delimiter.join(current_chunk)
-            if get_token_count(new_chunk) > max_tokens:
+            if get_token_count(new_chunk, model) > max_tokens:
                 logger.warning(f"Part of the input is longer than {max_tokens} tokens.")
-                new_chunk = truncate_oversized_chunk(new_chunk, max_tokens=max_tokens, delimiter=delimiter)
+                new_chunk = truncate_oversized_chunk(new_chunk, max_tokens=max_tokens, delimiter=delimiter, model=model)
             chunks.append(new_chunk + delimiter)
             current_chunk = [part]
             current_tokens = part_token_count
@@ -109,12 +109,12 @@ def chunk_input_with_token_limit(input_str: str, max_tokens: int, delimiter: str
     return chunks
 
 
-def truncate_oversized_chunk(chunk: str, max_tokens: int, delimiter: str) -> str:
+def truncate_oversized_chunk(chunk: str, max_tokens: int, delimiter: str, model: str) -> str:
     """Truncate the chunk if it is longer than max_tokens."""
-    tokens = tokenize(chunk + delimiter)
+    tokens = tokenize(chunk + delimiter, model)
     if len(tokens) > max_tokens:
-        tokens = tokens[: max_tokens - get_token_count(delimiter)]
-        chunk = tiktoken.get_encoding("gpt-4").decode(tokens)
+        tokens = tokens[: max_tokens - get_token_count(delimiter, model)]
+        chunk = tiktoken.encoding_for_model(model).decode(tokens)
         chunk += delimiter
     return chunk
 

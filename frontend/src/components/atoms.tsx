@@ -47,6 +47,7 @@ import {
   IStatus,
 } from "./types";
 import TextArea from "antd/es/input/TextArea";
+import Swal from "sweetalert2";
 
 const { useToken } = theme;
 interface CodeProps {
@@ -900,7 +901,6 @@ export const AgentFlowSpecView = ({
                 className="mt-2 w-full"
                 defaultValue={flowSpec.config.model}
                 value={flowSpec.config.model}
-                disabled={flowSpec.id && flowSpec.user_id}
                 onChange={(value: any) => {
                   onControlChange(value, "model");
                 }}
@@ -908,34 +908,40 @@ export const AgentFlowSpecView = ({
                   label: model.label,
                   value: model.value,
                 }))}
+                mode="tags"
+                showSearch
+                tokenSeparators={[',']}
+                maxTagCount={1}
+                onSelect={(value: any) => {
+                  onControlChange(value, "model");
+                }}
+                onDeselect={(value: any) => {
+                  onControlChange("gpt-3.5-turbo", "model");
+                }}
               />
             }
           />
         )}
 
-        {/* {llm_config && llm_config.config_list.length > 0 && (
-          <ControlRowView
-            title="Temperature"
-            className="mt-4"
-            description="Defines the randomness of the agent's response."
-            value={llm_config.temperature}
-            control={
-              <Slider
-                min={0}
-                max={2}
-                step={0.1}
-                defaultValue={llm_config.temperature || 0.1}
-                onChange={(value: any) => {
-                  const llm_config = {
-                    ...flowSpec.config.llm_config,
-                    temperature: value,
-                  };
-                  onControlChange(llm_config, "llm_config");
-                }}
-              />
-            }
-          />
-        )} */}
+        {(
+            <ControlRowView
+                title="Temperature"
+                className="mt-4"
+                description="Defines the randomness of the agent's response."
+                value={flowSpec.config.temperature || 0.0}
+                control={
+                  <Slider
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      defaultValue={flowSpec.config.temperature || 0.0}
+                      onChange={(value: any) => {
+                        onControlChange(value, "temperature");
+                      }}
+                  />
+                }
+            />
+        )}
 
         {
           <ControlRowView
@@ -1562,4 +1568,24 @@ export const AgentRow = ({ message }: { message: any }) => {
       <MarkdownView data={message.message?.content} className="text-sm" />
     </GroupView>
   );
+};
+
+export const DeleteConfirmation = (title: string, message: string, onConfirm: () => void)=> {
+  Swal.fire({
+    title: title,
+    icon: "warning",
+    html: message,
+    showCloseButton: false,
+    showCancelButton: true,
+    focusConfirm: false,
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    confirmButtonColor: "#1639a3",
+    cancelButtonColor: "#d33",
+    returnFocus: false,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      onConfirm();
+    }
+  });
 };

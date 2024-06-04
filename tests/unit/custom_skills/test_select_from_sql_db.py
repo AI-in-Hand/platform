@@ -19,11 +19,9 @@ def test_select_from_db_success(mock_sessionmaker, mock_create_engine, mock_user
     # Mock the SQLAlchemy session
     mock_session_class = MagicMock()
     mock_session = mock_session_class.return_value.__enter__.return_value
-    mock_session.execute.return_value = iter(
-        [
-            (1, "Alice", "alice@example.com"),
-        ]
-    )
+    mock_result = [MagicMock(spec=["_asdict"]) for _ in range(1)]
+    mock_result[0]._asdict.return_value = {"id": 1, "name": "Alice", "email": "alice@example.com"}
+    mock_session.execute.return_value = iter(mock_result)
     mock_sessionmaker.return_value = mock_session_class
     mock_create_engine.return_value.dispose = MagicMock()
 
@@ -38,7 +36,7 @@ def test_select_from_db_success(mock_sessionmaker, mock_create_engine, mock_user
     )
     response = tool.run()
 
-    expected_result = json.dumps([{"id": 1, "name": "Alice", "email": "alice@example.com"}], indent=4)
+    expected_result = json.dumps([{"id": 1, "name": "Alice", "email": "alice@example.com"}], indent=4, default=str)
 
     assert response == expected_result
     mock_session.execute.assert_called_once()
