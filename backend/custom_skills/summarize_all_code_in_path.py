@@ -92,8 +92,8 @@ class SummarizeAllCodeInPath(BaseTool):
 if __name__ == "__main__":
     print(
         SummarizeAllCodeInPath(
-            start_path=".",
+            start_path="./data/agency_data",
             file_extensions=[".py"],
             exclude_directories=["__pycache__", ".git", ".idea", "venv", ".vscode", "node_modules", "build", "dist"],
-        ).run(api_key=os.getenv("API_KEY"))
+        ).run(api_key=os.getenv("OPENAI_API_KEY"))
     )

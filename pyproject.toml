@@ -12,7 +12,7 @@ python = ">=3.11.0a1,<3.13"
 agency-swarm = "0.2.2"
 cachetools = "^5.3.3"
 cryptography = "^42.0.6"
-duckduckgo-search = "^6.1.0"
+duckduckgo-search = "^6.1.7"
 fastapi = "^0.111.0"
 firebase-admin = "^6.3.0"
 google-cloud-logging = "^3.10.0"
@@ -23,15 +23,15 @@ oracledb = "^2.2.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 psycopg2 = "^2.9.9"
 pyairtable = "^2.3.3"
-pydantic = "^2.7.0"
-pydantic-settings = "^2.1.0"
+pydantic = "^2.7.4"
+pydantic-settings = "^2.3.4"
 pymysql = "^1.1.1"
 pyodbc = "^5.1.0"
-redis = "^5.0.4"
+redis = "^5.0.6"
 sqlalchemy = "^1.4.52"
 sqlalchemy-redshift = "^0.8.14"
 tiktoken = "^0.7.0"
-uvicorn = {extras = ["standard"], version = "^0.29.0"}
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
 
 [tool.poetry.group.dev.dependencies]
 poetry-plugin-export = ">=1.6.0"
