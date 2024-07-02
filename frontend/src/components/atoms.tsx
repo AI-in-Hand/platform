@@ -1213,8 +1213,6 @@ const AgentModal = ({
     allAgentsFiltered = allAgents;
   }
 
-  // console.log(flowSpecs,"flowspec", setAddFlowBtn);
-
   const availableAgentsOptions = flowSpecs.filter(
     (spec, index) => !allAgentsFiltered.includes(spec.id)
   );
@@ -1238,7 +1236,6 @@ const AgentModal = ({
           handler(localAgent);
         }
         setShowAgentModal(false);
-        console.log(availableAgentsOptions.length);
         setAddFlowBtn(availableAgentsOptions.length > 1 ? true : false);
       }}
       onCancel={() => {
@@ -1342,7 +1339,6 @@ export const FlowConfigViewer = ({
     React.useState<IFlowConfig>(flowConfig);
 
   const [addFlowBtn, setAddFlowBtn] = React.useState<boolean>(true);
-  console.log(addFlowBtn, "addFlowBtn");
 
   const updateFlowConfig = (key: string, value: string) => {
     const updatedFlowConfig = { ...flowConfig, [key]: value };
@@ -1395,9 +1391,6 @@ export const FlowConfigViewer = ({
   const selectedReceiverAgents = localFlowConfig.flows
     .map((flow) => flow.receiver?.id)
     .filter(Boolean);
-
-  // let allSelectedAgents = [...selectedSenderAgents, ...selectedReceiverAgents];
-  // console.log(allSelectedAgents,"allSelectedAgents");
 
   return (
     <>
