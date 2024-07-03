@@ -1158,9 +1158,8 @@ const AgentModal = ({
   handler,
   selectedSenderAgents,
   selectedReceiverAgents,
-  isReceiver = false,
   agentId,
-  setAddFlowBtn,
+  setAgentListData,
 }: {
   agent: IAgentFlowSpec | null;
   showAgentModal: boolean;
@@ -1168,9 +1167,8 @@ const AgentModal = ({
   handler?: (agent: IAgentFlowSpec | null) => void;
   selectedSenderAgents: string[];
   selectedReceiverAgents: string[];
-  isReceiver?: boolean;
   agentId: string;
-  setAddFlowBtn: (value: boolean) => void;
+  setAgentListData: null;
 }) => {
   const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(
     agent
@@ -1192,6 +1190,7 @@ const AgentModal = ({
     const onSuccess = (data: any) => {
       if (data && data.status) {
         setFlowSpecs(data.data);
+        setAgentListData(data.data);
       }
     };
     const onError = (err: any) => {
@@ -1236,7 +1235,6 @@ const AgentModal = ({
           handler(localAgent);
         }
         setShowAgentModal(false);
-        setAddFlowBtn(availableAgentsOptions.length > 1 ? true : false);
       }}
       onCancel={() => {
         setShowAgentModal(false);
@@ -1269,17 +1267,15 @@ export const AgentSelector = ({
   setFlowSpec,
   selectedSenderAgents,
   selectedReceiverAgents,
-  isReceiver = false,
   agentId,
-  setAddFlowBtn,
+  setAgentListData,
 }: {
   flowSpec: IAgentFlowSpec | null;
   setFlowSpec: (agent: IAgentFlowSpec | null) => void;
   selectedSenderAgents: string[];
   selectedReceiverAgents: string[];
-  isReceiver?: boolean;
   agentId: string;
-  setAddFlowBtn: boolean;
+  setAgentListData: null;
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -1315,12 +1311,10 @@ export const AgentSelector = ({
             handler={(agent: IAgentFlowSpec | null) => {
               setFlowSpec(agent);
             }}
-            // availableAgents={availableAgents}
             selectedSenderAgents={selectedSenderAgents}
             selectedReceiverAgents={selectedReceiverAgents}
-            isReceiver={isReceiver}
             agentId={agentId}
-            setAddFlowBtn={setAddFlowBtn}
+            setAgentListData={setAgentListData}
           />
         </>
       }
@@ -1337,8 +1331,8 @@ export const FlowConfigViewer = ({
 }) => {
   const [localFlowConfig, setLocalFlowConfig] =
     React.useState<IFlowConfig>(flowConfig);
-
-  const [addFlowBtn, setAddFlowBtn] = React.useState<boolean>(true);
+    
+  const [agentListData, setAgentListData] = useState(null);
 
   const updateFlowConfig = (key: string, value: string) => {
     const updatedFlowConfig = { ...flowConfig, [key]: value };
@@ -1392,6 +1386,7 @@ export const FlowConfigViewer = ({
     .map((flow) => flow.receiver?.id)
     .filter(Boolean);
 
+  const availableAgentOptions = agentListData?.length - localFlowConfig.flows.length * 2;
   return (
     <>
       <ControlRowView
@@ -1435,7 +1430,7 @@ export const FlowConfigViewer = ({
               selectedSenderAgents={selectedSenderAgents}
               selectedReceiverAgents={selectedReceiverAgents}
               agentId={flow?.sender?.id}
-              setAddFlowBtn={setAddFlowBtn}
+              setAgentListData={setAgentListData}
             />
           </div>
           <div className="w-1/2">
@@ -1451,15 +1446,15 @@ export const FlowConfigViewer = ({
               }
               selectedSenderAgents={selectedSenderAgents}
               selectedReceiverAgents={selectedReceiverAgents}
-              isReceiver={true}
               agentId={flow?.receiver?.id}
-              setAddFlowBtn={setAddFlowBtn}
+              setAgentListData={setAgentListData}
             />
           </div>
           <button onClick={() => removeFlow(index)}>Remove</button>
         </div>
       ))}
-      {addFlowBtn && <button onClick={addFlow}>Add Flow</button>}
+
+      {availableAgentOptions >= 2 && <button onClick={addFlow}>Add Flow</button>}
     </>
   );
 };
