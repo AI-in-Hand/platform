@@ -441,3 +441,18 @@ div#gatsby-focus-wrapper {
 .ant-typography {
   @apply text-primary !important;
 }
+
+/* variables css */
+.hide-variable{
+  display: none;
+}
+.variable-button-wrap{
+  width: 150px;
+}
+.variable-value-wrap{
+  width: 50%;
+  /* text-align: center; */
+}
+.variable-value-wrap .ant-form-item{
+  margin-bottom: 0px;
+}
