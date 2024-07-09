@@ -18,6 +18,7 @@ class UserVariableManager:
     def __init__(self, user_variable_storage: UserVariableStorage):
         self._user_variable_storage = user_variable_storage
         self._encryption_service = EncryptionService(settings.encryption_key)
+        self._agent_storage = AgentFlowSpecStorage()
 
     def get_by_key(self, key: str) -> str:
         """Get a variable by key."""
@@ -65,10 +66,9 @@ class UserVariableManager:
         # Encrypt and update new or changed variables
         for key, value in variables.items():
             if value:  # Only update if the value is not an empty string
-                if key == "OPENAI_API_KEY" and value != self._encryption_service.decrypt(existing_variables[key]): # Check if OPENAI_API_KEY is updated
-                    agent_storage = AgentFlowSpecStorage()
-                    agents = agent_storage.load_by_user_id(user_id=user_id)
-                    if len(agents) > 0: # Check if this user has any agent
+                if key == "OPENAI_API_KEY" and value != self._encryption_service.decrypt(existing_variables[key]):  # Check if OPENAI_API_KEY is updated
+                    agents = self._agent_storage.load_by_user_id(user_id=user_id)
+                    if len(agents) > 0:  # Check if this user has any agent
                         return False
 
                 existing_variables[key] = self._encryption_service.encrypt(value)
