@@ -5,7 +5,7 @@ const ProfilePage = ({ data }: any) => {
   const [form] = Form.useForm();
 
   const handleFinish = (values: any) => {
-    // console.log("Form values:", values);
+    console.log("Form values:", values);
   };
 
   return (
@@ -17,12 +17,13 @@ const ProfilePage = ({ data }: any) => {
             onFinish={handleFinish}
             layout="vertical"
             className="space-y-6"
+            labelAlign="left"
           >
             <div className="grid grid-cols-12 gap-4">
               <Form.Item
                 label="First Name"
                 name="firstName"
-                rules={[{ message: "Please input your first name!" }]}
+                rules={[{ required: true, message: "Please input your first name!" }]}
                 className="col-span-12 sm:col-span-6 mb-4"
               >
                 <Input className="rounded-md" />
@@ -30,7 +31,7 @@ const ProfilePage = ({ data }: any) => {
               <Form.Item
                 label="Last Name"
                 name="lastName"
-                rules={[{ message: "Please input your last name!" }]}
+                rules={[{ required: true, message: "Please input your last name!" }]}
                 className="col-span-12 sm:col-span-6 mb-4"
               >
                 <Input className="rounded-md" />
@@ -40,7 +41,7 @@ const ProfilePage = ({ data }: any) => {
               label="Email"
               name="email"
               rules={[
-                { message: "Please input your email!" },
+                { required: true, message: "Please input your email!" },
                 { type: 'email', message: "Please enter a valid email address!" }
               ]}
               className="mb-4"
