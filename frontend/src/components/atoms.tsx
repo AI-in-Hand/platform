@@ -40,12 +40,7 @@ import {
   obscureString,
   truncateText,
 } from "./utils";
-import {
-  IAgentFlowSpec,
-  IFlowConfig,
-  ISkill,
-  IStatus,
-} from "./types";
+import { IAgentFlowSpec, IFlowConfig, ISkill, IStatus } from "./types";
 import TextArea from "antd/es/input/TextArea";
 import Swal from "sweetalert2";
 
@@ -108,8 +103,7 @@ export const IconButton = ({
       onClick={onClick}
       className={`inline-block mr-2 hover:text-accent transition duration-300 ${className} ${
         active ? "border-accent border rounded text-accent" : ""
-      }`}
-    >
+      }`}>
       {icon}
     </span>
   );
@@ -124,8 +118,7 @@ export const LaunchButton = ({
     <button
       role={"button"}
       className={` focus:ring ring-accent  ring-l-none  rounded  cursor-pointer hover:brightness-110 bg-accent transition duration-500    text-white ${className} `}
-      onClick={onClick}
-    >
+      onClick={onClick}>
       {children}
     </button>
   );
@@ -136,8 +129,7 @@ export const SecondaryButton = ({ children, onClick, className }: any) => {
     <button
       role={"button"}
       className={` ${className}   focus:ring ring-accent  p-2 px-5 rounded  cursor-pointer hover:brightness-90 bg-secondary transition duration-500    text-primary`}
-      onClick={onClick}
-    >
+      onClick={onClick}>
       {children}
     </button>
   );
@@ -162,8 +154,7 @@ export const Card = ({
     <div
       onClick={onClick}
       role={"button"}
-      className={`${border} border-2 bg-secondary  group ${className} rounded ${cursor} transition duration-300`}
-    >
+      className={`${border} border-2 bg-secondary  group ${className} rounded ${cursor} transition duration-300`}>
       <div className="mt- text-sm text-secondary  break-words">
         {title && (
           <div className="text-accent rounded font-semibold  text-xs pb-1">
@@ -193,16 +184,14 @@ export const CollapseBox = ({
           e.preventDefault();
         }
       }}
-      className="bordper border-secondary rounded"
-    >
+      className="bordper border-secondary rounded">
       <div
         onClick={() => {
           setIsOpen(!isOpen);
         }}
         className={`cursor-pointer bg-secondary p-2 rounded ${
           isOpen ? "rounded-b-none " : " "
-        }"}`}
-      >
+        }"}`}>
         {isOpen && <ChevronUpIcon className={chevronClass} />}
         {!isOpen && <ChevronDownIcon className={chevronClass} />}
 
@@ -271,8 +260,7 @@ export const MessageBox = ({ title, children, className }: IProps) => {
   return (
     <div
       ref={messageBox}
-      className={`${className} p-3  rounded  bg-secondary transition duration-1000 ease-in-out  overflow-hidden`}
-    >
+      className={`${className} p-3  rounded  bg-secondary transition duration-1000 ease-in-out  overflow-hidden`}>
       {" "}
       <div className="flex gap-2 mb-2">
         <div className="flex-1">
@@ -286,8 +274,7 @@ export const MessageBox = ({ title, children, className }: IProps) => {
             onClick={() => {
               closeMessage();
             }}
-            className=" border border-secondary bg-secondary brightness-125 hover:brightness-100 cursor-pointer transition duration-200   inline-block px-1 pb-1 rounded text-primary"
-          >
+            className=" border border-secondary bg-secondary brightness-125 hover:brightness-100 cursor-pointer transition duration-200   inline-block px-1 pb-1 rounded text-primary">
             <XMarkIcon className="h-4 w-4 inline-block" />
           </span>
         </div>
@@ -331,15 +318,13 @@ export const ExpandView = ({
       style={{
         minHeight: "100px",
       }}
-      className={`h-full    rounded mb-6  border-secondary ${className}`}
-    >
+      className={`h-full    rounded mb-6  border-secondary ${className}`}>
       <div
         role="button"
         onClick={() => {
           setIsOpen(true);
         }}
-        className="text-xs mb-2 h-full w-full break-words"
-      >
+        className="text-xs mb-2 h-full w-full break-words">
         {icon ? icon : children}
       </div>
       {isOpen && (
@@ -348,8 +333,7 @@ export const ExpandView = ({
           width={800}
           open={isOpen}
           onCancel={() => setIsOpen(false)}
-          footer={null}
-        >
+          footer={null}>
           {/* <ResizableBox
             // handle={<span className="text-accent">resize</span>}
             lockAspectRatio={false}
@@ -379,14 +363,12 @@ export const LoadingOverlay = ({ children, loading }: IProps) => {
         <>
           <div
             className="absolute inset-0 bg-secondary flex  pointer-events-none"
-            style={{ opacity: 0.5 }}
-          >
+            style={{ opacity: 0.5 }}>
             {/* Overlay background */}
           </div>
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ pointerEvents: "none" }}
-          >
+            style={{ pointerEvents: "none" }}>
             {/* Center BounceLoader without inheriting the opacity */}
             <BounceLoader />
           </div>
@@ -423,8 +405,7 @@ export const MarkdownView = ({
             onClick={() => {
               setCodeVisible(!codeVisible);
             }}
-            className="  flex-1 mr-4  "
-          >
+            className="  flex-1 mr-4  ">
             {!codeVisible && (
               <div className=" text-white hover:text-accent duration-300">
                 <ChevronDownIcon className="inline-block  w-5 h-5" />
@@ -469,8 +450,7 @@ export const MarkdownView = ({
             language={language}
             className="rounded w-full"
             PreTag="div"
-            wrapLongLines={true}
-          >
+            wrapLongLines={true}>
             {String(children).replace(/\n$/, "")}
           </SyntaxHighlighter>
         )}
@@ -480,8 +460,7 @@ export const MarkdownView = ({
 
   return (
     <div
-      className={` w-full   chatbox prose dark:prose-invert text-primary rounded   ${className}`}
-    >
+      className={` w-full   chatbox prose dark:prose-invert text-primary rounded   ${className}`}>
       <ReactMarkdown
         className="   w-full"
         remarkPlugins={[remarkGfm]}
@@ -497,8 +476,7 @@ export const MarkdownView = ({
               </code>
             );
           },
-        }}
-      >
+        }}>
         {processString(data)}
       </ReactMarkdown>
     </div>
@@ -535,8 +513,7 @@ export const CodeBlock = ({
         <div className="relative border border-transparent w-full h-full">
           <div
             style={{ zIndex: -1 }}
-            className="w-full absolute top-0 h-full bg-gray-900 hover:bg-opacity-0 duration-300 bg-opacity-50 rounded"
-          ></div>
+            className="w-full absolute top-0 h-full bg-gray-900 hover:bg-opacity-0 duration-300 bg-opacity-50 rounded"></div>
           <div className="   ">
             {showCopied && (
               <div className="inline-block px-2 pl-3 text-white">
@@ -562,8 +539,7 @@ export const CodeBlock = ({
       <div
         id="codeDivBox"
         className={`rounded w-full overflow-auto overflow-y-scroll   scroll ${className}`}
-        style={{ maxHeight: maxHeight, minHeight: minHeight }}
-      >
+        style={{ maxHeight: maxHeight, minHeight: minHeight }}>
         <SyntaxHighlighter
           id="codeDiv"
           className="rounded-sm h-full break-all"
@@ -571,8 +547,7 @@ export const CodeBlock = ({
           showLineNumbers={showLineNumbers}
           style={atomDark}
           wrapLines={wrapLines}
-          wrapLongLines={wrapLines}
-        >
+          wrapLongLines={wrapLines}>
           {codeString}
         </SyntaxHighlighter>
       </div>
@@ -780,8 +755,7 @@ export const PdfViewer = ({ url }: { url: string }) => {
           data={url}
           type="application/pdf"
           width="100%"
-          height="450px"
-        >
+          height="450px">
           <p>PDF cannot be displayed.</p>
         </object>
       )}
@@ -822,8 +796,7 @@ export const AgentFlowSpecView = ({
       <div className="text-accent ">{title}</div>
       <GroupView
         title=<div className="px-2">{flowSpec?.config?.name}</div>
-        className="mb-4 bg-primary  "
-      >
+        className="mb-4 bg-primary  ">
         <ControlRowView
           title="Agent Name"
           className="mt-4"
@@ -870,7 +843,7 @@ export const AgentFlowSpecView = ({
           }
         />
 
-        {(
+        {
           <ControlRowView
             title="Instructions"
             className="mt-4"
@@ -888,9 +861,9 @@ export const AgentFlowSpecView = ({
               />
             }
           />
-        )}
+        }
 
-        {(
+        {
           <ControlRowView
             title="Model"
             className="mt-4"
@@ -910,7 +883,7 @@ export const AgentFlowSpecView = ({
                 }))}
                 mode="tags"
                 showSearch
-                tokenSeparators={[',']}
+                tokenSeparators={[","]}
                 maxTagCount={1}
                 onSelect={(value: any) => {
                   onControlChange(value, "model");
@@ -921,27 +894,27 @@ export const AgentFlowSpecView = ({
               />
             }
           />
-        )}
+        }
 
-        {(
-            <ControlRowView
-                title="Temperature"
-                className="mt-4"
-                description="Defines the randomness of the agent's response."
-                value={flowSpec.config.temperature || 0.0}
-                control={
-                  <Slider
-                      min={0}
-                      max={1}
-                      step={0.01}
-                      defaultValue={flowSpec.config.temperature || 0.0}
-                      onChange={(value: any) => {
-                        onControlChange(value, "temperature");
-                      }}
-                  />
-                }
-            />
-        )}
+        {
+          <ControlRowView
+            title="Temperature"
+            className="mt-4"
+            description="Defines the randomness of the agent's response."
+            value={flowSpec.config.temperature || 0.0}
+            control={
+              <Slider
+                min={0}
+                max={1}
+                step={0.01}
+                defaultValue={flowSpec.config.temperature || 0.0}
+                onChange={(value: any) => {
+                  onControlChange(value, "temperature");
+                }}
+              />
+            }
+          />
+        }
 
         {
           <ControlRowView
@@ -1022,8 +995,7 @@ export const SkillSelector: React.FC<SkillSelectorProps> = ({
         onCancel={() => {
           setShowSkillModal(false);
           setSelectedSkill(null);
-        }}
-      >
+        }}>
         {selectedSkill && (
           <div>
             <div className="mb-2">{selectedSkill.file_name}</div>
@@ -1036,15 +1008,13 @@ export const SkillSelector: React.FC<SkillSelectorProps> = ({
         {localSkills.map((skill, index) => (
           <div
             key={"skillitemrow" + index}
-            className=" mb-1 p-1 px-2 rounded border"
-          >
+            className=" mb-1 p-1 px-2 rounded border">
             <span
               role="button"
               onClick={() => {
                 setSelectedSkill(skill);
               }}
-              className=" inline-block "
-            >
+              className=" inline-block ">
               {skill.title}
             </span>
             <XMarkIcon
@@ -1060,8 +1030,7 @@ export const SkillSelector: React.FC<SkillSelectorProps> = ({
           role="button"
           onClick={() => {
             setIsModalVisible(true);
-          }}
-        >
+          }}>
           add <PlusIcon className="w-4 h-4 inline-block mt-1" />
         </div>
       </div>
@@ -1081,12 +1050,10 @@ export const SkillSelector: React.FC<SkillSelectorProps> = ({
             onClick={() => {
               handleAddSkill();
               setIsModalVisible(false);
-            }}
-          >
+            }}>
             Add Skill
           </Button>,
-        ]}
-      >
+        ]}>
         <SkillLoader skill={newSkill} setSkill={setNewSkill} />
       </Modal>
     </>
@@ -1189,13 +1156,23 @@ const AgentModal = ({
   showAgentModal,
   setShowAgentModal,
   handler,
+  selectedSenderAgents,
+  selectedReceiverAgents,
+  agentId,
+  setAgentListData,
 }: {
   agent: IAgentFlowSpec | null;
   showAgentModal: boolean;
   setShowAgentModal: (show: boolean) => void;
   handler?: (agent: IAgentFlowSpec | null) => void;
+  selectedSenderAgents: string[];
+  selectedReceiverAgents: string[];
+  agentId: string;
+  setAgentListData: null;
 }) => {
-  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(agent);
+  const [localAgent, setLocalAgent] = React.useState<IAgentFlowSpec | null>(
+    agent
+  );
   const [selectedFlowSpec, setSelectedFlowSpec] = useState<number | null>(null);
 
   const serverUrl = getServerUrl();
@@ -1207,10 +1184,13 @@ const AgentModal = ({
     fetchAgents();
   }, []);
 
+  let allAgents = [...selectedSenderAgents, ...selectedReceiverAgents];
+
   const fetchAgents = () => {
     const onSuccess = (data: any) => {
       if (data && data.status) {
         setFlowSpecs(data.data);
+        setAgentListData(data.data);
       }
     };
     const onError = (err: any) => {
@@ -1225,11 +1205,21 @@ const AgentModal = ({
     fetchJSON(listAgentsUrl, payLoad, onSuccess, onError);
   };
 
-  const handleAgentChange = (value: any) => {
-    setSelectedFlowSpec(value);
-    setLocalAgent(flowSpecs[value]);
-  };
+  let allAgentsFiltered;
+  if (allAgents.includes(agentId)) {
+    allAgentsFiltered = allAgents.filter((item) => item !== agentId);
+  } else {
+    allAgentsFiltered = allAgents;
+  }
 
+  const availableAgentsOptions = flowSpecs.filter(
+    (spec, index) => !allAgentsFiltered.includes(spec.id)
+  );
+
+  const handleAgentChange = (value: any, data: any) => {
+    setSelectedFlowSpec(value);
+    setLocalAgent(availableAgentsOptions.find((item) => item.id == data.value));
+  };
   return (
     <Modal
       title={
@@ -1252,22 +1242,21 @@ const AgentModal = ({
       afterClose={() => {
         // If the modal is closed other than onOk, the agent is reset to before the update; if it is closed onOk, the agent is updated again with the localAgent passed to the handler.
         setLocalAgent(agent);
-      }}
-    >
-      {(
+      }}>
+      {
         <div>
           <Select
             className="mt-2 w-full"
             defaultValue={selectedFlowSpec}
             value={selectedFlowSpec}
             onChange={handleAgentChange}
-            options={flowSpecs.map((spec, index) => ({
+            options={availableAgentsOptions.map((spec, index) => ({
               label: spec.config.name,
-              value: index,
+              value: spec.id,
             }))}
           />
         </div>
-      )}
+      }
       {/* {JSON.stringify(localAgent)} */}
     </Modal>
   );
@@ -1276,9 +1265,17 @@ const AgentModal = ({
 export const AgentSelector = ({
   flowSpec,
   setFlowSpec,
+  selectedSenderAgents,
+  selectedReceiverAgents,
+  agentId,
+  setAgentListData,
 }: {
   flowSpec: IAgentFlowSpec | null;
   setFlowSpec: (agent: IAgentFlowSpec | null) => void;
+  selectedSenderAgents: string[];
+  selectedReceiverAgents: string[];
+  agentId: string;
+  setAgentListData: null;
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -1287,13 +1284,10 @@ export const AgentSelector = ({
       <div
         role="button"
         onClick={() => setIsModalVisible(true)}
-        className="hover:bg-secondary h-full duration-300  border border-dashed rounded p-2"
-      >
-        {(
+        className="hover:bg-secondary h-full duration-300  border border-dashed rounded p-2">
+        {
           <div className=" ">
-            {(
-              <UsersIcon className="w-5 h-5 inline-block mr-2" />
-            )}
+            {<UsersIcon className="w-5 h-5 inline-block mr-2" />}
             {flowSpec?.config.name || "Select Agent"}
             <div className="mt-2 text-secondary text-sm">
               {" "}
@@ -1306,7 +1300,7 @@ export const AgentSelector = ({
               </span>
             </div>
           </div>
-        )}
+        }
       </div>
       {
         <>
@@ -1317,6 +1311,10 @@ export const AgentSelector = ({
             handler={(agent: IAgentFlowSpec | null) => {
               setFlowSpec(agent);
             }}
+            selectedSenderAgents={selectedSenderAgents}
+            selectedReceiverAgents={selectedReceiverAgents}
+            agentId={agentId}
+            setAgentListData={setAgentListData}
           />
         </>
       }
@@ -1333,6 +1331,8 @@ export const FlowConfigViewer = ({
 }) => {
   const [localFlowConfig, setLocalFlowConfig] =
     React.useState<IFlowConfig>(flowConfig);
+    
+  const [agentListData, setAgentListData] = useState(null);
 
   const updateFlowConfig = (key: string, value: string) => {
     const updatedFlowConfig = { ...flowConfig, [key]: value };
@@ -1350,7 +1350,10 @@ export const FlowConfigViewer = ({
     setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
   };
 
-  const updateReceiverFlowSpec = (index: number, newFlowSpec: IAgentFlowSpec) => {
+  const updateReceiverFlowSpec = (
+    index: number,
+    newFlowSpec: IAgentFlowSpec
+  ) => {
     const updatedFlows = [...localFlowConfig.flows];
     updatedFlows[index] = {
       ...updatedFlows[index],
@@ -1375,6 +1378,15 @@ export const FlowConfigViewer = ({
     setFlowConfig({ ...localFlowConfig, flows: updatedFlows });
   };
 
+  const selectedSenderAgents = localFlowConfig.flows
+    .map((flow) => flow.sender?.id)
+    .filter(Boolean);
+
+  const selectedReceiverAgents = localFlowConfig.flows
+    .map((flow) => flow.receiver?.id)
+    .filter(Boolean);
+
+  const availableAgentOptions = agentListData?.length - localFlowConfig.flows.length * 2;
   return (
     <>
       <ControlRowView
@@ -1415,6 +1427,10 @@ export const FlowConfigViewer = ({
               setFlowSpec={(newFlowSpec) =>
                 updateSenderFlowSpec(index, newFlowSpec)
               }
+              selectedSenderAgents={selectedSenderAgents}
+              selectedReceiverAgents={selectedReceiverAgents}
+              agentId={flow?.sender?.id}
+              setAgentListData={setAgentListData}
             />
           </div>
           <div className="w-1/2">
@@ -1428,12 +1444,17 @@ export const FlowConfigViewer = ({
               setFlowSpec={(newFlowSpec) =>
                 updateReceiverFlowSpec(index, newFlowSpec)
               }
+              selectedSenderAgents={selectedSenderAgents}
+              selectedReceiverAgents={selectedReceiverAgents}
+              agentId={flow?.receiver?.id}
+              setAgentListData={setAgentListData}
             />
           </div>
           <button onClick={() => removeFlow(index)}>Remove</button>
         </div>
       ))}
-      <button onClick={addFlow}>Add Flow</button>
+
+      {availableAgentOptions >= 2 && <button onClick={addFlow}>Add Flow</button>}
     </>
   );
 };
@@ -1500,8 +1521,7 @@ export const CardHoverBar = ({
         key={"cardhoverrow" + i}
         role="button"
         className="text-accent text-xs inline-block hover:bg-primary p-2 rounded"
-        onClick={item.onClick}
-      >
+        onClick={item.onClick}>
         <Tooltip title={item.hoverText}>
           <item.icon className="w-4 h-4 cursor-pointer inline-block" />
         </Tooltip>
@@ -1513,8 +1533,7 @@ export const CardHoverBar = ({
       onMouseEnter={(e) => {
         e.stopPropagation();
       }}
-      className=" mt-2 text-right opacity-0 group-hover:opacity-100 "
-    >
+      className=" mt-2 text-right opacity-0 group-hover:opacity-100 ">
       {itemRows}
     </div>
   );
@@ -1529,14 +1548,17 @@ export const AgentRow = ({ message }: { message: any }) => {
           {message.recipient} )
         </div>
       }
-      className="m"
-    >
+      className="m">
       <MarkdownView data={message.message?.content} className="text-sm" />
     </GroupView>
   );
 };
 
-export const DeleteConfirmation = (title: string, message: string, onConfirm: () => void)=> {
+export const DeleteConfirmation = (
+  title: string,
+  message: string,
+  onConfirm: () => void
+) => {
   Swal.fire({
     title: title,
     icon: "warning",
