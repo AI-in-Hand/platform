@@ -149,7 +149,7 @@ const UserVariables = () => {
           <p>Example usage for a variable named <code>AIRTABLE_TOKEN</code>:</p>
           <pre>
             <code>from backend.services.user_variable_manager import UserVariableManager</code><br />
-            <code>user_variable_manager = UserVariableManager(UserVariableStorage())</code><br />
+            <code>user_variable_manager = UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage())</code><br />
             <code>airtable_token = user_variable_manager.get_by_key("AIRTABLE_TOKEN")</code><br />
           </pre>
         </section>

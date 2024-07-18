@@ -15,10 +15,10 @@ class UserVariableManager:
 
     DEFAULT_VARIABLE_NAMES: set[str] = {"OPENAI_API_KEY"}
 
-    def __init__(self, user_variable_storage: UserVariableStorage):
+    def __init__(self, user_variable_storage: UserVariableStorage, agent_storage: AgentFlowSpecStorage):
         self._user_variable_storage = user_variable_storage
         self._encryption_service = EncryptionService(settings.encryption_key)
-        self._agent_storage = AgentFlowSpecStorage()
+        self._agent_storage = agent_storage
 
     def get_by_key(self, key: str) -> str:
         """Get a variable by key."""

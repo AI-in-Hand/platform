@@ -4,6 +4,7 @@ from agency_swarm import BaseTool
 from pyairtable import Api
 from pydantic import Field
 
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.user_variable_manager import UserVariableManager
 
@@ -19,7 +20,7 @@ class SaveLeadToAirtable(BaseTool):
 
     def run(self) -> str:
         """Save a new lead to Airtable."""
-        user_variable_manager = UserVariableManager(UserVariableStorage())
+        user_variable_manager = UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage())
 
         try:
             airtable_base_id = user_variable_manager.get_by_key("AIRTABLE_BASE_ID")
