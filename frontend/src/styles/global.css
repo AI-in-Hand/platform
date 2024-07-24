@@ -361,7 +361,6 @@ iiz__zoom-img {
   @apply border-dashed border-accent text-accent;
 }
 
-
 .ant-modal-close {
   @apply text-primary   duration-200   !important;
 }
@@ -440,4 +439,61 @@ div#gatsby-focus-wrapper {
 
 .ant-typography {
   @apply text-primary !important;
+}
+
+/* Disclaimer modal css */
+.disclaimer-modal .ant-modal-content {
+  padding: 0;
+}
+.disclaimer-modal .ant-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #d9d9d9;
+  margin-bottom: 0;
+}
+.disclaimer-modal .ant-modal-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+.disclaimer-modal .ant-modal-body {
+  padding: 20px 24px;
+  border-bottom: 1px solid #d9d9d9;
+}
+.disclaimer-modal .ant-modal-footer {
+  padding: 10px 24px 20px;
+  font-size: 14px;
+}
+.disclaimer-note {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+.discalimer-single-list {
+  margin-bottom: 25px;
+}
+.discalimer-single-list:last-child {
+  margin-bottom: 0;
+}
+.discalimer-single-content .content-name {
+  color: rgba(51, 65, 85, 0.8);
+}
+.disclaimer-modal .ant-modal-body p {
+  color: rgba(51, 65, 85, 0.8);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+/* variables css */
+.hide-variable {
+  display: none;
+}
+.variable-button-wrap {
+  width: 150px;
+}
+.variable-value-wrap {
+  width: 50%;
+  /* text-align: center; */
+}
+.variable-value-wrap .ant-form-item {
+  margin-bottom: 0px;
 }
