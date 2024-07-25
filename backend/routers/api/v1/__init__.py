@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from backend.routers.api.v1.agency import agency_router
 from backend.routers.api.v1.agent import agent_router
 from backend.routers.api.v1.message import message_router
+from backend.routers.api.v1.profile import profile_router
 from backend.routers.api.v1.session import session_router
 from backend.routers.api.v1.skill import skill_router
 from backend.routers.api.v1.user import user_router
@@ -20,3 +21,4 @@ v1_router.include_router(session_router)
 v1_router.include_router(message_router)
 v1_router.include_router(version_router)
 v1_router.include_router(user_router)
+v1_router.include_router(profile_router)
