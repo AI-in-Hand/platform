@@ -100,4 +100,4 @@ class VersionResponse(BaseResponse):
 # User Profile API Response
 
 class UserProfileResponse(BaseResponse):
-    data: dict[str, str] = Field(..., description="User profile data.")
+    data: dict[str, str] | None = Field(..., description="User profile data.")
