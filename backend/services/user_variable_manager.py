@@ -66,7 +66,9 @@ class UserVariableManager:
         # Encrypt and update new or changed variables
         for key, value in variables.items():
             if value:  # Only update if the value is not an empty string
-                if key == "OPENAI_API_KEY" and value != self._encryption_service.decrypt(existing_variables[key]):  # Check if OPENAI_API_KEY is updated
+                if key == "OPENAI_API_KEY" and key in existing_variables and \
+                        value != self._encryption_service.decrypt(existing_variables[key]):
+                    # Check if OPENAI_API_KEY is updated
                     agents = self._agent_storage.load_by_user_id(user_id=user_id)
                     if len(agents) > 0:  # Check if this user has any agent
                         return False

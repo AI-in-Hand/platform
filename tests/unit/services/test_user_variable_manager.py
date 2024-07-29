@@ -1,14 +1,36 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock, AsyncMock
 
 import pytest
 
 from backend.exceptions import UnsetVariableError
+from backend.models.agent_flow_spec import AgentFlowSpec
+from backend.models.skill_config import SkillConfig
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
+from backend.services.agent_manager import AgentManager
 from backend.services.encryption_service import EncryptionService
 from backend.services.user_variable_manager import UserVariableManager
 from backend.settings import settings
 from tests.testing_utils import TEST_USER_ID
+
+
+@pytest.fixture
+def agent_data():
+    return {
+        "id": "agent1",
+        "config": {
+            "name": "example_name",
+            "system_message": "Do something important",
+            "code_execution_config": {
+                "work_dir": "test_agency_dir",
+                "use_docker": False,
+            },
+        },
+        "timestamp": "2024-04-04T09:39:13.048457+00:00",
+        "skills": ["skill1", "skill2"],
+        "description": "An example agent",
+        "user_id": TEST_USER_ID,
+    }
 
 
 # Test 1: Successful retrieval of a variable
@@ -135,3 +157,29 @@ def test_update_variables_success(mock_firestore_client):
     assert EncryptionService(settings.encryption_key).decrypt(updated_variables["VARIABLE1"]) == "new_value"
     assert updated_variables["VARIABLE2"] == "value2"
     assert EncryptionService(settings.encryption_key).decrypt(updated_variables["VARIABLE3"]) == "value3"
+
+
+# Test 12: Successful update of OPENAI_API_KEY
+def test_create_or_update_open_ai_key_variable_success(mock_firestore_client):
+    mock_firestore_client.setup_mock_data(
+        "user_variables", TEST_USER_ID, {"OPENAI_API_KEY": EncryptionService(settings.encryption_key).encrypt("value1")}
+    )
+    variables = {"OPENAI_API_KEY": "new_value"}
+
+    manager = UserVariableManager(user_variable_storage=UserVariableStorage(), agent_storage=AgentFlowSpecStorage())
+    result = manager.create_or_update_variables(TEST_USER_ID, variables)
+    assert result is True
+
+
+# Test 13: Fail update of OPENAI_API_KEY when user have an agent
+def test_create_or_update_open_ai_key_variable_fail(mock_firestore_client, agent_data):
+    mock_firestore_client.setup_mock_data("agent_configs", "agent1", agent_data)
+
+    mock_firestore_client.setup_mock_data(
+        "user_variables", TEST_USER_ID, {"OPENAI_API_KEY": EncryptionService(settings.encryption_key).encrypt("value1")}
+    )
+    variables = {"OPENAI_API_KEY": "new_value"}
+
+    manager = UserVariableManager(user_variable_storage=UserVariableStorage(), agent_storage=AgentFlowSpecStorage())
+    result = manager.create_or_update_variables(TEST_USER_ID, variables)
+    assert result is False
