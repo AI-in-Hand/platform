@@ -23,6 +23,7 @@ const ProfilePage = ({ data }: any) => {
       const values = {
         firstName: userData.first_name,
         lastName: userData.last_name,
+        notifications:userData.email_subscription === "subscribed" ? true : false ,
       };
       form.setFieldsValue(values);
       setInitialValues(values);
@@ -51,9 +52,10 @@ const ProfilePage = ({ data }: any) => {
 
   const handleFinish = (values: any) => {
     setLoading(true);
-    const updatedData: { first_name: string; last_name: string } = {
+    const updatedData: { first_name: string; last_name: string; email_subscription:string; } = {
       first_name: values.firstName,
       last_name: values.lastName,
+      email_subscription: values.notifications === true ? "subscribed" : "unsubscribed",
     };
     const payLoad = {
       method: "PUT",
@@ -123,7 +125,8 @@ const ProfilePage = ({ data }: any) => {
     const currentValues = form.getFieldsValue();
     if (
       currentValues.firstName.trim() !== initialValues.firstName ||
-      currentValues.lastName.trim() !== initialValues.lastName
+      currentValues.lastName.trim() !== initialValues.lastName ||
+      currentValues.notifications !== initialValues.notifications
     ) {
       setHasValueChange(true);
     } else {
@@ -131,6 +134,8 @@ const ProfilePage = ({ data }: any) => {
     }
   };
 
+  console.log(userData);
+  
   return (
     <div className="flex justify-center items-center">
       <div className="w-full ">
