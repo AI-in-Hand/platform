@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { appContext } from "../hooks/provider";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import Disclaimer from "../components/disclaimer";
 import { navigate } from "gatsby";
 import { useSelector } from "react-redux";
 import { useLocation } from "@reach/router";
@@ -26,6 +27,9 @@ const MainLayouts = ({ data }: any) => {
         <div className="h-full text-primary">{children}</div>
       </div>
       <Footer />
+      {loggedIn && (
+        <Disclaimer loggedIn={loggedIn} />
+      )}
     </div>
   );
 
