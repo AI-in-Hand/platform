@@ -58,7 +58,11 @@ async def update_user_profile(
         # Data to send in the request
         data = {
             "email_address": email,
-            "status": requested_email_subscribe_value
+            "status": requested_email_subscribe_value,
+            "merge_fields": {
+                "FNAME": user_profile_fields.get("first_name"),
+                "LNAME": user_profile_fields.get("last_name"),
+            }
         }
         # Headers for the request
         headers = {
