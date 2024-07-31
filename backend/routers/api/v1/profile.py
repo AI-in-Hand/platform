@@ -29,7 +29,8 @@ async def get_user_profile(
         user_profile_data = {
             "first_name": user_profile.get('first_name'),
             "last_name": user_profile.get('last_name'),
-            "email_subscription": user_profile.get('email_subscription'),
+            "email_subscription":
+                user_profile.get('email_subscription') if user_profile.get('email_subscription') is not None else "",
         }
 
     return UserProfileResponse(data=user_profile_data)
