@@ -58,16 +58,21 @@ async def update_user_profile(
         # Data to send in the request
         data = {
             "email_address": email,
-            "status": requested_email_subscribe_value
+            "status": requested_email_subscribe_value,
+            "merge_fields": {
+                "FNAME": user_profile_fields.get("first_name"),
+                "LNAME": user_profile_fields.get("last_name"),
+            }
         }
         # Headers for the request
         headers = {
             'Authorization': f'apikey {api_key}',
             'Content-Type': 'application/json'
         }
-        if user_profile.get('mail_chimp_member_hash_id'):
+        mailchimp_member_hash_id = user_profile.get('mail_chimp_member_hash_id') if user_profile is not None else ""
+        if mailchimp_member_hash_id:
             # Mailchimp API URL
-            url = f'https://<dc>.api.mailchimp.com/3.0/lists/{list_id}/members/{user_profile.get("mail_chimp_member_hash_id")}'
+            url = f'https://<dc>.api.mailchimp.com/3.0/lists/{list_id}/members/{mailchimp_member_hash_id}'
             # Replace <dc> with your data center prefix (e.g., 'us5')
             url = url.replace('<dc>', api_key.split('-')[-1])
 
