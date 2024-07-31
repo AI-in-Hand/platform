@@ -3,11 +3,13 @@ import { Form, Input, Checkbox, Button, message, Tooltip } from "antd";
 import { LockOutlined } from "@ant-design/icons";
 import { fetchJSON, getServerUrl } from "../../api_utils";
 import { useSelector } from "react-redux";
+import { BounceLoader, LoadingOverlay } from "../../atoms";
 
 const ProfilePage = ({ data }: any) => {
   const { email } = useSelector((state) => state.user);
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const [showFromloading, setShowFromloading] = React.useState(true);
   const [hasValueChange, setHasValueChange] = React.useState(false);
   const [userData, setUserData] = useState<{ [key: string]: string }>({});
   const [initialValues, setInitialValues] = useState<any>({});
@@ -23,7 +25,8 @@ const ProfilePage = ({ data }: any) => {
       const values = {
         firstName: userData.first_name,
         lastName: userData.last_name,
-        notifications:userData.email_subscription === "subscribed" ? true : false ,
+        notifications:
+          userData.email_subscription === "subscribed" ? true : false,
       };
       form.setFieldsValue(values);
       setInitialValues(values);
@@ -43,20 +46,36 @@ const ProfilePage = ({ data }: any) => {
       } else {
         message.error(data.message);
       }
+      setShowFromloading(false)
     };
     const onError = (err: any) => {
       message.error(err.message);
+      setShowFromloading(false)
     };
     fetchJSON(userDataUrl, payLoad, onSuccess, onError);
   };
 
   const handleFinish = (values: any) => {
+    let sendingNotificationsValue;
+    let notificationsValue =
+      values.notifications === initialValues.notifications ? false : true;
+    if (notificationsValue === true) {
+      sendingNotificationsValue =
+        values.notifications === true ? "subscribed" : "unsubscribed";
+    } else {
+      sendingNotificationsValue = "";
+    }
     setLoading(true);
-    const updatedData: { first_name: string; last_name: string; email_subscription:string; } = {
+    const updatedData: {
+      first_name: string;
+      last_name: string;
+      email_subscription: string;
+    } = {
       first_name: values.firstName,
       last_name: values.lastName,
-      email_subscription: values.notifications === true ? "subscribed" : "unsubscribed",
+      email_subscription: sendingNotificationsValue,
     };
+
     const payLoad = {
       method: "PUT",
       headers: {
@@ -72,61 +91,22 @@ const ProfilePage = ({ data }: any) => {
         message.error(data.message);
       }
       setLoading(false);
+      setHasValueChange(false);
     };
     const onError = (err: any) => {
       message.error(err.message);
       setLoading(false);
+      setHasValueChange(false);
     };
     fetchJSON(userDataUrl, payLoad, onSuccess, onError);
-
-    // if (values.notifications) {
-    //   const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
-    //   const API_KEY = process.env.MAILCHIMP_API_KEY;
-    //   const DATACENTER = process.env.MAILCHIMP_API_SERVER;
-
-    //   const url = `https://${DATACENTER}.api.mailchimp.com/3.0/lists/${AUDIENCE_ID}/members`;
-    //   const data = {
-    //     email_address: values.email,
-    //     status: "subscribed",
-    //     merge_fields: {
-    //       FNAME: values.firstName,
-    //       LNAME: values.lastName,
-    //     },
-    //   };
-
-    //   setLoading(true);
-
-    //   try {
-    //     const response = await fetch(url, {
-    //       method: "POST",
-    //       headers: {
-    //         Authorization: `apikey ${API_KEY}`,
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(data),
-    //     });
-
-    //     const responseData = await response.json();
-    //     console.log(responseData, "responseData");
-    //     if (response.ok) {
-    //       console.log("Successfully subscribed to Mailchimp");
-    //     } else {
-    //       console.error("Failed to subscribe to Mailchimp", responseData);
-    //     }
-    //   } catch (error) {
-    //     console.error("Error subscribing to Mailchimp", error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
   };
 
   const hasChanges = () => {
     const currentValues = form.getFieldsValue();
     if (
-      currentValues.firstName.trim() !== initialValues.firstName ||
-      currentValues.lastName.trim() !== initialValues.lastName ||
-      currentValues.notifications !== initialValues.notifications
+      currentValues?.firstName.trim() !== initialValues.firstName ||
+      currentValues?.lastName.trim() !== initialValues.lastName ||
+      currentValues?.notifications !== initialValues.notifications
     ) {
       setHasValueChange(true);
     } else {
@@ -134,67 +114,84 @@ const ProfilePage = ({ data }: any) => {
     }
   };
 
-  console.log(userData);
-  
   return (
     <div className="flex justify-center items-center">
       <div className="w-full ">
         <h1 className="text-3xl font-bold mb-8">Profile</h1>
-        <Form
-          form={form}
-          onFinish={handleFinish}
-          layout="vertical"
-          className="space-y-6"
-          labelAlign="left"
-          onValuesChange={hasChanges}>
-          <div className="grid grid-cols-12 gap-4">
-            <Form.Item
-              label="First Name"
-              name="firstName"
-              rules={[
-                { required: true, message: "Please type your first name!" },
-              ]}
-              className="col-span-12 sm:col-span-6 mb-4">
-              <Input className="rounded-md" />
-            </Form.Item>
-            <Form.Item
-              label="Last Name"
-              name="lastName"
-              rules={[
-                { required: true, message: "Please type your last name!" },
-              ]}
-              className="col-span-12 sm:col-span-6 mb-4">
-              <Input className="rounded-md" />
-            </Form.Item>
+        {showFromloading ? (
+          <div className="w-full relative">
+            <LoadingOverlay loading={showFromloading} />
           </div>
-          <Form.Item
-            label="Email"
-            name="email"
-            initialValue={email}
-            className="mb-4">
-            <Input
-              className="rounded-md"
-              readOnly
-              disabled
-              suffix={<LockOutlined />}
-            />
-          </Form.Item>
-          <Form.Item
-            name="notifications"
-            valuePropName="checked"
-            className="mb-4">
-            <Checkbox>Subscribe to Mailchimp notifications</Checkbox>
-          </Form.Item>
-          <Form.Item className="flex">
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="rounded-md px-8"
-              disabled={!hasValueChange || loading}>
-              Save
-            </Button>
-          </Form.Item>
-        </Form>
+        ) : (
+          <Form
+            form={form}
+            onFinish={handleFinish}
+            layout="vertical"
+            className="space-y-6"
+            labelAlign="left"
+            onValuesChange={hasChanges}>
+            <div className="grid grid-cols-12 gap-4">
+              <Form.Item
+                label="First Name"
+                name="firstName"
+                rules={[
+                  { required: true, message: "Please type your first name!" },
+                ]}
+                className="col-span-12 sm:col-span-6 mb-4">
+                <Input className="rounded-md" />
+              </Form.Item>
+              <Form.Item
+                label="Last Name"
+                name="lastName"
+                rules={[
+                  { required: true, message: "Please type your last name!" },
+                ]}
+                className="col-span-12 sm:col-span-6 mb-4">
+                <Input className="rounded-md" />
+              </Form.Item>
+            </div>
+            <Form.Item
+              label="Email"
+              name="email"
+              initialValue={email}
+              className="mb-4">
+              <Input
+                className="rounded-md"
+                readOnly
+                disabled
+                suffix={<LockOutlined />}
+              />
+            </Form.Item>
+            <Form.Item
+              name="notifications"
+              valuePropName="checked"
+              className="mb-4">
+              {initialValues.notifications == true ? (
+                <Checkbox>Unsubscribe from mailing list</Checkbox>
+              ) : (
+                <Checkbox>Subscribe to our mailing list</Checkbox>
+              )}
+            </Form.Item>
+            <Form.Item className="flex">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className={`${
+                  !hasValueChange || loading ? "disable" : ""
+                } rounded-md px-8 custom-profile-btn`}
+                disabled={!hasValueChange || loading}>
+                Save
+              </Button>
+            </Form.Item>
+            {loading && (
+            <div className="  w-full text-center">
+              {" "}
+              <BounceLoader />{" "}
+              <span className="inline-block"> loading .. </span>
+            </div>
+          )}
+          </Form>
+        )}
       </div>
     </div>
   );
