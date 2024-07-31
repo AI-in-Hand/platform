@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     # redis_tls_url: RedisDsn | None = Field(default=None)
     # redis_url: RedisDsn = Field(default="redis://localhost:6379/1")
     encryption_key: bytes = Field(default=b"")
+    mailchimp_api_key: str | None = Field(default=None)
+    mailchimp_list_id: str | None = Field(default=None)
 
     model_config = SettingsConfigDict(env_file=".env")
 
