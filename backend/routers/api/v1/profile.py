@@ -24,7 +24,15 @@ async def get_user_profile(
     This endpoint fetches profile data stored for the authenticated user.
     """
     user_profile = user_profile_manager.get_user_profile(current_user.id)
-    return UserProfileResponse(data=user_profile)
+    user_profile_data = {}
+    if user_profile is not None:
+        user_profile_data = {
+            "first_name": user_profile.get('first_name'),
+            "last_name": user_profile.get('last_name'),
+            "email_subscription": user_profile.get('email_subscription'),
+        }
+
+    return UserProfileResponse(data=user_profile_data)
 
 
 @profile_router.put("/user/profile")
@@ -40,16 +48,12 @@ async def update_user_profile(
     """
     user_profile = user_profile_manager.get_user_profile(current_user.id)
 
-    previous_email_subscribe_value = user_profile.get('email_subscription')
+    previous_email_subscribe_value = user_profile.get('email_subscription') if user_profile is not None else ""
     requested_email_subscribe_value = user_profile_fields.get("email_subscription")
     if requested_email_subscribe_value and (previous_email_subscribe_value != requested_email_subscribe_value):
         api_key = os.environ.get('MAILCHIMP_API_KEY')
         list_id = os.environ.get('MAILCHIMP_LIST_ID')
         email = current_user.email
-        # Mailchimp API URL
-        url = f'https://<dc>.api.mailchimp.com/3.0/lists/{list_id}/members/'
-        # Replace <dc> with your data center prefix (e.g., 'us5')
-        url = url.replace('<dc>', api_key.split('-')[-1])
         # Data to send in the request
         data = {
             "email_address": email,
@@ -60,12 +64,32 @@ async def update_user_profile(
             'Authorization': f'apikey {api_key}',
             'Content-Type': 'application/json'
         }
+        if user_profile.get('mail_chimp_member_hash_id'):
+            # Mailchimp API URL
+            url = f'https://<dc>.api.mailchimp.com/3.0/lists/{list_id}/members/{user_profile.get("mail_chimp_member_hash_id")}'
+            # Replace <dc> with your data center prefix (e.g., 'us5')
+            url = url.replace('<dc>', api_key.split('-')[-1])
 
-        # Make the POST request to subscribe the email
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-        member_id = response.json().get('id')
-        user_profile_fields["mail_chimp_member_hash_id"] = member_id
+            requests.put(url, headers=headers, data=json.dumps(data))
+
+        else:
+            # Mailchimp API URL
+            url = f'https://<dc>.api.mailchimp.com/3.0/lists/{list_id}/members/'
+            # Replace <dc> with your data center prefix (e.g., 'us5')
+            url = url.replace('<dc>', api_key.split('-')[-1])
+
+            response = requests.post(url, headers=headers, data=json.dumps(data))
+            if response.status_code == 200:
+                member_id = response.json().get('id')
+                user_profile_fields["mail_chimp_member_hash_id"] = member_id
 
     user_profile_manager.update_user_profile(user_id=current_user.id, fields=user_profile_fields)
     user_profile = user_profile_manager.get_user_profile(current_user.id)
-    return UserProfileResponse(message="Profile is updated successfully", data=user_profile)
+    user_profile_data = {
+        "first_name": user_profile.get('first_name'),
+        "last_name": user_profile.get('last_name'),
+        "email_subscription":
+            user_profile.get('email_subscription') if user_profile.get('email_subscription') is not None else "",
+    }
+
+    return UserProfileResponse(message="Profile is updated successfully", data=user_profile_data)
