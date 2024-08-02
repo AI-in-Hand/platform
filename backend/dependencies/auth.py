@@ -22,7 +22,7 @@ async def get_current_user(
 ) -> User:
     user_data = await cache_manager.get(credentials.credentials)
     if user_data:
-        user = User.parse_obj(user_data)
+        user = User.model_validate(user_data)
     else:
         user = auth_service.get_user(credentials.credentials)
         await cache_manager.set(credentials.credentials, user.model_dump(), expire=300)

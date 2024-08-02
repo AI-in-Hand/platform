@@ -29,7 +29,7 @@ user_data: dict[str, Any] = {
 @pytest.fixture
 def redis_mock():
     redis_client_mock = AsyncMock(spec=aioredis.Redis)
-    redis_client_mock.get = AsyncMock(return_value=pickle.dumps("value"))
+    redis_client_mock.get = AsyncMock(return_value=pickle.dumps(""))
     redis_client_mock.set = AsyncMock()
     redis_client_mock.delete = AsyncMock()
     redis_client_mock.close = AsyncMock()
@@ -97,7 +97,11 @@ async def test_get_current_superuser_not_superuser(mock_verify_id_token):
 @pytest.mark.asyncio
 async def test_get_current_user_cached(cache_manager, mock_verify_id_token):
     token = "valid_token"
-    await cache_manager.set(token, mock_verify_id_token, expire=300)
+    await cache_manager.set(token, User.model_validate({
+        'id': 'testuser',
+        'email': 'testuser@example.com',
+        'is_superuser': False
+    }), expire=300)
     credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid_token")
     user = await get_current_user(
         credentials,
