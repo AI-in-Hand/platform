@@ -19,7 +19,7 @@ google-cloud-logging = "^3.10.0"
 gunicorn = "^22.0.0"
 instructor = "^1.2.2"
 openai = "^1.23.3"
-oracledb = "^2.2.0"
+oracledb = "^2.3.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 psycopg2-binary = "^2.9.9"
 pyairtable = "^2.3.3"
