@@ -199,7 +199,7 @@ const UserVariables = () => {
             </code>
             <br />
             <code>
-              user_variable_manager = UserVariableManager(UserVariableStorage())
+              user_variable_manager = UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage())
             </code>
             <br />
             <code>

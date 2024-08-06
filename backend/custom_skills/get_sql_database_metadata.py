@@ -14,6 +14,7 @@ from agency_swarm import BaseTool
 from pydantic import Field
 from sqlalchemy import MetaData, create_engine
 
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.user_variable_manager import UserVariableManager
 
@@ -27,7 +28,7 @@ class GetSQLDatabaseMetadata(BaseTool):
 
     def run(self) -> str:
         """Execute the SQL query and return the result as a formatted string."""
-        user_variable_manager = UserVariableManager(UserVariableStorage())
+        user_variable_manager = UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage())
         database_url_prefix = user_variable_manager.get_by_key("DATABASE_URL_PREFIX")
         database_password = user_variable_manager.get_by_key("DATABASE_PASSWORD")
 

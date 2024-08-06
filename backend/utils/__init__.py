@@ -8,6 +8,7 @@ import firebase_admin
 import tiktoken
 from firebase_admin import credentials
 
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.oai_client import get_openai_client
 from backend.services.user_variable_manager import UserVariableManager
@@ -26,7 +27,7 @@ def init_firebase_app():
 
 def init_openai_client():
     """Initialize the OpenAI client."""
-    user_variable_manager = UserVariableManager(UserVariableStorage())
+    user_variable_manager = UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage())
     return get_openai_client(user_variable_manager=user_variable_manager)
 
 
@@ -60,7 +61,7 @@ def get_chat_completion(system_message: str, user_prompt: str, model: str, api_k
     if api_key:
         client = get_openai_client(api_key=api_key)
     else:
-        client = get_openai_client(user_variable_manager=UserVariableManager(UserVariableStorage()))
+        client = get_openai_client(user_variable_manager=UserVariableManager(UserVariableStorage(), AgentFlowSpecStorage()))
     completion = client.chat.completions.create(
         model=model,
         messages=[
