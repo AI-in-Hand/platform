@@ -497,3 +497,8 @@ div#gatsby-focus-wrapper {
 .variable-value-wrap .ant-form-item {
   margin-bottom: 0px;
 }
+/* profile page css */
+.custom-profile-btn.disable:hover {
+  color: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.04);
+}

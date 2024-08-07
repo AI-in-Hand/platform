@@ -5,6 +5,7 @@ from backend.repositories.agency_config_storage import AgencyConfigStorage
 from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.session_storage import SessionConfigStorage
 from backend.repositories.skill_config_storage import SkillConfigStorage
+from backend.repositories.user_profile_storage import UserProfileStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.adapters.agency_adapter import AgencyAdapter
 from backend.services.adapters.agent_adapter import AgentAdapter
@@ -16,6 +17,7 @@ from backend.services.message_manager import MessageManager
 from backend.services.redis_cache_manager import RedisCacheManager
 from backend.services.session_manager import SessionManager
 from backend.services.skill_manager import SkillManager
+from backend.services.user_profile_manager import UserProfileManager
 from backend.services.user_variable_manager import UserVariableManager
 from backend.services.websocket.websocket_connection_manager import WebSocketConnectionManager
 from backend.services.websocket.websocket_handler import WebSocketHandler
@@ -116,3 +118,10 @@ def get_websocket_handler(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> WebSocketHandler:
     return WebSocketHandler(connection_manager, auth_service, agency_manager, message_manager, session_manager)
+
+
+def get_user_profile_manager(
+    user_profile_storage: UserProfileStorage = Depends(UserProfileStorage),
+) -> UserProfileManager:
+    """Returns user profile data"""
+    return UserProfileManager(user_profile_storage)
