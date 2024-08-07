@@ -38,6 +38,10 @@ async def update_variables(
     Existing variables are updated based on the keys provided in the request body.
     This functionality supports partial updates; items variables "" values remain unchanged.
     """
-    user_variable_manager.create_or_update_variables(user_id=current_user.id, variables=user_variables)
+    response = user_variable_manager.create_or_update_variables(user_id=current_user.id, variables=user_variables)
+    message = "Variables updated successfully"
+    if not response:
+        message = "Please delete all agents and teams to update the Open AI API key"
+
     user_variable_names = user_variable_manager.get_variable_names(current_user.id)
-    return UserVariablesResponse(message="Variables updated successfully", data=user_variable_names)
+    return UserVariablesResponse(status=response, message=message, data=user_variable_names)

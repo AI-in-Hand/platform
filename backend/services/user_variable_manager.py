@@ -1,6 +1,7 @@
 import logging
 
 from backend.exceptions import UnsetVariableError
+from backend.repositories.agent_flow_spec_storage import AgentFlowSpecStorage
 from backend.repositories.user_variable_storage import UserVariableStorage
 from backend.services.context_vars_manager import ContextEnvVarsManager
 from backend.services.encryption_service import EncryptionService
@@ -14,9 +15,10 @@ class UserVariableManager:
 
     DEFAULT_VARIABLE_NAMES: set[str] = {"OPENAI_API_KEY"}
 
-    def __init__(self, user_variable_storage: UserVariableStorage):
+    def __init__(self, user_variable_storage: UserVariableStorage, agent_storage: AgentFlowSpecStorage):
         self._user_variable_storage = user_variable_storage
         self._encryption_service = EncryptionService(settings.encryption_key)
+        self._agent_storage = agent_storage
 
     def get_by_key(self, key: str) -> str:
         """Get a variable by key."""
@@ -50,7 +52,7 @@ class UserVariableManager:
         all_variables = variable_names.union(self.DEFAULT_VARIABLE_NAMES)
         return sorted(all_variables)
 
-    def create_or_update_variables(self, user_id: str, variables: dict[str, str]) -> None:
+    def create_or_update_variables(self, user_id: str, variables: dict[str, str]) -> bool:
         """Update or create variables for a user.
         :param user_id: The ID of the user whose variables are being updated.
         :param variables: A dictionary containing the variables to be updated or created.
@@ -64,6 +66,13 @@ class UserVariableManager:
         # Encrypt and update new or changed variables
         for key, value in variables.items():
             if value:  # Only update if the value is not an empty string
+                if key == "OPENAI_API_KEY" and key in existing_variables and \
+                        value != self._encryption_service.decrypt(existing_variables[key]):
+                    # Check if OPENAI_API_KEY is updated
+                    agents = self._agent_storage.load_by_user_id(user_id=user_id)
+                    if len(agents) > 0:  # Check if this user has any agent
+                        return False
+
                 existing_variables[key] = self._encryption_service.encrypt(value)
 
         # Remove variables that are no longer present
@@ -72,3 +81,4 @@ class UserVariableManager:
             del existing_variables[key]
 
         self._user_variable_storage.set_variables(user_id, existing_variables)
+        return True

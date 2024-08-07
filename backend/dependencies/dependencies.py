@@ -64,8 +64,9 @@ def get_redis_cache_manager(redis: aioredis.Redis = Depends(get_redis)) -> Redis
 
 def get_user_variable_manager(
     user_variable_storage: UserVariableStorage = Depends(UserVariableStorage),
+    agent_storage: AgentFlowSpecStorage = Depends(AgentFlowSpecStorage)
 ) -> UserVariableManager:
-    return UserVariableManager(user_variable_storage)
+    return UserVariableManager(user_variable_storage, agent_storage)
 
 
 def get_skill_manager(
