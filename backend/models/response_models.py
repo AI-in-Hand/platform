@@ -94,3 +94,10 @@ class VersionData(BaseModel):
 
 class VersionResponse(BaseResponse):
     data: VersionData = Field(..., description="The data to be returned.")
+
+
+# =================================================================================================
+# User Profile API Response
+
+class UserProfileResponse(BaseResponse):
+    data: dict[str, str] | None = Field(..., description="User profile data.")

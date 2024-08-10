@@ -11,19 +11,19 @@ import { Fragment } from "react";
 import { appContext } from "../hooks/provider";
 import { Link, navigate } from "gatsby";
 import React from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {ResetState} from "../store/actions/usersActions";
+import { useDispatch, useSelector } from "react-redux";
+import { ResetState } from "../store/actions/usersActions";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
 const Header = ({ meta, link }: any) => {
-  const { email, loggedIn } = useSelector(state => state.user);
+  const { email, loggedIn } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const logout = () => {
     dispatch(ResetState());
-    navigate("/sign-in")
+    navigate("/sign-in");
   };
   const links: any[] = [
     { name: "Build", href: "/build" },
@@ -45,8 +45,7 @@ const Header = ({ meta, link }: any) => {
                 }
               }}
               type="button"
-              className="flex-shrink-0 bg-primary p-1 text-secondary rounded-full hover:text-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
-            >
+              className="flex-shrink-0 bg-primary p-1 text-secondary rounded-full hover:text-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
               <span className="sr-only">Toggle dark mode </span>
               {context.darkMode === "dark" && (
                 <MoonIcon className="h-6 w-6" aria-hidden="true" />
@@ -63,8 +62,7 @@ const Header = ({ meta, link }: any) => {
   return (
     <Disclosure
       as="nav"
-      className="bg-primary text-primary mb-8 border-b border-secondary"
-    >
+      className="bg-primary text-primary mb-8 border-b border-secondary">
       {({ open }) => (
         <>
           <div className="  px-0 sm:px-0 lg:px-0 ">
@@ -97,19 +95,16 @@ const Header = ({ meta, link }: any) => {
                     return (
                       <div
                         key={index + "linkrow"}
-                        className={`text-primary  items-center hover:text-accent  px-1 pt-1 block   text-sm font-medium `}
-                      >
+                        className={`text-primary  items-center hover:text-accent  px-1 pt-1 block   text-sm font-medium `}>
                         <Link
                           className="hover:text-accent h-full flex flex-col"
-                          to={data.href}
-                        >
+                          to={data.href}>
                           <div className=" flex-1 flex-col flex">
                             <div className="flex-1"></div>
                             <div className="pb-2 px-3">{data.name}</div>
                           </div>
                           <div
-                            className={`${activeClass}  w-full h-1 rounded-t-lg `}
-                          ></div>
+                            className={`${activeClass}  w-full h-1 rounded-t-lg `}></div>
                         </Link>
                       </div>
                     );
@@ -158,19 +153,23 @@ const Header = ({ meta, link }: any) => {
                           enterTo="transform opacity-100 scale-100"
                           leave="transition ease-in duration-75"
                           leaveFrom="transform opacity-100 scale-100"
-                          leaveTo="transform opacity-0 scale-95"
-                        >
+                          leaveTo="transform opacity-0 scale-95">
                           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-primary ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            {/* <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(active ? 'bg-secondary' : '', 'block px-4 py-2 text-sm text-primary')}
-                          >
-                            Your Profile
-                          </a>
-                        )}
-                      </Menu.Item> */}
+                            <Menu.Item>
+                              {({ active }) => (
+                                <a
+                                  href={link === "/profile" ? null : "/profile"}
+                                  className={classNames(
+                                    active ? "bg-secondary" : "",
+                                    link === "/profile"
+                                      ? "bg-secondary cursor-not-allowed"
+                                      : "text-primary",
+                                    "block px-4 py-2 text-sm"
+                                  )}>
+                                  Profile
+                                </a>
+                              )}
+                            </Menu.Item>
 
                             <Menu.Item>
                               {({ active }) => (
@@ -179,8 +178,7 @@ const Header = ({ meta, link }: any) => {
                                   className={classNames(
                                     active ? "bg-secondary" : "",
                                     "block px-4 py-2 text-sm text-primary"
-                                  )}
-                                >
+                                  )}>
                                   Sign out
                                 </a>
                               )}
@@ -204,8 +202,7 @@ const Header = ({ meta, link }: any) => {
                     key={index + "linkrow"}
                     as="a"
                     href={data.href}
-                    className="bg-secondary border-accent text-accent block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                  >
+                    className="bg-secondary border-accent text-accent block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                     {data.name}
                   </Disclosure.Button>
                 );
@@ -231,8 +228,7 @@ const Header = ({ meta, link }: any) => {
                   </div>
                   <button
                     type="button"
-                    className="ml-auto flex-shrink-0 bg-primary p-1 text-secondary rounded-full hover:text-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
-                  >
+                    className="ml-auto flex-shrink-0 bg-primary p-1 text-secondary rounded-full hover:text-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
                     <span className="sr-only">View notifications</span>
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </button>
@@ -240,9 +236,19 @@ const Header = ({ meta, link }: any) => {
                 <div className="mt-3 space-y-1">
                   <Disclosure.Button
                     as="a"
+                    href={"/profile"}
+                    className={classNames(
+                      link === "/profile"
+                        ? "bg-secondary cursor-not-allowed"
+                        : "",
+                      "block px-4 py-2 text-base font-medium text-secondary hover:text-primary"
+                    )}>
+                    Profile
+                  </Disclosure.Button>
+                  <Disclosure.Button
+                    as="a"
                     onClick={logout}
-                    className="block px-4 py-2 text-base font-medium text-secondary hover:text-primary "
-                  >
+                    className="block px-4 py-2 text-base font-medium text-secondary hover:text-primary">
                     Sign out
                   </Disclosure.Button>
                 </div>
