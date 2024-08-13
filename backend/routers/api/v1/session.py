@@ -79,7 +79,7 @@ async def delete_session(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> SessionListResponse:
     """Delete the session with the given id and return a list of all sessions for the current user."""
-    logger.info(f"Deleting session: {id}, user: {current_user.id}")
+    logger.info("Deleting session", extra={"session_id": id, "user_id": current_user.id})
 
     session_manager.delete_session(id)
 
