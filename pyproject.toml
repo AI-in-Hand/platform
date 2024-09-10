@@ -10,7 +10,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.11.0a1,<3.13"
 agency-swarm = "0.2.2"
-cachetools = "^5.3.3"
+cachetools = "^5.5.0"
 cryptography = "^43.0.0"
 duckduckgo-search = "^6.2.6"
 fastapi = "^0.114.0"
