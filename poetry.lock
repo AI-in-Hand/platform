@@ -1164,23 +1164,23 @@ protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4
 
 [[package]]
 name = "google-cloud-logging"
-version = "3.11.1"
+version = "3.11.2"
 description = "Stackdriver Logging API client library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_cloud_logging-3.11.1-py2.py3-none-any.whl", hash = "sha256:9b2403bce5e4faf30c8a8756f85529bb14a28991dd2cedde49c488dd56076a26"},
-    {file = "google_cloud_logging-3.11.1.tar.gz", hash = "sha256:a70f33d17a70237ea8b63409e07dd14adaedec93fbf52550be4f51d347c67918"},
+    {file = "google_cloud_logging-3.11.2-py2.py3-none-any.whl", hash = "sha256:0a755f04f184fbe77ad608258dc283a032485ebb4d0e2b2501964059ee9c898f"},
+    {file = "google_cloud_logging-3.11.2.tar.gz", hash = "sha256:4897441c2b74f6eda9181c23a8817223b6145943314a821d64b729d30766cb2b"},
 ]
 
 [package.dependencies]
 google-api-core = {version = ">=1.34.1,<2.0.dev0 || >=2.11.dev0,<3.0.0dev", extras = ["grpc"]}
 google-auth = ">=2.14.1,<2.24.0 || >2.24.0,<2.25.0 || >2.25.0,<3.0.0dev"
-google-cloud-appengine-logging = ">=0.1.0,<2.0.0dev"
-google-cloud-audit-log = ">=0.1.0,<1.0.0dev"
+google-cloud-appengine-logging = ">=0.1.3,<2.0.0dev"
+google-cloud-audit-log = ">=0.2.4,<1.0.0dev"
 google-cloud-core = ">=2.0.0,<3.0.0dev"
 grpc-google-iam-v1 = ">=0.12.4,<1.0.0dev"
-opentelemetry-api = ">=1.0.0"
+opentelemetry-api = ">=1.9.0"
 proto-plus = {version = ">=1.22.2,<2.0.0dev", markers = "python_version >= \"3.11\""}
 protobuf = ">=3.20.2,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<6.0.0dev"
 
@@ -4069,4 +4069,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11.0a1,<3.13"
-content-hash = "5c578363c24929beca7e2b41b50bbef5dd5f7d6d0b18fbbe5c5f445ae84e1118"
+content-hash = "88aebd93fb1c5a2a367fac18007c75273fa29e44ac8ba3843cc58896fa530269"
