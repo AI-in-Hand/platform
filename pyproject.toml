@@ -31,7 +31,7 @@ redis = "^5.0.7"
 sqlalchemy = "^1.4.54"
 sqlalchemy-redshift = "^0.8.14"
 tiktoken = "^0.7.0"
-uvicorn = {extras = ["standard"], version = "^0.30.6"}
+uvicorn = {extras = ["standard"], version = "^0.31.0"}
 
 [tool.poetry.group.dev.dependencies]
 poetry-plugin-export = ">=1.6.0"
