@@ -30,7 +30,7 @@ pyodbc = "^5.1.0"
 redis = "^5.1.0"
 sqlalchemy = "^1.4.54"
 sqlalchemy-redshift = "^0.8.14"
-tiktoken = "^0.7.0"
+tiktoken = "^0.8.0"
 uvicorn = {extras = ["standard"], version = "^0.31.0"}
 
 [tool.poetry.group.dev.dependencies]
