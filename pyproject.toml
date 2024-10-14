@@ -9,7 +9,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11.0a1,<3.13"
-agency-swarm = "0.2.2"
+agency-swarm = "0.2.6"
 cachetools = "^5.5.0"
 cryptography = "^43.0.1"
 fastapi = "^0.115.0"
