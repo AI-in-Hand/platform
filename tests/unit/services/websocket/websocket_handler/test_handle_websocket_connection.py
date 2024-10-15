@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import websockets.frames
 from openai import AuthenticationError as OpenAIAuthenticationError
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
@@ -89,7 +90,9 @@ async def test_handle_websocket_connection_connection_closed_ok(websocket_handle
     client_id = "client_id"
 
     with patch.object(websocket_handler, "_handle_websocket_messages", new_callable=AsyncMock) as handle_messages_mock:
-        handle_messages_mock.side_effect = ConnectionClosedOK(1000, "")
+        # Create frames.Close objects for rcvd and sent
+        close_frame = websockets.frames.Close(code=1000, reason="")
+        handle_messages_mock.side_effect = ConnectionClosedOK(rcvd=close_frame, sent=None)
         await websocket_handler.handle_websocket_connection(websocket, client_id)
 
     websocket_handler.connection_manager.disconnect.assert_awaited_once_with(client_id)
