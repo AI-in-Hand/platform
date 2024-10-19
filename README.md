@@ -1,6 +1,6 @@
 # AI in Hand Platform
-[![Actions Status](https://github.com/AI-in-Hand/platform/workflows/Test/badge.svg)](https://github.com/AI-in-Hand/platform/actions)
-[![codecov](https://codecov.io/gh/AI-in-Hand/platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/AI-in-Hand/platform)
+[![Actions Status](https://github.com/bonk1t/agentic-platform/workflows/Test/badge.svg)](https://github.com/bonk1t/agentic-platform/actions)
+[![codecov](https://codecov.io/gh/bonk1t/agentic-platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/bonk1t/agentic-platform)
 [![Follow on Twitter](https://img.shields.io/twitter/follow/nick_bobrowski_.svg?style=social&label=Follow%20%40nick_bobrowski_)](https://twitter.com/nick_bobrowski_)
 [![Join our Discord!](https://img.shields.io/discord/1233159105057918996?label=Discord)](https://discord.gg/wmSvRkw8R9)
 
@@ -19,18 +19,13 @@ for UI layout and customizable components.
 - **API and WebSocket**: Interact with the platform through API endpoints and WebSocket for real-time communication.
 - **Security**: Authenticate users with Firebase Authentication and encrypt user variables.
 
-## Deployed Version
-
-A deployed version of the AI in Hand Platform is always available at [https://platform.ainhand.com](https://platform.ainhand.com).
-Feel free to explore and interact with the platform without setting it up locally.
-
 ## Getting Started
 
 To set up the AI in Hand Platform locally, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/AI-in-Hand/platform.git
+   git clone https://github.com/bonk1t/agentic-platform.git
    ```
 
 2. Set up the backend:
