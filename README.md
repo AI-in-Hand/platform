@@ -1,8 +1,6 @@
 # AI in Hand Platform (Research Project)
 [![Actions Status](https://github.com/bonk1t/agentic-platform/workflows/Test/badge.svg)](https://github.com/bonk1t/agentic-platform/actions)
 [![codecov](https://codecov.io/gh/bonk1t/agentic-platform/graph/badge.svg?token=D2ZCM1DK55)](https://codecov.io/gh/bonk1t/agentic-platform)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/nick_bobrowski_.svg?style=social&label=Follow%20%40nick_bobrowski_)](https://twitter.com/nick_bobrowski_)
-[![Join our Discord!](https://img.shields.io/discord/1233159105057918996?label=Discord)](https://discord.gg/wmSvRkw8R9)
 
 > [!NOTE]
 > AI in Hand Platform was a research project exploring multi-agent workflows. It is currently not actively maintained.

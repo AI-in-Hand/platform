@@ -92,7 +92,6 @@ class AgencyManager:
                 agents[agent_flow_spec.config.name] = agent
             else:
                 logger.error(f"Agent with id {agent_id} not found.")
-                # TODO: Handle this error (raise exception?)
         return agents
 
     async def delete_agency(self, agency_id: str, current_user_id: str) -> None:
